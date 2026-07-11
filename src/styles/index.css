@@ -1,0 +1,512 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===================================
+   Dentiva DESIGN SYSTEM v2.0
+   Design Tokens & CSS Custom Properties
+   =================================== */
+:root {
+  /* Brand Colors */
+  --color-primary: #0F4C81;
+  --color-primary-dark: #0a3460;
+  --color-primary-light: #1a6ab5;
+  --color-secondary: #00B4D8;
+  --color-secondary-dark: #0099bb;
+  --color-accent: #FF6B35;
+  --color-accent-dark: #e85a24;
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 3px rgba(15, 76, 129, 0.06);
+  --shadow-sm: 0 2px 6px rgba(15, 76, 129, 0.08);
+  --shadow-md: 0 4px 12px rgba(15, 76, 129, 0.12);
+  --shadow-lg: 0 8px 24px rgba(15, 76, 129, 0.14);
+  --shadow-xl: 0 16px 40px rgba(15, 76, 129, 0.16);
+  --shadow-2xl: 0 24px 64px rgba(15, 76, 129, 0.20);
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* ===================================
+   BASE STYLES
+   =================================== */
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+    font-family: var(--font-sans);
+  }
+
+  input, textarea, select {
+    outline: none;
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: var(--radius-full);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+    opacity: 0.6;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary-dark);
+  }
+}
+
+/* ===================================
+   COMPONENT STYLES
+   =================================== */
+@layer components {
+
+  /* ---- Buttons ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    font-weight: 600;
+    transition: all var(--transition-base);
+    cursor: pointer;
+    border: 2px solid transparent;
+    line-height: 1;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  .btn:not(:disabled):active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:not(:disabled):hover {
+    background: var(--color-primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .btn-primary:not(:disabled):focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.25), var(--shadow-sm);
+  }
+
+  .btn-secondary {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
+  }
+  .btn-secondary:not(:disabled):hover {
+    background: #e2e8f0;
+    color: #334155;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-secondary:not(:disabled):focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.2);
+  }
+
+  .btn-success {
+    background: var(--color-success);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-success:not(:disabled):hover {
+    background: #059669;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .btn-success:not(:disabled):focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  }
+
+  .btn-danger {
+    background: var(--color-danger);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-danger:not(:disabled):hover {
+    background: #dc2626;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .btn-danger:not(:disabled):focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+  }
+
+  .btn-outline-primary {
+    background: transparent;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+  .btn-outline-primary:not(:disabled):hover {
+    background: var(--color-primary);
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  /* ---- Input Fields ---- */
+  .input-field {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    color: #1e293b;
+    background: white;
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  }
+
+  .input-field::placeholder {
+    color: #94a3b8;
+    font-style: italic;
+  }
+
+  .input-field:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.12);
+    outline: none;
+  }
+
+  .input-field:hover:not(:focus) {
+    border-color: #94a3b8;
+  }
+
+  .input-field.input-error {
+    border-color: var(--color-danger);
+    background: #fef2f2;
+  }
+  .input-field.input-error:focus {
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+  }
+
+  .field-error {
+    @apply text-red-500 text-xs mt-1 flex items-center gap-1;
+  }
+
+  .label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 5px;
+    letter-spacing: 0.01em;
+  }
+
+  /* ---- Cards ---- */
+  .card {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    border: 1px solid rgba(15, 76, 129, 0.06);
+  }
+
+  .card-elevated {
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 24px;
+    border: 1px solid rgba(15, 76, 129, 0.06);
+    transition: box-shadow var(--transition-slow), transform var(--transition-slow);
+  }
+  .card-elevated:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+  }
+
+  /* ---- Badge & Chip ---- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+
+  .badge-primary { background: rgba(15, 76, 129, 0.12); color: var(--color-primary); }
+  .badge-secondary { background: rgba(0, 180, 216, 0.12); color: var(--color-secondary-dark); }
+  .badge-success { background: rgba(16, 185, 129, 0.12); color: #059669; }
+  .badge-danger { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+  .badge-warning { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+  .badge-accent { background: rgba(255, 107, 53, 0.12); color: var(--color-accent-dark); }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  /* ---- Tables ---- */
+  .table {
+    @apply min-w-full divide-y divide-gray-100;
+  }
+
+  .table-header {
+    background: rgba(15, 76, 129, 0.04);
+  }
+
+  .table-cell {
+    @apply px-4 py-3 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  /* ---- Glass Effect ---- */
+  .glass {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* ---- Skeleton Loading ---- */
+  .skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+    border-radius: var(--radius-md);
+  }
+}
+
+/* ===================================
+   UTILITY STYLES
+   =================================== */
+@layer utilities {
+  /* Text Gradient */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-accent {
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-warning) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Background Gradients */
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #1a6ab5 100%);
+  }
+
+  .bg-gradient-brand {
+    background: linear-gradient(135deg, var(--color-primary) 0%, #1a3a5c 100%);
+  }
+
+  .bg-gradient-secondary {
+    background: linear-gradient(135deg, var(--color-secondary) 0%, #0077a8 100%);
+  }
+
+  .bg-gradient-success {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  }
+
+  .bg-gradient-danger {
+    background: linear-gradient(135deg, #EF4444 0%, #dc2626 100%);
+  }
+
+  .bg-gradient-warning {
+    background: linear-gradient(135deg, #F59E0B 0%, #d97706 100%);
+  }
+
+  /* Scrollbar hide */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-balance { text-wrap: balance; }
+}
+
+/* ===================================
+   SKELETON SHIMMER KEYFRAME
+   =================================== */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ===================================
+   PRINT STYLES — Dentiva v1.9
+   =================================== */
+@media print {
+  .no-print, nav, aside, header, .sidebar, button:not(.print-show) {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    font-size: 12pt;
+    color: #000;
+  }
+
+  .card, .card-elevated {
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    page-break-inside: avoid;
+  }
+
+  .print-only { display: block !important; }
+  .print-block { display: block !important; }
+
+  .invoice-print-area {
+    display: block !important;
+    page-break-before: always;
+    padding: 20mm;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .invoice-print-area h1 {
+    font-size: 18pt;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .invoice-print-area table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .invoice-print-area table th,
+  .invoice-print-area table td {
+    border: 1px solid #ccc;
+    padding: 6pt 8pt;
+    text-align: left;
+    font-size: 10pt;
+  }
+
+  .invoice-print-area table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+  }
+
+  .medical-print-area {
+    display: block !important;
+    padding: 10mm;
+    font-size: 10pt;
+  }
+
+  .medical-print-area h2 {
+    font-size: 14pt;
+    border-bottom: 2pt solid #000;
+    padding-bottom: 4pt;
+    margin-bottom: 8pt;
+  }
+
+  .medical-print-area .print-section {
+    page-break-inside: avoid;
+    margin-bottom: 12pt;
+  }
+
+  @page {
+    margin: 15mm;
+    size: A4;
+  }
+
+  .overflow-x-auto { overflow: visible !important; }
+  a[href]::after { content: none !important; }
+}
+
+/* ===================================
+   MOBILE RESPONSIVE FIXES
+   =================================== */
+@media (max-width: 768px) {
+  .card, .card-elevated { padding: 16px; }
+
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-cell { @apply px-3 py-2; }
+
+  .grid { min-width: 0; }
+
+  .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+@media print {
+  .invoice-print-area { display: block !important; }
+  .invoice-print-area.hidden { display: block !important; }
+  .flex.flex-col.h-screen > nav,
+  .flex.flex-col.h-screen > header { display: none !important; }
+}
