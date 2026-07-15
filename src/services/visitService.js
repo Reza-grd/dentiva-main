@@ -53,7 +53,7 @@ export const visitService = {
         .select(`
           *,
           patient:patients(id, nama_lengkap, no_rm, no_wa),
-          dokter:users(id, full_name)
+          dokter:users!dokter_id(id, full_name)
         `, { count: 'exact' })
         .order('tanggal_kunjungan', { ascending: false })
         .range(offset, offset + limit - 1);
@@ -76,7 +76,7 @@ export const visitService = {
         .select(`
           *,
           patient:patients(id, nama_lengkap, no_rm, no_wa),
-          dokter:users(id, full_name),
+          dokter:users!dokter_id(id, full_name),
           payments(id, invoice_number, total_bayar, status_pembayaran, metode_pembayaran, tanggal_pembayaran)
         `, { count: 'exact' })
         .order('tanggal_kunjungan', { ascending: false });
@@ -106,7 +106,7 @@ export const visitService = {
         .from('visits')
         .select(`
           *,
-          dokter:users(full_name),
+          dokter:users!dokter_id(full_name),
           payments(id, invoice_number, total_bayar, status_pembayaran, metode_pembayaran)
         `)
         .eq('patient_id', patientId)
@@ -130,7 +130,7 @@ export const visitService = {
         .select(`
           *,
           patient:patients(nama_lengkap, no_rm, no_wa),
-          dokter:users(full_name),
+          dokter:users!dokter_id(full_name),
           payments(status_pembayaran)
         `)
         .eq('tanggal_kunjungan', today)
@@ -153,7 +153,7 @@ export const visitService = {
         .select(`
           *,
           patient:patients(nama_lengkap, no_rm, no_wa),
-          dokter:users(full_name)
+          dokter:users!dokter_id(full_name)
         `)
         .eq('tanggal_kunjungan', date)
         // FIX Bug #6: order by jam_kunjungan (nulls last) untuk urutan slot yang benar
@@ -175,7 +175,7 @@ export const visitService = {
         .select(`
           *,
           patient:patients(*),
-          dokter:users(full_name)
+          dokter:users!dokter_id(full_name)
         `)
         .eq('id', visitId)
         .single();

@@ -25,7 +25,7 @@ const QueueDisplay = () => {
         .select(`
           id, status, jam_kunjungan, nomor_antrian, created_at,
           patient:patients(nama_lengkap, no_rm),
-          dokter:users(full_name)
+          dokter:users!dokter_id(full_name)
         `)
         .eq('tanggal_kunjungan', today)
         .order('created_at', { ascending: true });
