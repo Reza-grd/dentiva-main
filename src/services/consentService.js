@@ -2,28 +2,13 @@ import { supabase } from './supabase.js';
 
 export const consentService = {
   /**
-   * Dapatkan clinic_id dari sesi aktif pengguna untuk isolasi tenant.
-   */
-  async getSessionClinicId() {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.user?.app_metadata?.clinic_id || 'd0000000-0000-0000-0000-000000000000';
-  },
-
-  /**
    * Save a new informed consent
    */
   async saveConsent(consentData) {
     try {
-      const clinicId = await this.getSessionClinicId();
-      
-      const record = {
-        ...consentData,
-        clinic_id: clinicId
-      };
-
       const { data, error } = await supabase
         .from('informed_consents')
-        .insert([record])
+        .insert([consentData])
         .select()
         .single();
 
