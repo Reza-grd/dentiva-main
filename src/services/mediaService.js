@@ -1,6 +1,57 @@
-import { supabase } from './supabase';
+import { supabase } from './supabase.js';
 
 export const mediaService = {
+  /**
+   * Dapatkan signed URL yang aman untuk media.
+   * Mendukung backward compatibility untuk URL publik lama.
+   */
+  async getMediaUrl(bucketName, filePathOrUrl) {
+    if (!filePathOrUrl) return null;
+
+    let filePath = filePathOrUrl;
+    let bucket = bucketName;
+
+    if (filePathOrUrl.startsWith('http://') || filePathOrUrl.startsWith('https://')) {
+      if (filePathOrUrl.includes('/object/sign/')) {
+        return filePathOrUrl; // Sudah berupa signed URL
+      }
+      try {
+        const url = new URL(filePathOrUrl);
+        const publicMarker = '/object/public/';
+        const idx = url.pathname.indexOf(publicMarker);
+        if (idx !== -1) {
+          const rest = url.pathname.substring(idx + publicMarker.length);
+          const parts = rest.split('/');
+          bucket = parts[0];
+          filePath = parts.slice(1).join('/');
+        }
+      } catch (e) {
+        console.error('Error parsing media URL:', e);
+        return filePathOrUrl;
+      }
+    }
+
+    try {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .createSignedUrl(filePath, 3600); // Valid 1 jam
+
+      if (error) throw error;
+      return data.signedUrl;
+    } catch (err) {
+      console.warn(`gagal membuat signed URL untuk ${bucket}/${filePath}:`, err.message);
+      return filePathOrUrl;
+    }
+  },
+
+  /**
+   * Dapatkan clinic_id dari sesi aktif pengguna untuk isolasi tenant.
+   */
+  async getSessionClinicId() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.app_metadata?.clinic_id || 'd0000000-0000-0000-0000-000000000000';
+  },
+
   /**
    * Upload media file to Supabase storage and create record in patient_media table
    */
@@ -9,9 +60,10 @@ export const mediaService = {
       const isRadiologi = ['panoramic', 'cephalometric', 'dental', 'other'].includes(category);
       const bucketName = isRadiologi ? 'radiologi' : 'klinik';
       
+      const clinicId = await this.getSessionClinicId();
       const fileExt = file.name.split('.').pop();
       const fileName = `${patientId}_${category}_${Date.now()}.${fileExt}`;
-      const filePath = `${patientId}/${fileName}`;
+      const filePath = `${clinicId}/${patientId}/${fileName}`;
 
       // 1. Upload to storage bucket
       const { error: uploadError } = await supabase.storage
@@ -20,7 +72,7 @@ export const mediaService = {
 
       if (uploadError) throw uploadError;
 
-      // 2. Get public URL
+      // 2. Get public URL structure to store in DB
       const { data: { publicUrl } } = supabase.storage
         .from(bucketName)
         .getPublicUrl(filePath);
@@ -45,7 +97,11 @@ export const mediaService = {
 
       if (dbError) throw dbError;
 
-      return { success: true, data };
+      // Generate signed URL for immediate preview in UI
+      const signedUrl = await mediaService.getMediaUrl(bucketName, data.file_url);
+      const returnedData = { ...data, file_url: signedUrl };
+
+      return { success: true, data: returnedData };
     } catch (error) {
       console.error('Error uploading media:', error);
       return { success: false, error: error.message };
@@ -64,7 +120,18 @@ export const mediaService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return { success: true, data };
+
+      // Ubah semua URL publik menjadi signed URL
+      const signedData = await Promise.all(
+        data.map(async (item) => {
+          const isRadiologi = ['panoramic', 'cephalometric', 'dental', 'other'].includes(item.category);
+          const bucketName = isRadiologi ? 'radiologi' : 'klinik';
+          const signedUrl = await mediaService.getMediaUrl(bucketName, item.file_url);
+          return { ...item, file_url: signedUrl };
+        })
+      );
+
+      return { success: true, data: signedData };
     } catch (error) {
       console.error('Error fetching media:', error);
       return { success: false, error: error.message };
@@ -82,7 +149,8 @@ export const mediaService = {
       
       const urlParts = mediaRecord.file_url.split('/' + bucketName + '/');
       if (urlParts.length > 1) {
-        const filePath = urlParts[1];
+        // Jika file_url mengandung parameter signed token, bersihkan parameternya untuk mengambil file path
+        let filePath = urlParts[1].split('?')[0];
         const { error: storageError } = await supabase.storage.from(bucketName).remove([filePath]);
         if (storageError) throw new Error('Gagal menghapus file fisik dari storage: ' + storageError.message);
       }

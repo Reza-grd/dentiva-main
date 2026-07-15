@@ -15,14 +15,49 @@ function normalizePhoneForWhapi(phone: string): string {
   return clean
 }
 
+// In-memory rate limiting per client IP
+const rateLimitMap = new Map<string, number[]>()
+
+function isRateLimited(ip: string, limit = 100, windowMs = 15 * 60 * 1000): boolean {
+  const now = Date.now()
+  const timestamps = rateLimitMap.get(ip) || []
+  const activeTimestamps = timestamps.filter(t => now - t < windowMs)
+  
+  if (activeTimestamps.length >= limit) {
+    return true
+  }
+  
+  activeTimestamps.push(now)
+  rateLimitMap.set(ip, activeTimestamps)
+  return false
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  // Rate Limiting Check
+  const clientIp = req.headers.get('cf-connecting-ip') || req.headers.get('x-real-ip') || '127.0.0.1'
+  if (isRateLimited(clientIp)) {
+    return new Response(JSON.stringify({ error: 'Too Many Requests: Rate limit exceeded' }), {
+      status: 429,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
+
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const authHeader = req.headers.get('Authorization')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SERVICE_ROLE_KEY')!
+
+    if (!authHeader || authHeader !== `Bearer ${supabaseServiceKey}`) {
+      return new Response(JSON.stringify({ error: 'Unauthorized: Service role key required' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // 1. Fetch settings

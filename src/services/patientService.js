@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from './supabase.js';
 
 export const patientService = {
   // VIEW FIX: gunakan v_patient_summary untuk mendapat total_visits, last_visit, total_spent dengan paginasi server-side

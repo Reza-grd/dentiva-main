@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         if (session?.user && mounted) {
-          console.log('✅ User found:', session.user.email);
+          console.log('✅ User found');
           setUser(session.user);
           state.currentUserId = session.user.id;
           await fetchUserProfile(session.user.id);
@@ -119,6 +119,47 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  // Monitor aktivitas untuk automatic session inactivity timeout (15 menit)
+  useEffect(() => {
+    if (!user) return;
+
+    const INACTIVITY_TIMEOUT = 15 * 60 * 1000; // 15 menit
+    let timeoutId;
+
+    const logoutUser = async () => {
+      console.log('🔄 Session timeout due to inactivity');
+      await signOut();
+      alert('Sesi Anda telah berakhir karena tidak ada aktivitas.');
+    };
+
+    const resetTimeout = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(logoutUser, INACTIVITY_TIMEOUT);
+    };
+
+    // Event listeners untuk mendeteksi aktivitas pengguna
+    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+    const setupListeners = () => {
+      events.forEach(event => {
+        window.addEventListener(event, resetTimeout);
+      });
+    };
+
+    const removeListeners = () => {
+      events.forEach(event => {
+        window.removeEventListener(event, resetTimeout);
+      });
+    };
+
+    setupListeners();
+    resetTimeout(); // Mulai timeout awal
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      removeListeners();
+    };
+  }, [user]);
+
   const fetchUserProfile = async (userId) => {
     try {
       console.log('Fetching user profile for:', userId);
@@ -134,7 +175,7 @@ export const AuthProvider = ({ children }) => {
         throw error; // Lempar error agar bisa di-catch di pemanggil
       }
       
-      console.log('✅ Profile loaded:', data);
+      console.log('✅ Profile loaded');
       setUserProfile(data);
       return data;
     } catch (error) {

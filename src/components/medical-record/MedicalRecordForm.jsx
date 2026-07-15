@@ -30,6 +30,8 @@ const MedicalRecordForm = () => {
   const [patient, setPatient] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, action: null, data: null });
   const [showReferralModal, setShowReferralModal] = useState(false);
+  const [versionModal, setVersionModal] = useState({ isOpen: false, visitId: null, versions: [], loading: false });
+  const [selectedVersion, setSelectedVersion] = useState(null);
 
   const canAccess = userProfile && ['dokter', 'admin'].includes(userProfile.role);
 
@@ -211,9 +213,9 @@ const MedicalRecordForm = () => {
       }
       setIsTreatmentLocked(paymentLocked);
 
-      // Check if localStorage has draft
+      // Check if sessionStorage has draft
       const draftKey = `Dentiva_draft_rm_${patientId}`;
-      const savedDraft = localStorage.getItem(draftKey);
+      const savedDraft = sessionStorage.getItem(draftKey);
       if (savedDraft) {
         try {
           const parsed = JSON.parse(savedDraft);
@@ -249,8 +251,8 @@ const MedicalRecordForm = () => {
         visits,
         timestamp: Date.now()
       };
-      localStorage.setItem(`Dentiva_draft_rm_${patientId}`, JSON.stringify(draft));
-      console.log('Draft autosaved to localStorage for patient:', patientId);
+      sessionStorage.setItem(`Dentiva_draft_rm_${patientId}`, JSON.stringify(draft));
+      console.log('Draft autosaved securely');
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -273,10 +275,50 @@ const MedicalRecordForm = () => {
   };
 
   const handleDiscardDraft = () => {
-    localStorage.removeItem(`Dentiva_draft_rm_${patientId}`);
+    sessionStorage.removeItem(`Dentiva_draft_rm_${patientId}`);
     setShowDraftPrompt(false);
     setIsDraftChecked(true);
     toast.info('Draf diabaikan');
+  };
+
+  const openVersionModal = async (visitId) => {
+    setVersionModal({ isOpen: true, visitId, versions: [], loading: true });
+    setSelectedVersion(null);
+    try {
+      const { data, error } = await supabase
+        .from('medical_record_versions')
+        .select(`
+          *,
+          users ( full_name )
+        `)
+        .eq('visit_id', visitId)
+        .order('version', { ascending: false });
+
+      if (error) throw error;
+      setVersionModal(prev => ({ ...prev, versions: data || [], loading: false }));
+    } catch (error) {
+      toast.error('Gagal memuat riwayat versi: ' + error.message);
+      setVersionModal(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const handleRestoreVersion = async (versionNumber) => {
+    try {
+      setSaving(true);
+      const { error } = await supabase.rpc('restore_visit_version', {
+        p_visit_id: versionModal.visitId,
+        p_version: versionNumber
+      });
+
+      if (error) throw error;
+      toast.success('Rekam medis berhasil dipulihkan ke versi #' + versionNumber);
+      setVersionModal({ isOpen: false, visitId: null, versions: [], loading: false });
+      await loadPatientData(); // Reload EMR data
+    } catch (error) {
+      toast.error('Gagal memulihkan versi: ' + error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const initializeVoiceRecognition = () => {
@@ -469,7 +511,7 @@ const MedicalRecordForm = () => {
       }
 
       toast.success('Berhasil disimpan!');
-      localStorage.removeItem(`Dentiva_draft_rm_${patientId}`); // Clear draft on successful database save
+      sessionStorage.removeItem(`Dentiva_draft_rm_${patientId}`); // Clear draft on successful database save
       await loadPatientData(); // Reload pristine data and clear _isNew flags to prevent duplicates
     } catch (error) { 
       toast.error('Gagal: ' + error.message); 
@@ -1166,7 +1208,17 @@ const MedicalRecordForm = () => {
                         <div className="absolute w-4 h-4 rounded-full bg-[var(--color-accent)] border-4 border-white dark:border-gray-900 -left-[33px] top-7 shadow-sm"></div>
                         <div className="flex justify-between items-center mb-5 border-b border-gray-100 dark:border-gray-800 pb-3">
                           <span className="font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-3 py-1 rounded-md text-xs uppercase tracking-wider">Kunjungan #{index + 1}</span>
-                          <button onClick={() => deleteVisit(visit.id)} className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-1.5 rounded-lg transition-colors no-print"><Trash2 size={18}/></button>
+                          <div className="flex gap-2 no-print">
+                            {!visit._isNew && (
+                              <button 
+                                onClick={() => openVersionModal(visit.id)}
+                                className="px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 rounded-lg transition-colors"
+                              >
+                                Riwayat Versi
+                              </button>
+                            )}
+                            <button onClick={() => deleteVisit(visit.id)} className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-1.5 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                          </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                           <div>
@@ -1346,7 +1398,114 @@ const MedicalRecordForm = () => {
         patient={patient}
         userProfile={userProfile}
       />
-    </div>
+
+      {/* Version History Modal */}
+      {versionModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in no-print">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-800 animate-scale-up">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
+              <div>
+                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Riwayat Versi Rekam Medis</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Setiap perubahan rekam medis tercatat secara permanen di bawah ini.</p>
+              </div>
+              <button 
+                onClick={() => setVersionModal({ isOpen: false, visitId: null, versions: [], loading: false })}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Left Column: Version list */}
+              <div className="md:col-span-1 border-r border-gray-100 dark:border-gray-800 pr-4 space-y-3">
+                <h4 className="font-bold text-xs text-gray-400 uppercase tracking-wide mb-2">Daftar Versi</h4>
+                {versionModal.loading ? (
+                  <p className="text-sm text-gray-500 animate-pulse">Memuat...</p>
+                ) : versionModal.versions.length === 0 ? (
+                  <p className="text-sm text-gray-500">Belum ada riwayat versi.</p>
+                ) : (
+                  versionModal.versions.map(v => (
+                    <button
+                      key={v.id}
+                      onClick={() => setSelectedVersion(v)}
+                      className={`w-full text-left p-3.5 rounded-xl border transition-all flex flex-col gap-1 ${
+                        selectedVersion?.id === v.id
+                          ? 'border-amber-500 bg-amber-500/5 text-amber-700 dark:text-amber-400'
+                          : 'border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-sm">Versi #{v.version}</span>
+                        <span className="text-[10px] text-gray-400">{new Date(v.changed_at).toLocaleDateString('id-ID')}</span>
+                      </div>
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1">{v.change_summary || 'Perubahan tersimpan'}</span>
+                      <span className="text-[10px] font-semibold text-gray-400 mt-1">Oleh: {v.users?.full_name || 'System'}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+
+              {/* Right Column: Version Details & Diff */}
+              <div className="md:col-span-2 space-y-4">
+                <h4 className="font-bold text-xs text-gray-400 uppercase tracking-wide">Detail Konten Rekam Medis</h4>
+                {selectedVersion ? (
+                  <div className="bg-gray-50/50 dark:bg-gray-800/20 p-5 rounded-xl border border-gray-100 dark:border-gray-800 space-y-4">
+                    <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-3">
+                      <div>
+                        <span className="font-bold text-sm text-gray-800 dark:text-white">Versi #{selectedVersion.version}</span>
+                        <p className="text-[10px] text-gray-400 mt-0.5">Diedit pada {new Date(selectedVersion.changed_at).toLocaleString('id-ID')}</p>
+                      </div>
+                      <button
+                        onClick={() => handleRestoreVersion(selectedVersion.version)}
+                        className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors active:scale-95 shadow-sm"
+                      >
+                        Pulihkan ke Versi Ini
+                       </button>
+                     </div>
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <div>
+                         <span className="text-[10px] font-bold text-gray-400 uppercase">Keluhan (S)</span>
+                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.keluhan || '-'}</p>
+                       </div>
+                       <div>
+                         <span className="text-[10px] font-bold text-gray-400 uppercase">Pemeriksaan Fisik (O)</span>
+                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.pemeriksaan_fisik || '-'}</p>
+                       </div>
+                       <div>
+                         <span className="text-[10px] font-bold text-gray-400 uppercase">Diagnosa (A)</span>
+                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.diagnosa || '-'}</p>
+                       </div>
+                       <div>
+                         <span className="text-[10px] font-bold text-gray-400 uppercase">Terapi (P)</span>
+                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.terapi || '-'}</p>
+                       </div>
+                     </div>
+                   </div>
+                 ) : (
+                   <div className="flex flex-col items-center justify-center h-48 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+                     <p className="text-sm text-gray-400 font-medium">Pilih versi di sebelah kiri untuk melihat detail konten</p>
+                   </div>
+                 )}
+               </div>
+             </div>
+
+             {/* Modal Footer */}
+             <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex justify-end">
+               <button 
+                 onClick={() => setVersionModal({ isOpen: false, visitId: null, versions: [], loading: false })}
+                 className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+               >
+                 Tutup
+               </button>
+             </div>
+           </div>
+         </div>
+       )}
+     </div>
   );
 };
 

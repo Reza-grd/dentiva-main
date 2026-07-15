@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff } from 'lucide-react';
+import { Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
@@ -18,6 +18,27 @@ const SettingsPage = () => {
   const [testPhone, setTestPhone] = useState('');
   const [testingWA, setTestingWA] = useState(false);
   const [showToken, setShowToken] = useState(false);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [loadingAudit, setLoadingAudit] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'audit-logs') {
+      fetchAuditLogs();
+    }
+  }, [activeTab]);
+
+  const fetchAuditLogs = async () => {
+    setLoadingAudit(true);
+    try {
+      const { data, error } = await supabase.rpc('get_audit_logs');
+      if (error) throw error;
+      setAuditLogs(data || []);
+    } catch (e) {
+      toast.error('Gagal memuat log audit: ' + e.message);
+    } finally {
+      setLoadingAudit(false);
+    }
+  };
 
   useEffect(() => {
     if (userProfile) {
@@ -219,6 +240,7 @@ const SettingsPage = () => {
       { id: 'treatment-education', label: 'Edukasi Perawatan', icon: MessageSquare },
     ] : []),
     { id: 'security', label: 'Keamanan', icon: Lock },
+    { id: 'audit-logs', label: 'Log Audit', icon: Shield },
     ...(isAdmin ? [
       { id: 'database', label: 'Database', icon: Database },
     ] : []),
@@ -629,6 +651,84 @@ const SettingsPage = () => {
                     </button>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Audit Logs Tab */}
+            {activeTab === 'audit-logs' && (
+              <div className="glass-panel p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                      <Shield className="text-amber-500" size={24} />
+                      Log Audit Keamanan
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Daftar aktivitas penting dalam sistem untuk keamanan dan kepatuhan medis.</p>
+                  </div>
+                  <button 
+                    onClick={fetchAuditLogs}
+                    className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-lg transition-colors"
+                    disabled={loadingAudit}
+                  >
+                    Segarkan
+                  </button>
+                </div>
+
+                {loadingAudit ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-accent)]"></div>
+                  </div>
+                ) : auditLogs.length === 0 ? (
+                  <div className="text-center py-12 border-2 border-dashed border-gray-100 dark:border-gray-800 rounded-xl">
+                    <p className="text-sm text-gray-400 font-medium">Belum ada catatan log audit yang tersedia</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-100 dark:border-gray-800 text-xs font-bold text-gray-400 uppercase">
+                          <th className="py-3 px-4">Waktu</th>
+                          <th className="py-3 px-4">Modul</th>
+                          <th className="py-3 px-4">Aktivitas</th>
+                          <th className="py-3 px-4">Role</th>
+                          <th className="py-3 px-4">Tingkat Risiko</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50 dark:divide-gray-800 text-sm">
+                        {auditLogs.map((log) => (
+                          <tr key={log.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/10">
+                            <td className="py-3 px-4 text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(log.timestamp).toLocaleString('id-ID')}
+                            </td>
+                            <td className="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 capitalize">
+                              {log.module}
+                            </td>
+                            <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
+                              <span className="font-bold text-xs uppercase bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400 mr-2">
+                                {log.action}
+                              </span>
+                              {log.visit_id ? 'Detail rekam medis diakses' : log.patient_id ? 'Profil pasien diakses' : 'Aktivitas sistem'}
+                            </td>
+                             <td className="py-3 px-4 text-xs font-semibold text-gray-500 capitalize">
+                              {log.user_role}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+                                log.risk_level === 'CRITICAL' || log.risk_level === 'HIGH'
+                                  ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
+                                  : log.risk_level === 'MEDIUM'
+                                  ? 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400'
+                                  : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
+                              }`}>
+                                {log.risk_level}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
 

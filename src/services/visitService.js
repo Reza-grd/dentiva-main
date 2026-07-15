@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from './supabase.js';
 
 export const visitService = {
   // Get all visits — lengkap dengan dokter, pasien, dan payment status

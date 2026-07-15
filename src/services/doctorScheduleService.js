@@ -1,4 +1,4 @@
-import { supabase } from './supabase';
+import { supabase } from './supabase.js';
 
 // ─────────────────────────────────────────────
 //  Nama hari dalam Bahasa Indonesia (index 0 = Minggu)

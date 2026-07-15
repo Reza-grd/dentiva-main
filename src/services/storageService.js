@@ -1,8 +1,16 @@
-import { supabase } from './supabase';
+import { supabase } from './supabase.js';
 
 const BUCKET = 'patient-photos';
 
 export const storageService = {
+  /**
+   * Dapatkan clinic_id dari sesi aktif pengguna untuk isolasi tenant.
+   */
+  async getSessionClinicId() {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.app_metadata?.clinic_id || 'd0000000-0000-0000-0000-000000000000';
+  },
+
   /**
    * Upload foto pasien ke Supabase Storage (PRIVATE bucket).
    * Menyimpan path relatif (bukan full URL) ke kolom foto_profile di DB.
@@ -24,16 +32,18 @@ export const storageService = {
         return { success: false, error: 'Ukuran file terlalu besar. Maksimal 5MB.' };
       }
 
+      const clinicId = await storageService.getSessionClinicId();
+
       // Buat path unik untuk menghindari cache lama
       const ext = file.name.split('.').pop().toLowerCase();
-      const filePath = `${patientId}/profile.${ext}`;
+      const filePath = `${clinicId}/${patientId}/profile.${ext}`;
 
       // Hapus foto lama jika ada (semua extension)
       await supabase.storage.from(BUCKET).remove([
-        `${patientId}/profile.jpg`,
-        `${patientId}/profile.jpeg`,
-        `${patientId}/profile.png`,
-        `${patientId}/profile.webp`,
+        `${clinicId}/${patientId}/profile.jpg`,
+        `${clinicId}/${patientId}/profile.jpeg`,
+        `${clinicId}/${patientId}/profile.png`,
+        `${clinicId}/${patientId}/profile.webp`,
       ]);
 
       // Upload file baru
