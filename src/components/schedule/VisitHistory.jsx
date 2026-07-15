@@ -14,6 +14,7 @@ import { useAuth } from '../../contexts/AuthContext';
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 import { parseDateLocal } from '../../utils/dateUtils';
+import { findICD10ByCode } from '../../data/icd10Dental';
 
 const formatDate = (date) => {
   const d = parseDateLocal(date);
@@ -136,7 +137,13 @@ const VisitDetailModal = ({ visitId, onClose, navigate, role }) => {
                   <Field label="Keluhan" value={detail.keluhan} />
                   <Field label="Pemeriksaan Fisik" value={detail.pemeriksaan_fisik} />
                   <Field label="Diagnosa" value={detail.diagnosa} />
-                  {detail.kode_icd10 && <Field label="Kode ICD-10" value={detail.kode_icd10} mono />}
+                  {detail.kode_icd10 && (
+                    <Field 
+                      label="Kode ICD-10" 
+                      value={findICD10ByCode(detail.kode_icd10) ? `${detail.kode_icd10} — ${findICD10ByCode(detail.kode_icd10).description}` : detail.kode_icd10} 
+                      mono 
+                    />
+                  )}
                   <Field label="Terapi / Rencana" value={detail.terapi} />
                   {detail.catatan_dokter && <Field label="Catatan Dokter" value={detail.catatan_dokter} />}
                 </div>
@@ -332,7 +339,14 @@ const TimelineItem = ({ visit, isFirst, isLast, onViewDetail, role }) => {
               <div className="grid grid-cols-2 gap-4">
                 {visit.diagnosa && (
                   <div>
-                    <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Diagnosa</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Diagnosa</p>
+                      {visit.kode_icd10 && (
+                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20">
+                          {visit.kode_icd10}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-2">{visit.diagnosa}</p>
                   </div>
                 )}

@@ -1,4 +1,29 @@
 import { supabase } from './supabase.js';
+import { encryptionService } from './encryptionService.js';
+
+async function decryptPatientList(list) {
+  if (!list || list.length === 0) return list;
+  const isArray = Array.isArray(list);
+  const items = isArray ? list : [list];
+
+  const payloads = [];
+  items.forEach(p => {
+    payloads.push(p.nama_lengkap || '');
+    payloads.push(p.no_wa || '');
+    payloads.push(p.alamat || '');
+  });
+
+  const decrypted = await encryptionService.decryptBatch(payloads);
+
+  let idx = 0;
+  items.forEach(p => {
+    p.nama_lengkap = decrypted[idx++];
+    p.no_wa = decrypted[idx++];
+    p.alamat = decrypted[idx++];
+  });
+
+  return list;
+}
 
 export const patientService = {
   // VIEW FIX: gunakan v_patient_summary untuk mendapat total_visits, last_visit, total_spent dengan paginasi server-side
@@ -29,9 +54,10 @@ export const patientService = {
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
-      const { data, error, count } = await query;
-      if (error) throw error;
-      return { success: true, data, count };
+       const { data, error, count } = await query;
+       if (error) throw error;
+       const decryptedData = await decryptPatientList(data);
+       return { success: true, data: decryptedData, count };
     } catch (error) {
       console.error('Error fetching paginated patients:', error);
       return { success: false, error: error.message };
@@ -69,7 +95,8 @@ export const patientService = {
       const { data, error } = await supabase
         .from('patients').select('*').eq('id', id).single();
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = data ? (await decryptPatientList([data]))[0] : data;
+      return { success: true, data: decryptedData };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -215,13 +242,67 @@ export const patientService = {
         }
       });
 
+      // 1. Gather all ciphertext inputs
+      const decryptPayloads = [];
+      
+      // Patient PII
+      decryptPayloads.push(patient.nama_lengkap || '');
+      decryptPayloads.push(patient.no_wa || '');
+      decryptPayloads.push(patient.alamat || '');
+
+      // Medical History PHI
+      if (mh) {
+        decryptPayloads.push(mh.alergi_detail || '');
+        decryptPayloads.push(mh.riwayat_lain || '');
+        decryptPayloads.push(mh.konsumsi_obat || '');
+      }
+
+      // Visits PHI
+      const visits = visitRes.data || [];
+      visits.forEach(v => {
+        decryptPayloads.push(v.diagnosa || '');
+        decryptPayloads.push(v.keluhan || '');
+        decryptPayloads.push(v.pemeriksaan_fisik || '');
+        decryptPayloads.push(v.terapi || '');
+        decryptPayloads.push(v.catatan_dokter || '');
+      });
+
+      // 2. Decrypt in a single RPC call
+      const decrypted = await encryptionService.decryptBatch(decryptPayloads);
+
+      // 3. Map back values
+      let decryptIdx = 0;
+      patient.nama_lengkap = decrypted[decryptIdx++];
+      patient.no_wa = decrypted[decryptIdx++];
+      patient.alamat = decrypted[decryptIdx++];
+
+      if (mh) {
+        mh.alergi_detail = decrypted[decryptIdx++];
+        mh.riwayat_lain = decrypted[decryptIdx++];
+        mh.konsumsi_obat = decrypted[decryptIdx++];
+        // Map back to medicalHistory state object
+        if (medicalHistory) {
+          medicalHistory.alergi_detail = mh.alergi_detail;
+          medicalHistory.riwayat_lain = mh.riwayat_lain;
+          medicalHistory.konsumsi_obat = mh.konsumsi_obat;
+        }
+      }
+
+      visits.forEach(v => {
+        v.diagnosa = decrypted[decryptIdx++];
+        v.keluhan = decrypted[decryptIdx++];
+        v.pemeriksaan_fisik = decrypted[decryptIdx++];
+        v.terapi = decrypted[decryptIdx++];
+        v.catatan_dokter = decrypted[decryptIdx++];
+      });
+
       return {
         success: true,
         data: {
           patient,
           medicalHistory,
           clinicalData,
-          visits: visitRes.data || [],
+          visits,
           toothConditions,
           periodontalData,
           ekstraOralData,
@@ -239,12 +320,24 @@ export const patientService = {
   async createPatient(patientData) {
     try {
       const { data: authData } = await supabase.auth.getUser();
+      const encrypted = await encryptionService.encryptBatch([
+        patientData.nama_lengkap || '',
+        patientData.no_wa || '',
+        patientData.alamat || ''
+      ]);
+      const encryptedData = {
+        ...patientData,
+        nama_lengkap: encrypted[0],
+        no_wa: encrypted[1],
+        alamat: encrypted[2]
+      };
       const { data, error } = await supabase
         .from('patients')
-        .insert([{ ...patientData, registered_by: authData.user?.id }])
+        .insert([{ ...encryptedData, registered_by: authData.user?.id }])
         .select().single();
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = data ? (await decryptPatientList([data]))[0] : data;
+      return { success: true, data: decryptedData };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -252,10 +345,27 @@ export const patientService = {
 
   async updatePatient(id, patientData) {
     try {
+      const encryptedData = { ...patientData };
+      const fieldsToEncrypt = ['nama_lengkap', 'no_wa', 'alamat'];
+      const payloads = [];
+      const indices = [];
+      fieldsToEncrypt.forEach(f => {
+        if (patientData[f] !== undefined && patientData[f] !== null) {
+          payloads.push(patientData[f]);
+          indices.push(f);
+        }
+      });
+      if (payloads.length > 0) {
+        const encrypted = await encryptionService.encryptBatch(payloads);
+        indices.forEach((f, idx) => {
+          encryptedData[f] = encrypted[idx];
+        });
+      }
       const { data, error } = await supabase
-        .from('patients').update(patientData).eq('id', id).select().single();
+        .from('patients').update(encryptedData).eq('id', id).select().single();
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = data ? (await decryptPatientList([data]))[0] : data;
+      return { success: true, data: decryptedData };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -270,7 +380,8 @@ export const patientService = {
         .or(`nama_lengkap.ilike.%${searchTerm}%,no_rm.ilike.%${searchTerm}%,no_wa.ilike.%${searchTerm}%`)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = await decryptPatientList(data);
+      return { success: true, data: decryptedData };
     } catch (error) {
       return { success: false, error: error.message };
     }
@@ -281,6 +392,11 @@ export const patientService = {
   // =====================================================
   async saveMedicalHistory(patientId, historyData) {
     try {
+      const encrypted = await encryptionService.encryptBatch([
+        historyData.alergi_detail || '',
+        historyData.konsumsi_obat || '',
+        historyData.riwayat_lain || ''
+      ]);
       const dbData = {
         patient_id: patientId,
         hipertensi: historyData.hipertensi || false,
@@ -298,18 +414,26 @@ export const patientService = {
         osteoporosis: historyData.osteoporosis || false,
         tiroid: historyData.tiroid || false,
         epilepsi: historyData.epilepsi || false,
-kanker: historyData.kanker || false,
-asam_urat: historyData.asam_urat || false,
-reumatik: historyData.reumatik || false,
-glaukoma: historyData.glaukoma || false,
-covid19: historyData.covid19 || false,
-        alergi_detail: historyData.alergi_detail || '',
-        konsumsi_obat: historyData.konsumsi_obat || '',
-        riwayat_lain: historyData.riwayat_lain || ''
+        kanker: historyData.kanker || false,
+        asam_urat: historyData.asam_urat || false,
+        reumatik: historyData.reumatik || false,
+        glaukoma: historyData.glaukoma || false,
+        covid19: historyData.covid19 || false,
+        alergi_detail: encrypted[0],
+        konsumsi_obat: encrypted[1],
+        riwayat_lain: encrypted[2]
       };
       const { data, error } = await supabase
         .from('medical_history').upsert(dbData, { onConflict: 'patient_id' }).select().single();
       if (error) throw error;
+
+      // Decrypt returned data
+      if (data) {
+        const decrypted = await encryptionService.decryptBatch([data.alergi_detail, data.konsumsi_obat, data.riwayat_lain]);
+        data.alergi_detail = decrypted[0];
+        data.konsumsi_obat = decrypted[1];
+        data.riwayat_lain = decrypted[2];
+      }
       return { success: true, data };
     } catch (error) {
       console.error('Error saving medical history:', error);

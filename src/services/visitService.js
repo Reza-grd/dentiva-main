@@ -1,4 +1,47 @@
 import { supabase } from './supabase.js';
+import { encryptionService } from './encryptionService.js';
+
+async function decryptVisitsList(list) {
+  if (!list || list.length === 0) return list;
+  const isArray = Array.isArray(list);
+  const items = isArray ? list : [list];
+
+  const payloads = [];
+  items.forEach(v => {
+    // Visit EMR fields
+    payloads.push(v.diagnosa || '');
+    payloads.push(v.keluhan || '');
+    payloads.push(v.pemeriksaan_fisik || '');
+    payloads.push(v.terapi || '');
+    payloads.push(v.catatan_dokter || '');
+
+    // Nested Patient PII fields
+    if (v.patient) {
+      payloads.push(v.patient.nama_lengkap || '');
+      payloads.push(v.patient.no_wa || '');
+      payloads.push(v.patient.alamat || '');
+    }
+  });
+
+  const decrypted = await encryptionService.decryptBatch(payloads);
+
+  let idx = 0;
+  items.forEach(v => {
+    v.diagnosa = decrypted[idx++];
+    v.keluhan = decrypted[idx++];
+    v.pemeriksaan_fisik = decrypted[idx++];
+    v.terapi = decrypted[idx++];
+    v.catatan_dokter = decrypted[idx++];
+
+    if (v.patient) {
+      v.patient.nama_lengkap = decrypted[idx++];
+      v.patient.no_wa = decrypted[idx++];
+      v.patient.alamat = decrypted[idx++];
+    }
+  });
+
+  return list;
+}
 
 export const visitService = {
   // Get all visits — lengkap dengan dokter, pasien, dan payment status
@@ -16,7 +59,8 @@ export const visitService = {
         .range(offset, offset + limit - 1);
 
       if (error) throw error;
-      return { success: true, data, count };
+      const decryptedData = await decryptVisitsList(data);
+      return { success: true, data: decryptedData, count };
     } catch (error) {
       console.error('Error fetching visits:', error);
       return { success: false, error: error.message };
@@ -47,7 +91,8 @@ export const visitService = {
 
       const { data, error, count } = await query;
       if (error) throw error;
-      return { success: true, data, count };
+      const decryptedData = await decryptVisitsList(data);
+      return { success: true, data: decryptedData, count };
     } catch (error) {
       console.error('Error fetching visits with payments:', error);
       return { success: false, error: error.message };
@@ -68,7 +113,8 @@ export const visitService = {
         .order('tanggal_kunjungan', { ascending: false });
 
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = await decryptVisitsList(data);
+      return { success: true, data: decryptedData };
     } catch (error) {
       console.error('Error fetching patient visits:', error);
       return { success: false, error: error.message };
@@ -91,7 +137,8 @@ export const visitService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = await decryptVisitsList(data);
+      return { success: true, data: decryptedData };
     } catch (error) {
       console.error('Error fetching today visits:', error);
       return { success: false, error: error.message };
@@ -113,14 +160,14 @@ export const visitService = {
         .order('jam_kunjungan', { ascending: true, nullsFirst: false });
 
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = await decryptVisitsList(data);
+      return { success: true, data: decryptedData };
     } catch (error) {
       console.error('Error fetching visits by date:', error);
       return { success: false, error: error.message };
     }
   },
 
-  // Get visit by ID with treatments + payment
   async getVisitById(visitId) {
     try {
       const { data: visit, error: visitError } = await supabase
@@ -147,10 +194,12 @@ export const visitService = {
           .maybeSingle(),
       ]);
 
+      const [decryptedVisit] = await decryptVisitsList([visit]);
+
       return {
         success: true,
         data: {
-          ...visit,
+          ...decryptedVisit,
           treatments: treatmentsRes.data || [],
           payment: paymentsRes.data || null,
         }
@@ -161,7 +210,6 @@ export const visitService = {
     }
   },
 
-  // Create new visit
   async createVisit(visitData) {
     try {
       const user = (await supabase.auth.getUser()).data.user;
@@ -176,6 +224,24 @@ export const visitService = {
       // Hapus dokter_id dan visit_number dari payload (keduanya ditangani DB)
       const { dokter_id: _removed, visit_number: _vn, ...visitDataClean } = visitData;
 
+      // Encrypt EMR fields if present
+      const encFields = ['diagnosa', 'keluhan', 'pemeriksaan_fisik', 'terapi', 'catatan_dokter'];
+      const payloads = [];
+      const indices = [];
+      encFields.forEach(f => {
+        if (visitDataClean[f] !== undefined && visitDataClean[f] !== null) {
+          payloads.push(visitDataClean[f]);
+          indices.push(f);
+        }
+      });
+
+      if (payloads.length > 0) {
+        const encrypted = await encryptionService.encryptBatch(payloads);
+        indices.forEach((f, idx) => {
+          visitDataClean[f] = encrypted[idx];
+        });
+      }
+
       const { data, error } = await supabase
         .from('visits')
         .insert([{
@@ -186,25 +252,44 @@ export const visitService = {
         .single();
 
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = data ? (await decryptVisitsList([data]))[0] : data;
+      return { success: true, data: decryptedData };
     } catch (error) {
       console.error('Error creating visit:', error);
       return { success: false, error: error.message };
     }
   },
 
-  // Update visit
   async updateVisit(visitId, visitData) {
     try {
+      const encryptedData = { ...visitData };
+      const encFields = ['diagnosa', 'keluhan', 'pemeriksaan_fisik', 'terapi', 'catatan_dokter'];
+      const payloads = [];
+      const indices = [];
+      encFields.forEach(f => {
+        if (visitData[f] !== undefined && visitData[f] !== null) {
+          payloads.push(visitData[f]);
+          indices.push(f);
+        }
+      });
+
+      if (payloads.length > 0) {
+        const encrypted = await encryptionService.encryptBatch(payloads);
+        indices.forEach((f, idx) => {
+          encryptedData[f] = encrypted[idx];
+        });
+      }
+
       const { data, error } = await supabase
         .from('visits')
-        .update(visitData)
+        .update(encryptedData)
         .eq('id', visitId)
         .select()
         .maybeSingle();
 
       if (error) throw error;
-      return { success: true, data };
+      const decryptedData = data ? (await decryptVisitsList([data]))[0] : data;
+      return { success: true, data: decryptedData };
     } catch (error) {
       console.error('Error updating visit:', error);
       return { success: false, error: error.message };
@@ -335,6 +420,27 @@ export const visitService = {
       return { success: true, data };
     } catch (error) {
       console.error('Error fetching doctors:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Lock/Unlock visit (Phase 4 Finalization)
+  async toggleLockVisit(visitId, lockStatus) {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      const { error } = await supabase
+        .from('visits')
+        .update({
+          is_locked: lockStatus,
+          locked_at: lockStatus ? new Date().toISOString() : null,
+          locked_by: lockStatus ? user?.id : null
+        })
+        .eq('id', visitId);
+      
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Error toggling visit lock:', error);
       return { success: false, error: error.message };
     }
   },

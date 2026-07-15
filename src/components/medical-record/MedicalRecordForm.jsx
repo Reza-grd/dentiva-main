@@ -6,17 +6,24 @@ import { useToast } from '../common/ToastNotification';
 import { useAuth } from '../../contexts/AuthContext';
 import { patientService } from '../../services/patientService';
 import { visitService } from '../../services/visitService';
-import { Plus, Trash2, Save, Mic, MicOff, Info, ArrowLeft, Shield, User, Calendar, Phone, Printer, FileText, AlertCircle, Stethoscope } from 'lucide-react';
+import { Plus, Trash2, Save, Mic, MicOff, Info, ArrowLeft, Shield, User, Calendar, Phone, Printer, FileText, AlertCircle, Stethoscope, Lock, Unlock, PenTool } from 'lucide-react';
 import { supabase } from '../../services/supabase';
+import ConsentFormModal from './ConsentFormModal';
+import { consentService } from '../../services/consentService';
+import { generateConsentPdf } from '../../utils/consentPdfGenerator';
 import { formatDoctorName } from '../../utils/dateUtils';
 import PatientAvatar from '../common/PatientAvatar';
 
 // Import komponen Odontogram v5.0 dan datanya
 import Odontogram from './odontogram/Odontogram';
+import ICD10Picker from '../common/ICD10Picker';
 import { CODE_CATEGORIES } from './odontogram/OdontogramData';
 import PatientMediaUpload from './PatientMediaUpload';
 import DiagnosisTreatment from './DiagnosisTreatment';
 import ReferralLetterModal from './ReferralLetterModal';
+import PrescriptionEntry from './PrescriptionEntry';
+import { prescriptionService } from '../../services/prescriptionService';
+import { generatePrescriptionPdf } from '../../utils/prescriptionPdfGenerator';
 
 const MedicalRecordForm = () => {
   const { patientId } = useParams();
@@ -74,6 +81,9 @@ const MedicalRecordForm = () => {
     kelainan_gigi_geligi: 'tidak_ada', kelainan_gigi_geligi_keterangan: '', lain_lain: ''
   });
   const [visits, setVisits] = useState([]);
+  const [consents, setConsents] = useState([]);
+  const [showConsentModal, setShowConsentModal] = useState(false);
+  const [selectedConsentVisit, setSelectedConsentVisit] = useState(null);
 
   // Odontogram States
   const [toothConditions, setToothConditions] = useState({});
@@ -144,6 +154,7 @@ const MedicalRecordForm = () => {
   const recognitionRef = useRef(null);
   const [showLegend, setShowLegend] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [soapTemplates, setSoapTemplates] = useState([]);
 
   // Active Tab state for Right Panel hybrid workflow
   
@@ -170,6 +181,18 @@ const MedicalRecordForm = () => {
   const loadPatientData = async () => {
     setLoading(true);
     setIsDraftChecked(false);
+    
+    // Load SOAP Templates
+    const fetchTemplates = async () => {
+      try {
+        const { data } = await supabase.from('soap_templates').select('*').order('treatment_type');
+        if (data) setSoapTemplates(data);
+      } catch (err) {
+        console.error('Error fetching SOAP templates', err);
+      }
+    };
+    fetchTemplates();
+
     const { success, data, error } = await patientService.getPatientWithDetails(patientId);
     if (success) {
       setPatient(data.patient); 
@@ -196,7 +219,21 @@ const MedicalRecordForm = () => {
       });
       setOdontogramMeta(data.odontogramMeta || { relasi_molar_kanan: '', relasi_molar_kiri: '', catatan_odontogram: '' });
       setToothConditions(data.toothConditions || {});
-      setVisits(data.visits || []);
+      
+      // Fetch prescriptions for each visit
+      const loadedVisits = data.visits || [];
+      const visitsWithPrescriptions = await Promise.all(
+        loadedVisits.map(async (v) => {
+          const rxRes = await prescriptionService.getVisitObat(v.id);
+          return { ...v, prescriptions: rxRes.success && rxRes.data ? rxRes.data : [] };
+        })
+      );
+      setVisits(visitsWithPrescriptions);
+
+      const consRes = await consentService.getConsentsByPatient(patientId);
+      if (consRes.success) {
+        setConsents(consRes.data || []);
+      }
 
       // Check payment status to lock treatment list
       const latestVisit = data.visits && data.visits.length > 0 ? data.visits[0] : null;
@@ -359,12 +396,53 @@ const MedicalRecordForm = () => {
   };
 
   const addVisit = () => {
-    setVisits([...visits, { id: Date.now(), _isNew: true, tanggal_kunjungan: new Date().toISOString().split('T')[0], keluhan: '', pemeriksaan_fisik: '', diagnosa: '', terapi: '' }]);
+    setVisits([...visits, { id: Date.now(), _isNew: true, tanggal_kunjungan: new Date().toISOString().split('T')[0], keluhan: '', pemeriksaan_fisik: '', diagnosa: '', terapi: '', kode_icd10: '', prescriptions: [] }]);
     toast.info('Kunjungan ditambahkan');
   };
   const updateVisit = (id, field, value) => setVisits(visits.map(v => v.id === id ? { ...v, [field]: value } : v));
   const deleteVisit = (id) => setConfirmDialog({ isOpen: true, action: 'deleteVisit', data: id });
   
+  const applySoapTemplate = (visitId, templateId) => {
+    const template = soapTemplates.find(t => t.id === templateId);
+    if (!template) return;
+    
+    if (window.confirm(`Ganti isi SOAP dengan template "${template.treatment_type}"? (Isi yang ada akan tertimpa)`)) {
+      setVisits(visits.map(v => {
+        if (v.id === visitId) {
+          return {
+            ...v,
+            keluhan: template.keluhan || '',
+            pemeriksaan_fisik: template.pemeriksaan_fisik || '',
+            diagnosa: template.diagnosa || '',
+            terapi: template.terapi || ''
+          };
+        }
+        return v;
+      }));
+      toast.success('Template berhasil diterapkan');
+    }
+  };
+
+  const handleToggleLock = async (visitId, currentLockStatus) => {
+    if (!currentLockStatus) {
+      if (!window.confirm('Apakah Anda yakin ingin mengunci catatan ini? Catatan yang dikunci akan menjadi read-only.')) return;
+    } else {
+      if (!window.confirm('Buka kunci catatan ini untuk mengedit?')) return;
+    }
+    
+    setSaving(true);
+    const { success, error } = await visitService.toggleLockVisit(visitId, !currentLockStatus);
+    setSaving(false);
+    
+    if (success) {
+      toast.success(currentLockStatus ? 'Kunci dibuka' : 'Catatan dikunci');
+      // Update local state
+      setVisits(visits.map(v => v.id === visitId ? { ...v, is_locked: !currentLockStatus } : v));
+    } else {
+      toast.error('Gagal merubah status kunci: ' + error);
+    }
+  };
+
   const handleConfirmDeleteVisit = async () => {
     const v = visits.find(x => x.id === confirmDialog.data);
     if (v && !v._isNew && typeof confirmDialog.data === 'string') {
@@ -426,6 +504,7 @@ const MedicalRecordForm = () => {
           pemeriksaan_fisik: v.pemeriksaan_fisik || '', 
           diagnosa: v.diagnosa || '', 
           terapi: v.terapi || '', 
+          kode_icd10: v.kode_icd10 || '',
           status: 'completed' 
         });
         if (!res.success) {
@@ -435,6 +514,9 @@ const MedicalRecordForm = () => {
         }
         if (res.data) {
           latestVisitId = res.data.id;
+          if (v.prescriptions && v.prescriptions.length > 0) {
+            await prescriptionService.replaceVisitObat(latestVisitId, v.prescriptions);
+          }
         }
       }
       for (const v of visits.filter(v => !v._isNew && typeof v.id === 'string')) {
@@ -443,6 +525,7 @@ const MedicalRecordForm = () => {
           diagnosa: v.diagnosa || '', 
           terapi: v.terapi || '', 
           pemeriksaan_fisik: v.pemeriksaan_fisik || '',
+          kode_icd10: v.kode_icd10 || '',
           status: 'completed'
         });
         if (!res.success) {
@@ -451,6 +534,9 @@ const MedicalRecordForm = () => {
           return;
         }
         if (!latestVisitId) latestVisitId = v.id;
+        if (v.prescriptions) {
+          await prescriptionService.replaceVisitObat(v.id, v.prescriptions);
+        }
       }
 
       // Auto-sync treatments to the latest visit
@@ -615,8 +701,16 @@ const MedicalRecordForm = () => {
         
 
         {/* Right Column: Workspaces (Interactive tab views) */}
-        <div className="space-y-6 w-full">
-            {/* Riwayat Penyakit Medis */}
+        {userProfile?.role !== 'dokter' ? (
+          <div className="glass-panel p-12 text-center flex flex-col items-center justify-center animate-scale-in w-full h-96">
+            <Shield className="w-16 h-16 text-rose-500 mb-4 opacity-80" />
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Data Medis Rahasia</h3>
+            <p className="text-gray-500 dark:text-gray-400">Rincian rekam medis hanya dapat dilihat dan diisi oleh Dokter yang berwenang.</p>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-6 w-full">
+                {/* Riwayat Penyakit Medis */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
                 <h3 className="font-bold text-lg text-gray-900 dark:text-white">Riwayat Penyakit Medis</h3>
@@ -1209,21 +1303,80 @@ const MedicalRecordForm = () => {
                         <div className="flex justify-between items-center mb-5 border-b border-gray-100 dark:border-gray-800 pb-3">
                           <span className="font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-3 py-1 rounded-md text-xs uppercase tracking-wider">Kunjungan #{index + 1}</span>
                           <div className="flex gap-2 no-print">
+                            {!visit._isNew && !visit.is_locked && (
+                              <button
+                                type="button"
+                                onClick={() => { setSelectedConsentVisit(visit); setShowConsentModal(true); }}
+                                className="px-2.5 py-1 text-xs font-bold text-teal-600 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-500/10 rounded-lg transition-colors flex items-center gap-1"
+                              >
+                                <PenTool size={14} /> Informed Consent
+                              </button>
+                            )}
                             {!visit._isNew && (
-                              <button 
-                                onClick={() => openVersionModal(visit.id)}
+                              <button
+                                type="button"
+                                onClick={() => handleToggleLock(visit.id, visit.is_locked)}
+                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 ${
+                                  visit.is_locked 
+                                    ? 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10' 
+                                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                                }`}
+                              >
+                                {visit.is_locked ? <><Lock size={14} /> Terkunci (Klik Buka)</> : <><Unlock size={14} /> Kunci Catatan</>}
+                              </button>
+                            )}
+                            {!visit._isNew && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedVersion({ isOpen: true, visitId: visit.id });
+                                }}
                                 className="px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 rounded-lg transition-colors"
                               >
                                 Riwayat Versi
                               </button>
                             )}
-                            <button onClick={() => deleteVisit(visit.id)} className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-1.5 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                            {!visit._isNew && visit.prescriptions && visit.prescriptions.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => generatePrescriptionPdf(visit, patient, userProfile, { name: 'NeuroDent Clinic', address: 'Jl. Contoh Alamat No. 123', city: 'Jakarta' })}
+                                className="px-2.5 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10 rounded-lg transition-colors flex items-center gap-1"
+                              >
+                                <Printer size={14} /> Cetak Resep
+                              </button>
+                            )}
+                            {!visit.is_locked && (
+                              <button onClick={() => deleteVisit(visit.id)} className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-500/10 p-1.5 rounded-lg transition-colors"><Trash2 size={18}/></button>
+                            )}
                           </div>
                         </div>
+
+                        {/* SOAP Template Selector */}
+                        {soapTemplates.length > 0 && !isTreatmentLocked && !visit.is_locked && (
+                          <div className="mb-4 bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-xl border border-blue-100 dark:border-blue-800 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-blue-800 dark:text-blue-300">Gunakan Template SOAP:</span>
+                            <select 
+                              className="glass-input text-sm px-3 py-1.5 w-64 rounded-lg bg-white dark:bg-gray-800"
+                              onChange={(e) => {
+                                if(e.target.value) {
+                                  applySoapTemplate(visit.id, e.target.value);
+                                  e.target.value = ""; // reset select
+                                }
+                              }}
+                              disabled={saving}
+                            >
+                              <option value="">-- Pilih Template Tindakan --</option>
+                              {soapTemplates.map(t => (
+                                <option key={t.id} value={t.id}>{t.treatment_type}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                           <div>
                             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Tanggal</label>
-                            <input type="date" value={visit.tanggal_kunjungan || ''} onChange={e => updateVisit(visit.id, 'tanggal_kunjungan', e.target.value)} className="glass-input w-full px-3 py-2 rounded-lg text-sm"/>
+                            <input type="date" value={visit.tanggal_kunjungan || ''} onChange={e => updateVisit(visit.id, 'tanggal_kunjungan', e.target.value)} className="glass-input w-full px-3 py-2 rounded-lg text-sm" disabled={visit.is_locked || saving}/>
                           </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
@@ -1234,6 +1387,7 @@ const MedicalRecordForm = () => {
                               value={visit.keluhan || ''} 
                               onChange={e => updateVisit(visit.id, 'keluhan', e.target.value)} 
                               className={`glass-input w-full px-3 py-2 rounded-lg text-sm ${validationErrors.visits?.[visit.id]?.keluhan ? 'border-rose-500 ring-rose-500 focus:border-rose-500 focus:ring-rose-500 border-2' : ''}`}
+                              disabled={visit.is_locked || saving}
                             />
                             {validationErrors.visits?.[visit.id]?.keluhan && (
                               <p className="text-rose-500 text-[10px] mt-1 font-medium">{validationErrors.visits[visit.id].keluhan}</p>
@@ -1247,11 +1401,18 @@ const MedicalRecordForm = () => {
                               type="text" 
                               value={visit.diagnosa || ''} 
                               onChange={e => updateVisit(visit.id, 'diagnosa', e.target.value)} 
-                              className={`glass-input w-full px-3 py-2 rounded-lg text-sm ${validationErrors.visits?.[visit.id]?.diagnosa ? 'border-rose-500 ring-rose-500 focus:border-rose-500 focus:ring-rose-500 border-2' : ''}`}
+                              className={`glass-input w-full px-3 py-2 rounded-lg text-sm mb-2 ${validationErrors.visits?.[visit.id]?.diagnosa ? 'border-rose-500 ring-rose-500 focus:border-rose-500 focus:ring-rose-500 border-2' : ''}`}
+                              disabled={visit.is_locked || saving}
                             />
                             {validationErrors.visits?.[visit.id]?.diagnosa && (
-                              <p className="text-rose-500 text-[10px] mt-1 font-medium">{validationErrors.visits[visit.id].diagnosa}</p>
+                              <p className="text-rose-500 text-[10px] mb-2 font-medium">{validationErrors.visits[visit.id].diagnosa}</p>
                             )}
+                            <ICD10Picker
+                              value={visit.kode_icd10 || ''}
+                              onChange={(codeObj) => updateVisit(visit.id, 'kode_icd10', codeObj?.code || '')}
+                              disabled={visit.is_locked || saving}
+                              id={`icd10-${visit.id}`}
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
@@ -1262,12 +1423,41 @@ const MedicalRecordForm = () => {
                               value={visit.terapi || ''} 
                               onChange={e => updateVisit(visit.id, 'terapi', e.target.value)} 
                               className={`glass-input w-full px-3 py-2 rounded-lg text-sm ${validationErrors.visits?.[visit.id]?.terapi ? 'border-rose-500 ring-rose-500 focus:border-rose-500 focus:ring-rose-500 border-2' : ''}`}
+                              disabled={visit.is_locked || saving}
                             />
                             {validationErrors.visits?.[visit.id]?.terapi && (
                               <p className="text-rose-500 text-[10px] mt-1 font-medium">{validationErrors.visits[visit.id].terapi}</p>
                             )}
                           </div>
                         </div>
+
+                        {/* Consents List */}
+                        {consents.filter(c => c.visit_id === visit.id).length > 0 && (
+                          <div className="mb-4 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">Informed Consents</span>
+                            <div className="flex flex-wrap gap-2">
+                              {consents.filter(c => c.visit_id === visit.id).map(c => (
+                                <button
+                                  key={c.id}
+                                  type="button"
+                                  onClick={() => generateConsentPdf(c, { name: 'NeuroDent Clinic', address: 'Jl. Contoh Alamat No. 123', city: 'Jakarta' })}
+                                  className="px-3 py-1.5 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg flex items-center gap-2 hover:border-teal-400 transition-colors"
+                                >
+                                  <FileText size={14} className="text-teal-500"/> {c.treatment_type}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Prescription Entry Component */}
+                        <PrescriptionEntry
+                          prescriptions={visit.prescriptions || []}
+                          onChange={(newPrescriptions) => updateVisit(visit.id, 'prescriptions', newPrescriptions)}
+                          patientAllergies={medicalHistory.alergi_detail}
+                          disabled={visit.is_locked || saving}
+                        />
+
                       </div>
                     ))}
                   </div>
@@ -1293,6 +1483,8 @@ const MedicalRecordForm = () => {
           </button>
         </div>
       </div>
+      </>
+      )}
 
       {/* Global CSS for Print (Medical Record) */}
       <style>{`
@@ -1505,7 +1697,25 @@ const MedicalRecordForm = () => {
            </div>
          </div>
        )}
-     </div>
+
+      {/* Consent Modal */}
+      {showConsentModal && selectedConsentVisit && (
+        <ConsentFormModal
+          patient={patient}
+          visit={selectedConsentVisit}
+          userProfile={userProfile}
+          onClose={() => {
+            setShowConsentModal(false);
+            setSelectedConsentVisit(null);
+          }}
+          onSaveSuccess={async () => {
+            const consRes = await consentService.getConsentsByPatient(patientId);
+            if (consRes.success) setConsents(consRes.data || []);
+          }}
+        />
+      )}
+
+    </div>
   );
 };
 

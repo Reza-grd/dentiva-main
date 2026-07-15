@@ -5,6 +5,7 @@ import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 import TreatmentEducationTemplates from './TreatmentEducationTemplates';
+import SoapTemplates from './SoapTemplates';
 
 const SettingsPage = () => {
   const { user, userProfile } = useAuth();
@@ -238,6 +239,7 @@ const SettingsPage = () => {
       { id: 'notifications', label: 'Notifikasi', icon: Bell },
       { id: 'whatsapp', label: 'Pengaturan WhatsApp', icon: MessageSquare },
       { id: 'treatment-education', label: 'Edukasi Perawatan', icon: MessageSquare },
+      { id: 'soap-templates', label: 'Template SOAP', icon: Save },
     ] : []),
     { id: 'security', label: 'Keamanan', icon: Lock },
     { id: 'audit-logs', label: 'Log Audit', icon: Shield },
@@ -577,6 +579,13 @@ const SettingsPage = () => {
             {activeTab === 'treatment-education' && (
               <div>
                 <TreatmentEducationTemplates />
+              </div>
+            )}
+
+            {/* SOAP Templates Tab */}
+            {activeTab === 'soap-templates' && (
+              <div>
+                <SoapTemplates />
               </div>
             )}
 

@@ -4,6 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 const AdminDashboard = lazy(() => import('./components/dashboard/AdminDashboard'));
 const DoctorDashboard = lazy(() => import('./components/dashboard/DoctorDashboard'));
@@ -24,6 +25,7 @@ const DoctorProfilePage = lazy(() => import('./components/profile/DoctorProfileP
 const SchedulePage = lazy(() => import('./components/schedule/SchedulePage'));
 const VisitHistory = lazy(() => import('./components/schedule/VisitHistory'));
 const DoctorSchedulePage = lazy(() => import('./components/schedule/DoctorSchedulePage'));
+const QueueDisplay = lazy(() => import('./components/queue/QueueDisplay'));
 
 function App() {
   const { loading, user, userProfile, signOut } = useAuth();
@@ -77,176 +79,181 @@ function App() {
   };
 
   return (
-    <Suspense fallback={<LoadingSpinner fullScreen />}>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        
-        <Route path="/admin/*" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingSpinner fullScreen />}>
+        <Routes>
+          {/* Public Queue Display — for TV in waiting room */}
+          <Route path="/queue-display" element={<QueueDisplay />} />
 
-        <Route path="/dokter/*" element={
-          <ProtectedRoute allowedRoles={['dokter', 'admin']}>
-            <DoctorDashboard />
-          </ProtectedRoute>
-        } />
+          <Route path="/login" element={<LoginPage />} />
+          
+          <Route path="/admin/*" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/resepsionis/*" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <ReceptionistDashboard />
-          </ProtectedRoute>
-        } />
+          <Route path="/dokter/*" element={
+            <ProtectedRoute allowedRoles={['dokter', 'admin']}>
+              <DoctorDashboard />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/pasien" element={
-          <ProtectedRoute>
-            <PatientList />
-          </ProtectedRoute>
-        } />
+          <Route path="/resepsionis/*" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <ReceptionistDashboard />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/pasien/daftar" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <PatientRegistration />
-          </ProtectedRoute>
-        } />
+          <Route path="/pasien" element={
+            <ProtectedRoute>
+              <PatientList />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/pasien/:patientId" element={
-          <ProtectedRoute allowedRoles={['dokter', 'resepsionis', 'admin']}>
-            <PatientDetail />
-          </ProtectedRoute>
-        } />
+          <Route path="/pasien/daftar" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <PatientRegistration />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/pasien/:patientId/kunjungan" element={
-          <ProtectedRoute allowedRoles={['dokter', 'resepsionis', 'admin']}>
-            <VisitHistory />
-          </ProtectedRoute>
-        } />
+          <Route path="/pasien/:patientId" element={
+            <ProtectedRoute allowedRoles={['dokter', 'resepsionis', 'admin']}>
+              <PatientDetail />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/rekam-medis/:patientId" element={
-          <ProtectedRoute allowedRoles={['dokter']}>
-            <MedicalRecordForm />
-          </ProtectedRoute>
-        } />
+          <Route path="/pasien/:patientId/kunjungan" element={
+            <ProtectedRoute allowedRoles={['dokter', 'resepsionis', 'admin']}>
+              <VisitHistory />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/pembayaran/:visitId" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <PaymentForm />
-          </ProtectedRoute>
-        } />
+          <Route path="/rekam-medis/:patientId" element={
+            <ProtectedRoute allowedRoles={['dokter']}>
+              <MedicalRecordForm />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/resepsionis/pembayaran/:visitId" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <PaymentForm />
-          </ProtectedRoute>
-        } />
+          <Route path="/pembayaran/:visitId" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <PaymentForm />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/keuangan" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <FinancialDashboard />
-          </ProtectedRoute>
-        } />
+          <Route path="/resepsionis/pembayaran/:visitId" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <PaymentForm />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/pembayaran" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <PaymentList />
-          </ProtectedRoute>
-        } />
+          <Route path="/keuangan" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <FinancialDashboard />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/treatments" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <TreatmentMaster />
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/pembayaran" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <PaymentList />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/laporan" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <ReportsPage />
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/treatments" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <TreatmentMaster />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/pengaturan" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <SettingsPage />
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/laporan" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ReportsPage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/profil" element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/pengaturan" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <SettingsPage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/pengaturan" element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        } />
+          <Route path="/profil" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/jadwal-dokter" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <DoctorSchedulePage />
-          </ProtectedRoute>
-        } />
+          <Route path="/pengaturan" element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/admin/jadwal" element={
-          <ProtectedRoute allowedRoles={['admin']}>
-            <SchedulePage />
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/jadwal-dokter" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <DoctorSchedulePage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/dokter/jadwal" element={
-          <ProtectedRoute allowedRoles={['dokter', 'admin']}>
-            <SchedulePage />
-          </ProtectedRoute>
-        } />
+          <Route path="/admin/jadwal" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <SchedulePage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/dokter/rekam-medis" element={
-          <ProtectedRoute allowedRoles={['dokter']}>
-            <MedicalRecordList />
-          </ProtectedRoute>
-        } />
+          <Route path="/dokter/jadwal" element={
+            <ProtectedRoute allowedRoles={['dokter', 'admin']}>
+              <SchedulePage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/dokter/profil-dokter" element={
-          <ProtectedRoute allowedRoles={['dokter']}>
-            <DoctorProfilePage />
-          </ProtectedRoute>
-        } />
+          <Route path="/dokter/rekam-medis" element={
+            <ProtectedRoute allowedRoles={['dokter']}>
+              <MedicalRecordList />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/dokter/kunjungan" element={
-          <ProtectedRoute allowedRoles={['dokter', 'admin']}>
-            <VisitHistory />
-          </ProtectedRoute>
-        } />
+          <Route path="/dokter/profil-dokter" element={
+            <ProtectedRoute allowedRoles={['dokter']}>
+              <DoctorProfilePage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/resepsionis/kunjungan" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <VisitHistory />
-          </ProtectedRoute>
-        } />
+          <Route path="/dokter/kunjungan" element={
+            <ProtectedRoute allowedRoles={['dokter', 'admin']}>
+              <VisitHistory />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/resepsionis/jadwal" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <SchedulePage />
-          </ProtectedRoute>
-        } />
+          <Route path="/resepsionis/kunjungan" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <VisitHistory />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/resepsionis/pembayaran" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <PaymentList />
-          </ProtectedRoute>
-        } />
+          <Route path="/resepsionis/jadwal" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <SchedulePage />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/resepsionis/transaksi" element={
-          <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-            <PaymentList />
-          </ProtectedRoute>
-        } />
+          <Route path="/resepsionis/pembayaran" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <PaymentList />
+            </ProtectedRoute>
+          } />
 
-        <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
-        <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
-      </Routes>
-    </Suspense>
+          <Route path="/resepsionis/transaksi" element={
+            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+              <PaymentList />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
+          <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

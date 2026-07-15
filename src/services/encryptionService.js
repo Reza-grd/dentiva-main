@@ -1,9 +1,11 @@
 /**
  * DENTIVA EMR — ENCRYPTION & DATA CLASSIFICATION FRAMEWORK
  * 
- * Provides client-side and server-side ready abstraction for key management,
- * field classification, key rotation, and AES-GCM encryption wrappers.
+ * Provides client-side delegation to server-side database pgcrypto functions
+ * with a temporary local fallback decryptor for client-side legacy data.
  */
+
+import { supabase } from './supabase.js';
 
 // 1. Data Classification Matrix
 export const DATA_CLASSIFICATION = {
@@ -13,7 +15,7 @@ export const DATA_CLASSIFICATION = {
   HIGHLY_CONFIDENTIAL: 'HIGHLY_CONFIDENTIAL' // Clinical EMR (Diagnosis, SOAP notes, histories)
 };
 
-// Target fields map for future incremental column migrations
+// Target fields map for verification
 export const ENCRYPTED_FIELDS_MAP = {
   patients: {
     nama_lengkap: DATA_CLASSIFICATION.CONFIDENTIAL,
@@ -61,51 +63,37 @@ async function deriveKey(masterSecret, salt, iterations = 100000) {
 }
 
 export const encryptionService = {
-  _masterKEK: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_ENCRYPTION_KEY) || (typeof process !== 'undefined' && process.env && process.env.VITE_ENCRYPTION_KEY) || 'dentiva-default-shared-system-kek-2026',
+  // CONFIG CUTOFF: Change to false to permanently disable the client-side fallback
+  FALLBACK_ENABLED: true,
+
+  // Vite environment key (strictly env-driven; no default fallback string allowed)
+  _masterKEK: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_ENCRYPTION_KEY) || (typeof process !== 'undefined' && process.env && process.env.VITE_ENCRYPTION_KEY) || null,
 
   /**
-   * Derive a Tenant-Specific Data Encryption Key (DEK)
+   * Derive local KEK salt for fallback decryption
    */
   async getTenantDEK(clinicId = 'default') {
-    // Derive key using KEK + Clinic ID as salt
+    if (!this._masterKEK) {
+      throw new Error('Fallback Master Key is not configured in client environment.');
+    }
     return deriveKey(this._masterKEK, clinicId);
   },
 
   /**
-   * Encrypt a value using AES-GCM 256
+   * Decrypt a value using legacy client-side AES-GCM 256 (strictly fallback only)
    */
-  async encrypt(plaintext, clinicId = 'default') {
-    if (!plaintext) return plaintext;
-    try {
-      const key = await this.getTenantDEK(clinicId);
-      const enc = new TextEncoder();
-      const iv = window.crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV
-      
-      const ciphertext = await window.crypto.subtle.encrypt(
-        {
-          name: 'AES-GCM',
-          iv
-        },
-        key,
-        enc.encode(plaintext)
-      );
-
-      // Package payload: IV + Ciphertext as Base64
-      const ivBase64 = btoa(String.fromCharCode(...iv));
-      const cipherBase64 = btoa(String.fromCharCode(...new Uint8Array(ciphertext)));
-
-      return `ENC:v1:${ivBase64}:${cipherBase64}`;
-    } catch (e) {
-      console.error('Encryption failed:', e);
-      return plaintext; // Fallback
+  async decryptLocalFallback(encryptedPayload, clinicId = 'default') {
+    if (!this.FALLBACK_ENABLED) {
+      console.warn('[SECURITY] Fallback client-side decryption is disabled.');
+      return encryptedPayload;
     }
-  },
-
-  /**
-   * Decrypt a value using AES-GCM 256
-   */
-  async decrypt(encryptedPayload, clinicId = 'default') {
-    if (!encryptedPayload || !encryptedPayload.startsWith('ENC:v1:')) return encryptedPayload;
+    if (!this._masterKEK) {
+      console.warn('[SECURITY] No fallback master KEK configured. Cannot decrypt legacy payload.');
+      return encryptedPayload;
+    }
+    if (!encryptedPayload || !encryptedPayload.startsWith('ENC:v1:')) {
+      return encryptedPayload;
+    }
     try {
       const parts = encryptedPayload.split(':');
       if (parts.length < 4) return encryptedPayload;
@@ -128,32 +116,69 @@ export const encryptionService = {
 
       return new TextDecoder().decode(decrypted);
     } catch (e) {
-      console.warn('Decryption failed, returning raw payload:', e.message);
-      return encryptedPayload; // Return raw value if decryption fails (e.g. not encrypted)
+      console.warn('[SECURITY] Decrypting legacy payload failed:', e.message);
+      return encryptedPayload;
     }
   },
 
   /**
-   * ROTATION STRATEGY
-   * Recrypts a payload from an old KEK to a new KEK.
+   * BATCH ENCRYPTION (SERVER-DELEGATED)
+   * Encrypts multiple plaintext fields in a single Supabase RPC call.
    */
-  async rotatePayload(payload, oldKEK, newKEK, clinicId = 'default') {
-    if (!payload || !payload.startsWith('ENC:')) return payload;
+  async encryptBatch(plaintextsArray) {
+    if (!plaintextsArray || plaintextsArray.length === 0) return [];
     
-    // Save current KEK
-    const currentKEK = this._masterKEK;
-    
-    // Decrypt using old key
-    this._masterKEK = oldKEK;
-    const plaintext = await this.decrypt(payload, clinicId);
-    
-    // Encrypt using new key
-    this._masterKEK = newKEK;
-    const reencrypted = await this.encrypt(plaintext, clinicId);
-    
-    // Restore current KEK
-    this._masterKEK = currentKEK;
-    
-    return reencrypted;
+    // Call server-side batch encryption RPC
+    const { data, error } = await supabase.rpc('encrypt_batch', { p_payloads: plaintextsArray });
+    if (error) {
+      console.error('[SECURITY] Server-side batch encryption failed:', error);
+      throw new Error('Encryption error: ' + error.message);
+    }
+    return data || [];
+  },
+
+  /**
+   * BATCH DECRYPTION (SERVER-DELEGATED)
+   * Decrypts multiple ciphertext fields in a single Supabase RPC call,
+   * while transparently routing legacy 'ENC:v1:' data to the client-side fallback.
+   */
+  async decryptBatch(ciphertextsArray) {
+    if (!ciphertextsArray || ciphertextsArray.length === 0) return [];
+
+    const processed = [];
+    const pgpPayloads = [];
+    const pgpIndices = [];
+
+    // 1. Separate legacy client-side ENC:v1: from server-side PGP / plaintext fields
+    for (let i = 0; i < ciphertextsArray.length; i++) {
+      const val = ciphertextsArray[i];
+      if (val && val.startsWith('ENC:v1:')) {
+        processed[i] = await this.decryptLocalFallback(val);
+      } else if (val && val.startsWith('PGP:')) {
+        processed[i] = null; // placeholder for server-side decrypted value
+        pgpPayloads.push(val);
+        pgpIndices.push(i);
+      } else {
+        processed[i] = val; // Plaintext or null
+      }
+    }
+
+    // 2. Fetch server-side decrypted values for all PGP inputs in a single round-trip
+    if (pgpPayloads.length > 0) {
+      const { data, error } = await supabase.rpc('decrypt_batch', { p_payloads: pgpPayloads });
+      if (error) {
+        console.error('[SECURITY] Server-side batch decryption failed:', error);
+        // Fallback to original ciphertext on error
+        pgpIndices.forEach((origIdx, batchIdx) => {
+          processed[origIdx] = pgpPayloads[batchIdx];
+        });
+      } else {
+        pgpIndices.forEach((origIdx, batchIdx) => {
+          processed[origIdx] = data[batchIdx];
+        });
+      }
+    }
+
+    return processed;
   }
 };

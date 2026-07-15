@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, RotateCw, Move } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, RotateCw, Move, Sun, Contrast, RefreshCw } from 'lucide-react';
 
 const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
@@ -7,6 +7,8 @@ const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
   
   const dragStart = useRef({ x: 0, y: 0 });
   const containerRef = useRef(null);
@@ -18,6 +20,8 @@ const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
     setScale(1);
     setPosition({ x: 0, y: 0 });
     setRotation(0);
+    setBrightness(100);
+    setContrast(100);
   }, [currentIndex]);
 
   useEffect(() => {
@@ -144,9 +148,10 @@ const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
         <img 
           src={currentImage.file_url} 
           alt={currentImage.filename}
-          className="max-w-[90vw] max-h-[90vh] object-contain transition-transform duration-100 ease-out"
+          className="max-w-[90vw] max-h-[80vh] object-contain transition-transform duration-100 ease-out"
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale}) rotate(${rotation}deg)`,
+            filter: `brightness(${brightness}%) contrast(${contrast}%)`,
             cursor: scale > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default',
           }}
           draggable={false}
@@ -154,10 +159,40 @@ const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
         
         {/* Helper overlay when zooming */}
         {scale > 1 && (
-          <div className="absolute bottom-6 right-6 bg-black/60 px-3 py-1.5 rounded-full text-white text-xs font-semibold flex items-center gap-2 pointer-events-none">
+          <div className="absolute top-24 left-1/2 -translate-x-1/2 bg-black/60 px-3 py-1.5 rounded-full text-white text-xs font-semibold flex items-center gap-2 pointer-events-none">
             <Move size={14} /> Drag to pan ({Math.round(scale * 100)}%)
           </div>
         )}
+      </div>
+
+      {/* Bottom Controls (Brightness & Contrast for Radiology) */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md px-6 py-4 rounded-2xl flex flex-col gap-4 min-w-[300px] shadow-2xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-3">
+          <Sun size={18} className="text-gray-400" />
+          <input 
+            type="range" 
+            min="50" max="150" value={brightness} 
+            onChange={(e) => setBrightness(e.target.value)}
+            className="flex-1 accent-white"
+          />
+          <span className="text-white text-xs w-8 text-right">{brightness}%</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <Contrast size={18} className="text-gray-400" />
+          <input 
+            type="range" 
+            min="50" max="150" value={contrast} 
+            onChange={(e) => setContrast(e.target.value)}
+            className="flex-1 accent-white"
+          />
+          <span className="text-white text-xs w-8 text-right">{contrast}%</span>
+        </div>
+        <button 
+          onClick={() => { setBrightness(100); setContrast(100); }} 
+          className="text-xs text-gray-300 hover:text-white flex items-center justify-center gap-1 mt-1 transition-colors"
+        >
+          <RefreshCw size={12} /> Reset Filter
+        </button>
       </div>
     </div>
   );
