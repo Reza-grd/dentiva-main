@@ -10,7 +10,7 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 const AdminDashboard = lazy(() => import('./components/dashboard/AdminDashboard'));
 const DoctorDashboard = lazy(() => import('./components/dashboard/DoctorDashboard'));
 const ReceptionistDashboard = lazy(() => import('./components/dashboard/ReceptionistDashboard'));
-const PatientRegistration = lazy(() => import('./components/patient/PatientRegistrationV2'));
+const PatientRegistration = lazy(() => import('./components/patient/PatientRegistration'));
 const PatientList = lazy(() => import('./components/patient/PatientList'));
 const PatientDetail = lazy(() => import('./components/patient/PatientDetail'));
 const MedicalRecordForm = lazy(() => import('./components/medical-record/MedicalRecordForm'));
