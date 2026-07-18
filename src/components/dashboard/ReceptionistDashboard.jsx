@@ -32,28 +32,30 @@ const StatusBadge = ({ status }) => {
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor, loading, subtitle }) => (
-  <div className="glass-panel p-5 group relative overflow-hidden">
+  <Card className="group relative overflow-hidden border-0 bg-white/60 dark:bg-gray-900/60 shadow-sm backdrop-blur-xl">
     <div className="absolute -right-6 -top-6 opacity-5 dark:opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
       <Icon size={120} />
     </div>
-    {loading ? (
-      <div className="animate-pulse space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-8 bg-gray-200 rounded w-1/2" />
-      </div>
-    ) : (
-      <div className="flex items-center justify-between relative z-10">
-        <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
-          <p className={`text-2xl font-bold ${valueColor}`}>{value}</p>
-          {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>}
+    <CardContent className="p-5">
+      {loading ? (
+        <div className="animate-pulse space-y-3">
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+          <div className="h-8 bg-gray-200 rounded w-1/2" />
         </div>
-        <div className={`w-12 h-12 ${iconBg} dark:bg-gray-800/50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm`}>
-          <Icon className={iconColor} size={22} />
+      ) : (
+        <div className="flex items-center justify-between relative z-10">
+          <div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
+            <p className={`text-2xl font-bold ${valueColor}`}>{value}</p>
+            {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>}
+          </div>
+          <div className={`w-12 h-12 ${iconBg} dark:bg-gray-800/50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm`}>
+            <Icon className={iconColor} size={22} />
+          </div>
         </div>
-      </div>
-    )}
-  </div>
+      )}
+    </CardContent>
+  </Card>
 );
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
@@ -193,16 +195,17 @@ const ReceptionistDashboard = () => {
           </div>
 
           {/* ── Antrian Real-time ────────────────────────────────── */}
-          <div className="glass-panel overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <h2 className="font-semibold text-gray-900 dark:text-gray-100">Antrian Real-time</h2>
+                <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Antrian Real-time</CardTitle>
               </div>
-              <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full font-medium">
+              <Badge variant="default" className="bg-gray-100 text-gray-500">
                 {todayVisits.length} antrian
-              </span>
-            </div>
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-0">
 
             {loading ? (
               <div className="p-5 space-y-3">
@@ -219,12 +222,9 @@ const ReceptionistDashboard = () => {
               <div className="flex flex-col items-center justify-center py-14 text-gray-400 dark:text-gray-500 gap-3">
                 <Calendar size={44} className="opacity-30" />
                 <p className="text-sm font-medium">Belum ada antrian hari ini</p>
-                <button
-                  onClick={() => navigate('/pasien/daftar')}
-                  className="mt-1 px-5 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white text-sm font-semibold rounded-xl transition-colors"
-                >
+                <Button onClick={() => navigate('/pasien/daftar')} className="mt-1">
                   + Daftarkan Pasien
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -307,22 +307,24 @@ const ReceptionistDashboard = () => {
                 </table>
               </div>
             )}
-          </div>
+          </CardContent>
+        </Card>
 
           {/* ── Bottom Row ───────────────────────────────────────── */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
             {/* Pembayaran Pending */}
-            <div className="glass-panel overflow-hidden flex flex-col">
-              <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100 dark:border-gray-800">
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 py-4 border-b border-gray-100 dark:border-gray-800">
                 <AlertCircle size={18} className="text-amber-500" />
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Pembayaran Pending</h3>
+                <CardTitle className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pembayaran Pending</CardTitle>
                 {belumBayar > 0 && (
-                  <span className="ml-auto text-xs font-bold bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                  <Badge variant="secondary" className="ml-auto bg-amber-100 text-amber-700">
                     {belumBayar}
-                  </span>
+                  </Badge>
                 )}
-              </div>
+              </CardHeader>
+              <CardContent className="p-0">
               {pendingPayments.length === 0 ? (
                 <div className="flex flex-col items-center justify-center flex-1 py-10 text-gray-400 dark:text-gray-500 gap-2">
                   <CheckCircle size={36} className="text-emerald-400 opacity-60" />
@@ -364,16 +366,20 @@ const ReceptionistDashboard = () => {
                   </button>
                 </div>
               )}
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Quick stats + mini bar + quick actions */}
             <div className="space-y-4">
               {/* Mini chart */}
-              <div className="glass-panel p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Activity size={16} className="text-[var(--color-accent)]" />
-                  <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Kunjungan Minggu Ini</h4>
-                </div>
+              <Card>
+                <CardHeader className="py-4">
+                  <div className="flex items-center gap-2">
+                    <Activity size={16} className="text-[var(--color-accent)]" />
+                    <CardTitle className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Kunjungan Minggu Ini</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
                 <ResponsiveContainer width="100%" height={70}>
                   <BarChart data={weekData} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
                     <Bar dataKey="kunjungan" fill="var(--color-accent)" radius={[4, 4, 0, 0]} maxBarSize={24} />
@@ -390,12 +396,15 @@ const ReceptionistDashboard = () => {
                     />
                   </BarChart>
                 </ResponsiveContainer>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Quick actions */}
-              <div className="glass-panel p-5">
-                <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-3">Akses Cepat</h4>
-                <div className="space-y-2">
+              <Card>
+                <CardHeader className="py-4">
+                  <CardTitle className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Akses Cepat</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
                   <button
                     onClick={() => navigate('/pasien/daftar')}
                     className="w-full flex items-center justify-between p-3 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-50 dark:hover:bg-blue-500/20 rounded-xl text-blue-700 dark:text-blue-400 transition-colors group"
@@ -416,8 +425,8 @@ const ReceptionistDashboard = () => {
                     </div>
                     <ArrowRight size={15} className="opacity-40 group-hover:opacity-100 transition-opacity" />
                   </button>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
 

@@ -15,6 +15,9 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import { Badge } from '../ui/Badge';
+import { Button } from '../ui/Button';
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, isCurrency }) => {
@@ -41,71 +44,73 @@ const CustomTooltip = ({ active, payload, label, isCurrency }) => {
 
 // ─── KPI Card ────────────────────────────────────────────────────────────────
 const KpiCard = ({ label, value, icon: Icon, iconBg, iconColor, trend, trendLabel, loading }) => (
-  <div className="glass-panel p-5 group relative overflow-hidden">
+  <Card className="group relative overflow-hidden h-full">
     <div className="absolute -right-6 -top-6 opacity-5 dark:opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
       <Icon size={120} />
     </div>
-    {loading ? (
-      <div className="animate-pulse space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-8 bg-gray-200 rounded w-1/2" />
-        <div className="h-3 bg-gray-200 rounded w-1/3" />
-      </div>
-    ) : (
-      <div className="flex items-start justify-between relative z-10">
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">{value}</p>
-          {trend !== undefined && (
-            <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${
-              trend >= 0 ? 'text-emerald-600' : 'text-red-500'
-            }`}>
-              {trend >= 0
-                ? <ArrowUpRight size={14} />
-                : <ArrowDownRight size={14} />}
-              <span>{Math.abs(trend)}% {trendLabel || 'dari bulan lalu'}</span>
-            </div>
-          )}
+    <CardContent className="p-5 flex items-start justify-between relative z-10 h-full">
+      {loading ? (
+        <div className="animate-pulse space-y-3 w-full">
+          <div className="h-4 bg-gray-200 rounded w-3/4" />
+          <div className="h-8 bg-gray-200 rounded w-1/2" />
+          <div className="h-3 bg-gray-200 rounded w-1/3" />
         </div>
-        <div className={`w-12 h-12 ${iconBg} dark:bg-gray-800/50 rounded-xl flex items-center justify-center ml-4 flex-shrink-0 group-hover:scale-110 transition-transform shadow-sm`}>
-          <Icon className={iconColor} size={22} />
-        </div>
-      </div>
-    )}
-  </div>
+      ) : (
+        <>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">{value}</p>
+            {trend !== undefined && (
+              <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${
+                trend >= 0 ? 'text-emerald-600' : 'text-red-500'
+              }`}>
+                {trend >= 0
+                  ? <ArrowUpRight size={14} />
+                  : <ArrowDownRight size={14} />}
+                <span>{Math.abs(trend)}% {trendLabel || 'dari bulan lalu'}</span>
+              </div>
+            )}
+          </div>
+          <div className={`w-12 h-12 ${iconBg} dark:bg-gray-800/50 rounded-xl flex items-center justify-center ml-4 flex-shrink-0 group-hover:scale-110 transition-transform shadow-sm`}>
+            <Icon className={iconColor} size={22} />
+          </div>
+        </>
+      )}
+    </CardContent>
+  </Card>
 );
 
 // ─── Chart Card wrapper ──────────────────────────────────────────────────────
 const ChartCard = ({ title, subtitle, children, loading, action }) => (
-  <div className="glass-panel p-5">
-    <div className="flex items-start justify-between mb-4">
+  <Card className="h-full flex flex-col">
+    <CardHeader className="flex flex-row items-start justify-between pb-2 space-y-0">
       <div>
-        <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-base">{title}</h3>
-        {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>}
+        <CardTitle>{title}</CardTitle>
+        {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subtitle}</p>}
       </div>
-      {action}
-    </div>
-    {loading ? (
-      <div className="h-52 flex items-center justify-center">
-        <div className="w-7 h-7 border-[3px] border-primary-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    ) : children}
-  </div>
+      {action && <div>{action}</div>}
+    </CardHeader>
+    <CardContent className="flex-1 pb-4">
+      {loading ? (
+        <div className="h-52 flex items-center justify-center">
+          <div className="w-7 h-7 border-[3px] border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : children}
+    </CardContent>
+  </Card>
 );
 
 // ─── Status badge ────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const map = {
-    scheduled:  { label: 'Terjadwal',   cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-    ongoing:    { label: 'Berlangsung', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-    completed:  { label: 'Selesai',     cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    cancelled:  { label: 'Batal',       cls: 'bg-red-50 text-red-600 border-red-200' },
+    scheduled:  { label: 'Terjadwal',   variant: 'primary' },
+    ongoing:    { label: 'Berlangsung', variant: 'warning' },
+    completed:  { label: 'Selesai',     variant: 'success' },
+    cancelled:  { label: 'Batal',       variant: 'danger' },
   };
-  const { label, cls } = map[status] || { label: status, cls: 'bg-gray-100 text-gray-600 border-gray-200' };
+  const { label, variant } = map[status] || { label: status, variant: 'default' };
   return (
-    <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border ${cls}`}>
-      {label}
-    </span>
+    <Badge variant={variant}>{label}</Badge>
   );
 };
 

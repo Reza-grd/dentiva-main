@@ -244,8 +244,8 @@ const QueueDisplay = () => {
           inset: 0;
           display: flex;
           flex-direction: column;
-          background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-          font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+          background: linear-gradient(135deg, var(--color-primary-dark) 0%, #0f172a 100%);
+          font-family: var(--font-sans);
           color: #e2e8f0;
           overflow: hidden;
           z-index: 9999;
@@ -259,7 +259,7 @@ const QueueDisplay = () => {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          background: #0f172a;
+          background: var(--color-primary-dark);
           color: #94a3b8;
           font-size: 1.5rem;
           gap: 1rem;
@@ -267,8 +267,8 @@ const QueueDisplay = () => {
         .queue-spinner {
           width: 48px;
           height: 48px;
-          border: 4px solid #334155;
-          border-top-color: #38bdf8;
+          border: 4px solid rgba(255, 255, 255, 0.1);
+          border-top-color: var(--color-secondary);
           border-radius: 50%;
           animation: qspin 1s linear infinite;
         }
@@ -280,9 +280,9 @@ const QueueDisplay = () => {
           justify-content: space-between;
           align-items: center;
           padding: 1.25rem 2.5rem;
-          background: rgba(15, 23, 42, 0.85);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(56, 189, 248, 0.15);
+          background: rgba(10, 52, 96, 0.6);
+          backdrop-filter: blur(16px);
+          border-bottom: 1px solid rgba(0, 180, 216, 0.2);
         }
         .queue-header-left {
           display: flex;
@@ -293,32 +293,32 @@ const QueueDisplay = () => {
           width: 52px;
           height: 52px;
           border-radius: 14px;
-          background: linear-gradient(135deg, #0ea5e9, #6366f1);
+          background: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary));
           display: flex;
           align-items: center;
           justify-content: center;
           color: white;
-          box-shadow: 0 0 20px rgba(14, 165, 233, 0.3);
+          box-shadow: 0 0 25px rgba(0, 180, 216, 0.4);
         }
         .queue-clinic-name {
           font-size: 1.75rem;
           font-weight: 800;
-          background: linear-gradient(90deg, #e0f2fe, #bae6fd, #7dd3fc);
+          background: linear-gradient(90deg, #ffffff, var(--color-secondary));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           letter-spacing: -0.02em;
         }
         .queue-date {
           font-size: 0.95rem;
-          color: #94a3b8;
+          color: #cbd5e1;
           margin-top: 2px;
         }
         .queue-clock {
           font-size: 2.5rem;
           font-weight: 700;
           font-variant-numeric: tabular-nums;
-          color: #38bdf8;
-          text-shadow: 0 0 20px rgba(56, 189, 248, 0.35);
+          color: var(--color-secondary);
+          text-shadow: 0 0 20px rgba(0, 180, 216, 0.4);
         }
 
         /* ─── BODY ───────────────────────────────── */
@@ -339,26 +339,27 @@ const QueueDisplay = () => {
           font-size: 1.1rem;
           font-weight: 800;
           letter-spacing: 0.06em;
-          color: #fb923c;
+          color: var(--color-warning);
           padding: 0.75rem 1rem;
           border-radius: 12px 12px 0 0;
-          background: rgba(251, 146, 60, 0.08);
-          border-bottom: 2px solid rgba(251, 146, 60, 0.2);
+          background: rgba(245, 158, 11, 0.1);
+          border-bottom: 2px solid rgba(245, 158, 11, 0.3);
         }
         .queue-panel-header-blue {
-          color: #38bdf8;
-          background: rgba(56, 189, 248, 0.06);
-          border-bottom-color: rgba(56, 189, 248, 0.15);
+          color: var(--color-secondary);
+          background: rgba(0, 180, 216, 0.1);
+          border-bottom-color: rgba(0, 180, 216, 0.3);
         }
 
         /* ─── NOW SERVING PANEL ──────────────────── */
         .queue-now-serving-panel {
-          background: rgba(30, 41, 59, 0.6);
+          background: rgba(15, 76, 129, 0.4);
           border-radius: 16px;
-          border: 1px solid rgba(251, 146, 60, 0.12);
+          border: 1px solid rgba(245, 158, 11, 0.2);
           display: flex;
           flex-direction: column;
           overflow: hidden;
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
         .queue-now-serving-list {
           flex: 1;
@@ -372,21 +373,25 @@ const QueueDisplay = () => {
           display: flex;
           align-items: center;
           gap: 1rem;
-          background: linear-gradient(135deg, rgba(251, 146, 60, 0.08), rgba(249, 115, 22, 0.04));
-          border: 1px solid rgba(251, 146, 60, 0.15);
+          background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+          border: 1px solid rgba(245, 158, 11, 0.3);
           border-radius: 14px;
           padding: 1.25rem 1.5rem;
-          animation: slideInLeft 0.5s ease-out both;
+          animation: slideInLeft 0.5s ease-out both, cardPulse 2.5s infinite alternate;
         }
         @keyframes slideInLeft {
           from { opacity: 0; transform: translateX(-30px); }
           to { opacity: 1; transform: translateX(0); }
         }
+        @keyframes cardPulse {
+          0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+          100% { box-shadow: 0 0 20px 4px rgba(245, 158, 11, 0.1); }
+        }
         .queue-now-serving-avatar {
           width: 56px;
           height: 56px;
           border-radius: 14px;
-          background: linear-gradient(135deg, #f97316, #ea580c);
+          background: linear-gradient(135deg, var(--color-warning), #d97706);
           color: white;
           display: flex;
           align-items: center;
@@ -394,17 +399,17 @@ const QueueDisplay = () => {
           font-weight: 800;
           font-size: 1.2rem;
           flex-shrink: 0;
-          box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+          box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
         .queue-now-serving-info { flex: 1; }
         .queue-now-serving-name {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #f1f5f9;
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: #ffffff;
         }
         .queue-now-serving-doctor {
-          font-size: 0.9rem;
-          color: #94a3b8;
+          font-size: 1rem;
+          color: #cbd5e1;
           display: flex;
           align-items: center;
           gap: 0.35rem;
@@ -413,35 +418,37 @@ const QueueDisplay = () => {
         .queue-now-serving-badge {
           display: flex;
           align-items: center;
-          gap: 0.4rem;
-          font-size: 0.75rem;
+          gap: 0.5rem;
+          font-size: 0.85rem;
           font-weight: 800;
           letter-spacing: 0.05em;
-          color: #fb923c;
-          background: rgba(251, 146, 60, 0.12);
-          padding: 0.4rem 0.8rem;
+          color: var(--color-warning);
+          background: rgba(245, 158, 11, 0.15);
+          padding: 0.5rem 1rem;
           border-radius: 8px;
           flex-shrink: 0;
+          text-transform: uppercase;
         }
         .queue-badge-pulse {
-          width: 8px;
-          height: 8px;
+          width: 10px;
+          height: 10px;
           border-radius: 50%;
-          background: #fb923c;
-          animation: badgePulse 1.5s ease-in-out infinite;
+          background: var(--color-warning);
+          animation: badgePulse 1.2s ease-in-out infinite;
         }
         @keyframes badgePulse {
-          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251,146,60,0.6); }
-          50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(251,146,60,0); }
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(245,158,11,0.8); }
+          50% { opacity: 0.5; box-shadow: 0 0 0 8px rgba(245,158,11,0); }
         }
 
         /* ─── PULSE ICON (header) ────────────────── */
         .queue-pulse-icon {
-          animation: iconPulse 2s ease-in-out infinite;
+          animation: iconPulse 1.5s ease-in-out infinite;
+          color: var(--color-warning);
         }
         @keyframes iconPulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.2); opacity: 0.7; }
         }
 
         /* ─── EMPTY STATES ───────────────────────── */
@@ -452,7 +459,7 @@ const QueueDisplay = () => {
           align-items: center;
           justify-content: center;
           gap: 0.75rem;
-          color: #475569;
+          color: #64748b;
           font-size: 1.1rem;
         }
         .queue-empty-small {
@@ -470,9 +477,9 @@ const QueueDisplay = () => {
         /* ─── WAITING PANEL ──────────────────────── */
         .queue-waiting-panel {
           flex: 1;
-          background: rgba(30, 41, 59, 0.6);
+          background: rgba(15, 76, 129, 0.3);
           border-radius: 16px;
-          border: 1px solid rgba(56, 189, 248, 0.1);
+          border: 1px solid rgba(0, 180, 216, 0.2);
           display: flex;
           flex-direction: column;
           overflow: hidden;
@@ -487,25 +494,25 @@ const QueueDisplay = () => {
           align-items: center;
           gap: 0.75rem;
           padding: 0.8rem 1.25rem;
-          border-bottom: 1px solid rgba(148, 163, 184, 0.06);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
           animation: fadeInUp 0.4s ease-out both;
           transition: background 0.2s;
         }
         .queue-waiting-row:hover {
-          background: rgba(56, 189, 248, 0.04);
+          background: rgba(0, 180, 216, 0.08);
         }
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(10px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .queue-order-number {
-          width: 36px;
-          height: 36px;
+          width: 38px;
+          height: 38px;
           border-radius: 10px;
-          background: rgba(56, 189, 248, 0.1);
-          color: #38bdf8;
+          background: rgba(0, 180, 216, 0.15);
+          color: var(--color-secondary);
           font-weight: 800;
-          font-size: 1rem;
+          font-size: 1.1rem;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -517,29 +524,29 @@ const QueueDisplay = () => {
           flex-direction: column;
         }
         .queue-waiting-name {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: #e2e8f0;
+          font-size: 1.15rem;
+          font-weight: 700;
+          color: #ffffff;
         }
         .queue-waiting-doctor {
-          font-size: 0.8rem;
-          color: #64748b;
+          font-size: 0.85rem;
+          color: #94a3b8;
         }
         .queue-waiting-time {
-          font-size: 0.85rem;
-          color: #64748b;
+          font-size: 0.9rem;
+          color: #94a3b8;
           display: flex;
           align-items: center;
-          gap: 0.3rem;
+          gap: 0.4rem;
           flex-shrink: 0;
         }
         .queue-count-badge {
           margin-left: auto;
-          background: rgba(56, 189, 248, 0.15);
-          color: #38bdf8;
-          font-size: 0.85rem;
+          background: rgba(0, 180, 216, 0.2);
+          color: var(--color-secondary);
+          font-size: 0.9rem;
           font-weight: 800;
-          padding: 0.15rem 0.65rem;
+          padding: 0.2rem 0.75rem;
           border-radius: 8px;
         }
 
@@ -551,47 +558,49 @@ const QueueDisplay = () => {
           flex-shrink: 0;
         }
         .queue-stat {
-          background: rgba(30, 41, 59, 0.7);
-          border: 1px solid rgba(148, 163, 184, 0.08);
+          background: rgba(15, 76, 129, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 14px;
           padding: 1rem;
           text-align: center;
           display: flex;
           flex-direction: column;
           gap: 0.25rem;
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
         .queue-stat-value {
-          font-size: 2rem;
+          font-size: 2.2rem;
           font-weight: 800;
           font-variant-numeric: tabular-nums;
         }
         .queue-stat-label {
           font-size: 0.75rem;
-          font-weight: 600;
-          color: #64748b;
-          letter-spacing: 0.04em;
+          font-weight: 700;
+          color: #94a3b8;
+          letter-spacing: 0.05em;
           text-transform: uppercase;
         }
-        .queue-stat-ongoing   { color: #fb923c; }
-        .queue-stat-waiting   { color: #38bdf8; }
-        .queue-stat-completed { color: #4ade80; }
-        .queue-stat-total     { color: #a78bfa; }
+        .queue-stat-ongoing   { color: var(--color-warning); }
+        .queue-stat-waiting   { color: var(--color-secondary); }
+        .queue-stat-completed { color: var(--color-success); }
+        .queue-stat-total     { color: var(--color-primary-light); }
 
         /* ─── FOOTER TICKER ──────────────────────── */
         .queue-footer {
-          padding: 0.75rem 0;
-          background: rgba(15, 23, 42, 0.9);
-          border-top: 1px solid rgba(56, 189, 248, 0.1);
+          padding: 0.8rem 0;
+          background: rgba(10, 52, 96, 0.8);
+          border-top: 1px solid rgba(0, 180, 216, 0.2);
           overflow: hidden;
         }
         .queue-ticker {
           display: flex;
           white-space: nowrap;
-          animation: ticker 35s linear infinite;
+          animation: ticker 25s linear infinite;
         }
         .queue-ticker-text {
-          font-size: 1rem;
-          color: #94a3b8;
+          font-size: 1.05rem;
+          font-weight: 500;
+          color: #cbd5e1;
           padding-left: 100%;
         }
         @keyframes ticker {
@@ -602,11 +611,11 @@ const QueueDisplay = () => {
         /* ─── SCROLLBAR ──────────────────────────── */
         .queue-waiting-list::-webkit-scrollbar,
         .queue-now-serving-list::-webkit-scrollbar {
-          width: 4px;
+          width: 5px;
         }
         .queue-waiting-list::-webkit-scrollbar-thumb,
         .queue-now-serving-list::-webkit-scrollbar-thumb {
-          background: rgba(148, 163, 184, 0.15);
+          background: rgba(255, 255, 255, 0.2);
           border-radius: 10px;
         }
       `}</style>

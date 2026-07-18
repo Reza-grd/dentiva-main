@@ -10,6 +10,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   PROVINSI, getKabupatenByProvinsi, getKecamatanByKabupaten, getDesaByKecamatan
 } from '../../utils/wilayahIndonesia';
+import { Card, CardContent } from '../ui/Card';
+import { Input } from '../ui/Input';
+import { Button } from '../ui/Button';
 import { UserPlus, Save, X, CheckCircle, Calendar, Clock, ChevronLeft, Search, Loader2 } from 'lucide-react';
 
 const AGAMA_OPTIONS = ['Islam','Kristen','Katolik','Hindu','Budha','Konghucu'];
@@ -497,7 +500,8 @@ const PatientRegistration = () => {
         {/* STEP 1: DATA DIRI & KONTAK */}
         {currentStep === 1 && (
           <div className="space-y-6">
-            <div className="glass-panel p-6">
+            <Card>
+            <CardContent className="p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Data Diri Pasien</h2>
 
               <div className="flex justify-center mb-8">
@@ -642,9 +646,11 @@ const PatientRegistration = () => {
                   {errors.tinggi_badan && <p className="text-red-500 text-xs mt-1.5">{errors.tinggi_badan}</p>}
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="glass-panel p-6">
+            <Card>
+            <CardContent className="p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Kontak & Jaminan Kesehatan</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -690,13 +696,15 @@ const PatientRegistration = () => {
                   </select>
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
           </div>
         )}
 
         {/* STEP 2: ALAMAT DOMISILI */}
         {currentStep === 2 && (
-          <div className="glass-panel p-6">
+          <Card>
+            <CardContent className="p-6">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Alamat Domisili</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -758,7 +766,8 @@ const PatientRegistration = () => {
                   placeholder="Contoh: Jl. Merdeka No. 10 RT 05/RW 02" />
               </div>
             </div>
-          </div>
+          </CardContent>
+          </Card>
         )}
 
         {/* STEP 3: DOKTER, RUJUKAN, KELUHAN & JADWAL */}
@@ -774,7 +783,8 @@ const PatientRegistration = () => {
               </div>
             )}
 
-            <div className="glass-panel p-6">
+            <Card>
+            <CardContent className="p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Dokter Keluarga & Rujukan</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -796,17 +806,21 @@ const PatientRegistration = () => {
                     className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="Nama klinik/dokter perujuk (kosongkan jika tidak ada)" />
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="glass-panel p-6">
+            <Card>
+            <CardContent className="p-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Keluhan Awal</h2>
               <textarea name="keluhan_awal" value={formData.keluhan_awal}
                 onChange={handleChange} disabled={loading}
                 className="glass-input w-full px-4 py-2.5 rounded-xl resize-none" rows="3"
                 placeholder="Keluhan yang dirasakan pasien saat ini" />
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="glass-panel p-6 border border-blue-200 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-900/10">
+            <Card>
+            <CardContent className="p-6 border border-blue-200 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-900/10">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white cursor-pointer flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-[var(--color-accent)]" />
                 Jadwal Kunjungan Pertama
@@ -869,7 +883,8 @@ const PatientRegistration = () => {
                   <p>Jadwal kunjungan pertama pasien akan ditandai dengan status "Terjadwal" dan masuk ke antrean klinik.</p>
                 </div>
               </div>
-            </div>
+            </CardContent>
+          </Card>
           </div>
         )}
 
@@ -967,7 +982,8 @@ const PatientRegistration = () => {
       ) : (
         /* Pasien Lama Mode UI */
         <div className="space-y-6 animate-fade-in">
-          <div className="glass-panel p-6">
+          <Card>
+            <CardContent className="p-6">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Cari Pasien Terdaftar</h2>
             
             <div className="relative mb-6">
@@ -1039,10 +1055,12 @@ const PatientRegistration = () => {
                 </div>
               </div>
             )}
-          </div>
+          </CardContent>
+          </Card>
 
           {selectedOldPatient && (
-            <div className="glass-panel p-6 animate-fade-in">
+            <Card>
+            <CardContent className="p-6 animate-fade-in">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Jadwal Kunjungan Baru</h2>
               <form onSubmit={handleOldPatientSubmit}>
                 <ScheduleVisitForm 
@@ -1061,7 +1079,8 @@ const PatientRegistration = () => {
                   </button>
                 </div>
               </form>
-            </div>
+            </CardContent>
+          </Card>
           )}
         </div>
       )}
