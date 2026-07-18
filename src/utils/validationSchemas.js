@@ -34,3 +34,11 @@ export const scheduleVisitSchema = z.object({
   keluhan: zSanitizedString().optional(),
   catatan: zSanitizedString().optional(),
 });
+
+export const userManagementSchema = z.object({
+  email: zSanitizedString().pipe(z.string().email("Format email tidak valid")),
+  password: zSanitizedString().pipe(z.string().min(6, "Password minimal 6 karakter")),
+  full_name: zSanitizedString().pipe(z.string().min(3, "Nama lengkap minimal 3 karakter")),
+  role: zSanitizedString().pipe(z.string().min(1, "Pilih peran")),
+  phone: zSanitizedString().pipe(z.string().regex(/^[0-9]{9,15}$/, "Nomor telepon tidak valid (9-15 angka)")),
+});

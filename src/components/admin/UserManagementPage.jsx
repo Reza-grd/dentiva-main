@@ -3,21 +3,25 @@ import { userManagementService } from '../../services/userManagementService';
 import { useToast } from '../common/ToastNotification';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { UserPlus, Shield, UserX, UserCheck, RefreshCw, Edit2, ShieldAlert } from 'lucide-react';
-
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { userManagementSchema } from '../../utils/validationSchemas';
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const toast = useToast();
 
-  const [addForm, setAddForm] = useState({
-    email: '',
-    password: '',
-    full_name: '',
-    role: 'resepsionis',
-    phone: ''
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting: formSubmitting } } = useForm({
+    resolver: zodResolver(userManagementSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+      full_name: '',
+      role: 'resepsionis',
+      phone: ''
+    }
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, user: null, action: null }); // action: 'deactivate' | 'reactivate'
 
@@ -36,21 +40,13 @@ const UserManagementPage = () => {
     setLoading(false);
   };
 
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    if (addForm.password.length < 6) {
-      toast.error('Password minimal 6 karakter');
-      return;
-    }
-    
-    setIsSubmitting(true);
-    const { success, error } = await userManagementService.createStaffUser(addForm);
-    setIsSubmitting(false);
+  const handleAddSubmit = async (data) => {
+    const { success, error } = await userManagementService.createStaffUser(data);
 
     if (success) {
       toast.success('Staf berhasil ditambahkan');
       setShowAddModal(false);
-      setAddForm({ email: '', password: '', full_name: '', role: 'resepsionis', phone: '' });
+      reset();
       fetchUsers();
     } else {
       toast.error('Gagal menambahkan staf: ' + error);
@@ -208,83 +204,88 @@ const UserManagementPage = () => {
               </h2>
             </div>
             
-            <form onSubmit={handleAddSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit(handleAddSubmit)} className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Nama Lengkap</label>
                 <input
                   type="text"
-                  required
-                  value={addForm.full_name}
-                  onChange={e => setAddForm({...addForm, full_name: e.target.value})}
+                  {...register('full_name')}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[var(--color-accent)] outline-none"
                   placeholder="Budi Santoso"
                 />
+                {errors.full_name && <p className="text-red-500 text-xs mt-1">{errors.full_name.message}</p>}
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Email</label>
                 <input
                   type="email"
-                  required
-                  value={addForm.email}
-                  onChange={e => setAddForm({...addForm, email: e.target.value})}
+                  {...register('email')}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[var(--color-accent)] outline-none"
                   placeholder="budi@klinik.com"
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Nomor Telepon/WA</label>
+                <input
+                  type="text"
+                  {...register('phone')}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[var(--color-accent)] outline-none"
+                  placeholder="081234567890"
+                />
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>}
               </div>
 
               <div>
                 <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Password Sementara</label>
                 <input
                   type="text"
-                  required
-                  minLength={6}
-                  value={addForm.password}
-                  onChange={e => setAddForm({...addForm, password: e.target.value})}
+                  {...register('password')}
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[var(--color-accent)] outline-none font-mono"
                   placeholder="Minimal 6 karakter"
                 />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Peran (Role)</label>
                   <select
-                    value={addForm.role}
-                    onChange={e => setAddForm({...addForm, role: e.target.value})}
+                    {...register('role')}
                     className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[var(--color-accent)] outline-none"
                   >
-                    <option value="admin">Admin</option>
-                    <option value="dokter">Dokter</option>
                     <option value="resepsionis">Resepsionis</option>
+                    <option value="dokter">Dokter</option>
+                    <option value="kasir">Kasir</option>
+                    <option value="perawat">Perawat</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">No. WhatsApp</label>
-                  <input
-                    type="tel"
-                    value={addForm.phone}
-                    onChange={e => setAddForm({...addForm, phone: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-[var(--color-accent)] outline-none"
-                    placeholder="0812..."
-                  />
+                  {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>}
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end pt-4 border-t border-gray-100 dark:border-gray-800 mt-6">
+              <div className="pt-4 flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-5 py-2.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    reset();
+                  }}
+                  className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium text-sm"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white text-sm font-semibold rounded-xl shadow-md flex items-center gap-2"
+                  disabled={formSubmitting}
+                  className="flex-1 px-4 py-2.5 bg-[var(--color-accent)] text-white rounded-xl hover:brightness-110 transition-all font-medium text-sm disabled:opacity-70 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? 'Menyimpan...' : 'Simpan'}
+                  {formSubmitting ? (
+                    <><RefreshCw size={18} className="animate-spin" /> Menyimpan...</>
+                  ) : (
+                    'Simpan Staf'
+                  )}
                 </button>
               </div>
             </form>
