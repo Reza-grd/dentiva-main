@@ -87,6 +87,14 @@ const QueueDisplay = () => {
     return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
   };
 
+  // Privacy: tampilkan nama depan + inisial nama belakang ("Budi Santoso" → "Budi S.")
+  const maskedName = (name) => {
+    if (!name) return 'Pasien';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0];
+    return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+  };
+
   const formatTime = (date) => {
     return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   };
@@ -146,7 +154,7 @@ const QueueDisplay = () => {
                     {getInitials(v.patient?.nama_lengkap)}
                   </div>
                   <div className="queue-now-serving-info">
-                    <p className="queue-now-serving-name">{v.patient?.nama_lengkap || 'Pasien'}</p>
+                    <p className="queue-now-serving-name">{maskedName(v.patient?.nama_lengkap)}</p>
                     <p className="queue-now-serving-doctor">
                       <Stethoscope size={14} /> {v.dokter?.full_name || 'Dokter'}
                     </p>
@@ -183,7 +191,7 @@ const QueueDisplay = () => {
                   <div key={v.id} className="queue-waiting-row" style={{ animationDelay: `${idx * 0.08}s` }}>
                     <span className="queue-order-number">{idx + 1}</span>
                     <div className="queue-waiting-info">
-                      <span className="queue-waiting-name">{v.patient?.nama_lengkap || 'Pasien'}</span>
+                      <span className="queue-waiting-name">{maskedName(v.patient?.nama_lengkap)}</span>
                       <span className="queue-waiting-doctor">{v.dokter?.full_name || '-'}</span>
                     </div>
                     {v.jam_kunjungan && (

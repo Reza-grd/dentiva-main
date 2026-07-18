@@ -1,100 +1,147 @@
-# NeuroDent — Paket Perbaikan SQL & Bug Fix
+# Dentiva EMR
 
-## Isi Paket
-
-```
-neurodent-bugfix/
-├── 1_JALANKAN_PERTAMA_master.sql        ← SQL utama (fresh install)
-├── 2_JALANKAN_KEDUA_jadwal_dokter.sql   ← Tambahan jadwal dokter + bugfix RLS
-├── 3_OPSIONAL_seed_data.sql             ← Data awal treatment (opsional)
-├── src/
-│   ├── App.jsx                          ← Bug #5: route /pasien/:id/kunjungan
-│   ├── utils/
-│   │   └── dateUtils.js                 ← Bug #10: timezone-safe date utils
-│   ├── services/
-│   │   ├── visitService.js              ← Bug #6: order by jam_kunjungan
-│   │   └── doctorScheduleService.js     ← Service jadwal dokter
-│   └── components/
-│       ├── payment/
-│       │   └── PaymentForm.jsx          ← Bug #3: tanggal_pembayaran + visit status
-│       ├── schedule/
-│       │   ├── SchedulePage.jsx         ← Bug #4: takenSlots sinkron tanggal form
-│       │   └── VisitHistory.jsx         ← Bug #11: patientId dari route params
-│       └── common/
-│           └── Sidebar.jsx              ← Bug #9: icon duplikat diperbaiki
-└── README.md
-```
+**Sistem Manajemen Klinik Gigi Digital** — Electronic Medical Record (EMR) berbasis React + Vite + Supabase dengan enkripsi data medis server-side, integrasi WhatsApp, dan multi-tenant SaaS.
 
 ---
 
-## Langkah 1 — Jalankan SQL di Supabase
+## Tech Stack
 
-### Fresh Install (DB kosong)
-1. Buka **Supabase Dashboard → SQL Editor**
-2. Copy-paste isi `1_JALANKAN_PERTAMA_master.sql` → Run
-3. Copy-paste isi `2_JALANKAN_KEDUA_jadwal_dokter.sql` → Run
-4. _(Opsional)_ Copy-paste `3_OPSIONAL_seed_data.sql` untuk data contoh
-
-### DB Sudah Ada (upgrade dari versi lama)
-1. Jalankan `2_JALANKAN_KEDUA_jadwal_dokter.sql` saja
-2. Kedua file idempoten — aman dijalankan ulang
-
-### File SQL Lama — Arsipkan / Hapus
-File-file ini **tidak perlu dijalankan lagi**:
-- ❌ `supabase_schema.sql`
-- ❌ `supabase_migration_v1.2.sql` sampai `v1.7.sql`
-- ❌ `migrations/part5a1_doctor_schedules.sql` (duplikat)
-- ❌ `migrations/part5_final_migration.sql` (digantikan file 2)
+| Layer | Teknologi |
+|-------|-----------|
+| Frontend | React 18, Vite 5, Tailwind CSS |
+| Backend | Supabase (PostgreSQL + RLS + Edge Functions) |
+| Auth | Supabase Auth |
+| Enkripsi | Server-side AES-256 via Supabase RPC |
+| Notifikasi | Whapi.cloud (WhatsApp) |
+| Monitoring | Sentry |
+| Deploy | Vercel |
 
 ---
 
-## Langkah 2 — Replace File Frontend
+## Prasyarat
 
-Copy file-file dari folder `src/` ke dalam proyek Anda (overwrite file lama):
+- Node.js >= 18
+- npm >= 9
+- Akun Supabase (project sudah dibuat)
+- Akun Vercel (untuk deploy)
+- Token Whapi.cloud (opsional, untuk notifikasi WhatsApp)
+
+---
+
+## Cara Clone & Install
 
 ```bash
-# Dari root proyek Anda:
-cp neurodent-bugfix/src/App.jsx                                  src/
-cp neurodent-bugfix/src/utils/dateUtils.js                       src/utils/
-cp neurodent-bugfix/src/services/visitService.js                 src/services/
-cp neurodent-bugfix/src/services/doctorScheduleService.js        src/services/
-cp neurodent-bugfix/src/components/payment/PaymentForm.jsx       src/components/payment/
-cp neurodent-bugfix/src/components/schedule/SchedulePage.jsx     src/components/schedule/
-cp neurodent-bugfix/src/components/schedule/VisitHistory.jsx     src/components/schedule/
-cp neurodent-bugfix/src/components/common/Sidebar.jsx            src/components/common/
+git clone https://github.com/Reza-grd/dentiva-main.git
+cd dentiva-main
+npm install
 ```
 
 ---
 
-## Daftar Bug yang Diperbaiki
+## Environment Variables
 
-### Bug Database / Supabase
+Buat file `.env` di root proyek (jangan pernah commit file ini — sudah ada di `.gitignore`):
 
-| # | Bug | Dampak | Fix |
-|---|-----|--------|-----|
-| B1 | RLS `users` memblokir dokter & resepsionis | Dropdown dokter kosong, `getAllDoctors()` selalu error | Tambah policy `users_read_staff_directory` |
-| B2 | `generate_no_rm()` race condition (`SELECT MAX`) | Dua pasien bisa dapat No. RM yang sama | Ganti dengan PostgreSQL SEQUENCE (atomic) |
-| B3 | `generate_invoice_number()` CAST error | Semua pembayaran baru gagal jika ada data lama | Ganti dengan tabel `invoice_counters` (atomic UPSERT) |
-| B4 | `visit_number` race condition di frontend | Dua kunjungan pasien sama bisa nomor sama | Pindahkan logika ke trigger `BEFORE INSERT` di DB |
-| B5 | `v_patient_summary` double-counting | `total_spent` pasien tampil 2x–3x lebih besar | Pisahkan subquery visits & payments sebelum JOIN |
+```env
+# Supabase
+VITE_SUPABASE_URL=https://<project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon-public-key>
 
-### Bug Frontend
+# Enkripsi data medis (WAJIB, gunakan string acak minimal 32 karakter)
+VITE_ENCRYPTION_KEY=<random-string-min-32-chars>
+```
 
-| # | Bug | Dampak | File |
-|---|-----|--------|------|
-| #3 | `PaymentForm`: `tanggal_pembayaran` tidak dikirim | **Semua pembayaran gagal** (kolom NOT NULL di DB) | `PaymentForm.jsx` |
-| #3b | `PaymentForm`: visit status tidak diupdate setelah bayar | Kunjungan tetap `scheduled` selamanya | `PaymentForm.jsx` |
-| #4 | `SchedulePage`: `takenSlots` tidak sinkron saat tanggal form berubah | Slot terpakai tampil sebagai tersedia | `SchedulePage.jsx` |
-| #5 | `App.jsx`: route `/pasien/:id/kunjungan` tidak ada | Tombol "Lihat Semua Kunjungan" → 404 | `App.jsx` |
-| #6 | `visitService.getVisitsByDate`: order by kolom yang salah | Urutan antrian kunjungan acak | `visitService.js` |
-| #9 | `Sidebar`: icon duplikat `ClipboardList` di resepsionis | Dua menu tidak bisa dibedakan | `Sidebar.jsx` |
-| #10 | Timezone-unsafe date parsing di 6 file | Tanggal lahir/kunjungan bisa mundur 1 hari | `dateUtils.js` (utility baru) |
-| #11 | `VisitHistory`: `patientId` dari route tidak dibaca | Halaman kunjungan terbuka tanpa filter pasien | `VisitHistory.jsx` |
+> **Catatan:** `VITE_ENCRYPTION_KEY` digunakan untuk backward-compatibility dengan data lama yang terenkripsi client-side. Enkripsi utama dilakukan server-side oleh Supabase RPC dan tidak memerlukan key ini pada instalasi baru.
+
+### Environment Variables Tambahan (opsional)
+
+Untuk notifikasi WhatsApp, tambahkan ke Supabase Edge Function Secrets (bukan di `.env` frontend):
+
+```
+WHAPI_TOKEN=<whapi-cloud-token>
+WHAPI_CHANNEL_ID=<channel-id>
+```
 
 ---
 
-## Catatan
+## Menjalankan Migration Database
 
-- Semua file SQL **idempoten** — aman dijalankan lebih dari sekali
-- `src/utils/dateUtils.js` adalah **file baru** (belum ada di proyek lama), pastikan sudah ada di `src/utils/`
-- Bucket storage `patient-photos` dibuat otomatis oleh file SQL 1. Jika error permission, buat manual di Dashboard Supabase → Storage → New Bucket (name: `patient-photos`, Public: ON, Size: 5MB)
+Semua migration SQL ada di folder `supabase/migrations/` (bernomor urut 01–32). Jalankan **secara berurutan** di Supabase Dashboard → SQL Editor, atau gunakan Supabase CLI:
+
+```bash
+# Menggunakan Supabase CLI (jika sudah di-link ke project)
+npx supabase db push
+```
+
+Jika menjalankan manual, eksekusi file dari `01_...sql` sampai `32_...sql` secara berurutan.
+
+---
+
+## Menjalankan Dev Server
+
+```bash
+npm run dev
+```
+
+Aplikasi akan berjalan di `http://localhost:5173`.
+
+### Perintah lainnya
+
+```bash
+npm run build    # Build production
+npm run preview  # Preview production build lokal
+npm run lint     # Jalankan ESLint
+npm run test     # Jalankan test suite (Vitest)
+```
+
+---
+
+## Struktur Direktori
+
+```
+src/
+├── components/         # Komponen React
+│   ├── admin/          # Dashboard & tools admin
+│   ├── auth/           # Login, ProtectedRoute
+│   ├── common/         # Navbar, Sidebar, ImageViewer, dll.
+│   ├── dashboard/      # Dashboard per role
+│   ├── financial/      # Laporan keuangan
+│   ├── medical-record/ # Rekam medis, Odontogram, Informed Consent
+│   ├── patient/        # Daftar & detail pasien
+│   ├── payment/        # Form & daftar pembayaran
+│   ├── profile/        # Profil pengguna & dokter
+│   ├── queue/          # Display antrean (Smart TV)
+│   ├── reports/        # Laporan
+│   ├── schedule/       # Jadwal kunjungan
+│   ├── settings/       # Pengaturan klinik
+│   └── treatments/     # Master data tindakan
+├── contexts/           # React Context (Auth)
+├── services/           # Supabase service layer
+└── utils/              # Utility functions (logger, dateUtils, dll.)
+supabase/
+└── migrations/         # SQL migration files (01–32)
+scripts/                # Development & verification scripts
+public/                 # Static assets (logo, dll.)
+```
+
+---
+
+## Role Pengguna
+
+| Role | Akses |
+|------|-------|
+| `admin` | Semua fitur, termasuk laporan, pengaturan, audit log |
+| `dokter` | Rekam medis lengkap, jadwal, kunjungan |
+| `resepsionis` | Registrasi pasien, pendaftaran kunjungan, pembayaran |
+
+---
+
+## Changelog
+
+Lihat [CHANGELOG.md](CHANGELOG.md) untuk riwayat lengkap perubahan.
+
+---
+
+## Lisensi
+
+Proyek ini bersifat privat. Dilarang mendistribusikan tanpa izin.

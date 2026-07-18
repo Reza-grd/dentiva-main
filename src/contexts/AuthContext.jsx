@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
+import logger from '../utils/logger';
 
 const AuthContext = createContext({});
 
@@ -25,7 +26,7 @@ export const AuthProvider = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
-        console.log('🔍 Checking user session...');
+        logger.debug('🔍 Checking user session...');
         
         const { data: { session }, error } = await supabase.auth.getSession();
         
@@ -35,19 +36,19 @@ export const AuthProvider = ({ children }) => {
         }
         
         if (session?.user && mounted) {
-          console.log('✅ User found');
+          logger.debug('✅ User found');
           setUser(session.user);
           state.currentUserId = session.user.id;
           await fetchUserProfile(session.user.id);
         } else {
-          console.log('ℹ️ No active session');
+          logger.debug('ℹ️ No active session');
         }
       } catch (err) {
         console.error('❌ Initialization error:', err);
         if (mounted) setError(err.message);
       } finally {
         if (mounted) {
-          console.log('✅ Initial load complete, setting loading to false');
+          logger.debug('✅ Initial load complete, setting loading to false');
           setLoading(false);
           state.isInitialLoad = false; // Tandai initial load sudah selesai
         }
@@ -59,18 +60,18 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event);
+        logger.debug('Auth state changed:', event);
         
         // Skip jika masih initial load untuk menghindari race condition
         if (state.isInitialLoad) {
-          console.log('⏭️ Skipping auth change during initial load');
+          logger.debug('⏭️ Skipping auth change during initial load');
           return;
         }
 
         // BUG FIX: Skip INITIAL_SESSION event — sudah ditangani oleh getSession()
         // di initializeAuth(). Tanpa ini, INITIAL_SESSION bisa memicu double-fetch.
         if (event === 'INITIAL_SESSION') {
-          console.log('⏭️ Skipping INITIAL_SESSION event (handled by getSession)');
+          logger.debug('⏭️ Skipping INITIAL_SESSION event (handled by getSession)');
           return;
         }
 
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }) => {
         const prevUserId = state.currentUserId || null;
 
         if (sessionUserId === prevUserId && sessionUserId !== null) {
-          console.log('⏭️ User ID is unchanged. Skipping loading screen and profile refetch.');
+          logger.debug('⏭️ User ID is unchanged. Skipping loading screen and profile refetch.');
           if (mounted && session?.user) {
             setUser(session.user);
           }
@@ -106,7 +107,7 @@ export const AuthProvider = ({ children }) => {
           if (mounted) setError(error.message);
         } finally {
           if (mounted) {
-            console.log('✅ Auth state change processed, setting loading to false');
+            logger.debug('✅ Auth state change processed, setting loading to false');
             setLoading(false);
           }
         }
@@ -127,7 +128,7 @@ export const AuthProvider = ({ children }) => {
     let timeoutId;
 
     const logoutUser = async () => {
-      console.log('🔄 Session timeout due to inactivity');
+      logger.info('🔄 Session timeout due to inactivity');
       await signOut();
       alert('Sesi Anda telah berakhir karena tidak ada aktivitas.');
     };
@@ -162,7 +163,7 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserProfile = async (userId) => {
     try {
-      console.log('Fetching user profile for:', userId);
+      logger.debug('Fetching user profile for:', userId);
       
       const { data, error } = await supabase
         .from('users')
@@ -175,7 +176,7 @@ export const AuthProvider = ({ children }) => {
         throw error; // Lempar error agar bisa di-catch di pemanggil
       }
       
-      console.log('✅ Profile loaded');
+      logger.debug('✅ Profile loaded');
       setUserProfile(data);
       return data;
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import logger from '../../utils/logger';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { useToast } from '../common/ToastNotification';
@@ -289,7 +290,7 @@ const MedicalRecordForm = () => {
         timestamp: Date.now()
       };
       sessionStorage.setItem(`Dentiva_draft_rm_${patientId}`, JSON.stringify(draft));
-      console.log('Draft autosaved securely');
+      logger.debug('Draft autosaved securely');
     }, 2000);
 
     return () => clearTimeout(timer);

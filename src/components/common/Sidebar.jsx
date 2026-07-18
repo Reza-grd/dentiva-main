@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, Receipt, User,
+  ClipboardList, TrendingUp, Package, CalendarClock, Receipt, User, Shield,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -36,6 +36,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { group: 'LAINNYA' },
         { icon: Package,         label: 'Master Treatment', path: `${baseUrl}/treatments` },
         { icon: TrendingUp,      label: 'Laporan',          path: `${baseUrl}/laporan` },
+        { icon: Shield,          label: 'Audit Log',        path: `${baseUrl}/audit-log` },
         { icon: Settings,        label: 'Pengaturan',       path: `${baseUrl}/pengaturan` },
       ],
       dokter: [

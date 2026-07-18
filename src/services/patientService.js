@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { encryptionService } from './encryptionService.js';
+import logger from '../utils/logger.js';
 
 async function decryptPatientList(list) {
   if (!list || list.length === 0) return list;
@@ -108,9 +109,9 @@ export const patientService = {
       // Resolusi ID: periksa apakah ini visit_id alih-alih patient_id
       const { data: visitCheck } = await supabase.from('visits').select('patient_id').eq('id', id).maybeSingle();
       if (visitCheck) {
-        console.log('ID is a visit_id, resolving to patient_id:', visitCheck.patient_id);
+        logger.debug('ID is a visit_id, resolving to patient_id:', visitCheck.patient_id);
       } else {
-        console.log('ID is a patient_id:', id);
+        logger.debug('ID is a patient_id:', id);
       }
       const actualPatientId = visitCheck ? visitCheck.patient_id : id;
 

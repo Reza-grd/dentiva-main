@@ -26,6 +26,7 @@ const SchedulePage = lazy(() => import('./components/schedule/SchedulePage'));
 const VisitHistory = lazy(() => import('./components/schedule/VisitHistory'));
 const DoctorSchedulePage = lazy(() => import('./components/schedule/DoctorSchedulePage'));
 const QueueDisplay = lazy(() => import('./components/queue/QueueDisplay'));
+const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 
 function App() {
   const { loading, user, userProfile, signOut } = useAuth();
@@ -174,6 +175,12 @@ function App() {
           <Route path="/admin/pengaturan" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <SettingsPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin/audit-log" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AuditLogPage />
             </ProtectedRoute>
           } />
 
