@@ -7,13 +7,24 @@ export const prescriptionService = {
   async getActiveObat() {
     try {
       const { data, error } = await supabase
-        .from('master_obat')
+        .from('master_bahan')
         .select('*')
         .eq('is_active', true)
-        .order('nama_obat', { ascending: true });
+        .eq('kategori', 'Obat')
+        .order('nama_bahan', { ascending: true });
 
       if (error) throw error;
-      return { success: true, data };
+      
+      // Map it back to match the old expected format just in case UI hasn't been fully updated yet
+      const mappedData = data.map(item => ({
+        ...item,
+        id: item.id,
+        nama_obat: item.nama_bahan,
+        satuan: item.satuan_dasar,
+        harga_satuan: item.harga_rata2 || 0
+      }));
+
+      return { success: true, data: mappedData };
     } catch (error) {
       console.error('Error fetching active obat:', error);
       return { success: false, error: error.message };
@@ -67,7 +78,8 @@ export const prescriptionService = {
       // Format payload untuk diinsert
       const payload = prescriptionsArray.map(p => ({
         visit_id: visitId,
-        obat_id: p.obat_id,
+        obat_id: p.obat_id, // Tetap isi obat_id (legacy)
+        master_bahan_id: p.obat_id, // Isi kolom baru master_bahan_id dengan id yang sama
         nama_obat: p.nama_obat,
         dosis: p.dosis || '',
         frekuensi: p.frekuensi || '',

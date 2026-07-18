@@ -35,6 +35,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
         { group: 'LAINNYA' },
         { icon: Package,         label: 'Master Treatment', path: `${baseUrl}/treatments` },
+        { icon: DollarSign,      label: 'Biaya & Modal',    path: `${baseUrl}/costing` },
         { icon: TrendingUp,      label: 'Laporan',          path: `${baseUrl}/laporan` },
         { icon: Users,           label: 'Kelola Pengguna',  path: `${baseUrl}/pengguna` },
         { icon: Shield,          label: 'Audit Log',        path: `${baseUrl}/audit-log` },

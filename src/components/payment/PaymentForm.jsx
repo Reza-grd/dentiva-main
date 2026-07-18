@@ -69,15 +69,23 @@ const PaymentForm = () => {
       setAllTreatments(treatmentsResult.data || []);
     }
 
-    // Load master obat
+    // Load master obat dari master_bahan
     const { data: obatData, error: obatErr } = await supabase
-      .from('master_obat')
+      .from('master_bahan')
       .select('*')
       .eq('is_active', true)
-      .order('nama_obat', { ascending: true });
+      .eq('kategori', 'Obat')
+      .order('nama_bahan', { ascending: true });
     
     if (!obatErr) {
-      setAllObat(obatData || []);
+      const mappedData = obatData.map(item => ({
+        ...item,
+        id: item.id,
+        nama_obat: item.nama_bahan,
+        satuan: item.satuan_dasar,
+        harga_satuan: item.harga_rata2 || 0
+      }));
+      setAllObat(mappedData || []);
     }
 
     // Load existing visit obat

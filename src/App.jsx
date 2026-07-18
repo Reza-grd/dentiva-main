@@ -174,6 +174,12 @@ function App() {
             </ProtectedRoute>
           } />
 
+          <Route path="/admin/costing" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <CostingDashboard />
+            </ProtectedRoute>
+          } />
+
           <Route path="/admin/laporan" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <ReportsPage />
