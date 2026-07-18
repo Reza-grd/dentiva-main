@@ -107,13 +107,25 @@ const Tooth = ({ number, conditions = {}, isSelected, isBridgeTarget, onClick, o
     const centroid = getCentroid(surf);
     const label = getSurfaceLabel(surf.key);
 
+    const handleSurfaceKeyDown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        onSurfaceClick(number, surf.key, e);
+      }
+    };
+
     const sharedProps = {
       fill,
       stroke: surfStroke,
       strokeWidth: surfStrokeW,
       strokeLinejoin: 'round',
-      className: 'cursor-pointer transition-all duration-100 hover:brightness-[0.85]',
+      className: 'cursor-pointer transition-all duration-100 hover:brightness-[0.85] focus:outline-none focus:ring-2 focus:ring-blue-500',
+      tabIndex: 0,
+      role: 'button',
+      'aria-label': `Gigi ${number} Permukaan ${label}`,
       onClick: (e) => { e.stopPropagation(); onSurfaceClick(number, surf.key, e); },
+      onKeyDown: handleSurfaceKeyDown,
     };
 
     return (
@@ -170,13 +182,22 @@ const Tooth = ({ number, conditions = {}, isSelected, isBridgeTarget, onClick, o
 
       {/* SVG tooth */}
       <div
-        className={`relative transition-transform duration-100 group-hover:scale-110 ${
+        className={`relative transition-transform duration-100 group-hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
           isSelected ? 'ring-2 ring-blue-500 ring-offset-1 rounded-sm shadow-lg' :
           isBridgeTarget ? 'ring-2 ring-amber-400 ring-offset-1 rounded-sm shadow-md animate-pulse' :
           'hover:shadow-sm'
         } ${primary ? 'rounded-md' : 'rounded-sm'}`}
         style={{ width: size, height: size }}
+        tabIndex={0}
+        role="button"
+        aria-label={`Pilih seluruh gigi ${number}`}
         onClick={(e) => onClick(number, e)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick(number, e);
+          }
+        }}
       >
         <svg viewBox="0 0 100 100" className="w-full h-full">
           {/* Pattern and Filter definitions */}
