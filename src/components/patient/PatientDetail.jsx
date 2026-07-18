@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import MedicalRecordPreview from '../medical-record/MedicalRecordPreview';
-import ImageViewer from '../common/ImageViewer';
+
 import ScheduleVisitForm from './ScheduleVisitForm';
 import LoadingSpinner from '../common/LoadingSpinner';
 import PhotoUpload from '../common/PhotoUpload';

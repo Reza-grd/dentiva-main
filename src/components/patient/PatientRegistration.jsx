@@ -963,6 +963,108 @@ const PatientRegistration = () => {
           )}
         </div>
       </div>
+        </>
+      ) : (
+        /* Pasien Lama Mode UI */
+        <div className="space-y-6 animate-fade-in">
+          <div className="glass-panel p-6">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Cari Pasien Terdaftar</h2>
+            
+            <div className="relative mb-6">
+              <input
+                type="text"
+                value={searchOldTerm}
+                onChange={(e) => setSearchOldTerm(e.target.value)}
+                placeholder="Masukkan Nama, No. RM, atau No. WhatsApp..."
+                className="glass-input w-full px-4 py-3 pl-12 rounded-xl text-sm font-medium"
+              />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              {searchOldTerm && (
+                <button onClick={() => setSearchOldTerm('')} className="absolute inset-y-0 right-0 pr-4 flex items-center">
+                  <X className="h-5 w-5 text-gray-400 hover:text-gray-600 transition-colors" />
+                </button>
+              )}
+            </div>
+
+            {isSearchingOld && <div className="text-center py-4 text-sm text-gray-500"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Mencari data pasien...</div>}
+            
+            {!isSearchingOld && oldSearchResults.length > 0 && !selectedOldPatient && (
+              <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden divide-y divide-gray-100 dark:divide-gray-800">
+                {oldSearchResults.map(p => (
+                  <div key={p.id} onClick={() => setSelectedOldPatient(p)} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex justify-between items-center transition-colors">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 dark:text-white">{p.nama_lengkap}</h4>
+                      <p className="text-sm text-gray-500 mt-1 flex gap-3">
+                        <span className="font-mono text-[var(--color-accent)]">{p.no_rm}</span>
+                        <span>{p.no_wa || '-'}</span>
+                      </p>
+                    </div>
+                    <button className="text-sm font-semibold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-3 py-1.5 rounded-lg">Pilih</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!isSearchingOld && searchOldTerm.trim().length >= 2 && oldSearchResults.length === 0 && !selectedOldPatient && (
+              <div className="text-center py-8 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
+                Tidak ditemukan pasien dengan kata kunci "{searchOldTerm}"
+              </div>
+            )}
+
+            {selectedOldPatient && (
+              <div className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-xl border border-gray-200 dark:border-gray-700 relative">
+                <button onClick={() => setSelectedOldPatient(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+                  <X size={20} />
+                </button>
+                <h3 className="font-bold text-gray-900 dark:text-white mb-3">Pasien Terpilih</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">Nama</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{selectedOldPatient.nama_lengkap}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">No. RM</span>
+                    <span className="font-mono font-medium text-[var(--color-accent)]">{selectedOldPatient.no_rm}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">No. WhatsApp</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{selectedOldPatient.no_wa || '-'}</span>
+                  </div>
+                  <div>
+                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">Umur</span>
+                    <span className="font-medium text-gray-900 dark:text-white">{selectedOldPatient.umur ? `${selectedOldPatient.umur} tahun` : '-'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {selectedOldPatient && (
+            <div className="glass-panel p-6 animate-fade-in">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Jadwal Kunjungan Baru</h2>
+              <form onSubmit={handleOldPatientSubmit}>
+                <ScheduleVisitForm 
+                  scheduleForm={scheduleData} 
+                  setScheduleForm={setScheduleData} 
+                  allDoctors={doctors} 
+                />
+                
+                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 flex justify-end gap-4">
+                  <button type="button" onClick={() => setSelectedOldPatient(null)} className="px-6 py-2.5 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 transition-all">
+                    Batal
+                  </button>
+                  <button type="submit" disabled={loading} className="px-6 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={18} />}
+                    Jadwalkan Kunjungan
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modals */}
       {successModalData && (
