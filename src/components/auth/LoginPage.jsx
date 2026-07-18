@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../common/ToastNotification';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogIn, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Card, CardContent } from '../ui/Card';
 
 const FEATURES = [
   'Rekam medis digital terintegrasi',
@@ -120,34 +123,34 @@ const LoginPage = () => {
         </div>
 
         {/* Form card */}
-        <div className="w-full max-w-[400px] bg-white dark:bg-[#14171F]/80 dark:backdrop-blur-xl rounded-[24px] px-6 py-9 sm:px-8 shadow-xl shadow-slate-200/50 dark:shadow-black/25 border border-slate-100 dark:border-slate-800/80 transition-colors duration-300">
-          <h2 className="text-2xl font-black text-slate-905 dark:text-slate-100 mb-1">
-            Selamat Datang
-          </h2>
-          <p className="text-[13.5px] font-semibold text-slate-400 dark:text-slate-500 mb-7">
-            Masuk ke akun Anda untuk melanjutkan
-          </p>
+        <Card className="w-full max-w-[400px]">
+          <CardContent className="px-6 py-9 sm:px-8">
+            <h2 className="text-2xl font-black text-slate-905 dark:text-slate-100 mb-1">
+              Selamat Datang
+            </h2>
+            <p className="text-[13.5px] font-semibold text-slate-400 dark:text-slate-500 mb-7">
+              Masuk ke akun Anda untuk melanjutkan
+            </p>
 
-          {/* Error */}
-          {error && (
-            <div className="flex gap-2.5 items-start p-3.5 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 rounded-xl mb-5 animate-scale-in">
-              <AlertCircle size={16} className="text-rose-500 flex-shrink-0 mt-0.5" />
-              <span className="text-xs text-rose-600 dark:text-rose-455 font-bold leading-normal">{error}</span>
-            </div>
-          )}
+            {/* Error */}
+            {error && (
+              <div className="flex gap-2.5 items-start p-3.5 bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/30 rounded-xl mb-5 animate-in fade-in">
+                <AlertCircle size={16} className="text-rose-500 flex-shrink-0 mt-0.5" />
+                <span className="text-xs text-rose-600 dark:text-rose-400 font-bold leading-normal">{error}</span>
+              </div>
+            )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
             <div>
               <label className="block text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
                 Email
               </label>
-              <input
+              <Input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent,#0F4C81)] focus:border-transparent transition-all duration-200 text-sm font-medium"
                 placeholder="nama@email.com"
                 required
                 disabled={isLoading}
@@ -160,14 +163,14 @@ const LoginPage = () => {
                 Password
               </label>
               <div className="relative">
-                <input
+                <Input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-205 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-accent,#0F4C81)] focus:border-transparent transition-all duration-200 text-sm font-medium pr-12"
                   placeholder="••••••••"
                   required
                   disabled={isLoading}
+                  className="pr-12"
                 />
                 <button
                   type="button"
@@ -182,25 +185,23 @@ const LoginPage = () => {
             </div>
 
             {/* Submit */}
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 px-4 bg-[var(--color-accent,#0F4C81)] hover:brightness-110 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-blue-500/10 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none text-sm mt-7"
+              isLoading={isLoading}
+              className="w-full mt-7"
+              size="lg"
             >
-              {isLoading ? (
+              {!isLoading && (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Memproses...</span>
-                </>
-              ) : (
-                <>
-                  <LogIn size={17} />
-                  <span>Masuk</span>
+                  <LogIn size={17} className="mr-2" />
+                  Masuk
                 </>
               )}
-            </button>
+            </Button>
           </form>
-        </div>
+        </CardContent>
+        </Card>
 
         {/* Footer */}
         <p className="mt-8 text-xs text-slate-300 dark:text-slate-600 text-center font-medium">

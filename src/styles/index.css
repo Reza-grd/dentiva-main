@@ -522,3 +522,36 @@
   .flex.flex-col.h-screen > nav,
   .flex.flex-col.h-screen > header { display: none !important; }
 }
+
+/* ===================================
+   DESIGN SYSTEM UTILITIES
+   =================================== */
+@layer utilities {
+  .animate-in {
+    animation: animate-in 0.2s ease-out;
+  }
+  .fade-in {
+    animation-name: fadeIn;
+  }
+  .slide-in-from-top-1 {
+    animation-name: slideInFromTop1;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideInFromTop1 {
+    from { transform: translateY(-0.25rem); }
+    to { transform: translateY(0); }
+  }
+
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
+  }
+  
+  .dark .glass-panel {
+    @apply bg-gray-900/70 border-gray-800/60;
+  }
+}
