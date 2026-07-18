@@ -20,7 +20,10 @@ export const ClinicSettingsProvider = ({ children }) => {
       wa_payment_confirmation_enabled: 'true',
       wa_reminder_h1_day_enabled: 'true',
       wa_reminder_h1_hour_enabled: 'true',
-      wa_post_treatment_education_enabled: 'false'
+      wa_post_treatment_education_enabled: 'false',
+      primary_color: '#0F4C81',
+      secondary_color: '#00B4D8',
+      accent_color: '#F59E0B'
     };
     try {
       const cached = localStorage.getItem('clinic_settings');
@@ -60,6 +63,14 @@ export const ClinicSettingsProvider = ({ children }) => {
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
+
+  // Inject CSS Variables for Dynamic Branding
+  useEffect(() => {
+    const root = document.documentElement;
+    if (settings.primary_color) root.style.setProperty('--color-primary', settings.primary_color);
+    if (settings.secondary_color) root.style.setProperty('--color-secondary', settings.secondary_color);
+    if (settings.accent_color) root.style.setProperty('--color-warning', settings.accent_color);
+  }, [settings.primary_color, settings.secondary_color, settings.accent_color]);
 
   const updateSettings = async (settingsObj) => {
     setLoading(true);

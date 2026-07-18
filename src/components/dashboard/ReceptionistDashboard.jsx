@@ -16,6 +16,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
+import PageTransition from '../common/PageTransition';
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
@@ -129,6 +130,7 @@ const ReceptionistDashboard = () => {
   return (
     <Routes>
       <Route index element={
+        <PageTransition>
         <div className="max-w-6xl mx-auto space-y-6">
 
           {/* ── Header ───────────────────────────────────────────── */}
@@ -434,6 +436,7 @@ const ReceptionistDashboard = () => {
           </div>
 
         </div>
+        </PageTransition>
       } />
     </Routes>
   );

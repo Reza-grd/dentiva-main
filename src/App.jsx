@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -32,6 +33,7 @@ const UserManagementPage = lazy(() => import('./components/admin/UserManagementP
 
 function App() {
   const { loading, user, userProfile, signOut } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
@@ -84,7 +86,8 @@ function App() {
   return (
     <ErrorBoundary>
       <Suspense fallback={<LoadingSpinner fullScreen />}>
-        <Routes>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
           {/* Public Queue Display — for TV in waiting room */}
           <Route path="/queue-display" element={<QueueDisplay />} />
 
@@ -279,7 +282,8 @@ function App() {
 
           <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
           <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />
-        </Routes>
+          </Routes>
+        </AnimatePresence>
       </Suspense>
     </ErrorBoundary>
   );

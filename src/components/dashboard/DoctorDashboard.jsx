@@ -4,6 +4,7 @@ import { visitService } from '../../services/visitService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../components/common/ToastNotification';
 import { getGreeting, formatDateFull, formatRupiah, formatDoctorName } from '../../utils/dateUtils';
+import PageTransition from '../common/PageTransition';
 import {
   Calendar, Users, FileText, Clock, CheckCircle,
   AlertCircle, ArrowRight, Stethoscope, RefreshCw,
@@ -111,6 +112,7 @@ const DoctorDashboard = () => {
   return (
     <Routes>
       <Route index element={
+        <PageTransition>
         <div className="max-w-5xl mx-auto space-y-6">
 
           {/* ── Header ───────────────────────────────────────────── */}
@@ -333,8 +335,9 @@ const DoctorDashboard = () => {
               </div>
             </div>
           </div>
-        </div>
-      } />
+          </div>
+          </PageTransition>
+        } />
     </Routes>
   );
 };
