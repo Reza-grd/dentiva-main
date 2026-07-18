@@ -25,6 +25,7 @@ import ReferralLetterModal from './ReferralLetterModal';
 import PrescriptionEntry from './PrescriptionEntry';
 import { prescriptionService } from '../../services/prescriptionService';
 import { generatePrescriptionPdf } from '../../utils/prescriptionPdfGenerator';
+import { RichTextEditor } from '../ui/RichTextEditor';
 
 const MedicalRecordForm = () => {
   const { patientId } = useParams();
@@ -760,23 +761,19 @@ const MedicalRecordForm = () => {
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
                       Keluhan Utama <span className="text-rose-500">*</span>
                     </label>
-                    <textarea 
-                      value={clinicalData.chief_complaint || ''} 
-                      onChange={e => setClinicalData({...clinicalData, chief_complaint: e.target.value})} 
-                      className={`glass-input w-full px-4 py-2.5 rounded-xl resize-none h-24 ${validationErrors.chief_complaint ? 'border-rose-500 ring-rose-500 focus:border-rose-500 focus:ring-rose-500 border-2' : ''}`} 
-                      placeholder="Keluhan utama pasien saat ini..." 
+                    <RichTextEditor 
+                      value={clinicalData.chief_complaint} 
+                      onChange={(value) => setClinicalData({...clinicalData, chief_complaint: value})} 
+                      error={validationErrors.chief_complaint}
+                      placeholder="Keluhan utama pasien saat ini..."
                     />
-                    {validationErrors.chief_complaint && (
-                      <p className="text-rose-500 text-xs mt-1 font-medium">{validationErrors.chief_complaint}</p>
-                    )}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Keluhan Tambahan</label>
-                    <textarea 
-                      value={clinicalData.additional_complaint || ''} 
-                      onChange={e => setClinicalData({...clinicalData, additional_complaint: e.target.value})} 
-                      className="glass-input w-full px-4 py-2.5 rounded-xl resize-none h-24" 
-                      placeholder="Keluhan tambahan jika ada..." 
+                    <RichTextEditor 
+                      value={clinicalData.additional_complaint} 
+                      onChange={(value) => setClinicalData({...clinicalData, additional_complaint: value})} 
+                      placeholder="Keluhan tambahan jika ada..."
                     />
                   </div>
                 </div>

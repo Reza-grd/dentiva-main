@@ -179,17 +179,31 @@ const Tooth = ({ number, conditions = {}, isSelected, isBridgeTarget, onClick, o
         onClick={(e) => onClick(number, e)}
       >
         <svg viewBox="0 0 100 100" className="w-full h-full">
-          {/* Pattern definitions */}
+          {/* Pattern and Filter definitions */}
           <defs>
             <pattern id={patternId} patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">
               <line x1="0" y1="0" x2="0" y2="7" stroke="#3B82F6" strokeWidth="1.5" opacity="0.45" />
             </pattern>
+            <linearGradient id="glossyHighlight" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="white" stopOpacity="0.4" />
+              <stop offset="50%" stopColor="white" stopOpacity="0.0" />
+              <stop offset="100%" stopColor="black" stopOpacity="0.1" />
+            </linearGradient>
+            <filter id="innerBevel" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="2" result="blur" />
+              <feOffset dx="-1" dy="-1" result="offsetBlur" />
+              <feComposite in="SourceGraphic" in2="offsetBlur" operator="arithmetic" k2="1" k3="-1" result="shadowDiff" />
+              <feFlood floodColor="black" floodOpacity="0.2" />
+              <feComposite in2="shadowDiff" operator="in" />
+              <feComposite in2="SourceGraphic" operator="over" />
+            </filter>
           </defs>
 
           {/* ── MISSING TOOTH (big X) ── */}
           {isXMissing ? (
             <>
-              <rect x="0" y="0" width="100" height="100" fill={wholeRender.wholeFill || '#FEE2E2'} stroke={strokeColor} strokeWidth="3" rx={primary ? 8 : 2} />
+              <rect x="0" y="0" width="100" height="100" fill={wholeRender.wholeFill || '#FEE2E2'} stroke={strokeColor} strokeWidth="3" rx={primary ? 8 : 2} filter="url(#innerBevel)" />
+              <rect x="0" y="0" width="100" height="100" fill="url(#glossyHighlight)" rx={primary ? 8 : 2} className="pointer-events-none" />
               <line x1="12" y1="12" x2="88" y2="88" stroke="#DC2626" strokeWidth="7" strokeLinecap="round" />
               <line x1="88" y1="12" x2="12" y2="88" stroke="#DC2626" strokeWidth="7" strokeLinecap="round" />
             </>
@@ -202,10 +216,14 @@ const Tooth = ({ number, conditions = {}, isSelected, isBridgeTarget, onClick, o
                 stroke={wholeRender?.wholeBorder || 'none'}
                 strokeWidth={wholeRender?.wholeStrokeWidth || 0}
                 rx={primary ? 8 : 2}
+                filter="url(#innerBevel)"
               />
 
               {/* Render each surface */}
               {surfaceDefs.map(renderSurface)}
+              
+              {/* 3D Glossy Overlay (Premium Look) */}
+              <rect x="0" y="0" width="100" height="100" fill="url(#glossyHighlight)" rx={primary ? 8 : 2} className="pointer-events-none mix-blend-overlay" />
 
               {/* Whole-tooth text overlay */}
               {wholeRender?.wholeText && (
