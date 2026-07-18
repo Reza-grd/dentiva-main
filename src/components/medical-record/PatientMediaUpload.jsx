@@ -43,12 +43,31 @@ const PatientMediaUpload = ({ patientId, visitId }) => {
     setLoading(false);
   };
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB for radiologi/klinis
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+
   const handleFileSelect = async (e, categoryConfig) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
+    const rawFiles = Array.from(e.target.files);
+    if (!rawFiles.length) return;
+
+    // Validation
+    const validFiles = rawFiles.filter(file => {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast.error(`Format tidak didukung: ${file.name}`);
+        return false;
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`Ukuran file maksimal 10MB: ${file.name}`);
+        return false;
+      }
+      return true;
+    });
 
     // Reset input
     e.target.value = null;
+
+    if (!validFiles.length) return;
+    const files = validFiles;
 
     // For single uploads, we might want to delete the existing one first
     if (!categoryConfig.multiple) {

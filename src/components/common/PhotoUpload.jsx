@@ -35,9 +35,22 @@ const PhotoUpload = ({
   // displayUrl: blob URL (preview) → currentUrl path (akan di-resolve oleh PatientAvatar) → null
   const displayUrl = preview || currentUrl || null;
 
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Format file tidak didukung. Gunakan JPG, PNG, atau WEBP.');
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError('Ukuran file maksimal 5MB.');
+      return;
+    }
 
     setError('');
 
