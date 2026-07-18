@@ -17,6 +17,7 @@ const MedicalRecordList = lazy(() => import('./components/medical-record/Medical
 const PaymentForm = lazy(() => import('./components/payment/PaymentForm'));
 const PaymentList = lazy(() => import('./components/payment/PaymentList'));
 const FinancialDashboard = lazy(() => import('./components/financial/FinancialDashboard'));
+const CostingDashboard = lazy(() => import('./components/costing/CostingDashboard'));
 const TreatmentMaster = lazy(() => import('./components/treatments/TreatmentMaster'));
 const ReportsPage = lazy(() => import('./components/reports/ReportsPage'));
 const SettingsPage = lazy(() => import('./components/settings/SettingsPage'));
