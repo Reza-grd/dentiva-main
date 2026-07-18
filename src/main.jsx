@@ -27,15 +27,19 @@ if (isProd && dsn) {
   logger.info('[Sentry] Running in fallback safe console-logging mode.');
 }
 
+import { PermissionsProvider } from './contexts/PermissionsContext';
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <ThemeProvider>
         <ToastProvider>
           <AuthProvider>
-            <ClinicSettingsProvider>
-              <App />
-            </ClinicSettingsProvider>
+            <PermissionsProvider>
+              <ClinicSettingsProvider>
+                <App />
+              </ClinicSettingsProvider>
+            </PermissionsProvider>
           </AuthProvider>
         </ToastProvider>
       </ThemeProvider>
