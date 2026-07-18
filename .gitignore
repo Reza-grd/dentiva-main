@@ -44,3 +44,19 @@ scratch/
 
 .vercel
 .env*
+
+# ─── Debug/scratch scripts — jangan pernah commit ─────────────────────────────
+scratch_*.js
+scratch_*.ts
+scratch_*.py
+test_query*.js
+test_query*.ts
+*.local.js
+*.local.ts
+*.local.py
+
+# Script debugging lokal (Python/PowerShell sisa sesi dev)
+fix_*.py
+apply_*.py
+flatten_*.py
+wa_*.ps1

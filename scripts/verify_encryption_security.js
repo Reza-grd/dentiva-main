@@ -22,7 +22,12 @@ globalThis.window = { crypto: webcrypto };
 const supabaseUrl = process.env.SUPABASE_URL;
 const anonKey = process.env.SUPABASE_ANON_KEY;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const oldKey = process.env.VITE_ENCRYPTION_KEY || 'dentiva-default-shared-system-kek-2026';
+const oldKey = process.env.VITE_ENCRYPTION_KEY;
+if (!oldKey) {
+  console.error('[FATAL] VITE_ENCRYPTION_KEY tidak diset. Script ini tidak boleh dijalankan tanpa kunci enkripsi eksplisit.');
+  console.error('[FATAL] Jalankan ulang dengan: VITE_ENCRYPTION_KEY="kunci-anda" node scripts/verify_encryption_security.js');
+  process.exit(1);
+}
 
 if (!supabaseUrl || !anonKey || !serviceKey) {
   console.log('Skipping real DB tests (missing env vars). Simulating verification locally...\n');
