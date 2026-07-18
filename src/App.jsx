@@ -161,6 +161,13 @@ function App() {
             </ProtectedRoute>
           } />
 
+          {/* TODO: Saat ini Transaksi sengaja memakai komponen PaymentList yang sama dengan Pembayaran sebagai perbaikan sementara. Jika secara bisnis keduanya harus dibedakan, maka ganti komponen di sini nantinya. */}
+          <Route path="/admin/transaksi" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <PaymentList />
+            </ProtectedRoute>
+          } />
+
           <Route path="/admin/treatments" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <TreatmentMaster />

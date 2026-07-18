@@ -58,9 +58,32 @@ export const patientService = {
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
-       const { data, error, count } = await query;
+       let { data, error, count } = await query;
        if (error) throw error;
-       const decryptedData = await decryptPatientList(data);
+       let decryptedData = await decryptPatientList(data);
+
+       // Workaround sementara untuk pencarian pada field terenkripsi
+       // idealnya pakai blind-index/hash kolom terpisah untuk pencarian.
+       if (data.length === 0 && searchTerm && searchTerm.trim() && !/^\d+$/.test(searchTerm.trim())) {
+         const term = sanitizeSearchTerm(searchTerm).toLowerCase();
+         let fallbackQuery = supabase.from('v_patient_summary').select('*').order('created_at', { ascending: false }).limit(200);
+         if (gender && gender !== 'all') fallbackQuery = fallbackQuery.eq('jenis_kelamin', gender);
+         if (status && status !== 'all') fallbackQuery = fallbackQuery.eq('status', status);
+         
+         const { data: fallbackData, error: fallbackError } = await fallbackQuery;
+         if (!fallbackError && fallbackData) {
+           const decryptedFallback = await decryptPatientList(fallbackData);
+           const filtered = decryptedFallback.filter(p => 
+             (p.nama_lengkap && p.nama_lengkap.toLowerCase().includes(term)) ||
+             (p.no_wa && p.no_wa.toLowerCase().includes(term)) ||
+             (p.alamat && p.alamat.toLowerCase().includes(term)) ||
+             (p.alamat_detail && p.alamat_detail.toLowerCase().includes(term))
+           );
+           decryptedData = filtered.slice(0, limit);
+           count = filtered.length;
+         }
+       }
+
        return { success: true, data: decryptedData, count };
     } catch (error) {
       console.error('Error fetching paginated patients:', error);
@@ -385,9 +408,25 @@ export const patientService = {
           query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_wa.ilike.%${term}%`);
         }
       }
-      const { data, error } = await query.order('created_at', { ascending: false });
+      let { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
-      const decryptedData = await decryptPatientList(data);
+      let decryptedData = await decryptPatientList(data);
+
+      // Workaround sementara untuk pencarian pada field terenkripsi
+      // idealnya pakai blind-index/hash kolom terpisah untuk pencarian.
+      if (data.length === 0 && searchTerm && searchTerm.trim() && !/^\d+$/.test(searchTerm.trim())) {
+        const term = sanitizeSearchTerm(searchTerm).toLowerCase();
+        const { data: fallbackData, error: fallbackError } = await supabase.from('v_patient_summary').select('*').order('created_at', { ascending: false }).limit(200);
+        if (!fallbackError && fallbackData) {
+          const decryptedFallback = await decryptPatientList(fallbackData);
+          decryptedData = decryptedFallback.filter(p => 
+            (p.nama_lengkap && p.nama_lengkap.toLowerCase().includes(term)) ||
+            (p.no_wa && p.no_wa.toLowerCase().includes(term)) ||
+            (p.no_rm && p.no_rm.toLowerCase().includes(term))
+          );
+        }
+      }
+
       return { success: true, data: decryptedData };
     } catch (error) {
       return { success: false, error: error.message };

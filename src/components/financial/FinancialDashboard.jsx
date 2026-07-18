@@ -46,7 +46,8 @@ const FinancialDashboard = () => {
     }
 
     // Load revenue by period
-    const revenueResult = await financialService.getRevenueByPeriod('daily', 30);
+    const revenueLimitDays = dateRange === 'week' ? 7 : dateRange === 'year' ? 365 : 30;
+    const revenueResult = await financialService.getRevenueByPeriod('daily', revenueLimitDays);
     if (revenueResult.success) {
       const formattedRevenue = revenueResult.data.map(item => ({
         // TIMEZONE FIX: parseDateLocal mencegah off-by-one saat string DATE diparsing sebagai UTC
@@ -216,7 +217,9 @@ const FinancialDashboard = () => {
 
           {/* Revenue Chart */}
           <div className="glass-panel p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">Grafik Pendapatan (30 Hari Terakhir)</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-6">
+              Grafik Pendapatan ({dateRange === 'week' ? '7 Hari Terakhir' : dateRange === 'year' ? '1 Tahun Terakhir' : '30 Hari Terakhir'})
+            </h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
