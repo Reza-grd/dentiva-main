@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { encryptionService } from './encryptionService.js';
 import logger from '../utils/logger.js';
+import { sanitizeSearchTerm } from '../utils/stringUtils.js';
 
 async function decryptPatientList(list) {
   if (!list || list.length === 0) return list;
@@ -38,8 +39,10 @@ export const patientService = {
 
       // Apply search term if specified
       if (searchTerm && searchTerm.trim()) {
-        const term = searchTerm.trim();
-        query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_wa.ilike.%${term}%,alamat.ilike.%${term}%,alamat_detail.ilike.%${term}%`);
+        const term = sanitizeSearchTerm(searchTerm);
+        if (term) {
+          query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_wa.ilike.%${term}%,alamat.ilike.%${term}%,alamat_detail.ilike.%${term}%`);
+        }
       }
 
       if (gender && gender !== 'all') {
@@ -375,11 +378,14 @@ export const patientService = {
   // VIEW FIX: gunakan v_patient_summary — kolom filter (nama_lengkap, no_rm, no_wa) tersedia di view
   async searchPatients(searchTerm) {
     try {
-      const { data, error } = await supabase
-        .from('v_patient_summary')
-        .select('*')
-        .or(`nama_lengkap.ilike.%${searchTerm}%,no_rm.ilike.%${searchTerm}%,no_wa.ilike.%${searchTerm}%`)
-        .order('created_at', { ascending: false });
+      let query = supabase.from('v_patient_summary').select('*');
+      if (searchTerm && searchTerm.trim()) {
+        const term = sanitizeSearchTerm(searchTerm);
+        if (term) {
+          query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_wa.ilike.%${term}%`);
+        }
+      }
+      const { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
       const decryptedData = await decryptPatientList(data);
       return { success: true, data: decryptedData };

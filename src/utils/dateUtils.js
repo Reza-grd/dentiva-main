@@ -135,3 +135,42 @@ export const formatDoctorName = (profile) => {
   const gBelakang = profile.gelar_belakang ? `, ${profile.gelar_belakang.trim()}` : '';
   return `${gDepan}${profile.full_name || ''}${gBelakang}`;
 };
+
+/**
+ * Dapatkan string tanggal hari ini ("YYYY-MM-DD") secara lokal (WIB), bukan UTC.
+ */
+/**
+ * Format Date object to "YYYY-MM-DD" in local time.
+ */
+export const formatLocalISO = (d = new Date()) => {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+/**
+ * Dapatkan string tanggal hari ini ("YYYY-MM-DD") secara lokal (WIB), bukan UTC.
+ */
+export const getTodayLocal = () => formatLocalISO(new Date());
+
+/**
+ * Dapatkan rentang tanggal (start, end) secara lokal berdasarkan periode, untuk query database.
+ * @param {'today' | 'week' | 'month' | number} period 
+ * @returns {{ start: string, end: string }}
+ */
+export const getLocalDateRange = (period) => {
+  const endD = new Date();
+  let startD = new Date();
+
+  if (period === 'week') {
+    startD.setDate(endD.getDate() - 7);
+  } else if (period === 'month') {
+    startD.setDate(1); // Tanggal 1 bulan ini
+  } else if (typeof period === 'number') {
+    startD.setDate(endD.getDate() - period);
+  }
+  // jika 'today', startD dan endD sama
+
+  return { start: formatLocalISO(startD), end: formatLocalISO(endD) };
+};

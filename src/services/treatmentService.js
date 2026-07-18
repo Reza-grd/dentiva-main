@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { sanitizeSearchTerm } from '../utils/stringUtils.js';
 
 export const treatmentService = {
   // Get all treatments
@@ -110,12 +111,14 @@ export const treatmentService = {
   // Search treatments
   async searchTreatments(searchTerm) {
     try {
-      const { data, error } = await supabase
-        .from('treatments')
-        .select('*')
-        .or(`nama_treatment.ilike.%${searchTerm}%,kode_treatment.ilike.%${searchTerm}%`)
-        .eq('is_active', true)
-        .order('nama_treatment', { ascending: true });
+      let query = supabase.from('treatments').select('*').eq('is_active', true);
+      if (searchTerm && searchTerm.trim()) {
+        const term = sanitizeSearchTerm(searchTerm);
+        if (term) {
+          query = query.or(`nama_treatment.ilike.%${term}%,kode_treatment.ilike.%${term}%`);
+        }
+      }
+      const { data, error } = await query.order('nama_treatment', { ascending: true });
 
       if (error) throw error;
       return { success: true, data };

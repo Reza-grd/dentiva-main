@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PhotoUpload from '../common/PhotoUpload';
 import { useToast } from '../common/ToastNotification';
+import ScheduleVisitForm from './ScheduleVisitForm';
 import { patientService } from '../../services/patientService';
 import { visitService } from '../../services/visitService';
 import { storageService } from '../../services/storageService';
@@ -9,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   PROVINSI, getKabupatenByProvinsi, getKecamatanByKabupaten, getDesaByKecamatan
 } from '../../utils/wilayahIndonesia';
-import { UserPlus, Save, X, CheckCircle, Calendar, Clock, ChevronLeft } from 'lucide-react';
+import { UserPlus, Save, X, CheckCircle, Calendar, Clock, ChevronLeft, Search, Loader2 } from 'lucide-react';
 
 const AGAMA_OPTIONS = ['Islam','Kristen','Katolik','Hindu','Budha','Konghucu'];
 const PENDIDIKAN_OPTIONS = ['SD','SLTP','SLTA','D3','S1','Sp/S2','S3'];
@@ -19,6 +20,15 @@ const PatientRegistration = () => {
   const { userProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [registrationMode, setRegistrationMode] = useState('baru'); // 'baru' | 'lama'
+  
+  // Pasien Lama States
+  const [searchOldTerm, setSearchOldTerm] = useState('');
+  const [debouncedOldTerm, setDebouncedOldTerm] = useState('');
+  const [oldSearchResults, setOldSearchResults] = useState([]);
+  const [selectedOldPatient, setSelectedOldPatient] = useState(null);
+  const [isSearchingOld, setIsSearchingOld] = useState(false);
+
   const [successModalData, setSuccessModalData] = useState(null);
   const [scheduleSuccessModalData, setScheduleSuccessModalData] = useState(null);
   const [registeredPatientData, setRegisteredPatientData] = useState(null);
@@ -50,11 +60,68 @@ const PatientRegistration = () => {
 
   const [scheduleData, setScheduleData] = useState({
     tanggal_kunjungan: new Date().toISOString().split('T')[0],
-    waktu_kunjungan: '',
+    jam_kunjungan: '', // Changed to jam_kunjungan to match ScheduleVisitForm
     keluhan: '',
     catatan: '',
     dokter_id: '',
   });
+
+  // Debounce and Search Old Patient
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedOldTerm(searchOldTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchOldTerm]);
+
+  useEffect(() => {
+    const doSearch = async () => {
+      if (debouncedOldTerm.trim().length < 2) {
+        setOldSearchResults([]);
+        return;
+      }
+      setIsSearchingOld(true);
+      const { success, data } = await patientService.searchPatients(debouncedOldTerm);
+      if (success) setOldSearchResults(data || []);
+      setIsSearchingOld(false);
+    };
+    doSearch();
+  }, [debouncedOldTerm]);
+
+  const handleOldPatientSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedOldPatient) {
+      toast.error('Silakan pilih pasien terlebih dahulu');
+      return;
+    }
+    if (!scheduleData.dokter_id || !scheduleData.tanggal_kunjungan || !scheduleData.jam_kunjungan) {
+      toast.error('Harap lengkapi tanggal, jam, dan dokter');
+      return;
+    }
+
+    setLoading(true);
+    const result = await visitService.createVisit({
+      patient_id: selectedOldPatient.id,
+      dokter_id: scheduleData.dokter_id,
+      tanggal_kunjungan: scheduleData.tanggal_kunjungan,
+      jam_kunjungan: scheduleData.jam_kunjungan,
+      keluhan: scheduleData.keluhan,
+      catatan: scheduleData.catatan,
+      status: 'scheduled'
+    });
+    setLoading(false);
+
+    if (result.success) {
+      setScheduleSuccessModalData({
+        visitId: result.data.id,
+        patientName: selectedOldPatient.nama_lengkap,
+        date: scheduleData.tanggal_kunjungan,
+        time: scheduleData.jam_kunjungan
+      });
+    } else {
+      toast.error('Gagal menjadwalkan kunjungan: ' + result.error);
+    }
+  };
 
   useEffect(() => {
     const loadDoctors = async () => {
@@ -181,7 +248,7 @@ const PatientRegistration = () => {
   const validateScheduleData = () => {
     const newErrors = {};
     if (!scheduleData.tanggal_kunjungan) newErrors.tanggal_kunjungan = 'Tanggal kunjungan wajib diisi';
-    if (!scheduleData.waktu_kunjungan) newErrors.waktu_kunjungan = 'Waktu kunjungan wajib diisi';
+    if (!scheduleData.jam_kunjungan) newErrors.jam_kunjungan = 'Waktu kunjungan wajib diisi';
     if (!scheduleData.dokter_id) newErrors.dokter_id = 'Dokter wajib dipilih';
 
     setErrors(newErrors);
@@ -285,7 +352,7 @@ const PatientRegistration = () => {
       const visitPayload = {
         patient_id: registeredPatientData.id,
         tanggal_kunjungan: scheduleData.tanggal_kunjungan,
-        jam_kunjungan: scheduleData.waktu_kunjungan || null,
+        jam_kunjungan: scheduleData.jam_kunjungan || null,
         keluhan: scheduleData.keluhan || formData.keluhan_awal || 'Kunjungan pertama',
         status: 'scheduled',
         catatan_dokter: scheduleData.catatan,
@@ -297,7 +364,7 @@ const PatientRegistration = () => {
 
       setScheduleSuccessModalData({
         tanggal_kunjungan: scheduleData.tanggal_kunjungan,
-        waktu_kunjungan: scheduleData.waktu_kunjungan,
+        waktu_kunjungan: scheduleData.jam_kunjungan,
         dokter_name: doctorName
       });
     } catch (err) {
@@ -332,7 +399,7 @@ const PatientRegistration = () => {
       berat_badan:'',tinggi_badan:'',keluhan_awal:'',
     });
     setPekerjaanLainnya('');
-    setScheduleData({ tanggal_kunjungan: new Date().toISOString().split('T')[0], waktu_kunjungan:'', keluhan:'', catatan:'', dokter_id:'' });
+    setScheduleData({ tanggal_kunjungan: new Date().toISOString().split('T')[0], jam_kunjungan:'', keluhan:'', catatan:'', dokter_id:'' });
     setErrors({});
     setRegisteredPatientData(null);
     setIsDaftarDanJadwalkan(false);
@@ -358,8 +425,36 @@ const PatientRegistration = () => {
         </div>
       </div>
 
-      {/* Horizontal Stepper UI */}
-      <div className="flex items-center justify-between max-w-xl mx-auto mb-8 bg-white/60 dark:bg-[#14171F]/60 p-4 rounded-2xl border border-gray-200/50 dark:border-gray-800/50">
+      {/* Mode Switcher */}
+      <div className="flex justify-center mb-8">
+        <div className="bg-gray-100/80 dark:bg-gray-800/80 p-1 rounded-xl flex gap-1 border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+          <button
+            onClick={() => { setRegistrationMode('baru'); handleReset(); }}
+            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
+              registrationMode === 'baru' 
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-md' 
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            Pasien Baru
+          </button>
+          <button
+            onClick={() => { setRegistrationMode('lama'); handleReset(); }}
+            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ${
+              registrationMode === 'lama' 
+                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-md' 
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+            }`}
+          >
+            Pasien Lama
+          </button>
+        </div>
+      </div>
+
+      {registrationMode === 'baru' ? (
+        <>
+          {/* Horizontal Stepper UI */}
+          <div className="flex items-center justify-between max-w-xl mx-auto mb-8 bg-white/60 dark:bg-[#14171F]/60 p-4 rounded-2xl border border-gray-200/50 dark:border-gray-800/50">
         {[
           { step: 1, title: 'Identitas & Jaminan', subtitle: 'Biodata dasar' },
           { step: 2, title: 'Alamat Domisili', subtitle: 'Wilayah tinggal' },
@@ -729,10 +824,10 @@ const PatientRegistration = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Waktu Kunjungan <span className="text-red-500">*</span></label>
-                  <input type="time" name="waktu_kunjungan" value={scheduleData.waktu_kunjungan}
+                  <input type="time" name="jam_kunjungan" value={scheduleData.jam_kunjungan}
                     onChange={handleScheduleChange} disabled={loading}
-                    className={`glass-input w-full px-4 py-2.5 rounded-xl ${errors.waktu_kunjungan ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
-                  {errors.waktu_kunjungan && <p className="text-red-500 text-xs mt-1.5">{errors.waktu_kunjungan}</p>}
+                    className={`glass-input w-full px-4 py-2.5 rounded-xl ${errors.jam_kunjungan ? 'border-red-500 ring-1 ring-red-500' : ''}`} />
+                  {errors.jam_kunjungan && <p className="text-red-500 text-xs mt-1.5">{errors.jam_kunjungan}</p>}
                 </div>
 
                 <div className="md:col-span-2">

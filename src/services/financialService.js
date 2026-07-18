@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { getTodayLocal, getLocalDateRange } from '../utils/dateUtils.js';
 
 export const financialService = {
   // Get financial summary
@@ -43,12 +44,12 @@ export const financialService = {
   async getRevenueByPeriod(period = 'daily', limit = 30) {
     try {
       let query;
-      const endDate = new Date().toISOString().split('T')[0];
+      const endDate = getTodayLocal();
       let startDate;
 
       switch (period) {
         case 'daily':
-          startDate = new Date(Date.now() - limit * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          startDate = getLocalDateRange(limit).start;
           query = supabase
             .from('v_daily_revenue')
             .select('*')
@@ -58,7 +59,7 @@ export const financialService = {
           break;
         
         case 'monthly':
-          startDate = new Date(Date.now() - limit * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          startDate = getLocalDateRange(limit * 30).start;
           query = supabase
             .from('payments')
             .select('tanggal_pembayaran, total_bayar')
@@ -216,9 +217,8 @@ export const financialService = {
   // Get dashboard statistics
   async getDashboardStatistics() {
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-      const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
+      const today = getTodayLocal();
+      const { start: monthStart, end: monthEnd } = getLocalDateRange('month');
 
       // BUG-C2 FIX: tanggal_pembayaran adalah tipe DATE — gunakan string 'YYYY-MM-DD'
       // langsung tanpa suffix ISO timestamp (T00:00:00+00:00 dll).

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
 import logger from '../utils/logger';
+import { useToast } from '../components/common/ToastNotification';
 
 const AuthContext = createContext({});
 
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const toast = useToast();
 
   useEffect(() => {
     let mounted = true;
@@ -130,7 +132,7 @@ export const AuthProvider = ({ children }) => {
     const logoutUser = async () => {
       logger.info('🔄 Session timeout due to inactivity');
       await signOut();
-      alert('Sesi Anda telah berakhir karena tidak ada aktivitas.');
+      toast.warning('Sesi Anda telah berakhir karena tidak ada aktivitas.');
     };
 
     const resetTimeout = () => {
@@ -174,6 +176,12 @@ export const AuthProvider = ({ children }) => {
       if (error) {
         console.error('Profile fetch error:', error);
         throw error; // Lempar error agar bisa di-catch di pemanggil
+      }
+
+      if (data.is_active === false) {
+        await supabase.auth.signOut();
+        toast.error('Akun Anda telah dinonaktifkan. Silakan hubungi administrator.');
+        throw new Error('Akun dinonaktifkan');
       }
       
       logger.debug('✅ Profile loaded');

@@ -5,6 +5,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
+import GlobalSearch from './GlobalSearch';
 
 const ROUTE_LABELS = {
   '/admin': 'Dashboard Manajer Klinik',
@@ -66,6 +67,11 @@ const TopBar = ({ onMenuClick }) => {
             <ChevronRight size={14} className="text-gray-300 dark:text-gray-600" />
             <span className="text-gray-900 dark:text-gray-100 font-semibold">{pageTitle}</span>
           </div>
+        </div>
+
+        {/* Center: Global Search */}
+        <div className="flex-1 max-w-lg mx-4 flex justify-center">
+          <GlobalSearch />
         </div>
 
         {/* Right: Actions & User */}

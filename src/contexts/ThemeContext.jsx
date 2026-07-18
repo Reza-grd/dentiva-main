@@ -20,7 +20,7 @@ const getSecondaryColor = (hex) => {
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark';
+    return localStorage.getItem('theme') || 'light';
   });
 
   const [primaryColor, setPrimaryColor] = useState(() => {

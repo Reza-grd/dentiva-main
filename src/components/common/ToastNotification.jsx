@@ -121,6 +121,7 @@ const Toast = ({ toast, onRemove }) => {
         {/* Close */}
         <button
           onClick={() => onRemove(toast.id)}
+          aria-label="Tutup notifikasi"
           style={{
             flexShrink: 0,
             background: 'none',

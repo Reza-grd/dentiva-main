@@ -83,6 +83,7 @@ const ConfirmDialog = ({
         {/* Close X */}
         <button
           onClick={onClose}
+          aria-label="Tutup dialog"
           style={{
             position: 'absolute',
             top: 16,
@@ -98,7 +99,7 @@ const ConfirmDialog = ({
           }}
           onMouseEnter={e => {
             e.currentTarget.style.background = '#e2e8f0';
-            e.currentTarget.style.color = '#475569';
+            e.currentTarget.style.color = '#64748b';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.background = '#f1f5f9';

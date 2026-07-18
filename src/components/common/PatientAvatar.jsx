@@ -68,7 +68,7 @@ const PatientAvatar = ({
       {showImage ? (
         <img
           src={resolvedUrl}
-          alt={name || 'Foto Pasien'}
+          alt={`Foto profil pasien ${name || ''}`}
           className="w-full h-full object-cover"
           onError={() => setImgError(true)}
         />

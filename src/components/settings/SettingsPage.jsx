@@ -749,15 +749,13 @@ const SettingsPage = () => {
                   <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-500 rounded-xl border border-amber-500/30">Hubungi Administrator</span>
                 </h2>
                 <div className="space-y-6">
-                  <div className="p-5 bg-green-50/50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl">
-                    <h3 className="font-semibold text-green-900 dark:text-green-400 mb-2">Automatic Backup</h3>
-                    <p className="text-sm text-green-700 dark:text-green-300 mb-4">
-                      Backup otomatis dijalankan setiap hari pada pukul 02:00 WIB
+                  <div className="relative p-5 bg-gray-50/50 dark:bg-gray-800/10 border border-gray-200 dark:border-gray-800/50 rounded-xl">
+                    <span className="absolute top-0 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Belum Terverifikasi</span>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Automatic Backup</h3>
+                    {/* Mengubah teks misleading yang tadinya menampilkan status "Success" palsu karena tidak terhubung dengan API backup Supabase */}
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Backup dikelola oleh provider database (Supabase). Status backup terverifikasi belum tersedia di dashboard ini — hubungi administrator sistem untuk info backup terakhir.
                     </p>
-                    <div className="text-sm text-green-800 dark:text-green-500 font-mono bg-green-100/50 dark:bg-green-900/30 p-3 rounded-lg">
-                      <p>Last backup: Today at 02:00 WIB</p>
-                      <p className="flex items-center gap-1 mt-1"><Check size={14}/> Success</p>
-                    </div>
                   </div>
 
                   <div className="relative">

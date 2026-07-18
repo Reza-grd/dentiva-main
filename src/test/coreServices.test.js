@@ -109,6 +109,38 @@ describe('4. Payment Service', () => {
     const res = await paymentService.getAllPayments({ page: 1, limit: 10 });
     expect(res.success).toBe(true);
   });
+
+  it('getAllPayments should sanitize search terms containing PostgREST significant characters', async () => {
+    // Create a mock builder spy specifically for this test
+    const mockOr = vi.fn().mockReturnThis();
+    
+    // We need to override the supabase.from mock temporarily for this test
+    // so we can inspect the exact string passed to .or()
+    const originalFrom = supabase.from;
+    
+    const mockQueryBuilder = {
+      select: vi.fn().mockReturnThis(),
+      or: mockOr,
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockImplementation(async () => ({ data: [], error: null, count: 0 }))
+    };
+    
+    supabase.from = vi.fn(() => mockQueryBuilder);
+    
+    // Pass a search term with harmful characters
+    const dirtyTerm = 'John, Doe (VIP) %*';
+    const res = await paymentService.getAllPayments({ searchTerm: dirtyTerm });
+    
+    // The expected sanitized term is "John Doe VIP" (since we strip , ( ) % *)
+    expect(mockOr).toHaveBeenCalledWith(
+      expect.stringContaining('John Doe VIP')
+    );
+    expect(res.success).toBe(true);
+    
+    // Restore the original mock
+    supabase.from = originalFrom;
+  });
 });
 
 describe('5. Doctor Schedule Service', () => {

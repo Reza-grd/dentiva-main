@@ -1,4 +1,6 @@
 import { supabase } from './supabase.js';
+import { getLocalDateRange, getTodayLocal } from '../utils/dateUtils.js';
+import { sanitizeSearchTerm } from '../utils/stringUtils.js';
 
 export const paymentService = {
   // Get all payments
@@ -16,8 +18,10 @@ export const paymentService = {
 
       // Apply search term to invoice number or patient name
       if (searchTerm && searchTerm.trim()) {
-        const term = searchTerm.trim();
-        query = query.or(`invoice_number.ilike.%${term}%,patient.nama_lengkap.ilike.%${term}%`);
+        const term = sanitizeSearchTerm(searchTerm);
+        if (term) {
+          query = query.or(`invoice_number.ilike.%${term}%,patient.nama_lengkap.ilike.%${term}%`);
+        }
       }
 
       // Apply status filter
@@ -26,16 +30,13 @@ export const paymentService = {
       }
 
       // Apply date filter
-      const now = new Date();
-      if (dateFilter === 'today') {
-        const todayStr = now.toISOString().split('T')[0];
-        query = query.gte('created_at', `${todayStr}T00:00:00`).lte('created_at', `${todayStr}T23:59:59`);
-      } else if (dateFilter === 'week') {
-        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        query = query.gte('created_at', weekAgo.toISOString());
-      } else if (dateFilter === 'month') {
-        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-        query = query.gte('created_at', firstDay.toISOString());
+      if (dateFilter && dateFilter !== 'all') {
+        const { start, end } = getLocalDateRange(dateFilter);
+        if (dateFilter === 'today') {
+          query = query.gte('created_at', `${start}T00:00:00`).lte('created_at', `${end}T23:59:59`);
+        } else {
+          query = query.gte('created_at', `${start}T00:00:00`);
+        }
       }
 
       const { data, error, count } = await query
@@ -186,8 +187,8 @@ export const paymentService = {
   // Get daily revenue
   async getDailyRevenue(days = 30) {
     try {
-      const endDate = new Date().toISOString().split('T')[0];
-      const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const endDate = getTodayLocal();
+      const { start: startDate } = getLocalDateRange(days);
 
       const { data, error } = await supabase
         .from('v_daily_revenue')

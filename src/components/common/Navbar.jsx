@@ -69,6 +69,7 @@ const Navbar = ({ onMenuClick }) => {
             <button
               onClick={onMenuClick}
               className="lg:hidden"
+              aria-label="Buka menu navigasi"
               style={{
                 padding: 8,
                 borderRadius: 10,

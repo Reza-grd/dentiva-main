@@ -4,6 +4,28 @@ Dokumen ini mencatat riwayat perubahan dan perbaikan bug historis pada proyek De
 
 ---
 
+## [1.9.2] — Feature Implementations
+
+### Ditambahkan / Diperbaiki
+- **Manajemen Pengguna:** Laman `/admin/pengguna` untuk kelola staf, deactivation akun, dan Deno Edge Function `admin-create-user`.
+- **Pencarian Global:** Komponen `<GlobalSearch />` pada TopBar untuk mencari pasien dari mana saja.
+- **Pendaftaran Pasien Lama:** Mode "Pasien Lama" di Pendaftaran untuk menjadwalkan ulang pasien secara cepat.
+- **Perbaikan UI Backup:** Menghilangkan status kesuksesan hardcoded pada Automatic Backup di Pengaturan.
+
+---
+## [1.9.1] — UI/UX Bug Fixes
+
+### Bug Frontend
+
+| # | Bug | Dampak | File |
+|---|-----|--------|------|
+| UI1 | Tema default fallback `'dark'` | Pengguna baru selalu mendapat tema gelap di awal | `ThemeContext.jsx` |
+| UI2 | Odontogram popup (UnifiedCodePopup) terpotong (clipped) | Popup pada gigi tertentu tidak dapat diklik sebagian karena ancestor `glass-panel` & `overflow-hidden` | `Odontogram.jsx` |
+| UI3 | Potensi clipping pada popup `ImageViewer` | `fixed` elemen bisa terpotong jika berada di dalam `glass-panel` yang memiliki `overflow-hidden` | `ImageViewer.jsx` |
+| UI4 | Accessibility (A11y) tidak memadai pada tombol icon & gambar | Screen reader tidak membaca deskripsi dengan baik | `Navbar.jsx`, `Sidebar.jsx`, `ToastNotification.jsx`, `ConfirmDialog.jsx`, `PatientAvatar.jsx`, dkk. |
+
+---
+
 ## [1.9.0] — 2026-07 (Fasa 4–7)
 
 ### Ditambahkan

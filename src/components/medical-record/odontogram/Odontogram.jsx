@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Tooth from './Tooth';
 import {
   CODE_CATEGORIES,
@@ -159,8 +160,8 @@ const UnifiedCodePopup = ({
     );
   };
 
-  return (
-    <div ref={ref} className="fixed z-[100] animate-scale-in" style={{ left: pos.left, top: pos.top }}>
+  return createPortal(
+    <div ref={ref} className="fixed z-[9999] animate-scale-in" style={{ left: pos.left, top: pos.top }}>
       <div className="bg-white/95 dark:bg-[#14171F]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden" style={{ width: 320, boxShadow: '0 20px 60px -12px rgba(0,0,0,0.3)' }}>
         <div className="px-4 py-3.5 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary,var(--color-accent))] flex items-center justify-between">
           <div className="text-white">
@@ -172,7 +173,7 @@ const UnifiedCodePopup = ({
             </div>
             <p className="text-[10px] text-white/70 mt-0.5">{toothTypeLabel}</p>
           </div>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors">
+          <button onClick={onClose} aria-label="Tutup" className="w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 text-white transition-colors">
             <X size={14} />
           </button>
         </div>
@@ -194,6 +195,7 @@ const UnifiedCodePopup = ({
           <div className="px-3.5 pb-3.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/80 bg-gray-50/50 dark:bg-gray-900/30">
             <button
               onClick={onClear}
+              aria-label={`Hapus kondisi gigi ${toothNumber}`}
               className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-455 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 border border-rose-200 dark:border-rose-900/30 transition-colors active:scale-[0.98]"
             >
               <Eraser size={13} />
@@ -202,7 +204,8 @@ const UnifiedCodePopup = ({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

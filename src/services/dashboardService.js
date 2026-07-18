@@ -1,12 +1,11 @@
 import { supabase } from './supabase.js';
+import { getTodayLocal, getLocalDateRange, formatLocalISO } from '../utils/dateUtils.js';
 
 export const dashboardService = {
   // ─── Kunjungan harian 30 hari terakhir ───────────────────────────────────
   async getDailyVisits(days = 30) {
     try {
-      const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
+      const startDate = getLocalDateRange(days).start;
 
       const { data, error } = await supabase
         .from('visits')
@@ -19,9 +18,7 @@ export const dashboardService = {
       // Build full date range
       const dateMap = {};
       for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
+        const d = formatLocalISO(new Date(Date.now() - i * 24 * 60 * 60 * 1000));
         dateMap[d] = 0;
       }
 
@@ -59,14 +56,8 @@ export const dashboardService = {
         startDate = `${targetYear}-01-01`;
         endDate = `${targetYear}-12-31`;
       } else {
-        startDate = new Date(
-          new Date().getFullYear(),
-          new Date().getMonth() - monthsOrYear + 1,
-          1
-        )
-          .toISOString()
-          .split('T')[0];
-        endDate = new Date().toISOString().split('T')[0];
+        startDate = formatLocalISO(new Date(new Date().getFullYear(), new Date().getMonth() - monthsOrYear + 1, 1));
+        endDate = getTodayLocal();
       }
 
       let query = supabase
@@ -123,10 +114,8 @@ export const dashboardService = {
   // ─── Revenue harian via v_daily_revenue ──────────────────────────────────
   async getDailyRevenue(days = 30) {
     try {
-      const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .split('T')[0];
-      const endDate = new Date().toISOString().split('T')[0];
+      const startDate = getLocalDateRange(days).start;
+      const endDate = getTodayLocal();
 
       const { data, error } = await supabase
         .from('v_daily_revenue')
@@ -140,9 +129,7 @@ export const dashboardService = {
       // Fill gaps
       const dateMap = {};
       for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split('T')[0];
+        const d = formatLocalISO(new Date(Date.now() - i * 24 * 60 * 60 * 1000));
         dateMap[d] = { revenue: 0, transaksi: 0 };
       }
 
@@ -179,13 +166,7 @@ export const dashboardService = {
     try {
       // Gunakan v_monthly_revenue (DB view) agar hanya 1 query ke DB
       // Sebelumnya: loop 12 bulan × 2 tabel = 24 query beruntun
-      const startDate = new Date(
-        new Date().getFullYear(),
-        new Date().getMonth() - months + 1,
-        1
-      )
-        .toISOString()
-        .split('T')[0];
+      const startDate = formatLocalISO(new Date(new Date().getFullYear(), new Date().getMonth() - months + 1, 1));
 
       const { data: revenueRows, error: revErr } = await supabase
         .from('v_monthly_revenue')

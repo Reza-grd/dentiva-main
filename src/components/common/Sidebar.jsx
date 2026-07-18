@@ -36,6 +36,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { group: 'LAINNYA' },
         { icon: Package,         label: 'Master Treatment', path: `${baseUrl}/treatments` },
         { icon: TrendingUp,      label: 'Laporan',          path: `${baseUrl}/laporan` },
+        { icon: Users,           label: 'Kelola Pengguna',  path: `${baseUrl}/pengguna` },
         { icon: Shield,          label: 'Audit Log',        path: `${baseUrl}/audit-log` },
         { icon: Settings,        label: 'Pengaturan',       path: `${baseUrl}/pengaturan` },
       ],
@@ -102,6 +103,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
           <button
             onClick={onClose}
+            aria-label="Tutup sidebar"
             className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <X size={20} />

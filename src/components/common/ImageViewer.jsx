@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, RotateCw, Move, Sun, Contrast, RefreshCw } from 'lucide-react';
 
 const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
@@ -92,7 +93,7 @@ const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
 
   if (!currentImage) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm"
          onClick={onClose}>
       
@@ -147,7 +148,7 @@ const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
       >
         <img 
           src={currentImage.file_url} 
-          alt={currentImage.filename}
+          alt={`Tampilan penuh gambar ${currentImage.filename || ''}`}
           className="max-w-[90vw] max-h-[80vh] object-contain transition-transform duration-100 ease-out"
           style={{
             transform: `translate(${position.x}px, ${position.y}px) scale(${scale}) rotate(${rotation}deg)`,
@@ -194,7 +195,8 @@ const ImageViewer = ({ images, initialIndex = 0, onClose }) => {
           <RefreshCw size={12} /> Reset Filter
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

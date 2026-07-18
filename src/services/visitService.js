@@ -1,5 +1,6 @@
 import { supabase } from './supabase.js';
 import { encryptionService } from './encryptionService.js';
+import { getTodayLocal } from '../utils/dateUtils.js';
 
 async function decryptVisitsList(list) {
   if (!list || list.length === 0) return list;
@@ -124,7 +125,7 @@ export const visitService = {
   // Get today's visits
   async getTodayVisits() {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getTodayLocal();
       const { data, error } = await supabase
         .from('visits')
         .select(`

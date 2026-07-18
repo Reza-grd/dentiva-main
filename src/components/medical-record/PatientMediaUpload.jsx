@@ -202,7 +202,7 @@ const PatientMediaUpload = ({ patientId, visitId }) => {
                     ) : (
                       <img 
                         src={item.file_url} 
-                        alt={item.filename} 
+                        alt={`Thumbnail media medis ${item.filename || ''}`} 
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" 
                         loading="lazy"
                       />
