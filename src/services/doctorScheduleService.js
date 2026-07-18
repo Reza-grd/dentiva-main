@@ -161,6 +161,23 @@ export const doctorScheduleService = {
     }
   },
 
+  // Hitung interval menit per slot berdasarkan kapasitas pasien per hari
+  calculateSlotInterval(jamMulai, jamSelesai, kapasitasPasienPerHari) {
+    if (!kapasitasPasienPerHari || kapasitasPasienPerHari <= 0) return 30; // Default
+
+    const [startH, startM] = jamMulai.split(':').map(Number);
+    const [endH, endM] = jamSelesai.split(':').map(Number);
+
+    const startMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
+    const totalMinutes = endMinutes - startMinutes;
+
+    if (totalMinutes <= 0) return 30;
+
+    const computedInterval = Math.floor(totalMinutes / kapasitasPasienPerHari);
+    return Math.max(5, computedInterval); // Minimum 5 menit
+  },
+
   // Generate slot waktu (tiap 30 menit) dari jam_mulai s/d jam_selesai
   generateTimeSlots(jamMulai, jamSelesai, intervalMenit = 30) {
     const slots = [];

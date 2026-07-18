@@ -11,6 +11,7 @@ Dokumen ini mencatat riwayat perubahan dan perbaikan bug historis pada proyek De
 - **Pencarian Global:** Komponen `<GlobalSearch />` pada TopBar untuk mencari pasien dari mana saja.
 - **Pendaftaran Pasien Lama:** Mode "Pasien Lama" di Pendaftaran untuk menjadwalkan ulang pasien secara cepat.
 - **Perbaikan UI Backup:** Menghilangkan status kesuksesan hardcoded pada Automatic Backup di Pengaturan.
+- **Kapasitas Jadwal Dokter:** Admin dapat mengatur kapasitas pasien harian pada Jadwal Dokter; sistem akan menghitung interval waktu per kunjungan secara dinamis (fallback ke 30 menit jika kapasitas tidak diatur).
 
 ---
 ## [1.9.1] — UI/UX Bug Fixes

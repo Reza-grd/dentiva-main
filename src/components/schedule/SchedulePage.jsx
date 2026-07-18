@@ -205,10 +205,11 @@ const SchedulePage = () => {
       return;
     }
 
+    const interval = doctorScheduleService.calculateSlotInterval(sched.jam_mulai.substring(0, 5), sched.jam_selesai.substring(0, 5), sched.kapasitas_pasien_per_hari);
     const slots = doctorScheduleService.generateTimeSlots(
       sched.jam_mulai.substring(0, 5),
       sched.jam_selesai.substring(0, 5),
-      30
+      interval
     );
     setAvailableSlots(slots);
   }, [formData.dokter_id, formData.tanggal_kunjungan, daySchedules]);
@@ -372,10 +373,11 @@ const SchedulePage = () => {
               {dayDocs.length > 0 ? (
                 <div className="w-full mt-1 space-y-1">
                   {dayDocs.map(s => {
+                    const interval = doctorScheduleService.calculateSlotInterval(s.jam_mulai.substring(0, 5), s.jam_selesai.substring(0, 5), s.kapasitas_pasien_per_hari);
                     const slots = doctorScheduleService.generateTimeSlots(
                       s.jam_mulai.substring(0, 5),
                       s.jam_selesai.substring(0, 5),
-                      30
+                      interval
                     );
                     const taken = weekVisits.filter(
                       v => v.dokter_id === s.dokter_id && 
@@ -478,10 +480,11 @@ const SchedulePage = () => {
         ) : (
           <div className="divide-y divide-gray-100 dark:divide-gray-800">
             {daySchedules.filter(s => s.hari === dayOfWeek(selectedDate)).map(sched => {
-              const slots      = doctorScheduleService.generateTimeSlots(
+              const interval = doctorScheduleService.calculateSlotInterval(sched.jam_mulai.substring(0, 5), sched.jam_selesai.substring(0, 5), sched.kapasitas_pasien_per_hari);
+              const slots = doctorScheduleService.generateTimeSlots(
                 sched.jam_mulai.substring(0, 5),
                 sched.jam_selesai.substring(0, 5),
-                30
+                interval
               );
               const takenCount = takenSlots.filter(t => t.dokter_id === sched.dokter_id && t.tanggal === selectedDate).length;
               const freeCount  = slots.length - takenCount;

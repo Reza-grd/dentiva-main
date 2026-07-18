@@ -21,6 +21,7 @@ const initForm = (dokterId = '') => ({
   jam_selesai: '17:00',
   is_active: true,
   keterangan: '',
+  kapasitas_pasien_per_hari: null,
 });
 
 const Badge = ({ active }) =>
@@ -107,6 +108,7 @@ const DoctorSchedulePage = () => {
       jam_selesai: schedule.jam_selesai?.substring(0, 5) ?? '17:00',
       is_active: schedule.is_active,
       keterangan: schedule.keterangan ?? '',
+      kapasitas_pasien_per_hari: schedule.kapasitas_pasien_per_hari ?? null,
     });
     setFormError('');
     setShowModal(true);
@@ -123,6 +125,8 @@ const DoctorSchedulePage = () => {
     if (!formData.dokter_id) return 'Pilih dokter terlebih dahulu.';
     if (formData.jam_mulai >= formData.jam_selesai)
       return 'Jam mulai harus lebih awal dari jam selesai.';
+    if (formData.kapasitas_pasien_per_hari !== null && formData.kapasitas_pasien_per_hari !== '' && (isNaN(formData.kapasitas_pasien_per_hari) || Number(formData.kapasitas_pasien_per_hari) <= 0))
+      return 'Kapasitas pasien per hari harus bilangan positif.';
 
     // Cek duplikat (hari + dokter yang sama), kecuali saat edit
     const duplicate = schedules.find(
@@ -147,6 +151,7 @@ const DoctorSchedulePage = () => {
       const payload = {
         ...formData,
         hari: Number(formData.hari),
+        kapasitas_pasien_per_hari: formData.kapasitas_pasien_per_hari === '' ? null : (formData.kapasitas_pasien_per_hari ? Number(formData.kapasitas_pasien_per_hari) : null),
       };
 
       const result = editTarget
@@ -452,6 +457,35 @@ const DoctorSchedulePage = () => {
                   placeholder="mis. Praktek Poli Umum"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
                 />
+              </div>
+
+              {/* Kapasitas Pasien */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Jumlah Pasien per Hari (opsional)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.kapasitas_pasien_per_hari === null ? '' : formData.kapasitas_pasien_per_hari}
+                  onChange={(e) => setFormData({ ...formData, kapasitas_pasien_per_hari: e.target.value === '' ? null : Number(e.target.value) })}
+                  placeholder="Kosongkan untuk interval 30 menit default"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500"
+                />
+                {(() => {
+                  if (formData.jam_mulai && formData.jam_selesai && formData.jam_mulai < formData.jam_selesai) {
+                    const interval = doctorScheduleService.calculateSlotInterval(formData.jam_mulai, formData.jam_selesai, formData.kapasitas_pasien_per_hari);
+                    const slotsCount = doctorScheduleService.generateTimeSlots(formData.jam_mulai, formData.jam_selesai, interval).length;
+                    return (
+                      <p className="mt-1.5 text-xs text-gray-500 font-medium">
+                        {formData.kapasitas_pasien_per_hari 
+                          ? `≈ ${interval} menit per slot (${slotsCount} slot tersedia)` 
+                          : `Interval default 30 menit per slot (${slotsCount} slot tersedia)`}
+                      </p>
+                    );
+                  }
+                  return null;
+                })()}
               </div>
 
               {/* Status aktif */}

@@ -14,21 +14,15 @@ const LoadingSpinner = ({
 
   const { ring, border } = sizeMap[size] || sizeMap.md;
 
-  const borderColor =
-    color === 'white'
-      ? `rgba(255,255,255,0.25)`
-      : `rgba(15, 76, 129, 0.15)`;
-  const topColor =
-    color === 'white' ? 'white' : '#0F4C81';
-
   const SpinnerRing = () => (
     <div
+      className={color === 'white' ? 'border-white/25 border-t-white' : 'border-[var(--color-accent)]/15 border-t-[var(--color-accent)]'}
       style={{
         width: ring,
         height: ring,
         borderRadius: '50%',
-        border: `${border}px solid ${borderColor}`,
-        borderTopColor: topColor,
+        borderWidth: `${border}px`,
+        borderStyle: 'solid',
         animation: 'spin 0.75s linear infinite',
         display: 'inline-block',
         flexShrink: 0,
@@ -39,80 +33,35 @@ const LoadingSpinner = ({
   if (fullScreen) {
     return (
       <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(255,255,255,0.94)',
-          zIndex: 9999,
-          backdropFilter: 'blur(4px)',
-        }}
+        className="fixed inset-0 flex flex-col items-center justify-center z-[9999] backdrop-blur-[4px] bg-[var(--color-bg)]/95"
       >
         {/* Logo */}
         <div
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #0F4C81, #1a6ab5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 20,
-            boxShadow: '0 8px 24px rgba(15,76,129,0.25)',
-            animation: 'bounce-in 0.5s cubic-bezier(0.36,0.07,0.19,0.97) both',
-            overflow: 'hidden',
-            backgroundColor: '#fff'
-          }}
+          className="w-[72px] h-[72px] rounded-full flex items-center justify-center mb-5 overflow-hidden bg-white shadow-xl shadow-[var(--color-accent)]/20 animate-bounce-in"
         >
-          <img src="/dentiva-logo.png" alt="Dentiva Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src="/dentiva-logo.png" alt="Dentiva Logo" className="w-full h-full object-cover" />
         </div>
 
         {/* Dual Ring Spinner (lg) */}
-        <div style={{ position: 'relative', width: 52, height: 52 }}>
+        <div className="relative w-[52px] h-[52px]">
           <div
+            className="absolute inset-0 rounded-full border-4 border-solid border-[var(--color-accent)]/10 border-t-[var(--color-accent)]"
             style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '50%',
-              border: '4px solid rgba(15,76,129,0.10)',
-              borderTopColor: '#0F4C81',
               animation: 'spin 0.85s linear infinite',
             }}
           />
           <div
+            className="absolute inset-[6px] rounded-full border-[3px] border-solid border-[var(--color-accent-secondary)]/15 border-b-[var(--color-accent-secondary)]"
             style={{
-              position: 'absolute',
-              inset: 6,
-              borderRadius: '50%',
-              border: '3px solid rgba(0,180,216,0.15)',
-              borderBottomColor: '#00B4D8',
               animation: 'spin 1.1s linear infinite reverse',
             }}
           />
         </div>
 
-        <p
-          style={{
-            marginTop: 18,
-            color: '#475569',
-            fontSize: 15,
-            fontWeight: 500,
-            letterSpacing: '0.01em',
-          }}
-        >
+        <p className="mt-[18px] text-[var(--color-text)] text-[15px] font-medium tracking-[0.01em]">
           {message}
         </p>
-        <p
-          style={{
-            marginTop: 4,
-            color: '#94a3b8',
-            fontSize: 12,
-          }}
-        >
+        <p className="mt-1 text-[var(--color-muted)] text-[12px]">
           Dentiva · Klinik Gigi
         </p>
       </div>
@@ -121,18 +70,11 @@ const LoadingSpinner = ({
 
   return (
     <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: size === 'sm' ? '12px' : '28px',
-        gap: 10,
-      }}
+      className={`flex flex-col items-center justify-center gap-[10px] ${size === 'sm' ? 'p-[12px]' : 'p-[28px]'}`}
     >
       <SpinnerRing />
       {message && size !== 'sm' && (
-        <p style={{ color: '#64748b', fontSize: 13, fontWeight: 500 }}>
+        <p className="text-[var(--color-muted)] text-[13px] font-medium">
           {message}
         </p>
       )}
