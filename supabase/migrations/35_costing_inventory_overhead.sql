@@ -438,6 +438,10 @@ BEGIN
   ]
   LOOP
     EXECUTE format(
+      'DROP POLICY IF EXISTS "Admin full access %1$s" ON public.%1$s;',
+      tbl
+    );
+    EXECUTE format(
       'CREATE POLICY "Admin full access %1$s" ON public.%1$s FOR ALL USING (public.get_user_role() = ''admin'')',
       tbl
     );
