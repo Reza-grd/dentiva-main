@@ -176,7 +176,7 @@ BEGIN
     new_value,
     risk_level
   ) VALUES (
-    COALESCE(auth.uid(), '00000000-0000-0000-0000-000000000000'::UUID),
+    auth.uid(),
     COALESCE(public.get_user_role(), 'system'),
     v_patient_id,
     v_visit_id,
