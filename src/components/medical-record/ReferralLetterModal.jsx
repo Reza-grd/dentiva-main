@@ -102,12 +102,12 @@ const ReferralLetterModal = ({ isOpen, onClose, patient, userProfile }) => {
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-start pt-10 pb-10 overflow-y-auto print:hidden">
         
         {/* Modal Container */}
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl relative">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border dark:border-gray-800 w-full max-w-4xl relative text-gray-900 dark:text-white">
           
           {/* Header (Screen Only) */}
-          <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50 rounded-t-xl print:hidden">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="text-blue-600" /> Form Surat Rujukan
+          <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 rounded-t-2xl print:hidden">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <FileText className="text-[var(--color-accent)]" /> Form Surat Rujukan
             </h2>
             <button onClick={onClose} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
               <X size={24} />
@@ -115,7 +115,7 @@ const ReferralLetterModal = ({ isOpen, onClose, patient, userProfile }) => {
           </div>
 
           {/* Form Content - This area serves as BOTH the interactive form AND the print layout */}
-          <div className="p-8 print:p-0 bg-white" id="printable-referral">
+          <div className="p-8 print:p-0 bg-white dark:bg-gray-900" id="printable-referral">
             
             {/* PRINT HEADER: Only visible when printing */}
             <div className="hidden print:block mb-8 border-b-2 border-gray-900 pb-4">

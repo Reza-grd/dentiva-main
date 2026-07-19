@@ -555,11 +555,11 @@ const SettingsPage = () => {
                         type="button"
                         onClick={handleTestWA}
                         disabled={testingWA}
-                        className="px-5 py-2.5 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-95 disabled:opacity-50"
+                        className="px-5 py-2.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors active:scale-95 disabled:opacity-50"
                       >
                         {testingWA ? (
                           <>
-                            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-4 h-4 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin"></div>
                             Mengirim...
                           </>
                         ) : (

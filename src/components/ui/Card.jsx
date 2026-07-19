@@ -5,7 +5,7 @@ const Card = forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border border-gray-100 bg-white/80 text-gray-950 shadow-sm backdrop-blur-md transition-shadow hover:shadow-md",
+      "rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-[#09090b]/80 text-gray-950 dark:text-gray-50 shadow-sm backdrop-blur-md transition-shadow hover:shadow-card-hover",
       className
     )}
     {...props}
@@ -26,7 +26,7 @@ const CardTitle = forwardRef(({ className, ...props }, ref) => (
   <h3
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight text-gray-900",
+      "text-lg font-semibold leading-none tracking-tight text-gray-900 dark:text-gray-100",
       className
     )}
     {...props}
@@ -37,7 +37,7 @@ CardTitle.displayName = "CardTitle";
 const CardDescription = forwardRef(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-gray-500", className)}
+    className={cn("text-sm text-gray-500 dark:text-gray-400", className)}
     {...props}
   />
 ));

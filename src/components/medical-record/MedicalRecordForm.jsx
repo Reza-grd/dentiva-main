@@ -640,7 +640,7 @@ const MedicalRecordForm = () => {
         </div>
         <div className="flex items-center gap-2">
           <button onClick={() => window.print()} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm"><Printer size={18} /><span className="hidden sm:inline">Cetak</span></button>
-          <button onClick={() => setShowLegend(true)} className="px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm"><Info size={18} /><span className="hidden sm:inline">Legenda</span></button>
+          <button onClick={() => setShowLegend(true)} className="px-4 py-2 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm"><Info size={18} /><span className="hidden sm:inline">Legenda</span></button>
         </div>
       </div>
 
@@ -800,7 +800,7 @@ const MedicalRecordForm = () => {
                         type="text" 
                         value={clinicalData.treatment_history_details || ''} 
                         onChange={e => setClinicalData({...clinicalData, treatment_history_details: e.target.value})} 
-                        className="glass-input w-full px-4 py-2.5 rounded-xl bg-blue-50/30 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-800" 
+                        className="glass-input w-full px-4 py-2.5 rounded-xl bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 dark:border-[var(--color-accent)]/30 text-gray-900 dark:text-white" 
                         placeholder="Misal: Tumpatan amalgam pada gigi 16..." 
                       />
                     )}
@@ -1079,7 +1079,7 @@ const MedicalRecordForm = () => {
                     <div className="bg-gray-50/50 dark:bg-gray-800/20 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
                       <h5 className="text-sm font-bold text-gray-800 dark:text-gray-200 flex justify-between items-center">
                         <span>Debris Score</span>
-                        <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded-full font-mono">DI: {getOhisCalculation(ohisSubscores).di}</span>
+                        <span className="text-xs bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 text-[var(--color-accent)] px-2 py-0.5 rounded-full font-mono">DI: {getOhisCalculation(ohisSubscores).di}</span>
                       </h5>
                       <div className="grid grid-cols-6 gap-2">
                         {['16', '11', '26', '46', '31', '36'].map(tooth => (
@@ -1201,7 +1201,7 @@ const MedicalRecordForm = () => {
                 <h3 className="font-bold text-lg text-gray-900 dark:text-white">Odontogram Anak & Dewasa</h3>
                 <div className="flex gap-2">
                   <button onClick={() => setConfirmDialog({ isOpen: true, action: 'clearAllTooth', data: null })} className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 text-xs font-semibold rounded-lg transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-800 no-print">Reset Semua Gigi</button>
-                  <button onClick={() => setShowLegend(true)} className="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:hover:bg-blue-500/20 text-xs font-semibold rounded-lg transition-colors border border-transparent hover:border-blue-200 dark:hover:border-blue-800 no-print">Bantuan Simbol</button>
+                  <button onClick={() => setShowLegend(true)} className="px-3 py-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 text-xs font-semibold rounded-lg transition-colors border border-transparent hover:border-[var(--color-accent)]/20 dark:hover:border-gray-800 no-print">Bantuan Simbol</button>
                 </div>
               </div>
               <div className="p-4 sm:p-6 bg-white dark:bg-gray-900">
@@ -1338,7 +1338,7 @@ const MedicalRecordForm = () => {
                               <button
                                 type="button"
                                 onClick={() => generatePrescriptionPdf(visit, patient, userProfile, { name: 'NeuroDent Clinic', address: 'Jl. Contoh Alamat No. 123', city: 'Jakarta' })}
-                                className="px-2.5 py-1 text-xs font-bold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10 rounded-lg transition-colors flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 rounded-lg transition-colors flex items-center gap-1"
                               >
                                 <Printer size={14} /> Cetak Resep
                               </button>
@@ -1351,8 +1351,8 @@ const MedicalRecordForm = () => {
 
                         {/* SOAP Template Selector */}
                         {soapTemplates.length > 0 && !isTreatmentLocked && !visit.is_locked && (
-                          <div className="mb-4 bg-blue-50/50 dark:bg-blue-900/10 p-3 rounded-xl border border-blue-100 dark:border-blue-800 flex items-center justify-between">
-                            <span className="text-sm font-semibold text-blue-800 dark:text-blue-300">Gunakan Template SOAP:</span>
+                          <div className="mb-4 bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10 p-3 rounded-xl border border-[var(--color-accent)]/10 dark:border-gray-800 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-[var(--color-accent)]">Gunakan Template SOAP:</span>
                             <select 
                               className="glass-input text-sm px-3 py-1.5 w-64 rounded-lg bg-white dark:bg-gray-800"
                               onChange={(e) => {
@@ -1467,7 +1467,7 @@ const MedicalRecordForm = () => {
       {/* Pinned action wrapper for saving / printing */}
       {/* Sticky Bottom Actions Bar */}
       <div className="sticky bottom-6 z-10 flex flex-col md:flex-row justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] print:hidden gap-4">
-        <button onClick={() => setShowReferralModal(true)} className="w-full md:w-auto px-6 py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl flex items-center justify-center gap-2 transition-colors">
+        <button onClick={() => setShowReferralModal(true)} className="w-full md:w-auto px-6 py-2.5 bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors">
           <FileText size={18} /> Tambah Surat Rujukan
         </button>
         
@@ -1545,14 +1545,14 @@ const MedicalRecordForm = () => {
       {/* Legend Modal */}
       {showLegend && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto shadow-2xl animate-scale-in">
-            <div className="flex justify-between items-center mb-6 border-b pb-4">
-              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2"><Info className="text-blue-500"/> Legenda Simbol Odontogram v4.0</h3>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto shadow-2xl animate-scale-in text-gray-900 dark:text-white">
+            <div className="flex justify-between items-center mb-6 border-b pb-4 dark:border-gray-800">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><Info className="text-[var(--color-accent)]"/> Legenda Simbol Odontogram v4.0</h3>
               <button onClick={() => setShowLegend(false)} className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors font-bold text-gray-500">✕</button>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               {CODE_CATEGORIES.map(group => (
-                <div key={group.key} className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                <div key={group.key} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                   <h4 className="font-bold text-gray-800 mb-3 uppercase text-xs tracking-wider flex items-center gap-2">
                     <span>{group.icon}</span> {group.label}
                   </h4>

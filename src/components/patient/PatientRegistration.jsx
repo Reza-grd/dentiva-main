@@ -668,9 +668,9 @@ const PatientRegistration = () => {
                       name="wa_consent"
                       checked={formData.wa_consent} 
                       onChange={handleChange}
-                      className="mt-1 shrink-0 w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                      className="mt-1 shrink-0 w-4 h-4 text-[var(--color-accent)] rounded border-gray-300 focus:ring-[var(--color-accent)]"
                     />
-                    <label htmlFor="wa_consent" className="text-xs text-blue-800 dark:text-blue-300 cursor-pointer leading-tight">
+                    <label htmlFor="wa_consent" className="text-xs text-slate-800 dark:text-slate-200 cursor-pointer leading-tight">
                       Pasien setuju menerima notifikasi WhatsApp (resi pembayaran, edukasi perawatan, dan pengingat jadwal)
                     </label>
                   </div>

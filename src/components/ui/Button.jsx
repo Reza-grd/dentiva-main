@@ -4,22 +4,22 @@ import { motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         primary: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-light)] focus-visible:ring-[var(--color-primary)] shadow-sm",
         secondary: "bg-[var(--color-secondary)] text-white hover:bg-[var(--color-secondary-dark)] focus-visible:ring-[var(--color-secondary)] shadow-sm",
         danger: "bg-[var(--color-danger)] text-white hover:bg-red-600 focus-visible:ring-[var(--color-danger)] shadow-sm",
-        outline: "border border-gray-300 bg-transparent hover:bg-gray-100 text-gray-700 focus-visible:ring-gray-400",
-        ghost: "hover:bg-gray-100 hover:text-gray-900 text-gray-700 focus-visible:ring-gray-400",
+        outline: "border border-gray-300 dark:border-gray-700 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 focus-visible:ring-gray-400 dark:focus-visible:ring-gray-600",
+        ghost: "hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white text-gray-700 dark:text-gray-300 focus-visible:ring-gray-400",
         link: "text-[var(--color-primary)] underline-offset-4 hover:underline focus-visible:ring-[var(--color-primary)]",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-8 px-3 text-xs rounded-md",
-        lg: "h-12 px-8 text-lg rounded-md",
-        icon: "h-10 w-10 flex items-center justify-center rounded-md",
+        sm: "h-8 px-3 text-xs rounded-xl",
+        lg: "h-12 px-8 text-lg rounded-xl",
+        icon: "h-10 w-10 flex items-center justify-center rounded-xl",
       },
     },
     defaultVariants: {
@@ -45,6 +45,7 @@ const Button = forwardRef(({
       type={type}
       disabled={disabled || isLoading}
       className={cn(buttonVariants({ variant, size, className }))}
+      whileHover={disabled || isLoading ? {} : { scale: 1.02 }}
       whileTap={disabled || isLoading ? {} : { scale: 0.98 }}
       {...props}
     >

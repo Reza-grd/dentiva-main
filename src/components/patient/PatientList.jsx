@@ -138,10 +138,10 @@ const PatientList = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Pasien</p>
-              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.total}</p>
+              <p className="text-2xl font-bold text-[var(--color-accent)]">{stats.total}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Users className="text-blue-500" size={24} />
+            <div className="w-12 h-12 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <Users className="text-[var(--color-accent)]" size={24} />
             </div>
           </div>
         </div>
@@ -331,7 +331,7 @@ const PatientList = () => {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => handleViewDetail(patient.id)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors"
+                          className="p-2 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 rounded-lg transition-colors"
                           title="Lihat Detail"
                         >
                           <Eye size={18} />

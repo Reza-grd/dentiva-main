@@ -10,11 +10,11 @@
    =================================== */
 :root {
   /* Brand Colors (Legacy/Semantic) */
-  --color-primary: #0F4C81;
-  --color-primary-dark: #0a3460;
-  --color-primary-light: #1a6ab5;
-  --color-secondary: #00B4D8;
-  --color-secondary-dark: #0099bb;
+  --color-primary: var(--color-accent);
+  --color-primary-dark: var(--color-accent-secondary);
+  --color-primary-light: var(--color-accent);
+  --color-secondary: var(--color-accent-secondary);
+  --color-secondary-dark: var(--color-accent-secondary);
   --color-success: #10B981;
   --color-danger: #EF4444;
   --color-warning: #F59E0B;
@@ -56,12 +56,7 @@
 }
 
 .dark {
-  /* Brand Colors (Dark Mode Adjustments) */
-  --color-primary: #1e88e5;
-  --color-primary-dark: #1565c0;
-  --color-primary-light: #42a5f5;
-  --color-secondary: #00d2f9;
-  --color-secondary-dark: #00b4d8;
+  /* Brand Colors (Dark Mode Adjustments) - Inherited dynamically from :root */
   --color-success: #34d399;
   --color-danger: #f87171;
   --color-warning: #fbbf24;

@@ -183,12 +183,12 @@ const TreatmentMaster = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-600 mb-1">Harga Tertinggi</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-2xl font-bold text-[var(--color-accent)]">
                 {formatCurrency(Math.max(...treatments.map(t => t.harga_dasar), 0))}
               </p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-              <DollarSign className="text-blue-600" size={24} />
+            <div className="w-12 h-12 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-full flex items-center justify-center">
+              <DollarSign className="text-[var(--color-accent)]" size={24} />
             </div>
           </div>
         </div>
@@ -240,7 +240,7 @@ const TreatmentMaster = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(treatment)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-2 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 rounded-lg transition-colors"
                           title="Edit"
                         >
                           <Edit2 size={18} />

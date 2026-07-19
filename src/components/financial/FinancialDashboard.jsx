@@ -187,12 +187,12 @@ const FinancialDashboard = () => {
               <div className="flex items-center justify-between relative z-10">
                 <div>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Net Income</p>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <p className="text-2xl font-bold text-[var(--color-accent)]">
                     {formatCurrency(stats?.netIncome)}
                   </p>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-500/10 rounded-xl flex items-center justify-center">
-                  <DollarSign className="text-blue-600 dark:text-blue-400" size={24} />
+                <div className="w-12 h-12 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-xl flex items-center justify-center">
+                  <DollarSign className="text-[var(--color-accent)]" size={24} />
                 </div>
               </div>
             </div>

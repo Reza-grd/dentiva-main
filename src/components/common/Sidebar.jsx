@@ -161,7 +161,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Footer */}
         <div className="p-4 border-t border-gray-100 dark:border-gray-800 mt-auto bg-white/30 dark:bg-black/20">
           <div className="bg-gray-50/80 dark:bg-gray-900/80 rounded-2xl p-4 text-xs shadow-sm border border-gray-100/50 dark:border-gray-800/50">
-            <div className="font-semibold text-violet-600 dark:text-violet-400">Dentiva AI</div>
+            <div className="font-semibold text-[var(--color-accent)]">Dentiva AI</div>
             <div className="text-gray-500 dark:text-gray-400 font-medium mt-0.5">Platform © 2026</div>
           </div>
         </div>

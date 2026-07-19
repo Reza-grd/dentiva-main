@@ -208,7 +208,7 @@ const ConsentFormModal = ({ patient, visit, userProfile, onClose, onSaveSuccess 
           <button 
             onClick={handleSave} 
             disabled={saving}
-            className="px-6 py-2.5 font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors disabled:opacity-50"
+            className="px-6 py-2.5 font-bold text-white bg-[var(--color-accent)] hover:opacity-90 rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors disabled:opacity-50"
           >
             {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
             Simpan Persetujuan

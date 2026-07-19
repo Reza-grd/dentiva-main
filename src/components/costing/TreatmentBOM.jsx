@@ -298,15 +298,15 @@ const TreatmentBOM = () => {
                   className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                 />
               </div>
-              <div className="flex items-center gap-2 mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center gap-2 mt-2 p-3 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-lg">
                 <input 
                   type="checkbox" 
                   id="wajib" 
                   checked={formData.wajib} 
                   onChange={e => setFormData({...formData, wajib: e.target.checked})} 
-                  className="w-4 h-4 rounded text-blue-600" 
+                  className="w-4 h-4 rounded text-[var(--color-accent)] focus:ring-[var(--color-accent)]" 
                 />
-                <label htmlFor="wajib" className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                <label htmlFor="wajib" className="text-sm font-medium text-slate-800 dark:text-slate-200">
                   Bahan Wajib (otomatis dipotong dari stok saat selesai)
                 </label>
               </div>

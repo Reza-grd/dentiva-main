@@ -208,7 +208,7 @@ const MasterBahan = () => {
                           title="Lihat Batch & Expired"
                           className="p-1.5 text-orange-600 hover:bg-orange-50 rounded-lg"
                         ><Layers size={16}/></button>
-                        <button onClick={() => openEditModal(m)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><Pencil size={16}/></button>
+                        <button onClick={() => openEditModal(m)} className="p-1.5 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 rounded-lg"><Pencil size={16}/></button>
                         <button onClick={() => handleDelete(m.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16}/></button>
                       </div>
                     </td>

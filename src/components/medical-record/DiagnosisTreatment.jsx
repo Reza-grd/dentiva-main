@@ -96,10 +96,10 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* COLUMN 1: DIAGNOSIS */}
-          <div className="flex flex-col h-full border border-gray-100 rounded-xl bg-gray-50/30 overflow-visible">
-            <div className="px-4 py-3 border-b border-gray-100 bg-blue-50/50 flex items-center gap-2 rounded-t-xl">
-              <Stethoscope size={18} className="text-blue-600" />
-              <h4 className="font-semibold text-gray-800">Diagnosis (Temuan Masalah)</h4>
+          <div className="flex flex-col h-full border border-gray-100 dark:border-gray-800 rounded-2xl bg-gray-50/30 dark:bg-gray-900/10 overflow-visible">
+            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-[var(--color-accent)]/5 flex items-center gap-2 rounded-t-2xl">
+              <Stethoscope size={18} className="text-[var(--color-accent)]" />
+              <h4 className="font-semibold text-gray-800 dark:text-gray-200">Diagnosis (Temuan Masalah)</h4>
             </div>
             
             <div className="p-4 flex-1 flex flex-col">
@@ -110,7 +110,7 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
                   <input 
                     type="text" 
                     placeholder="Cari kode / nama diagnosis..." 
-                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:border-blue-400 focus:ring-1 focus:ring-blue-400 outline-none"
+                    className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] outline-none dark:bg-gray-800 dark:text-white"
                     value={diagSearch}
                     onChange={(e) => setDiagSearch(e.target.value)}
                   />
@@ -118,18 +118,18 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
                 
                 {/* Dropdown Options */}
                 {diagSearch && filteredDiagnoses.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden z-30">
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden z-30">
                     {filteredDiagnoses.map((d, i) => (
                       <button 
                         key={i} 
                         onClick={() => addDiagnosis(d)}
-                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 border-b border-gray-100 last:border-0 flex justify-between items-center group"
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0 flex justify-between items-center group"
                       >
                         <div>
-                          <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
-                          <span className="text-gray-700">{d.name}</span>
+                          <span className="font-mono text-xs font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
+                          <span className="text-gray-700 dark:text-gray-300">{d.name}</span>
                         </div>
-                        <Plus size={16} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                        <Plus size={16} className="text-gray-300 group-hover:text-[var(--color-accent)] transition-colors" />
                       </button>
                     ))}
                   </div>
@@ -150,10 +150,10 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
                 ) : (
                   <ul className="space-y-2">
                     {diagnoses.map((d) => (
-                      <li key={d.code} className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                      <li key={d.code} className="flex justify-between items-center bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div>
-                          <span className="font-mono text-xs font-bold text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
-                          <span className="text-sm font-medium text-gray-800">{d.name}</span>
+                          <span className="font-mono text-xs font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
+                          <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{d.name}</span>
                         </div>
                         <button onClick={() => removeDiagnosis(d.code)} className="print:hidden text-gray-400 hover:text-red-500 transition-colors p-1" title="Hapus">
                           <Trash2 size={16} />
@@ -165,10 +165,10 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
               </div>
               
               {/* Additional Notes Field */}
-              <div className="mt-4 pt-4 border-t border-gray-100">
-                <label className="text-xs font-semibold text-gray-700 block mb-2">Diagnosis lain / catatan tambahan</label>
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 block mb-2">Diagnosis lain / catatan tambahan</label>
                 <textarea 
-                  className="w-full text-sm p-2.5 border border-gray-200 rounded-lg focus:border-blue-400 focus:ring-1 focus:ring-blue-400 outline-none resize-none bg-white" 
+                  className="w-full text-sm p-2.5 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] outline-none resize-none bg-white dark:bg-gray-800 dark:text-white" 
                   rows="3"
                   placeholder="Tambahkan catatan diagnosis lainnya di sini..."
                   value={clinicalData.diagnosis_additional_notes || ''}

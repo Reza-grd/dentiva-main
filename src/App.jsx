@@ -6,6 +6,9 @@ import LoginPage from './components/auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import { AlertTriangle } from 'lucide-react';
+import { Card, CardContent } from './components/ui/Card';
+import { Button } from './components/ui/Button';
 
 const AdminDashboard = lazy(() => import('./components/dashboard/AdminDashboard'));
 const DoctorDashboard = lazy(() => import('./components/dashboard/DoctorDashboard'));
@@ -41,29 +44,45 @@ function App() {
 
   if (user && !userProfile) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
-          <h2 className="text-xl font-bold text-red-600 mb-2">Gagal Memuat Profil</h2>
-          <p className="text-gray-600 mb-6">
-            Koneksi ke database bermasalah atau data profil belum lengkap.
-            <br />
-            <span className="text-xs text-gray-400">ID: {user.id}</span>
-          </p>
-          <div className="flex gap-4 justify-center">
-            <button 
-              onClick={() => window.location.reload()} 
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Coba Lagi
-            </button>
-            <button 
-              onClick={signOut} 
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50 dark:bg-[#0B0F17] p-4 transition-colors duration-300">
+        {/* Decorative blobs */}
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-[var(--color-accent)]/10 blur-[60px]" />
+        <div className="absolute -bottom-15 -left-10 w-60 h-60 rounded-full bg-[var(--color-accent-secondary)]/10 blur-[50px]" />
+        
+        <Card className="w-full max-w-md relative z-10">
+          <CardContent className="p-8 text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-2xl flex items-center justify-center mb-6">
+              <AlertTriangle className="text-red-500 dark:text-red-400" size={32} />
+            </div>
+            
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Gagal Memuat Profil</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+              Koneksi ke database bermasalah atau data profil belum lengkap. Silakan hubungi admin atau coba lagi beberapa saat lagi.
+            </p>
+            
+            <div className="w-full bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-100 dark:border-gray-800 mb-6 text-left">
+              <span className="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">User ID Debug</span>
+              <span className="text-[11px] text-gray-500 dark:text-gray-400 font-mono break-all">{user.id}</span>
+            </div>
+            
+            <div className="flex gap-3 w-full">
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="primary"
+                className="flex-1"
+              >
+                Coba Lagi
+              </Button>
+              <Button 
+                onClick={signOut} 
+                variant="outline"
+                className="flex-1"
+              >
+                Logout
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

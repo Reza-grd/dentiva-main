@@ -279,15 +279,15 @@ const ReportsPage = () => {
           <p className="text-xs text-red-600 dark:text-red-400 mt-1">↑ 5% vs bulan lalu</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-blue-500">
+        <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-[var(--color-accent)]">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Profit</p>
-            <TrendingUp className="text-blue-500" size={20} />
+            <TrendingUp className="text-[var(--color-accent)]" size={20} />
           </div>
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatCurrency(reportData?.stats?.monthNetIncome || 0)}
           </p>
-          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">↑ 18% vs bulan lalu</p>
+          <p className="text-xs text-[var(--color-accent)] mt-1">↑ 18% vs bulan lalu</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-purple-500">
@@ -424,7 +424,7 @@ const ReportsPage = () => {
                   <td className="px-6 py-4 text-sm text-red-600 dark:text-red-400 font-semibold">
                     {formatCurrency(item.totalExpenses)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-blue-600 dark:text-blue-400 font-bold bg-blue-50/30 dark:bg-blue-500/10">
+                  <td className="px-6 py-4 text-sm text-[var(--color-accent)] font-bold bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10">
                     {formatCurrency(item.totalRevenue - item.totalExpenses)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 font-medium">

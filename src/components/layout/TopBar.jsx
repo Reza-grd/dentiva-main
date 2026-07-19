@@ -143,7 +143,7 @@ const TopBar = ({ onMenuClick }) => {
                   <img src={profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div 
-                    className="w-full h-full flex items-center justify-center text-white font-bold text-xs bg-gradient-to-br from-violet-500 to-indigo-600"
+                    className="w-full h-full flex items-center justify-center text-white font-bold text-xs bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-secondary)]"
                   >
                     {initials}
                   </div>

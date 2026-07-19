@@ -197,7 +197,7 @@ const TreatmentEducationTemplates = () => {
         {templates.map(tmpl => (
           <div key={tmpl.id} className="bg-gray-50 dark:bg-gray-800/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 relative group">
             <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => handleEdit(tmpl)} className="p-1.5 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200">
+              <button onClick={() => handleEdit(tmpl)} className="p-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent)]/20">
                 <Edit size={14} />
               </button>
               <button onClick={() => handleDelete(tmpl.id, tmpl.treatment_type)} className="p-1.5 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
@@ -208,7 +208,7 @@ const TreatmentEducationTemplates = () => {
             {tmpl.keywords && tmpl.keywords.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
                 {tmpl.keywords.map((kw, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 text-xs rounded-md">
+                  <span key={i} className="px-2 py-0.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] text-xs rounded-md">
                     {kw}
                   </span>
                 ))}

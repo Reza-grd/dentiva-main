@@ -150,7 +150,7 @@ const MedicalRecordList = () => {
         <div className="card">
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-1">Terdaftar Hari Ini</p>
-            <p className="text-xl md:text-3xl font-bold text-blue-600">
+            <p className="text-xl md:text-3xl font-bold text-[var(--color-accent)]">
               {filteredRecords.filter(r => {
                 const recordDate = new Date(r.created_at);
                 return recordDate.toDateString() === new Date().toDateString();

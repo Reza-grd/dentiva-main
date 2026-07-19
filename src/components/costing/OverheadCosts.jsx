@@ -312,7 +312,7 @@ const OverheadCosts = () => {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => openEditModal(cost)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><Pencil size={16}/></button>
+                          <button onClick={() => openEditModal(cost)} className="p-1.5 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 rounded-lg"><Pencil size={16}/></button>
                           <button onClick={() => handleDeleteCost(cost.id)} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={16}/></button>
                         </div>
                       </td>

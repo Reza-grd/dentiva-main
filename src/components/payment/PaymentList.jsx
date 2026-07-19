@@ -168,10 +168,10 @@ const PaymentList = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Semua</p>
-              <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{formatCurrency(stats.total)}</p>
+              <p className="text-xl font-bold text-[var(--color-accent)]">{formatCurrency(stats.total)}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <DollarSign className="text-blue-500" size={24} />
+            <div className="w-12 h-12 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+              <DollarSign className="text-[var(--color-accent)]" size={24} />
             </div>
           </div>
         </div>
