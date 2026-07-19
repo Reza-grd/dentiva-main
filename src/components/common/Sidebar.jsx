@@ -91,12 +91,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Logo */}
         <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
-              <img src="/dentiva-logo.png" alt="Dentiva Logo" className="h-6 w-auto brightness-0 invert" />
-            </div>
+            <img src="/dentiva-logo.png" alt="Dentiva Logo" className="h-10 w-auto rounded-xl shadow-sm" />
             <div>
               <div className="font-bold text-2xl tracking-tighter text-gray-900 dark:text-white leading-none mb-1">Dentiva</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-none">Klinik Gigi</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-none tracking-widest uppercase">Klinik Gigi</div>
             </div>
           </div>
           <button
@@ -129,10 +127,19 @@ const Sidebar = ({ isOpen, onClose }) => {
                 to={item.path}
                 end={item.path === `/${role}`}
                 onClick={() => !isDesktop && onClose()}
+                style={({ isActive }) => 
+                  isActive 
+                    ? { 
+                        background: 'linear-gradient(to right, var(--color-accent), var(--color-accent-secondary))',
+                        color: '#fff',
+                        boxShadow: 'var(--shadow-glow)'
+                      } 
+                    : {}
+                }
                 className={({ isActive }) => `
                   flex items-center gap-3 px-4 py-3 mb-1.5 rounded-2xl transition-all duration-200 group relative
                   ${isActive 
-                    ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 font-semibold' 
+                    ? 'font-semibold' 
                     : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200 font-medium'
                   }
                 `}
