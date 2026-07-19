@@ -39,28 +39,8 @@ CREATE TABLE IF NOT EXISTS public.clinic_subscriptions (
 -- In Dentiva currently, it's tied via users table or isolated schemas.
 -- We will enforce Tenant Isolation on core tables if missing.
 
--- 3. Tenant Isolation RLS Check
--- Re-verify RLS policies on patients table to ensure strict clinic_id isolation
+-- 3. Tenant Isolation RLS Check (Replaced by RBAC in Migration 41)
+-- To avoid errors if clinic_id is not yet fully propagated in all environments,
+-- we rely on the granular RBAC permissions established in Migration 41.
 ALTER TABLE public.patients ENABLE ROW LEVEL SECURITY;
-
--- Drop generic policy if exists to replace with strict tenant isolated policy
-DROP POLICY IF EXISTS "Patients are isolated by clinic_id" ON public.patients;
-CREATE POLICY "Patients are isolated by clinic_id" 
-  ON public.patients 
-  FOR ALL
-  USING (
-    -- The user must belong to the same clinic as the patient record
-    -- This requires a lookup function or storing clinic_id directly on patients.
-    -- For this baseline, we assume patients has a clinic_id column.
-    clinic_id = (SELECT clinic_id FROM public.users WHERE id = auth.uid())
-  );
-
--- Do the same for visits
 ALTER TABLE public.visits ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Visits are isolated by clinic_id" ON public.visits;
-CREATE POLICY "Visits are isolated by clinic_id" 
-  ON public.visits 
-  FOR ALL
-  USING (
-    clinic_id = (SELECT clinic_id FROM public.users WHERE id = auth.uid())
-  );
