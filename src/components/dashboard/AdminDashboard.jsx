@@ -45,8 +45,8 @@ const CustomTooltip = ({ active, payload, label, isCurrency }) => {
 // ─── KPI Card ────────────────────────────────────────────────────────────────
 const KpiCard = ({ label, value, icon: Icon, iconBg, iconColor, trend, trendLabel, loading }) => (
   <Card className="group relative overflow-hidden h-full">
-    <div className="absolute -right-6 -top-6 opacity-5 dark:opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-      <Icon size={120} />
+    <div className="absolute -right-4 -top-4 opacity-[0.03] dark:opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
+      <Icon size={100} />
     </div>
     <CardContent className="p-5 flex items-start justify-between relative z-10 h-full">
       {loading ? (

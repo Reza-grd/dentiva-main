@@ -51,8 +51,8 @@ const TopBar = ({ onMenuClick }) => {
   const PRESET_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/70 dark:bg-[#0B0E14]/70 border-b border-gray-200/50 dark:border-gray-800/50 transition-colors duration-300">
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/70 dark:bg-[#0B0E14]/70 border-b border-gray-100/50 dark:border-gray-800/50 transition-colors duration-200">
+      <div className="flex h-16 md:h-[72px] lg:h-20 items-center justify-between px-4 sm:px-6">
         {/* Left: Mobile Menu & Breadcrumb */}
         <div className="flex items-center gap-4">
           <button
@@ -62,47 +62,47 @@ const TopBar = ({ onMenuClick }) => {
             <Menu size={20} />
           </button>
           
-          <div className="hidden md:flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+          <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-400 dark:text-gray-500 opacity-90">
             <span>Dentiva</span>
-            <ChevronRight size={14} className="text-gray-300 dark:text-gray-600" />
-            <span className="text-gray-900 dark:text-gray-100 font-semibold">{pageTitle}</span>
+            <ChevronRight size={12} className="text-gray-300 dark:text-gray-600" />
+            <span className="text-gray-800 dark:text-gray-200 text-sm font-bold opacity-100">{pageTitle}</span>
           </div>
         </div>
 
         {/* Center: Global Search */}
-        <div className="flex-1 max-w-lg mx-4 flex justify-center">
+        <div className="flex-1 w-full max-w-sm md:max-w-md xl:max-w-lg mx-4 flex justify-center">
           <GlobalSearch />
         </div>
 
         {/* Right: Actions & User */}
-        <div className="flex items-center gap-3 sm:gap-5">
+        <div className="flex items-center gap-4 md:gap-6">
           {/* Theme Controls */}
-          <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800/50 p-1 rounded-full border border-gray-200 dark:border-gray-700/50">
+          <div className="flex items-center gap-1.5 bg-gray-50/80 dark:bg-gray-800/50 p-1 rounded-full border border-gray-100 dark:border-gray-700/50">
             <button
               onClick={toggleTheme}
-              className={`p-1.5 rounded-full transition-all ${theme === 'light' ? 'bg-white shadow-sm text-yellow-500' : 'text-gray-400 hover:text-gray-200'}`}
+              className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'light' ? 'bg-white shadow-sm text-yellow-500' : 'text-gray-400 hover:text-gray-200'}`}
             >
-              <Sun size={16} />
+              <Sun size={15} />
             </button>
             <button
               onClick={toggleTheme}
-              className={`p-1.5 rounded-full transition-all ${theme === 'dark' ? 'bg-gray-700 shadow-sm text-blue-400' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'dark' ? 'bg-gray-700 shadow-sm text-blue-400' : 'text-gray-400 hover:text-gray-600'}`}
             >
-              <Moon size={16} />
+              <Moon size={15} />
             </button>
             
-            <div className="relative">
+            <div className="relative flex items-center">
               <button
                 onClick={() => setShowColorPicker(!showColorPicker)}
                 className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
               >
-                <Palette size={16} />
+                <Palette size={15} />
               </button>
               
               {showColorPicker && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowColorPicker(false)} />
-                  <div className="absolute right-0 top-full mt-2 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl z-50 flex gap-2">
+                  <div className="absolute right-0 top-full mt-2 p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xl z-50 flex gap-2">
                     {PRESET_COLORS.map(c => (
                       <button
                         key={c}
@@ -125,10 +125,10 @@ const TopBar = ({ onMenuClick }) => {
           <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
 
           {/* User Menu */}
-          <div className="relative">
+          <div className="relative flex items-center">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+              className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-700/50"
             >
               <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-250 dark:border-gray-750">
                 {profilePhotoUrl ? (

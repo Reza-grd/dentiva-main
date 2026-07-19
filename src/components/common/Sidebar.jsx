@@ -82,21 +82,21 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`
-          flex flex-col flex-shrink-0 w-[260px] h-[100dvh] lg:h-[calc(100vh-2rem)] 
-          bg-white/80 dark:bg-[#14171F]/80 backdrop-blur-xl border-r lg:border lg:rounded-3xl lg:my-4 lg:ml-4
-          border-gray-200/50 dark:border-gray-800/50 shadow-card transition-transform duration-300 ease-in-out
+          flex flex-col flex-shrink-0 w-[260px] h-[100dvh] lg:h-screen
+          bg-white/80 dark:bg-[#14171F]/80 backdrop-blur-xl border-r
+          border-gray-100 dark:border-gray-800/50 shadow-sm transition-transform duration-300 ease-in-out
           ${isDesktop ? 'translate-x-0 static' : (isOpen ? 'translate-x-0 fixed left-0 top-0 z-50' : '-translate-x-full fixed left-0 top-0 z-50')}
         `}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800/50">
+        {/* Header Logo Area */}
+        <div className="flex items-center justify-between px-6 py-6 lg:py-7 border-b border-gray-50 dark:border-gray-800/30">
           <div className="flex items-center gap-3">
             <img src="/dentiva-logo.png" alt="Dentiva Logo" className="h-10 w-auto rounded-xl shadow-sm" />
-            <div>
-              <div className="text-lg font-extrabold text-gray-900 dark:text-gray-100 leading-tight">
+            <div className="flex flex-col justify-center">
+              <div className="text-lg font-extrabold text-gray-900 dark:text-gray-100 leading-none mb-1">
                 Dentiva
               </div>
-              <div className="text-[10px] text-gray-500 dark:text-gray-400 tracking-widest font-semibold uppercase">
+              <div className="text-[10px] text-gray-500/80 dark:text-gray-400/80 tracking-[0.2em] font-semibold uppercase leading-none">
                 Klinik Gigi
               </div>
             </div>
@@ -105,20 +105,20 @@ const Sidebar = ({ isOpen, onClose }) => {
           <button
             onClick={onClose}
             aria-label="Tutup sidebar"
-            className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 overflow-y-auto overflow-x-hidden scrollbar-hide">
+        <nav className="flex-1 px-4 py-6 overflow-y-auto overflow-x-hidden scrollbar-hide flex flex-col gap-1">
           {items.map((item, idx) => {
             if (item.group) {
               return (
                 <div
                   key={`g-${idx}`}
-                  className={`text-[10px] font-bold text-gray-400 dark:text-gray-500 tracking-wider uppercase ${idx === 0 ? 'px-3 pb-2 pt-1' : 'px-3 pb-2 pt-5'}`}
+                  className={`text-[9px] font-bold text-gray-400/70 dark:text-gray-500/70 tracking-[0.15em] uppercase ${idx === 0 ? 'px-2 pb-2 pt-1' : 'px-2 pb-2 pt-6'}`}
                 >
                   {item.group}
                 </div>
@@ -134,14 +134,14 @@ const Sidebar = ({ isOpen, onClose }) => {
                 onClick={() => !isDesktop && onClose()}
                 style={({ isActive }) => 
                   isActive 
-                    ? { backgroundColor: `${primaryColor}15`, color: primaryColor } 
-                    : {}
+                    ? { backgroundColor: `${primaryColor}10`, color: primaryColor, borderLeftColor: primaryColor } 
+                    : { borderLeftColor: 'transparent' }
                 }
                 className={({ isActive }) => `
-                  flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 transition-all duration-200 group
+                  flex items-center gap-3 px-3 py-2.5 rounded-r-xl border-l-[3px] transition-all duration-200 group relative
                   ${isActive 
-                    ? 'font-semibold' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-gray-200 font-medium'
+                    ? 'font-bold bg-gray-50/50' 
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 hover:text-gray-900 dark:hover:text-gray-200 font-medium'
                   }
                 `}
               >
@@ -149,10 +149,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                   <>
                     <Icon
                       size={18}
-                      style={isActive ? { color: primaryColor } : {}}
-                      className={`${!isActive && 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}
+                      style={isActive ? { color: primaryColor, strokeWidth: 2.5 } : { strokeWidth: 2 }}
+                      className={`${!isActive && 'text-gray-400/80 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'} transition-colors duration-200`}
                     />
-                    <span className="text-[13px]">{item.label}</span>
+                    <span className="text-[13px] tracking-wide">{item.label}</span>
                   </>
                 )}
               </NavLink>
@@ -161,9 +161,9 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-900/20 lg:rounded-b-3xl">
-          <div className="text-xs text-center text-gray-400 dark:text-gray-500 font-medium">
-            <span className="font-semibold">Dentiva</span> AI Platform
+        <div className="p-4 border-t border-gray-50 dark:border-gray-800/30 bg-transparent">
+          <div className="text-[10px] text-center text-gray-400/60 dark:text-gray-500/50 font-medium tracking-wide">
+            <span className="font-semibold text-gray-400/80 dark:text-gray-500/80">Dentiva</span> AI Platform
             <br/>© 2026
           </div>
         </div>

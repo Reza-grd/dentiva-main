@@ -36,9 +36,9 @@ const StatusBadge = ({ status }) => {
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor, loading, subtitle }) => (
-  <Card className="group relative overflow-hidden border-0 bg-white/60 dark:bg-gray-900/60 shadow-sm backdrop-blur-xl">
-    <div className="absolute -right-6 -top-6 opacity-5 dark:opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-      <Icon size={120} />
+  <Card className="group relative overflow-hidden border-0 bg-white/60 dark:bg-gray-900/60 shadow-sm backdrop-blur-xl h-full">
+    <div className="absolute -right-2 -top-2 opacity-[0.03] dark:opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
+      <Icon size={80} />
     </div>
     <CardContent className="p-5">
       {loading ? (

@@ -33,9 +33,9 @@ const StatusBadge = ({ status }) => {
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor, loading }) => (
-  <div className="glass-panel p-5 group relative overflow-hidden">
-    <div className="absolute -right-6 -top-6 opacity-5 dark:opacity-10 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-      <Icon size={120} />
+  <div className="glass-panel p-5 group relative overflow-hidden h-full">
+    <div className="absolute -right-2 -bottom-2 opacity-[0.03] dark:opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
+      <Icon size={80} />
     </div>
     {loading ? (
       <div className="animate-pulse space-y-3">
