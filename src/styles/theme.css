@@ -9,13 +9,13 @@
   --color-text: #0F172A;
   --color-muted: #64748B;
   
-  --color-accent: #3B82F6; /* Primary Gradient Start */
-  --color-accent-secondary: #8B5CF6; /* Primary Gradient End */
+  --color-accent: #6D28D9; /* Violet-700 */
+  --color-accent-secondary: #4F46E5; /* Indigo-600 */
   
   /* Shadows - Subtle & Premium */
   --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.03);
   --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 16px rgba(59, 130, 246, 0.25);
+  --shadow-glow: 0 0 16px rgba(109, 40, 217, 0.25);
   
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -31,13 +31,13 @@
   --color-text: #F8FAFC;
   --color-muted: #94A3B8;
   
-  --color-accent: #3B82F6;
-  --color-accent-secondary: #8B5CF6;
+  --color-accent: #6D28D9;
+  --color-accent-secondary: #4F46E5;
   
   /* Shadows - Subtle & Premium */
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.2);
   --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.35);
-  --shadow-glow: 0 0 16px rgba(59, 130, 246, 0.4);
+  --shadow-glow: 0 0 16px rgba(109, 40, 217, 0.4);
 }
 
 /* Base Body Styles */

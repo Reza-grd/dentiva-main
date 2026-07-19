@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette } from 'lucide-react';
+import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette, Bell, ChevronDown } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
 import GlobalSearch from './GlobalSearch';
@@ -124,19 +124,26 @@ const TopBar = ({ onMenuClick }) => {
 
           <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
 
+          {/* Notifications Placeholder */}
+          <div className="relative">
+            <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <Bell size={20} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0B0E14]"></span>
+            </button>
+          </div>
+
           {/* User Menu */}
           <div className="relative flex items-center">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-3 p-1 pr-3 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-700/50"
+              className="flex items-center gap-3 p-1.5 pr-4 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-700/50 group"
             >
-              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-250 dark:border-gray-750">
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 relative">
                 {profilePhotoUrl ? (
                   <img src={profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div 
-                    className="w-full h-full flex items-center justify-center text-white font-bold text-xs"
-                    style={{ background: 'linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary))' }}
+                    className="w-full h-full flex items-center justify-center text-white font-bold text-xs bg-gradient-to-br from-violet-500 to-indigo-600"
                   >
                     {initials}
                   </div>
@@ -146,10 +153,15 @@ const TopBar = ({ onMenuClick }) => {
                 <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">
                   {formatDoctorName(userProfile) || userProfile?.full_name || 'User'}
                 </div>
-                <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <div className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 w-fit px-1.5 py-0.5 rounded-md ${
+                  userProfile?.role === 'admin' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
+                  userProfile?.role === 'resepsionis' ? 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400' :
+                  'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
+                }`}>
                   {role}
                 </div>
               </div>
+              <ChevronDown size={14} className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors ml-1 hidden sm:block" />
             </button>
 
             {showUserMenu && (

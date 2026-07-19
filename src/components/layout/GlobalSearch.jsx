@@ -68,8 +68,8 @@ const GlobalSearch = () => {
   return (
     <div ref={wrapperRef} className="relative w-full max-w-md hidden md:block">
       <div className="relative group">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-4 w-4 text-gray-400 group-focus-within:text-[var(--color-accent)] transition-colors" />
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+          <Search className="h-[18px] w-[18px] text-gray-400 group-focus-within:text-[var(--color-accent)] transition-colors" />
         </div>
         <input
           type="text"
@@ -79,9 +79,16 @@ const GlobalSearch = () => {
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          placeholder="Cari pasien (Nama, No. RM, No. WA)..."
-          className="w-full pl-10 pr-10 py-2 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white dark:focus:bg-gray-900 transition-all text-gray-900 dark:text-white"
+          placeholder="Cari pasien..."
+          className="w-full pl-10 pr-20 py-2.5 bg-gray-100/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:bg-white dark:focus:bg-[#09090b] transition-all text-gray-900 dark:text-white"
         />
+        {!searchTerm && (
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-400 bg-gray-200/50 dark:bg-gray-700/50 rounded-lg">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </div>
+        )}
         {searchTerm && (
           <button
             onClick={() => {
