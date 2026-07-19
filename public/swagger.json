@@ -14,32 +14,24 @@
   "paths": {
     "/patients": {
       "get": {
-        "summary": "Get all patients",
-        "description": "Retrieves a list of patients associated with the authenticated clinic.",
+        "summary": "Get all patients (DEPRECATED & DISABLED)",
+        "description": "Retrieves a list of patients associated with the authenticated clinic. This endpoint is disabled for security reasons.",
+        "deprecated": true,
         "security": [
           { "BearerAuth": [] }
         ],
         "responses": {
-          "200": {
-            "description": "Successful response",
+          "410": {
+            "description": "Gone - Endpoint has been disabled",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "string", "format": "uuid" },
-                          "rekam_medis": { "type": "string" },
-                          "nama": { "type": "string" }
-                        }
-                      }
-                    },
+                    "success": { "type": "boolean", "example": false },
+                    "error": { "type": "string", "example": "Gone" },
                     "message": { "type": "string" },
+                    "code": { "type": "string" },
                     "timestamp": { "type": "string", "format": "date-time" },
                     "version": { "type": "string" }
                   }
