@@ -38,8 +38,8 @@ BEGIN
   
   -- If we can't get auth.uid() directly, maybe it's passed in the record (fallback for triggers)
   IF v_user_id IS NULL AND TG_OP IN ('INSERT', 'UPDATE') THEN
-    IF NEW ? 'clinic_id' THEN
-      v_clinic_id := NEW.clinic_id;
+    IF to_jsonb(NEW) ? 'clinic_id' THEN
+      v_clinic_id := (to_jsonb(NEW)->>'clinic_id')::uuid;
     END IF;
   END IF;
 
