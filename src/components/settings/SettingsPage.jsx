@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 import TreatmentEducationTemplates from './TreatmentEducationTemplates';
 import SoapTemplates from './SoapTemplates';
+import { satusehatService } from '../../services/satusehatService';
 
 const SettingsPage = () => {
   const { user, userProfile } = useAuth();
@@ -22,11 +23,123 @@ const SettingsPage = () => {
   const [auditLogs, setAuditLogs] = useState([]);
   const [loadingAudit, setLoadingAudit] = useState(false);
 
+  // SatuSehat States
+  const [ssOrg, setSsOrg] = useState(null);
+  const [ssLocations, setSsLocations] = useState([]);
+  const [ssOutbox, setSsOutbox] = useState([]);
+  const [loadingSS, setLoadingSS] = useState(false);
+  const [syncingSS, setSyncingSS] = useState({});
+  const [processingOutbox, setProcessingOutbox] = useState(false);
+  const [retryingOutboxId, setRetryingOutboxId] = useState(null);
+
   useEffect(() => {
     if (activeTab === 'audit-logs') {
       fetchAuditLogs();
+    } else if (activeTab === 'satusehat') {
+      loadSatuSehatData();
     }
-  }, [activeTab]);
+  }, [activeTab, userProfile]);
+
+  const loadSatuSehatData = async () => {
+    if (!userProfile?.clinic_id) return;
+    setLoadingSS(true);
+    try {
+      const { data: orgData, error: orgErr } = await supabase
+        .from('satusehat_organizations')
+        .select('*')
+        .eq('clinic_id', userProfile.clinic_id)
+        .maybeSingle();
+
+      if (orgErr) throw orgErr;
+      setSsOrg(orgData);
+
+      const { data: locData, error: locErr } = await supabase
+        .from('satusehat_locations')
+        .select('*')
+        .eq('clinic_id', userProfile.clinic_id)
+        .order('nama_unit', { ascending: true });
+
+      if (locErr) throw locErr;
+      setSsLocations(locData || []);
+
+      const outboxRes = await satusehatService.getOutboxLogs(userProfile.clinic_id);
+      if (outboxRes.success) {
+        setSsOutbox(outboxRes.data || []);
+      }
+    } catch (e) {
+      toast.error('Gagal memuat data SatuSehat: ' + e.message);
+    } finally {
+      setLoadingSS(false);
+    }
+  };
+
+  const handleRetryOutboxItem = async (outboxId) => {
+    setRetryingOutboxId(outboxId);
+    try {
+      const res = await satusehatService.retryOutboxItem(outboxId);
+      if (res.success) {
+        toast.success('Status antrian berhasil direset ke "pending".');
+        await loadSatuSehatData();
+      } else {
+        toast.error('Gagal me-reset item: ' + res.error);
+      }
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setRetryingOutboxId(null);
+    }
+  };
+
+  const handleProcessOutboxQueue = async () => {
+    setProcessingOutbox(true);
+    try {
+      const res = await satusehatService.processOutboxQueue();
+      if (res.success) {
+        toast.success(`Pemrosesan antrian selesai: ${res.data?.processedCount || 0} item diproses.`);
+        await loadSatuSehatData();
+      } else {
+        toast.error('Gagal memproses antrian: ' + res.error);
+      }
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setProcessingOutbox(false);
+    }
+  };
+
+  const handleSyncSSOrg = async () => {
+    setSyncingSS(prev => ({ ...prev, org: true }));
+    try {
+      const res = await satusehatService.syncOrganization(userProfile.clinic_id);
+      if (res.success) {
+        toast.success('Organisasi SatuSehat berhasil disinkronkan!');
+        await loadSatuSehatData();
+      } else {
+        toast.error('Gagal sinkronisasi organisasi: ' + res.error);
+      }
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setSyncingSS(prev => ({ ...prev, org: false }));
+    }
+  };
+
+  const handleSyncSSLoc = async (locId) => {
+    setSyncingSS(prev => ({ ...prev, [locId]: true }));
+    try {
+      const res = await satusehatService.syncLocation(locId);
+      if (res.success) {
+        toast.success('Lokasi SatuSehat berhasil disinkronkan!');
+        await loadSatuSehatData();
+      } else {
+        toast.error('Gagal sinkronisasi lokasi: ' + res.error);
+      }
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setSyncingSS(prev => ({ ...prev, [locId]: false }));
+    }
+  };
 
   const fetchAuditLogs = async () => {
     setLoadingAudit(true);
@@ -240,6 +353,7 @@ const SettingsPage = () => {
       { id: 'whatsapp', label: 'Pengaturan WhatsApp', icon: MessageSquare },
       { id: 'treatment-education', label: 'Edukasi Perawatan', icon: MessageSquare },
       { id: 'soap-templates', label: 'Template SOAP', icon: Save },
+      { id: 'satusehat', label: 'SATUSEHAT', icon: Shield },
     ] : []),
     { id: 'security', label: 'Keamanan', icon: Lock },
     { id: 'audit-logs', label: 'Log Audit', icon: Shield },
@@ -741,6 +855,284 @@ const SettingsPage = () => {
               </div>
             )}
 
+            {/* SatuSehat Tab */}
+            {activeTab === 'satusehat' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex justify-between items-center">
+                  <span>Integrasi SATUSEHAT Kemenkes RI</span>
+                  <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-blue-500/10 text-blue-500 rounded-xl border border-blue-500/20">
+                    SatuSehat Portal
+                  </span>
+                </h2>
+
+                {loadingSS ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <Loader className="animate-spin text-blue-500 mb-3" size={32} />
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Memuat data SATUSEHAT...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Organization Section */}
+                    <div className="glass-panel p-6 rounded-2xl border border-gray-150 dark:border-gray-800">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <Building size={18} className="text-blue-500" />
+                        Master Organisasi (DFO)
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                        Data Organisasi Klinik terpetakan 1-to-1 dengan registrasi DFO (Direktorat Fasilitas Pelayanan Kesehatan) Kementerian Kesehatan. Masukkan ID Organisasi Anda di database atau profil sebelum menekan tombol sinkronisasi.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-gray-50 dark:bg-gray-800/20 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">Status Integrasi</div>
+                          <div className="flex items-center gap-2">
+                            <span className={`w-2.5 h-2.5 rounded-full ${ssOrg?.satusehat_organization_id ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                              {ssOrg?.satusehat_organization_id ? 'Terhubung ke Sandbox' : 'Belum Terhubung / ID Kosong'}
+                            </span>
+                          </div>
+                          {ssOrg?.satusehat_organization_id && (
+                            <div className="mt-1 text-[11px] text-gray-500 font-mono select-all">
+                              ID: {ssOrg.satusehat_organization_id}
+                            </div>
+                          )}
+                          {ssOrg?.last_synced_at && (
+                            <div className="mt-1 text-[10px] text-gray-400">
+                              Terakhir Sinkron: {new Date(ssOrg.last_synced_at).toLocaleString('id-ID')}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={handleSyncSSOrg}
+                            disabled={syncingSS.org}
+                            className="flex items-center gap-2 py-2 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                          >
+                            {syncingSS.org ? <Loader className="animate-spin" size={16} /> : <Shield size={16} />}
+                            {syncingSS.org ? 'Menyinkronkan...' : 'Sinkronkan Organisasi'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Locations Section */}
+                    <div className="glass-panel p-6 rounded-2xl border border-gray-150 dark:border-gray-800">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                        <MapPin size={18} className="text-blue-500" />
+                        Master Lokasi (Ruangan & Unit Pelayanan)
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
+                        Data ruangan, poli gusi, poli bedah mulut, dan unit pelayanan fisik di dalam klinik yang wajib dipetakan ke FHIR Location SatuSehat.
+                      </p>
+
+                      {ssLocations.length === 0 ? (
+                        <div className="text-center py-8 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Belum ada lokasi klinik yang terdaftar.</p>
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="border-b border-gray-150 dark:border-gray-800 text-xs text-gray-500 font-semibold">
+                                <th className="py-3 px-4">Nama Unit/Ruangan</th>
+                                <th className="py-3 px-4">SatuSehat Location ID</th>
+                                <th className="py-3 px-4 text-center">Status</th>
+                                <th className="py-3 px-4 text-right">Aksi</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {ssLocations.map((loc) => (
+                                <tr key={loc.id} className="border-b border-gray-100 dark:border-gray-800 text-sm hover:bg-gray-50/50 dark:hover:bg-gray-800/10">
+                                  <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white">
+                                    {loc.nama_unit}
+                                    {loc.is_default && (
+                                      <span className="ml-2 inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 uppercase tracking-wide">
+                                        Default
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="py-3 px-4 font-mono text-xs text-gray-500 select-all">
+                                    {loc.satusehat_location_id || '-'}
+                                  </td>
+                                  <td className="py-3 px-4 text-center">
+                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                      loc.satusehat_location_id
+                                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                        : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                                    }`}>
+                                      {loc.satusehat_location_id ? 'Terhubung' : 'Belum Sinkron'}
+                                    </span>
+                                  </td>
+                                  <td className="py-3 px-4 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSyncSSLoc(loc.id)}
+                                      disabled={syncingSS[loc.id] || !ssOrg?.satusehat_organization_id}
+                                      className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      title={!ssOrg?.satusehat_organization_id ? 'Sinkronkan Organisasi terlebih dahulu' : ''}
+                                    >
+                                      {syncingSS[loc.id] ? <Loader className="animate-spin" size={12} /> : <Shield size={12} />}
+                                      {syncingSS[loc.id] ? 'Syncing...' : 'Sync'}
+                                    </button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Outbox Queue & Clinical Ratios Section */}
+                    <div className="glass-panel p-6 rounded-2xl border border-gray-150 dark:border-gray-800 space-y-6">
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <Database size={18} className="text-blue-500" />
+                            Antrian Pengiriman (Outbox Queue) & Rasio Medis
+                          </h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Status antrian asinkron pengiriman FHIR resource ke SatuSehat Kemenkes RI beserta rasio kelengkapan medis.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleProcessOutboxQueue}
+                          disabled={processingOutbox}
+                          className="flex items-center gap-2 py-2 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                        >
+                          {processingOutbox ? <Loader className="animate-spin" size={14} /> : <Send size={14} />}
+                          {processingOutbox ? 'Memproses...' : 'Jalankan Antrian Sekarang'}
+                        </button>
+                      </div>
+
+                      {/* Clinical Audit Ratios */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="p-4 bg-blue-50/50 dark:bg-blue-500/5 rounded-xl border border-blue-100 dark:border-blue-500/10">
+                          <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider">Condition : Encounter</div>
+                          <div className="text-2xl font-extrabold text-blue-700 dark:text-blue-300 mt-1">
+                            {(() => {
+                              const enc = ssOutbox.filter(i => i.resource_type === 'Encounter' && i.status === 'success').length;
+                              const cond = ssOutbox.filter(i => i.resource_type === 'Condition' && i.status === 'success').length;
+                              return enc > 0 ? (cond / enc).toFixed(2) : '0.00';
+                            })()}
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-0.5">Target ideal ≈ 1.00</div>
+                        </div>
+
+                        <div className="p-4 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100 dark:border-purple-500/10">
+                          <div className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold uppercase tracking-wider">Composition : Encounter</div>
+                          <div className="text-2xl font-extrabold text-purple-700 dark:text-purple-300 mt-1">
+                            {(() => {
+                              const enc = ssOutbox.filter(i => i.resource_type === 'Encounter' && i.status === 'success').length;
+                              const comp = ssOutbox.filter(i => i.resource_type === 'Composition' && i.status === 'success').length;
+                              return enc > 0 ? (comp / enc).toFixed(2) : '0.00';
+                            })()}
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-0.5">Target ideal ≈ 1.00</div>
+                        </div>
+
+                        <div className="p-4 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-100 dark:border-amber-500/10">
+                          <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider">Pending / Retryable</div>
+                          <div className="text-2xl font-extrabold text-amber-700 dark:text-amber-300 mt-1">
+                            {ssOutbox.filter(i => i.status === 'pending' || i.status === 'failed_retryable').length}
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-0.5">Menunggu jadwal retry</div>
+                        </div>
+
+                        <div className="p-4 bg-rose-50/50 dark:bg-rose-500/5 rounded-xl border border-rose-100 dark:border-rose-500/10">
+                          <div className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">Gagal Permanen</div>
+                          <div className="text-2xl font-extrabold text-rose-700 dark:text-rose-300 mt-1">
+                            {ssOutbox.filter(i => i.status === 'failed_permanent').length}
+                          </div>
+                          <div className="text-[10px] text-gray-500 mt-0.5">Butuh intervensi manual</div>
+                        </div>
+                      </div>
+
+                      {/* Outbox Log Table */}
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">
+                          Daftar Log Outbox Terakhir ({ssOutbox.length} item)
+                        </h4>
+
+                        {ssOutbox.length === 0 ? (
+                          <div className="text-center py-6 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
+                            <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Belum ada antrian pengiriman di outbox.</p>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto max-h-96">
+                            <table className="w-full text-left border-collapse">
+                              <thead className="sticky top-0 bg-gray-50 dark:bg-gray-800">
+                                <tr className="border-b border-gray-150 dark:border-gray-800 text-xs text-gray-500 font-semibold">
+                                  <th className="py-2.5 px-3">Waktu</th>
+                                  <th className="py-2.5 px-3">Resource</th>
+                                  <th className="py-2.5 px-3">Status</th>
+                                  <th className="py-2.5 px-3">Percobaan</th>
+                                  <th className="py-2.5 px-3">Pesan Error / ID</th>
+                                  <th className="py-2.5 px-3 text-right">Aksi</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ssOutbox.map((item) => (
+                                  <tr key={item.id} className="border-b border-gray-100 dark:border-gray-800/60 text-xs hover:bg-gray-50/50 dark:hover:bg-gray-800/20">
+                                    <td className="py-2.5 px-3 text-gray-500">
+                                      {new Date(item.created_at).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}
+                                    </td>
+                                    <td className="py-2.5 px-3 font-semibold text-gray-900 dark:text-white">
+                                      {item.resource_type}
+                                    </td>
+                                    <td className="py-2.5 px-3">
+                                      <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                        item.status === 'success'
+                                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+                                          : item.status === 'processing'
+                                          ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
+                                          : item.status === 'failed_retryable'
+                                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
+                                          : item.status === 'failed_permanent'
+                                          ? 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
+                                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+                                      }`}>
+                                        {item.status}
+                                      </span>
+                                    </td>
+                                    <td className="py-2.5 px-3 font-mono text-gray-600 dark:text-gray-400">
+                                      {item.attempt_count}
+                                    </td>
+                                    <td className="py-2.5 px-3 max-w-xs truncate text-gray-500 font-mono" title={item.last_error || item.satusehat_resource_id}>
+                                      {item.satusehat_resource_id ? (
+                                        <span className="text-emerald-600 dark:text-emerald-400">ID: {item.satusehat_resource_id}</span>
+                                      ) : item.last_error ? (
+                                        <span className="text-rose-600 dark:text-rose-400">{item.last_error}</span>
+                                      ) : '-'}
+                                    </td>
+                                    <td className="py-2.5 px-3 text-right">
+                                      {isAdmin && (item.status === 'failed_permanent' || item.status === 'failed_retryable') && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRetryOutboxItem(item.id)}
+                                          disabled={retryingOutboxId === item.id}
+                                          className="inline-flex items-center gap-1 py-1 px-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold rounded-lg text-[11px] transition-all"
+                                        >
+                                          {retryingOutboxId === item.id ? <Loader className="animate-spin" size={10} /> : <Shield size={10} />}
+                                          Retry Manual
+                                        </button>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Database Tab */}
             {activeTab === 'database' && (
               <div>
@@ -796,7 +1188,7 @@ const SettingsPage = () => {
             )}
 
             {/* Save Button */}
-            {activeTab !== 'security' && (
+            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && (
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3 items-center">
                 {saved && (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mr-2 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg">

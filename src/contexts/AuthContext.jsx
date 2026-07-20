@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../services/supabase';
+import { encryptionService } from '../services/encryptionService';
 import logger from '../utils/logger';
 import { useToast } from '../components/common/ToastNotification';
 
@@ -183,6 +184,15 @@ export const AuthProvider = ({ children }) => {
         toast.error('Akun Anda telah dinonaktifkan. Silakan hubungi administrator.');
         throw new Error('Akun dinonaktifkan');
       }
+
+      if (data.nik) {
+        try {
+          const decrypted = await encryptionService.decryptBatch([data.nik]);
+          data.nik = decrypted[0];
+        } catch (encErr) {
+          console.error('Failed to decrypt user NIK:', encErr);
+        }
+      }
       
       logger.debug('✅ Profile loaded');
       setUserProfile(data);
@@ -281,9 +291,14 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (updates) => {
     try {
       setLoading(true);
+      const updatesCopy = { ...updates };
+      if (updatesCopy.nik !== undefined && updatesCopy.nik !== null) {
+        const encrypted = await encryptionService.encryptBatch([updatesCopy.nik]);
+        updatesCopy.nik = encrypted[0];
+      }
       const { error } = await supabase
         .from('users')
-        .update(updates)
+        .update(updatesCopy)
         .eq('id', user.id);
 
       if (error) throw error;

@@ -6,7 +6,11 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import PhotoUpload from '../common/PhotoUpload';
 import { patientService } from '../../services/patientService';
 import { visitService } from '../../services/visitService';
-import { User, Edit, Save, X, Calendar, FileText, AlertCircle, ChevronLeft } from 'lucide-react';
+import { consentService } from '../../services/consentService';
+import { satusehatService } from '../../services/satusehatService';
+import { pdpService } from '../../services/pdpService';
+import { generatePDPAccessPDF } from '../../utils/pdpExportPdfGenerator';
+import { User, Edit, Save, X, Calendar, FileText, AlertCircle, ChevronLeft, Shield, Loader, Database, Download, Clock, Lock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { PROVINSI, getKabupatenByProvinsi, getKecamatanByKabupaten, getDesaByKecamatan } from '../../utils/wilayahIndonesia';
@@ -43,6 +47,16 @@ const PatientDetail = () => {
     keluhan: '',
   });
   const [schedulingVisit, setSchedulingVisit] = useState(false);
+  const [satusehatConsent, setSatusehatConsent] = useState(false);
+  const [savingConsent, setSavingConsent] = useState(false);
+  const [syncingPatient, setSyncingPatient] = useState(false);
+
+  // UU PDP & Permenkes 24/2022 States
+  const [pdpRequests, setPdpRequests] = useState([]);
+  const [retentionInfo, setRetentionInfo] = useState({ isExpired: false, label: 'Aktif' });
+  const [showPdpModal, setShowPdpModal] = useState(false);
+  const [pdpForm, setPdpForm] = useState({ requestType: 'access', notes: '' });
+  const [submittingPdp, setSubmittingPdp] = useState(false);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -79,12 +93,100 @@ const PatientDetail = () => {
         setPekerjaanLainnya(patientResult.data.pekerjaan);
         setEditForm(prev => ({ ...prev, pekerjaan: 'Lainnya' }));
       }
+      
+      // Load SatuSehat consent
+      const consentRes = await consentService.getLatestSatuSehatConsent(patientId);
+      if (consentRes.success && consentRes.data) {
+        setSatusehatConsent(consentRes.data.consent_given);
+      } else {
+        setSatusehatConsent(false);
+      }
+
+      // Load UU PDP Data Subject Requests
+      const pdpRes = await pdpService.getDataSubjectRequests(patientId);
+      if (pdpRes.success) {
+        setPdpRequests(pdpRes.data || []);
+      }
     } else {
       setError('Pasien tidak ditemukan');
     }
+
     const visitsResult = await visitService.getVisitsByPatient(patientId);
-    if (visitsResult.success) setVisits(visitsResult.data || []);
+    const visitList = visitsResult.success ? (visitsResult.data || []) : [];
+    if (visitsResult.success) setVisits(visitList);
+
+    // Permenkes 24/2022 Retention Audit Check
+    const lastVisitDate = visitList.length > 0 ? visitList[0].tanggal_kunjungan : null;
+    const rInfo = pdpService.checkRetentionStatus(lastVisitDate, 5);
+    setRetentionInfo(rInfo);
+
     setLoading(false);
+  };
+
+  const handleCreatePDPRequest = async (e) => {
+    e.preventDefault();
+    setSubmittingPdp(true);
+    try {
+      const res = await pdpService.createDataSubjectRequest({
+        clinicId: userProfile?.clinic_id,
+        patientId: patientId,
+        requestType: pdpForm.requestType,
+        notes: pdpForm.notes
+      });
+      if (res.success) {
+        toast.success('Permintaan Subjek Data (UU PDP) berhasil dicatat!');
+        setShowPdpModal(false);
+        setPdpForm({ requestType: 'access', notes: '' });
+        
+        const pdpRes = await pdpService.getDataSubjectRequests(patientId);
+        if (pdpRes.success) setPdpRequests(pdpRes.data || []);
+
+        if (pdpForm.requestType === 'access') {
+          generatePDPAccessPDF(patient, visits, { nama_klinik: userProfile?.clinic_name });
+        }
+      } else {
+        toast.error('Gagal mencatat permintaan: ' + res.error);
+      }
+    } catch (err) {
+      toast.error('Error: ' + err.message);
+    } finally {
+      setSubmittingPdp(false);
+    }
+  };
+
+  const handleExportPDPPdf = () => {
+    generatePDPAccessPDF(patient, visits, { nama_klinik: userProfile?.clinic_name });
+    toast.success('Berkas Hak Akses Subjek Data PDF berhasil diunduh!');
+  };
+
+  const handleSatuSehatConsentChange = async (e) => {
+    const val = e.target.checked;
+    setSavingConsent(true);
+    const res = await consentService.saveSatuSehatConsent(patientId, val, 'Diperbarui dari dashboard profil pasien');
+    if (res.success) {
+      setSatusehatConsent(val);
+      toast.success(val ? 'Persetujuan integrasi SatuSehat diaktifkan' : 'Persetujuan integrasi SatuSehat dinonaktifkan');
+    } else {
+      toast.error('Gagal memperbarui persetujuan SatuSehat: ' + res.error);
+    }
+    setSavingConsent(false);
+  };
+
+  const handleSyncPatient = async () => {
+    setSyncingPatient(true);
+    try {
+      const res = await satusehatService.syncPatient(patientId);
+      if (res.success) {
+        toast.success('Penyelarasan SatuSehat Patient Berhasil!');
+        await loadPatientData(); // Reload patient data to reflect new ID/sync date
+      } else {
+        toast.error('Gagal menyelaraskan: ' + res.error);
+      }
+    } catch (err) {
+      toast.error('Error: ' + err.message);
+    } finally {
+      setSyncingPatient(false);
+    }
   };
 
   const handleEditChange = (e) => {
@@ -102,8 +204,40 @@ const PatientDetail = () => {
   };
 
   const handleSave = async () => {
-    setSaving(true);
     setError('');
+    const idJenis = editForm.identitas_alternatif_jenis || 'NIK';
+    if (idJenis === 'NIK') {
+      const nikClean = (editForm.nik || '').trim();
+      if (!nikClean) {
+        setError('NIK wajib diisi');
+        return;
+      } else if (!/^\d{16}$/.test(nikClean)) {
+        setError('NIK harus berupa 16 digit angka');
+        return;
+      }
+    } else if (idJenis === 'NIK_IBU') {
+      const nikIbuClean = (editForm.nik_ibu || '').trim();
+      const nikClean = (editForm.nik || '').trim();
+      if (!nikIbuClean) {
+        setError('NIK Ibu wajib diisi');
+        return;
+      } else if (!/^\d{16}$/.test(nikIbuClean)) {
+        setError('NIK Ibu harus berupa 16 digit angka');
+        return;
+      }
+      if (nikClean && !/^\d{16}$/.test(nikClean)) {
+        setError('NIK Bayi harus berupa 16 digit angka');
+        return;
+      }
+    } else {
+      const nikClean = (editForm.nik || '').trim();
+      if (!nikClean) {
+        setError('Nomor identitas alternatif wajib diisi');
+        return;
+      }
+    }
+
+    setSaving(true);
     const { foto_profile, ...dataToUpdate } = editForm;
     if (dataToUpdate.pekerjaan === 'Lainnya') {
       dataToUpdate.pekerjaan = pekerjaanLainnya.trim() || 'Lainnya';
@@ -290,6 +424,37 @@ const PatientDetail = () => {
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Nama Lengkap</label>
                   <input type="text" name="nama_lengkap" value={editForm.nama_lengkap || ''} onChange={handleEditChange} className="glass-input w-full px-4 py-2.5 rounded-xl" />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Jenis Identitas</label>
+                  <select name="identitas_alternatif_jenis" value={editForm.identitas_alternatif_jenis || 'NIK'} onChange={handleEditChange} className="glass-input w-full px-4 py-2.5 rounded-xl appearance-none">
+                    <option value="NIK">NIK (KTP/KIA)</option>
+                    <option value="NIK_IBU">NIK Ibu Kandung (Bayi Baru Lahir)</option>
+                    <option value="PASPOR">Paspor (WNA)</option>
+                    <option value="LAINNYA">Lainnya</option>
+                  </select>
+                </div>
+
+                {editForm.identitas_alternatif_jenis === 'NIK_IBU' ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">NIK Ibu Kandung</label>
+                      <input type="text" name="nik_ibu" value={editForm.nik_ibu || ''} onChange={handleEditChange} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="16 digit NIK Ibu Kandung" maxLength="16" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">NIK Bayi (Opsional)</label>
+                      <input type="text" name="nik" value={editForm.nik || ''} onChange={handleEditChange} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="16 digit NIK Bayi" maxLength="16" />
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                      {editForm.identitas_alternatif_jenis === 'NIK' ? 'NIK (Nomor Induk Kependudukan)' :
+                       editForm.identitas_alternatif_jenis === 'PASPOR' ? 'Nomor Paspor' : 'Nomor Identitas'}
+                    </label>
+                    <input type="text" name="nik" value={editForm.nik || ''} onChange={handleEditChange} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder={editForm.identitas_alternatif_jenis === 'NIK' ? '16 digit NIK' : 'Nomor identitas'} maxLength={editForm.identitas_alternatif_jenis === 'NIK' ? "16" : undefined} />
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Jenis Kelamin</label>
                   <select name="jenis_kelamin" value={editForm.jenis_kelamin || ''} onChange={handleEditChange} className="glass-input w-full px-4 py-2.5 rounded-xl appearance-none">
@@ -364,6 +529,15 @@ const PatientDetail = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {fieldView('Nama Lengkap', patient?.nama_lengkap)}
+                {fieldView('Jenis Identitas', patient?.identitas_alternatif_jenis || 'NIK')}
+                {patient?.identitas_alternatif_jenis === 'NIK_IBU' ? (
+                  <>
+                    {fieldView('NIK Ibu Kandung', patient?.nik_ibu || '-')}
+                    {fieldView('NIK Bayi', patient?.nik || '-')}
+                  </>
+                ) : (
+                  fieldView(patient?.identitas_alternatif_jenis === 'PASPOR' ? 'Nomor Paspor' : 'NIK', patient?.nik || '-')
+                )}
                 {fieldView('Jenis Kelamin', patient?.jenis_kelamin)}
                 {fieldView('Umur', patient?.umur ? `${patient.umur} tahun` : '-')}
                 {fieldView('Tempat, Tanggal Lahir', `${patient?.tempat_lahir || '-'}, ${patient?.tanggal_lahir ? new Date(patient.tanggal_lahir).toLocaleDateString('id-ID') : '-'}`)}
@@ -542,6 +716,141 @@ const PatientDetail = () => {
             </div>
           </div>
 
+          {/* SatuSehat Integration */}
+          <div className="glass-panel p-6">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+              <Shield size={18} className="text-blue-500" /> Integrasi SATUSEHAT
+            </h3>
+            
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                <div className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">Status Sinkronisasi</div>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2.5 h-2.5 rounded-full ${patient?.satusehat_patient_id ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                    {patient?.satusehat_patient_id ? 'Terhubung (FHIR)' : 'Belum Sinkron'}
+                  </span>
+                </div>
+                {patient?.satusehat_patient_id && (
+                  <div className="mt-2 text-[10px] text-gray-500 font-mono select-all">
+                    ID: {patient.satusehat_patient_id}
+                  </div>
+                )}
+                {patient?.satusehat_last_synced_at && (
+                  <div className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                    Terakhir sinkron: {new Date(patient.satusehat_last_synced_at).toLocaleString('id-ID')}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="satusehat_consent_checkbox"
+                  checked={satusehatConsent}
+                  onChange={handleSatuSehatConsentChange}
+                  disabled={savingConsent}
+                  className="mt-1 w-4 h-4 rounded text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50"
+                />
+                <div className="flex-1">
+                  <label htmlFor="satusehat_consent_checkbox" className="text-sm font-semibold text-gray-700 dark:text-gray-300 cursor-pointer">
+                    Persetujuan SatuSehat
+                  </label>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Pasien menyetujui pembagian data rekam medis dengan platform SATUSEHAT Kemenkes RI.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSyncPatient}
+                disabled={syncingPatient || !satusehatConsent}
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={!satusehatConsent ? 'Persetujuan SatuSehat wajib diaktifkan terlebih dahulu' : ''}
+              >
+                {syncingPatient ? <Loader className="animate-spin" size={16} /> : <Shield size={16} />}
+                {syncingPatient ? 'Menghubungkan...' : 'Sinkronkan ke SatuSehat'}
+              </button>
+            </div>
+          </div>
+
+          {/* Permenkes 24/2022 Retention & UU PDP Data Subject Rights Panel */}
+          <div className="glass-panel p-6 space-y-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Lock size={18} className="text-emerald-500" /> Kepatuhan Retensi & UU PDP
+              </span>
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+                retentionInfo.isExpired
+                  ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
+                  : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
+              }`}>
+                {retentionInfo.label}
+              </span>
+            </h3>
+
+            {/* Permenkes Retention Audit Info */}
+            <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                <span className="flex items-center gap-1 font-semibold"><Clock size={12} /> Masa Retensi Medis</span>
+                <span>{retentionInfo.retentionYears || 5} Tahun</span>
+              </div>
+              {retentionInfo.isExpired ? (
+                <p className="text-xs text-rose-600 dark:text-rose-400 font-medium leading-relaxed">
+                  ⚠️ Rekam medis ini telah melewati periode retensi 5 tahun (terakhir kunjungan: {retentionInfo.lastVisitDate}). Ditandai untuk review manual admin.
+                </p>
+              ) : (
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Status rekam medis aktif dalam periode penyimpanan retensi wajib Permenkes 24/2022.
+                </p>
+              )}
+            </div>
+
+            {/* UU PDP Data Subject Actions */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center text-xs font-bold text-gray-700 dark:text-gray-300">
+                <span>Hak Subjek Data (PDP)</span>
+                <span className="text-[10px] text-gray-400 font-normal">{pdpRequests.length} Permintaan</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportPDPPdf}
+                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl text-xs transition-all"
+                  title="Unduh Berkas Rekam Medis (Hak Akses UU PDP)"
+                >
+                  <Download size={12} /> Export PDF PDP
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPdpModal(true)}
+                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold rounded-xl text-xs transition-all"
+                >
+                  <FileText size={12} /> Catat Permintaan
+                </button>
+              </div>
+
+              {/* History of Requests */}
+              {pdpRequests.length > 0 && (
+                <div className="mt-3 space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                  {pdpRequests.map(r => (
+                    <div key={r.id} className="p-2 bg-gray-50 dark:bg-gray-800/40 rounded-lg text-[11px] flex justify-between items-center border border-gray-100 dark:border-gray-800">
+                      <div>
+                        <span className="font-bold uppercase text-gray-700 dark:text-gray-300">{r.request_type}</span>
+                        {r.notes && <span className="text-gray-400 ml-1 truncate max-w-[120px] inline-block font-normal">({r.notes})</span>}
+                      </div>
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                        {r.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="glass-panel p-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
               Kunjungan Terakhir
@@ -622,6 +931,67 @@ const PatientDetail = () => {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Catat Permintaan Subjek Data (UU PDP) */}
+      {showPdpModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl text-left">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Lock size={18} className="text-purple-500" /> Permintaan Subjek Data (UU PDP)
+              </h3>
+              <button onClick={() => setShowPdpModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">&times;</button>
+            </div>
+
+            <form onSubmit={handleCreatePDPRequest} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Jenis Hak Subjek Data (UU PDP No. 27/2022)
+                </label>
+                <select
+                  value={pdpForm.requestType}
+                  onChange={e => setPdpForm({ ...pdpForm, requestType: e.target.value })}
+                  className="glass-input w-full px-3 py-2 rounded-xl text-sm"
+                >
+                  <option value="access">Akses / Permintaan Salinan Data (Export PDF)</option>
+                  <option value="correction">Koreksi / Perbaruan Informasi Data</option>
+                  <option value="deletion">Penghapusan / Pemutusan Akses Rekam Medis</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Catatan / Dasar Permintaan Pasien
+                </label>
+                <textarea
+                  value={pdpForm.notes}
+                  onChange={e => setPdpForm({ ...pdpForm, notes: e.target.value })}
+                  placeholder="Masukkan nomor identitas verifikator atau alasan permintaan pasien..."
+                  className="glass-input w-full px-3 py-2 rounded-xl text-xs"
+                  rows="3"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPdpModal(false)}
+                  className="flex-1 py-2 px-4 border rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingPdp}
+                  className="flex-1 py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-sm flex items-center justify-center gap-1 disabled:opacity-50"
+                >
+                  {submittingPdp ? <Loader className="animate-spin" size={14} /> : 'Catat & Proses'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

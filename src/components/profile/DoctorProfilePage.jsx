@@ -5,6 +5,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
 import { User, Phone, Shield, Save, Camera, FileText, Briefcase, Sparkles, Loader } from 'lucide-react';
+import { satusehatService } from '../../services/satusehatService';
 
 const DoctorProfilePage = () => {
   const { user, userProfile, updateProfile } = useAuth();
@@ -12,6 +13,25 @@ const DoctorProfilePage = () => {
   
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSyncSatuSehat = async () => {
+    setSyncing(true);
+    try {
+      const res = await satusehatService.syncPractitioner(user.id);
+      if (res.success) {
+        toast.success('Penyelarasan SatuSehat Practitioner Berhasil!');
+        // Force refetch local user profile state by doing a no-op update
+        await updateProfile({});
+      } else {
+        toast.error('Gagal menyelaraskan: ' + res.error);
+      }
+    } catch (err) {
+      toast.error('Error: ' + err.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
   
   // Form fields
   const [gelarDepan, setGelarDepan] = useState('');
@@ -24,6 +44,8 @@ const DoctorProfilePage = () => {
   const [noTelepon, setNoTelepon] = useState('');
   const [bio, setBio] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
+  const [nik, setNik] = useState('');
+  const [strBerlakuHingga, setStrBerlakuHingga] = useState('');
   
   const [errors, setErrors] = useState({});
 
@@ -38,6 +60,8 @@ const DoctorProfilePage = () => {
       setNoSip(userProfile.no_sip || '');
       setNoTelepon(userProfile.no_telepon || userProfile.phone || '');
       setBio(userProfile.bio || '');
+      setNik(userProfile.nik || '');
+      setStrBerlakuHingga(userProfile.str_berlaku_hingga || '');
       
       if (userProfile.foto_profil) {
         const { data: { publicUrl } } = supabase.storage
@@ -106,6 +130,10 @@ const DoctorProfilePage = () => {
       newErrors.fullName = 'Nama Lengkap wajib diisi';
     }
     
+    if (nik.trim() && !/^\d{16}$/.test(nik.trim())) {
+      newErrors.nik = 'NIK harus berupa 16 digit angka';
+    }
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       toast.error('Harap lengkapi formulir dengan benar.');
@@ -124,7 +152,9 @@ const DoctorProfilePage = () => {
       no_sip: noSip.trim() || null,
       no_telepon: noTelepon.trim() || null,
       phone: noTelepon.trim() || null, // Keep synced with auth phone field
-      bio: bio.trim() || null
+      bio: bio.trim() || null,
+      nik: nik.trim() || null,
+      str_berlaku_hingga: strBerlakuHingga || null
     };
 
     const { success, error } = await updateProfile(profileUpdates);
@@ -204,6 +234,36 @@ const DoctorProfilePage = () => {
             <p className="text-xs text-gray-400 dark:text-gray-500">Terdaftar sejak: {userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</p>
           </div>
 
+          {/* SatuSehat Integration Card */}
+          <div className="glass-panel p-6 rounded-2xl space-y-4">
+            <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-gray-500">
+              <Shield size={16} className="text-blue-500" /> Integrasi SATUSEHAT
+            </h4>
+            <div className="p-3 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
+              <div className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">Status Sinkronisasi</div>
+              <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${userProfile?.satusehat_practitioner_id ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                <span className="text-sm font-bold text-gray-850 dark:text-gray-200">
+                  {userProfile?.satusehat_practitioner_id ? 'Terhubung (SISDMK)' : 'Belum Terhubung'}
+                </span>
+              </div>
+              {userProfile?.satusehat_practitioner_id && (
+                <div className="mt-2 text-[10px] text-gray-500 font-mono select-all">
+                  ID: {userProfile.satusehat_practitioner_id}
+                </div>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={handleSyncSatuSehat}
+              disabled={syncing}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
+            >
+              {syncing ? <Loader className="animate-spin" size={16} /> : <Shield size={16} />}
+              {syncing ? 'Menghubungkan...' : 'Sinkronkan ke SatuSehat'}
+            </button>
+          </div>
+
           {/* Quick Stats / Bio View */}
           <div className="glass-panel p-6 rounded-2xl space-y-4">
             <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-gray-500">
@@ -247,15 +307,29 @@ const DoctorProfilePage = () => {
                     {errors.fullName && <p className="text-rose-500 text-xs mt-1">{errors.fullName}</p>}
                   </div>
                 </div>
-                <div className="mt-4">
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Gelar Belakang</label>
-                  <input
-                    type="text"
-                    value={gelarBelakang}
-                    onChange={(e) => setGelarBelakang(e.target.value)}
-                    className="glass-input w-full px-4 py-2.5 rounded-xl text-sm"
-                    placeholder="Contoh: Sp.Ort, M.Si"
-                  />
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Gelar Belakang</label>
+                    <input
+                      type="text"
+                      value={gelarBelakang}
+                      onChange={(e) => setGelarBelakang(e.target.value)}
+                      className="glass-input w-full px-4 py-2.5 rounded-xl text-sm"
+                      placeholder="Contoh: Sp.Ort, M.Si"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">NIK (No. Induk Kependudukan)</label>
+                    <input
+                      type="text"
+                      value={nik}
+                      onChange={(e) => { setNik(e.target.value); setErrors(p => ({ ...p, nik: null })); }}
+                      className={`glass-input w-full px-4 py-2.5 rounded-xl text-sm ${errors.nik ? 'border-rose-500 ring-rose-500' : ''}`}
+                      placeholder="16 digit NIK..."
+                      maxLength="16"
+                    />
+                    {errors.nik && <p className="text-rose-500 text-xs mt-1">{errors.nik}</p>}
+                  </div>
                 </div>
               </div>
 
@@ -334,6 +408,39 @@ const DoctorProfilePage = () => {
                       className="glass-input w-full px-4 py-2.5 rounded-xl text-sm"
                       placeholder="Nomor SIP aktif..."
                     />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide flex items-center gap-1.5">
+                      <Calendar size={14} />
+                      STR Berlaku Hingga
+                    </label>
+                    <input
+                      type="date"
+                      value={strBerlakuHingga}
+                      onChange={(e) => setStrBerlakuHingga(e.target.value)}
+                      className="glass-input w-full px-4 py-2.5 rounded-xl text-sm"
+                    />
+                    {strBerlakuHingga && (() => {
+                      const isExpired = new Date(strBerlakuHingga) < new Date();
+                      const isExpiringSoon = !isExpired && (new Date(strBerlakuHingga) - new Date()) < 30 * 24 * 60 * 60 * 1000;
+                      if (isExpired) {
+                        return (
+                          <div className="mt-2 text-xs font-semibold text-rose-500 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                            Peringatan: STR Anda sudah kedaluwarsa!
+                          </div>
+                        );
+                      }
+                      if (isExpiringSoon) {
+                        return (
+                          <div className="mt-2 text-xs font-semibold text-amber-500 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            Peringatan: STR Anda akan kedaluwarsa kurang dari 30 hari.
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 </div>
               </div>

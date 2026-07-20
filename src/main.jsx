@@ -15,14 +15,50 @@ import './styles/animations.css';
 const dsn = import.meta.env.VITE_SENTRY_DSN;
 const isProd = import.meta.env.PROD;
 
+const SENSITIVE_KEYS = ['nik', 'nama_pasien', 'nama_lengkap', 'alamat', 'alamat_detail', 'no_wa', 'no_telepon', 'diagnosa', 'keluhan', 'ciphertext', 'token', 'password', 'secret', 'auth'];
+
+function sanitizePII(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(sanitizePII);
+
+  const sanitized = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const lowerKey = key.toLowerCase();
+    if (SENSITIVE_KEYS.some(k => lowerKey.includes(k))) {
+      sanitized[key] = '[SCRUBBED_PII]';
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizePII(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+}
+
 if (isProd && dsn) {
   Sentry.init({
     dsn,
     tracesSampleRate: 1.0,
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
+    beforeSend(event) {
+      if (event.extra) {
+        event.extra = sanitizePII(event.extra);
+      }
+      if (event.breadcrumbs) {
+        event.breadcrumbs = event.breadcrumbs.map(b => {
+          if (b.data) b.data = sanitizePII(b.data);
+          return b;
+        });
+      }
+      if (event.user) {
+        delete event.user.ip_address;
+        delete event.user.email;
+      }
+      return event;
+    }
   });
-  logger.info('[Sentry] Initialized successfully in production environment.');
+  logger.info('[Sentry] Initialized successfully with PII scrubbing in production.');
 } else {
   logger.info('[Sentry] Running in fallback safe console-logging mode.');
 }

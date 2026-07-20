@@ -22,18 +22,22 @@ CREATE INDEX IF NOT EXISTS idx_informed_consents_visit_id ON informed_consents(v
 ALTER TABLE informed_consents ENABLE ROW LEVEL SECURITY;
 
 -- Allow any authenticated user (staff) to perform CRUD
+DROP POLICY IF EXISTS "Staff can read informed_consents" ON informed_consents;
 CREATE POLICY "Staff can read informed_consents" 
     ON informed_consents FOR SELECT 
     USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Staff can insert informed_consents" ON informed_consents;
 CREATE POLICY "Staff can insert informed_consents" 
     ON informed_consents FOR INSERT 
     WITH CHECK (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Staff can update informed_consents" ON informed_consents;
 CREATE POLICY "Staff can update informed_consents" 
     ON informed_consents FOR UPDATE 
     USING (auth.role() = 'authenticated');
 
+DROP POLICY IF EXISTS "Staff can delete informed_consents" ON informed_consents;
 CREATE POLICY "Staff can delete informed_consents" 
     ON informed_consents FOR DELETE 
     USING (auth.role() = 'authenticated');

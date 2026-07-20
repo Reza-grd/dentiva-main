@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Search, Package, DollarSign } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { treatmentService } from '../../services/treatmentService';
+import ICD9CMPicker from '../common/ICD9CMPicker';
 
 const TreatmentMaster = () => {
   const toast = useToast();
@@ -16,7 +17,9 @@ const TreatmentMaster = () => {
     nama_treatment: '',
     harga_dasar: '',
     kategori: '',
-    deskripsi: ''
+    deskripsi: '',
+    kode_icd9cm: '',
+    kode_snomed_ct: ''
   });
 
   useEffect(() => {
@@ -73,7 +76,9 @@ const TreatmentMaster = () => {
       nama_treatment: treatment.nama_treatment,
       harga_dasar: treatment.harga_dasar.toString(),
       kategori: treatment.kategori || '',
-      deskripsi: treatment.deskripsi || ''
+      deskripsi: treatment.deskripsi || '',
+      kode_icd9cm: treatment.kode_icd9cm || '',
+      kode_snomed_ct: treatment.kode_snomed_ct || ''
     });
     setShowModal(true);
   };
@@ -98,7 +103,9 @@ const TreatmentMaster = () => {
       nama_treatment: '',
       harga_dasar: '',
       kategori: '',
-      deskripsi: ''
+      deskripsi: '',
+      kode_icd9cm: '',
+      kode_snomed_ct: ''
     });
   };
 
@@ -212,6 +219,7 @@ const TreatmentMaster = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Treatment</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ICD-9 / SNOMED</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
                 </tr>
@@ -232,6 +240,10 @@ const TreatmentMaster = () => {
                       <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
                         {treatment.kategori || 'Lainnya'}
                       </span>
+                    </td>
+                    <td className="table-cell text-xs">
+                      <div>ICD-9: <span className="font-mono font-semibold text-gray-700">{treatment.kode_icd9cm || '-'}</span></div>
+                      <div className="mt-1">SNOMED: <span className="font-mono font-semibold text-gray-700">{treatment.kode_snomed_ct || '-'}</span></div>
                     </td>
                     <td className="table-cell font-semibold text-green-600">
                       {formatCurrency(treatment.harga_dasar)}
@@ -333,6 +345,31 @@ const TreatmentMaster = () => {
                     className="input-field"
                     placeholder="e.g., 250000"
                   />
+                </div>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kode ICD-9-CM (Tindakan SatuSehat)
+                    </label>
+                    <ICD9CMPicker
+                      value={formData.kode_icd9cm}
+                      onChange={(selected) => setFormData({ ...formData, kode_icd9cm: selected ? selected.code : '' })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Kode SNOMED-CT (Tindakan)
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.kode_snomed_ct}
+                      onChange={(e) => setFormData({ ...formData, kode_snomed_ct: e.target.value })}
+                      className="input-field"
+                      placeholder="e.g., 58207001"
+                    />
+                  </div>
                 </div>
 
                 <div>

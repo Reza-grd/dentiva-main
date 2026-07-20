@@ -59,6 +59,7 @@ const PatientRegistration = () => {
     golongan_darah: '', alamat_detail: '', provinsi: '', kabupaten: '', kecamatan: '', desa: '',
     no_wa: '', no_telepon: '', dokter_keluarga: '', dokter_gigi_keluarga: '', rujukan_dari: '',
     berat_badan: '', tinggi_badan: '', keluhan_awal: '', wa_consent: false,
+    nik: '', nik_ibu: '', identitas_alternatif_jenis: 'NIK'
   });
 
   const [scheduleData, setScheduleData] = useState({
@@ -220,6 +221,34 @@ const PatientRegistration = () => {
     if (!formData.nama_lengkap.trim()) newErrors.nama_lengkap = 'Nama lengkap wajib diisi';
     if (!formData.jenis_kelamin) newErrors.jenis_kelamin = 'Jenis kelamin wajib dipilih';
     if (!formData.no_wa.trim()) newErrors.no_wa = 'Nomor WhatsApp wajib diisi';
+
+    // Validation for NIK / Identitas
+    const idJenis = formData.identitas_alternatif_jenis || 'NIK';
+    if (idJenis === 'NIK') {
+      const nikClean = (formData.nik || '').trim();
+      if (!nikClean) {
+        newErrors.nik = 'NIK wajib diisi';
+      } else if (!/^\d{16}$/.test(nikClean)) {
+        newErrors.nik = 'NIK harus berupa 16 digit angka';
+      }
+    } else if (idJenis === 'NIK_IBU') {
+      const nikIbuClean = (formData.nik_ibu || '').trim();
+      const nikClean = (formData.nik || '').trim();
+      if (!nikIbuClean) {
+        newErrors.nik_ibu = 'NIK Ibu wajib diisi';
+      } else if (!/^\d{16}$/.test(nikIbuClean)) {
+        newErrors.nik_ibu = 'NIK Ibu harus berupa 16 digit angka';
+      }
+      if (nikClean && !/^\d{16}$/.test(nikClean)) {
+        newErrors.nik = 'NIK Bayi harus berupa 16 digit angka';
+      }
+    } else {
+      // PASPOR atau LAINNYA
+      const nikClean = (formData.nik || '').trim();
+      if (!nikClean) {
+        newErrors.nik = 'Nomor identitas alternatif wajib diisi';
+      }
+    }
 
     if (formData.no_wa) {
       const phoneRegex = /^(08|62|\+62)[0-9]{8,12}$/;
@@ -528,6 +557,52 @@ const PatientRegistration = () => {
                     placeholder="Nama lengkap sesuai KTP" />
                   {errors.nama_lengkap && <p className="text-red-500 text-xs mt-1.5">{errors.nama_lengkap}</p>}
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Jenis Identitas <span className="text-red-500">*</span></label>
+                  <select name="identitas_alternatif_jenis" value={formData.identitas_alternatif_jenis}
+                    onChange={handleChange} disabled={loading}
+                    className="glass-input w-full px-4 py-2.5 rounded-xl appearance-none">
+                    <option value="NIK">NIK (KTP/KIA)</option>
+                    <option value="NIK_IBU">NIK Ibu Kandung (Bayi Baru Lahir)</option>
+                    <option value="PASPOR">Paspor (WNA)</option>
+                    <option value="LAINNYA">Lainnya</option>
+                  </select>
+                </div>
+
+                {formData.identitas_alternatif_jenis === 'NIK_IBU' ? (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">NIK Ibu Kandung <span className="text-red-500">*</span></label>
+                      <input type="text" name="nik_ibu" value={formData.nik_ibu || ''}
+                        onChange={handleChange} disabled={loading}
+                        className={`glass-input w-full px-4 py-2.5 rounded-xl ${errors.nik_ibu ? 'border-red-500 ring-1 ring-red-500' : ''}`}
+                        placeholder="16 digit NIK Ibu Kandung" maxLength="16" />
+                      {errors.nik_ibu && <p className="text-red-500 text-xs mt-1.5">{errors.nik_ibu}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">NIK Bayi (Opsional)</label>
+                      <input type="text" name="nik" value={formData.nik || ''}
+                        onChange={handleChange} disabled={loading}
+                        className={`glass-input w-full px-4 py-2.5 rounded-xl ${errors.nik ? 'border-red-500 ring-1 ring-red-500' : ''}`}
+                        placeholder="16 digit NIK Bayi (jika ada)" maxLength="16" />
+                      {errors.nik && <p className="text-red-500 text-xs mt-1.5">{errors.nik}</p>}
+                    </div>
+                  </>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      {formData.identitas_alternatif_jenis === 'NIK' ? 'NIK (Nomor Induk Kependudukan) *' :
+                       formData.identitas_alternatif_jenis === 'PASPOR' ? 'Nomor Paspor *' : 'Nomor Identitas *'}
+                    </label>
+                    <input type="text" name="nik" value={formData.nik || ''}
+                      onChange={handleChange} disabled={loading}
+                      className={`glass-input w-full px-4 py-2.5 rounded-xl ${errors.nik ? 'border-red-500 ring-1 ring-red-500' : ''}`}
+                      placeholder={formData.identitas_alternatif_jenis === 'NIK' ? '16 digit NIK' : 'Nomor identitas'} 
+                      maxLength={formData.identitas_alternatif_jenis === 'NIK' ? "16" : undefined} />
+                    {errors.nik && <p className="text-red-500 text-xs mt-1.5">{errors.nik}</p>}
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nama Kepala Keluarga</label>

@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { encryptionService } from './encryptionService';
 
 export const userManagementService = {
   /**
@@ -12,6 +13,15 @@ export const userManagementService = {
         .order('full_name');
         
       if (error) throw error;
+
+      if (data && data.length > 0) {
+        const payloads = data.map(u => u.nik || '');
+        const decrypted = await encryptionService.decryptBatch(payloads);
+        data.forEach((u, idx) => {
+          u.nik = decrypted[idx];
+        });
+      }
+
       return { success: true, data };
     } catch (error) {
       console.error('Error fetching users:', error);

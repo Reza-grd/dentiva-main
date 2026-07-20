@@ -22,7 +22,8 @@ const MasterBahan = () => {
     faktor_konversi: 1,
     stok_minimum: 0,
     supplier: '',
-    is_active: true
+    is_active: true,
+    kode_kfa: ''
   });
 
   const [showBatchModal, setShowBatchModal] = useState(false);
@@ -92,7 +93,8 @@ const MasterBahan = () => {
       faktor_konversi: 1,
       stok_minimum: 5,
       supplier: '',
-      is_active: true
+      is_active: true,
+      kode_kfa: ''
     });
     setShowModal(true);
   };
@@ -108,7 +110,8 @@ const MasterBahan = () => {
       faktor_konversi: item.faktor_konversi,
       stok_minimum: item.stok_minimum,
       supplier: item.supplier || '',
-      is_active: item.is_active
+      is_active: item.is_active,
+      kode_kfa: item.kode_kfa || ''
     });
     setShowModal(true);
   };
@@ -185,9 +188,12 @@ const MasterBahan = () => {
                   <tr key={m.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 font-mono">{m.kode_bahan}</td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
-                      {m.nama_bahan}
+                      <div>{m.nama_bahan}</div>
+                      {m.kode_kfa && (
+                        <div className="text-[10px] text-gray-500 font-mono mt-0.5">KFA: {m.kode_kfa}</div>
+                      )}
                       {m.stok_saat_ini <= m.stok_minimum && (
-                        <span className="ml-2 inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700">
+                        <span className="mt-1 inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700">
                           Low Stock
                         </span>
                       )}
@@ -269,13 +275,28 @@ const MasterBahan = () => {
                   <p className="text-xs text-gray-500 italic">Rumus: 1 {formData.satuan_beli || 'Satuan Beli'} = {formData.faktor_konversi || 1} {formData.satuan_dasar || 'Satuan Dasar'}. Saat treatment berlangsung, yang dikurangi adalah Satuan Dasar.</p>
                 </div>
 
-                <div>
+                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ambang Stok Minimum (Alert)</label>
                   <input type="number" value={formData.stok_minimum} onChange={e => setFormData({...formData, stok_minimum: e.target.value})} className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supplier / Merek</label>
                   <input type="text" value={formData.supplier} onChange={e => setFormData({...formData, supplier: e.target.value})} className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Kode KFA SatuSehat (Kamus Farmasi dan Alat Kesehatan)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.kode_kfa || ''}
+                    onChange={e => setFormData({...formData, kode_kfa: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
+                    placeholder="Masukkan 8-10 digit Kode KFA (Contoh: 93000001)"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    Kode KFA resmi Kemenkes RI untuk integrasi e-resep ke SatuSehat.
+                  </p>
                 </div>
                 <div className="md:col-span-2 flex items-center gap-2 mt-2">
                   <input type="checkbox" id="is_active" checked={formData.is_active} onChange={e => setFormData({...formData, is_active: e.target.checked})} className="w-4 h-4 rounded text-primary-600" />

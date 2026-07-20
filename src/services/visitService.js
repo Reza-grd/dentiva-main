@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { encryptionService } from './encryptionService.js';
 import { getTodayLocal } from '../utils/dateUtils.js';
+import { satusehatService } from './satusehatService.js';
 
 async function decryptVisitsList(list) {
   if (!list || list.length === 0) return list;
@@ -290,6 +291,22 @@ export const visitService = {
 
       if (error) throw error;
       const decryptedData = data ? (await decryptVisitsList([data]))[0] : data;
+
+      // Asynchronous / Non-blocking SatuSehat trigger when status becomes completed
+      if (decryptedData && decryptedData.status === 'completed') {
+        satusehatService.syncVisit(visitId)
+          .then(res => {
+            if (res.success) {
+              console.log(`[SATUSEHAT] Auto-sync clinical resources for visit ${visitId} succeeded.`, res.data);
+            } else {
+              console.warn(`[SATUSEHAT] Auto-sync clinical resources for visit ${visitId} failed:`, res.error);
+            }
+          })
+          .catch(err => {
+            console.error(`[SATUSEHAT] Unexpected error during auto-sync for visit ${visitId}:`, err);
+          });
+      }
+
       return { success: true, data: decryptedData };
     } catch (error) {
       console.error('Error updating visit:', error);

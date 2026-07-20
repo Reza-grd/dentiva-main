@@ -13,6 +13,8 @@ async function decryptPatientList(list) {
     payloads.push(p.nama_lengkap || '');
     payloads.push(p.no_wa || '');
     payloads.push(p.alamat || '');
+    payloads.push(p.nik || '');
+    payloads.push(p.nik_ibu || '');
   });
 
   const decrypted = await encryptionService.decryptBatch(payloads);
@@ -22,6 +24,8 @@ async function decryptPatientList(list) {
     p.nama_lengkap = decrypted[idx++];
     p.no_wa = decrypted[idx++];
     p.alamat = decrypted[idx++];
+    p.nik = decrypted[idx++];
+    p.nik_ibu = decrypted[idx++];
   });
 
   return list;
@@ -350,13 +354,17 @@ export const patientService = {
       const encrypted = await encryptionService.encryptBatch([
         patientData.nama_lengkap || '',
         patientData.no_wa || '',
-        patientData.alamat || ''
+        patientData.alamat || '',
+        patientData.nik || '',
+        patientData.nik_ibu || ''
       ]);
       const encryptedData = {
         ...patientData,
         nama_lengkap: encrypted[0],
         no_wa: encrypted[1],
-        alamat: encrypted[2]
+        alamat: encrypted[2],
+        nik: encrypted[3],
+        nik_ibu: encrypted[4]
       };
       const { data, error } = await supabase
         .from('patients')
@@ -373,7 +381,7 @@ export const patientService = {
   async updatePatient(id, patientData) {
     try {
       const encryptedData = { ...patientData };
-      const fieldsToEncrypt = ['nama_lengkap', 'no_wa', 'alamat'];
+      const fieldsToEncrypt = ['nama_lengkap', 'no_wa', 'alamat', 'nik', 'nik_ibu'];
       const payloads = [];
       const indices = [];
       fieldsToEncrypt.forEach(f => {

@@ -55,12 +55,20 @@ VITE_ENCRYPTION_KEY=<random-string-min-32-chars>
 
 ### Environment Variables Tambahan (opsional)
 
-Untuk notifikasi WhatsApp, tambahkan ke Supabase Edge Function Secrets (bukan di `.env` frontend):
+Untuk notifikasi WhatsApp dan Integrasi SATUSEHAT, tambahkan ke Supabase Edge Function Secrets (bukan di `.env` frontend):
 
+```bash
+# Notifikasi WhatsApp via Whapi
+supabase secrets set WHAPI_TOKEN=<whapi-cloud-token> WHAPI_CHANNEL_ID=<channel-id>
+
+# Integrasi SATUSEHAT Kemenkes RI
+supabase secrets set SATUSEHAT_CLIENT_ID=<client-id>
+supabase secrets set SATUSEHAT_CLIENT_SECRET=<client-secret>
+supabase secrets set SATUSEHAT_ENVIRONMENT=sandbox # atau 'production'
+supabase secrets set SATUSEHAT_ORGANIZATION_ID=<organization-id>
 ```
-WHAPI_TOKEN=<whapi-cloud-token>
-WHAPI_CHANNEL_ID=<channel-id>
-```
+
+> **Keamanan Kritis:** `SATUSEHAT_CLIENT_SECRET` bersifat rahasia dan tidak boleh diletakkan di frontend (`src/`) atau diawali `VITE_` karena akan ter-bundle ke file JavaScript client. Panggilan SatuSehat wajib dialirkan melalui Edge Functions.
 
 ---
 

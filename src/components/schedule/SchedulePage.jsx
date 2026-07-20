@@ -394,7 +394,7 @@ const SchedulePage = () => {
                         className={`flex justify-between items-center text-[9px] px-1 py-0.5 rounded font-mono ${
                           isSelected 
                             ? 'bg-white/20 text-white border-white/10' 
-                            : 'bg-indigo-50/50 dark:bg-indigo-950/20 text-indigo-700 dark:text-indigo-300 border-indigo-100/30'
+                            : 'bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10 text-[var(--color-accent)] dark:text-[var(--color-accent-secondary)] border-[var(--color-accent)]/10'
                         } border`}
                       >
                         <span className="font-semibold truncate max-w-[24px]" title={s.dokter?.full_name}>{nameShort}</span>
@@ -462,13 +462,13 @@ const SchedulePage = () => {
 
       {/* ── Panel Dokter Praktek Hari Ini ────────────────────────────────────── */}
       <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">
-        <div className="px-5 py-3 bg-indigo-50/50 dark:bg-indigo-500/10 border-b border-indigo-100 dark:border-indigo-500/20 flex items-center gap-2">
-          <Stethoscope size={16} className="text-indigo-600 dark:text-indigo-400" />
-          <span className="font-semibold text-indigo-800 dark:text-indigo-300 text-sm">
+        <div className="px-5 py-3 bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10 border-b border-[var(--color-accent)]/10 dark:border-[var(--color-accent)]/20 flex items-center gap-2">
+          <Stethoscope size={16} className="text-[var(--color-accent)]" />
+          <span className="font-semibold text-[var(--color-accent)] dark:text-gray-200 text-sm">
             Dokter Praktek — {getHariLabel(dayOfWeek(selectedDate))}
           </span>
           {loadingSchedules && (
-            <span className="ml-2 w-3 h-3 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+            <span className="ml-2 w-3 h-3 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
           )}
         </div>
 
@@ -493,8 +493,8 @@ const SchedulePage = () => {
                 <div key={sched.id} className="px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-2 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
                   {/* Nama dokter */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center shrink-0">
-                      <UserCheck size={14} className="text-indigo-600 dark:text-indigo-400" />
+                    <div className="w-8 h-8 rounded-full bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 flex items-center justify-center shrink-0">
+                      <UserCheck size={14} className="text-[var(--color-accent)]" />
                     </div>
                     <div className="min-w-0">
                       <p className="font-medium text-gray-800 dark:text-gray-200 text-sm truncate">

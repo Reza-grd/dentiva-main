@@ -3,7 +3,7 @@
 -- Create table for Medical Record SOAP defaults
 -- ============================================
 
-CREATE TABLE soap_templates (
+CREATE TABLE IF NOT EXISTS soap_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   treatment_type TEXT NOT NULL,
   keluhan TEXT,
@@ -19,10 +19,12 @@ ALTER TABLE soap_templates ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS Policies
 -- Admin gets ALL privileges
+DROP POLICY IF EXISTS "Admin_ALL" ON soap_templates;
 CREATE POLICY "Admin_ALL" ON soap_templates 
 FOR ALL USING (public.get_user_role() = 'admin');
 
 -- Staff (Admin, Resepsionis, Dokter) get SELECT
+DROP POLICY IF EXISTS "Staff_SELECT" ON soap_templates;
 CREATE POLICY "Staff_SELECT" ON soap_templates 
 FOR SELECT USING (public.get_user_role() IN ('admin', 'resepsionis', 'dokter'));
 

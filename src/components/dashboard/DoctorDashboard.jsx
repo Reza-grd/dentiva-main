@@ -304,7 +304,7 @@ const DoctorDashboard = () => {
               <div className="space-y-2">
                 <button
                   onClick={() => navigate('/dokter/rekam-medis')}
-                  className="w-full flex items-center justify-between p-3.5 bg-blue-50/50 dark:bg-blue-500/10 hover:bg-blue-50 dark:hover:bg-blue-500/20 rounded-xl text-blue-700 dark:text-blue-400 transition-colors group"
+                  className="w-full flex items-center justify-between p-3.5 bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 rounded-xl text-[var(--color-accent)] transition-colors group"
                 >
                   <div className="flex items-center gap-3">
                     <FileText size={18} />
