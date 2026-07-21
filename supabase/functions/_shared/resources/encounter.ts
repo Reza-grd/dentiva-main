@@ -22,6 +22,17 @@ export async function buildAndSyncEncounter(
     throw new Error('Failed to find visit detail: ' + (visitErr?.message || 'Not found'));
   }
 
+  // FIX B: Fetch clinic's SATUSEHAT Organization ID for sys-ids.kemkes.go.id namespace
+  const { data: org, error: orgErr } = await supabaseAdmin
+    .from('satusehat_organizations')
+    .select('satusehat_organization_id')
+    .eq('clinic_id', visit.clinic_id)
+    .maybeSingle();
+
+  if (orgErr || !org?.satusehat_organization_id) {
+    throw new Error('Cannot build Encounter identifier: clinic has no synced SATUSEHAT Organization ID yet.');
+  }
+
   // 2. Fetch default location for this clinic
   const { data: location, error: locErr } = await supabaseAdmin
     .from('satusehat_locations')
@@ -58,9 +69,8 @@ export async function buildAndSyncEncounter(
   const timePart = visit.jam_kunjungan || '08:00';
   const isoTimestamp = `${datePart}T${timePart.substring(0, 5)}:00+07:00`;
 
-  // Verified: SATUSEHAT Outpatient Encounter Profile specifies serviceType and identifier
-  // Source: SATUSEHAT FHIR Implementation Guide - Encounter Profile (fhir.kemkes.go.id)
-  const encounterIdentifierSystem = `http://sys-ids.kemkes.go.id/encounter/${visit.clinic_id}`;
+  // FIX B: Use clinic's actual SATUSEHAT Organization IHS number in sys-ids.kemkes.go.id, NEVER local UUID
+  const encounterIdentifierSystem = `http://sys-ids.kemkes.go.id/encounter/${org.satusehat_organization_id}`;
 
   const fhirPayload = {
     resourceType: 'Encounter',
@@ -76,7 +86,6 @@ export async function buildAndSyncEncounter(
       code: 'AMB',
       display: 'ambulatory'
     },
-    // Item 3 Fix: Added required serviceType for Dental Clinic Outpatient care
     serviceType: {
       coding: [
         {
@@ -185,4 +194,52 @@ export async function buildAndSyncEncounter(
   await recordOutboxSuccess(supabaseAdmin, outboxId, encounterId);
 
   return encounterId;
+}
+
+/**
+ * FIX D: Update Encounter resource on SATUSEHAT to link created Condition diagnoses.
+ * Executes PUT request to update Encounter.diagnosis array once Condition IDs are known.
+ */
+export async function updateEncounterDiagnoses(
+  supabaseAdmin: any,
+  encounterId: string,
+  conditionIds: string[]
+) {
+  if (!encounterId || !conditionIds || conditionIds.length === 0) return;
+
+  const getRes = await fhirRequest(supabaseAdmin, 'GET', `Encounter/${encounterId}`);
+  if (!getRes.ok || !getRes.data) {
+    console.error(`Failed to fetch Encounter ${encounterId} for diagnosis update: HTTP ${getRes.status}`);
+    return;
+  }
+
+  const encounterPayload = getRes.data;
+
+  // Verified: SATUSEHAT Encounter Profile diagnosis linkage
+  // Source: SATUSEHAT FHIR Implementation Guide - Encounter Profile (fhir.kemkes.go.id)
+  encounterPayload.diagnosis = conditionIds.map((condId, index) => ({
+    condition: {
+      reference: `Condition/${condId}`,
+      display: `Diagnosis ${index + 1}`
+    },
+    use: {
+      coding: [
+        {
+          system: 'http://terminology.hl7.org/CodeSystem/diagnosis-role',
+          code: index === 0 ? 'CC' : 'AD',
+          display: index === 0 ? 'Chief complaint' : 'Admission diagnosis'
+        }
+      ]
+    },
+    rank: index + 1
+  }));
+
+  console.log(`Updating Encounter ${encounterId} on SATUSEHAT with ${conditionIds.length} linked Condition diagnoses...`);
+  const putRes = await fhirRequest(supabaseAdmin, 'PUT', `Encounter/${encounterId}`, encounterPayload);
+
+  if (!putRes.ok) {
+    console.error(`Failed to update Encounter ${encounterId} diagnoses: HTTP ${putRes.status} - ${JSON.stringify(putRes.data)}`);
+  } else {
+    console.log(`Encounter ${encounterId} diagnoses updated successfully on SATUSEHAT.`);
+  }
 }

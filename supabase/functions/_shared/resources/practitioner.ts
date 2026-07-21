@@ -3,43 +3,12 @@ import { decryptBatch } from '../decryptionHelper.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 
 /**
- * Resolve practitioner qualification code dynamically according to HL7 v2-0360 & SATUSEHAT specs.
+ * FIX A: SATUSEHAT Practitioner Qualification Builder
+ * Official Structure Verified from SATUSEHAT Public Postman Collection (Request 0ghdxvo):
+ * System: https://terminology.kemkes.go.id/v1-0302
+ * Code: STR-KKI (Surat Tanda Registrasi)
+ * STR Identifier System: https://fhir.kemkes.go.id/id/str-kki-number
  */
-function resolveQualification(user: any) {
-  const pType = (user.practitioner_type || '').toLowerCase();
-  const spec = (user.spesialisasi || '').toLowerCase();
-  const name = (user.full_name || '').toLowerCase();
-
-  // Checked: HL7 v2-0360 & SATUSEHAT Practitioner Qualification CodeSystem
-  // Source: SATUSEHAT Practitioner Resource Profile (fhir.kemkes.go.id)
-  const systemUri = 'http://terminology.hl7.org/CodeSystem/v2-0360';
-
-  if (pType === 'physician' || name.includes('dr.') && !name.includes('drg.')) {
-    return {
-      system: systemUri,
-      code: 'MD',
-      display: 'Doctor of Medicine'
-    };
-  } else if (pType === 'nurse') {
-    return {
-      system: systemUri,
-      code: 'RN',
-      display: 'Registered Nurse'
-    };
-  } else {
-    // Default for dental clinic practitioners: Doctor of Dental Surgery (DDS) or Doctor of Dental Medicine (DMD)
-    const displayTitle = user.spesialisasi 
-      ? `Doctor of Dental Surgery (Spesialis ${user.spesialisasi})`
-      : 'Doctor of Dental Surgery (drg.)';
-      
-    return {
-      system: systemUri,
-      code: 'DDS',
-      display: displayTitle
-    };
-  }
-}
-
 export async function syncPractitioner(
   supabaseAdmin: any, 
   userId: string, 
@@ -57,7 +26,7 @@ export async function syncPractitioner(
     throw new Error('Failed to find user profile: ' + (fetchErr?.message || 'Not found'));
   }
 
-  // 2. Decrypt the NIK field (will throw explicit error on failure, preventing ciphertext leakage)
+  // 2. Decrypt the NIK field
   let decryptedNik = '';
   if (user.nik) {
     const decrypted = await decryptBatch(supabaseAdmin, [user.nik]);
@@ -87,12 +56,17 @@ export async function syncPractitioner(
     throw new Error(`Kelengkapan profil dokter kurang atau tidak valid: ${errors.join(', ')}`);
   }
 
-  // Verified: SATUSEHAT Practitioner Profile specifies https://fhir.kemkes.go.id/id/nik for NIK
-  // and https://fhir.kemkes.go.id/id/str for STR numbers.
+  // Verified System URIs per SATUSEHAT Official Spec:
+  // NIK: https://fhir.kemkes.go.id/id/nik
+  // STR KKI Number: https://fhir.kemkes.go.id/id/str-kki-number
+  // Qualification CodeSystem: https://terminology.kemkes.go.id/v1-0302
   const systemNikUri = 'https://fhir.kemkes.go.id/id/nik';
-  const systemStrUri = 'https://fhir.kemkes.go.id/id/str';
+  const systemStrKkiUri = 'https://fhir.kemkes.go.id/id/str-kki-number';
+  const qualificationSystemUri = 'https://terminology.kemkes.go.id/v1-0302';
 
-  const qualificationCoding = resolveQualification(user);
+  const isDentist = (user.practitioner_type || 'dentist') === 'dentist' || (user.full_name || '').toLowerCase().includes('drg.');
+  const strDisplay = isDentist ? 'Surat Tanda Registrasi Dokter Gigi' : 'Surat Tanda Registrasi Dokter';
+  const strCode = user.qualification_code || 'STR-KKI';
 
   const fhirPayload = {
     resourceType: 'Practitioner',
@@ -112,14 +86,28 @@ export async function syncPractitioner(
     ],
     qualification: [
       {
+        code: {
+          coding: [
+            {
+              system: qualificationSystemUri,
+              code: strCode,
+              display: strDisplay
+            }
+          ]
+        },
         identifier: [
           {
-            system: systemStrUri,
+            use: 'official',
+            system: systemStrKkiUri,
             value: user.no_str
           }
         ],
-        code: {
-          coding: [qualificationCoding]
+        issuer: {
+          display: 'Konsil Kedokteran Indonesia',
+          reference: 'Organization/10000003'
+        },
+        period: {
+          end: user.str_berlaku_hingga
         }
       }
     ]

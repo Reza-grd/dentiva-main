@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { getCorsHeaders } from "../_shared/corsHelper.ts";
-import { buildAndSyncEncounter } from "../_shared/resources/encounter.ts";
+import { buildAndSyncEncounter, updateEncounterDiagnoses } from "../_shared/resources/encounter.ts";
 import { buildAndSyncConditions } from "../_shared/resources/condition.ts";
 import { buildAndSyncProcedures } from "../_shared/resources/procedure.ts";
 import { buildAndSyncMedicationRequests } from "../_shared/resources/medicationRequest.ts";
@@ -36,7 +36,7 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Item 6 Fix: Strict Role-Based Access Control (RBAC) & Multi-tenant clinic verification
+    // Role-Based Access Control (RBAC) & Multi-tenant clinic verification
     let callingUserId: string | null = null;
     let callingUserRole: string | null = null;
     let callingUserClinicId: string | null = null;
@@ -67,7 +67,6 @@ serve(async (req) => {
       callingUserClinicId = profile?.clinic_id || null;
     }
 
-    // Role check: Only admin or dokter (or service role) can trigger clinical visit sync
     const ALLOWED_ROLES = ['admin', 'dokter'];
     if (!isServiceRole && (!callingUserRole || !ALLOWED_ROLES.includes(callingUserRole))) {
       return new Response(
@@ -98,7 +97,7 @@ serve(async (req) => {
       });
     }
 
-    // Multi-tenant Isolation Check: Verify visit belongs to caller's clinic
+    // Multi-tenant Isolation Check
     if (!isServiceRole && callingUserClinicId) {
       const { data: vCheck } = await supabaseAdmin
         .from('visits')
@@ -155,6 +154,11 @@ serve(async (req) => {
       callingUserId
     );
 
+    // FIX D: Update Encounter resource on SATUSEHAT to attach Condition diagnosis references
+    if (conditionIds.length > 0) {
+      await updateEncounterDiagnoses(supabaseAdmin, encounterId, conditionIds);
+    }
+
     // 4. Sync Procedures (Step 3)
     const procedureIds = await buildAndSyncProcedures(
       supabaseAdmin,
@@ -190,7 +194,6 @@ serve(async (req) => {
       .eq('id', visitId);
 
     // 6. Sync Composition (Step 5)
-    // Composition only runs if Encounter succeeded and at least one Condition is synced successfully.
     let compositionId = null;
     if (conditionIds.length > 0) {
       compositionId = await buildAndSyncComposition(

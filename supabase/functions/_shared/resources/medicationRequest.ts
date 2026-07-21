@@ -17,7 +17,7 @@ export async function buildAndSyncMedicationRequests(
     .eq('id', visitId)
     .single();
 
-  // 2. Fetch visit prescriptions from visit_obat
+  // 2. Fetch visit prescriptions from visit_obat with master_bahan metadata
   const { data: voList, error: voErr } = await supabaseAdmin
     .from('visit_obat')
     .select(`
@@ -26,7 +26,7 @@ export async function buildAndSyncMedicationRequests(
       dosis,
       frekuensi,
       qty,
-      master_bahan(nama_bahan, kode_kfa)
+      master_bahan(nama_bahan, kode_kfa, kode_bentuk_sediaan)
     `)
     .eq('visit_id', visitId);
 
@@ -39,6 +39,7 @@ export async function buildAndSyncMedicationRequests(
   for (const vo of (voList || [])) {
     const mb: any = vo.master_bahan;
     const code = mb?.kode_kfa;
+    const bentukSediaanCode = mb?.kode_bentuk_sediaan || 'BS066';
     const name = vo.nama_obat || mb?.nama_bahan || 'Obat';
 
     if (!code) {
@@ -47,11 +48,11 @@ export async function buildAndSyncMedicationRequests(
     }
 
     const dosageText = `${vo.frekuensi || '1x'} ${vo.dosis || '1 tablet'}`.trim();
-
-    // Verified: SATUSEHAT MedicationRequest Profile specifies http://sys-ids.kemkes.go.id/kfa for KFA coding
-    // Source: SATUSEHAT FHIR Implementation Guide - MedicationRequest Profile (fhir.kemkes.go.id)
     const kfaSystemUri = 'http://sys-ids.kemkes.go.id/kfa';
 
+    // FIX C: Pair Medication and MedicationRequest using a contained Medication resource
+    // Official Structure Verified from SATUSEHAT Platform Docs - Medication & MedicationRequest:
+    // https://satusehat.kemkes.go.id/platform/docs/id/fhir/resources/medicationrequest/
     const fhirPayload = {
       resourceType: 'MedicationRequest',
       status: 'active',
@@ -67,14 +68,34 @@ export async function buildAndSyncMedicationRequests(
           ]
         }
       ],
-      medicationCodeableConcept: {
-        coding: [
-          {
-            system: kfaSystemUri,
-            code: code,
-            display: name
+      contained: [
+        {
+          resourceType: 'Medication',
+          id: 'med-1',
+          status: 'active',
+          code: {
+            coding: [
+              {
+                system: kfaSystemUri,
+                code: code,
+                display: name
+              }
+            ]
+          },
+          form: {
+            coding: [
+              {
+                system: 'http://terminology.kemkes.go.id/CodeSystem/medication-form',
+                code: bentukSediaanCode,
+                display: 'Tablet / Sediaan Obat'
+              }
+            ]
           }
-        ]
+        }
+      ],
+      medicationReference: {
+        reference: '#med-1',
+        display: name
       },
       subject: {
         reference: `Patient/${patientSId}`
