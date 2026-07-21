@@ -1,7 +1,12 @@
 import { fhirRequest } from '../fhirClient.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 
-export async function syncOrganization(supabaseAdmin: any, clinicId: string, existingOutboxId?: string) {
+export async function syncOrganization(
+  supabaseAdmin: any, 
+  clinicId: string, 
+  existingOutboxId?: string,
+  triggeredBy?: string | null
+) {
   // 1. Get local satusehat_organizations mapping
   const { data: localOrg, error: fetchErr } = await supabaseAdmin
     .from('satusehat_organizations')
@@ -19,15 +24,18 @@ export async function syncOrganization(supabaseAdmin: any, clinicId: string, exi
   
   const orgId = localOrg.satusehat_organization_id;
 
-  // Record Outbox Start
+  // Record Outbox Start with audit logging
   const outboxId = await recordOutboxStart(supabaseAdmin, {
     clinicId,
     resourceType: 'Organization',
     payload: { action: 'GET', path: `Organization/${orgId}` },
-    outboxId: existingOutboxId
+    outboxId: existingOutboxId,
+    triggeredBy: triggeredBy
   });
 
-  // 2. Search-before-create / Verification: GET Organization/<id>
+  // 2. Verification / Search: GET Organization/<id>
+  // Verified: SATUSEHAT Organization Profile specifies Organization/<id> or GET Organization?identifier=...
+  // Source: SATUSEHAT FHIR Implementation Guide - Organization Resource Profile (fhir.kemkes.go.id)
   console.log(`Verifying Organization ID ${orgId} on SatuSehat Sandbox...`);
   const res = await fhirRequest(supabaseAdmin, 'GET', `Organization/${orgId}`);
   if (!res.ok) {

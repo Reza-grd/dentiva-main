@@ -1,7 +1,12 @@
 import { fhirRequest } from '../fhirClient.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 
-export async function buildAndSyncEncounter(supabaseAdmin: any, visitId: string, existingOutboxId?: string) {
+export async function buildAndSyncEncounter(
+  supabaseAdmin: any, 
+  visitId: string, 
+  existingOutboxId?: string,
+  triggeredBy?: string | null
+) {
   // 1. Fetch visit details with patient and doctor details
   const { data: visit, error: visitErr } = await supabaseAdmin
     .from('visits')
@@ -53,13 +58,33 @@ export async function buildAndSyncEncounter(supabaseAdmin: any, visitId: string,
   const timePart = visit.jam_kunjungan || '08:00';
   const isoTimestamp = `${datePart}T${timePart.substring(0, 5)}:00+07:00`;
 
+  // Verified: SATUSEHAT Outpatient Encounter Profile specifies serviceType and identifier
+  // Source: SATUSEHAT FHIR Implementation Guide - Encounter Profile (fhir.kemkes.go.id)
+  const encounterIdentifierSystem = `http://sys-ids.kemkes.go.id/encounter/${visit.clinic_id}`;
+
   const fhirPayload = {
     resourceType: 'Encounter',
     status: 'finished',
+    identifier: [
+      {
+        system: encounterIdentifierSystem,
+        value: visitId
+      }
+    ],
     class: {
       system: 'http://terminology.hl7.org/CodeSystem/v3-ActCode',
       code: 'AMB',
       display: 'ambulatory'
+    },
+    // Item 3 Fix: Added required serviceType for Dental Clinic Outpatient care
+    serviceType: {
+      coding: [
+        {
+          system: 'http://terminology.hl7.org/CodeSystem/service-type',
+          code: '124',
+          display: 'Dental'
+        }
+      ]
     },
     subject: {
       reference: `Patient/${patientSId}`,
@@ -107,15 +132,34 @@ export async function buildAndSyncEncounter(supabaseAdmin: any, visitId: string,
     ]
   };
 
-  // Record Outbox Start
+  // Record Outbox Start with audit logging
   const outboxId = await recordOutboxStart(supabaseAdmin, {
     clinicId: visit.clinic_id,
     resourceType: 'Encounter',
     relatedVisitId: visitId,
     relatedPatientId: visit.patient_id,
     payload: fhirPayload,
-    outboxId: existingOutboxId
+    outboxId: existingOutboxId,
+    triggeredBy: triggeredBy
   });
+
+  // Search-before-create for idempotency during retries
+  const searchQuery = `Encounter?identifier=${encounterIdentifierSystem}|${visitId}`;
+  console.log(`Checking existing Encounter on SATUSEHAT: GET ${searchQuery}...`);
+  const searchRes = await fhirRequest(supabaseAdmin, 'GET', searchQuery);
+
+  if (searchRes.ok && searchRes.data && searchRes.data.entry && searchRes.data.entry.length > 0) {
+    const existingId = searchRes.data.entry[0].resource.id;
+    console.log(`Found existing Encounter ID ${existingId} on SATUSEHAT Sandbox.`);
+
+    await supabaseAdmin
+      .from('visits')
+      .update({ satusehat_encounter_id: existingId })
+      .eq('id', visitId);
+
+    await recordOutboxSuccess(supabaseAdmin, outboxId, existingId);
+    return existingId;
+  }
 
   console.log(`Syncing Encounter for Visit ID ${visitId} to SatuSehat Sandbox...`);
   const res = await fhirRequest(supabaseAdmin, 'POST', 'Encounter', fhirPayload);

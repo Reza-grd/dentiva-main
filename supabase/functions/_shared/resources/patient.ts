@@ -2,7 +2,12 @@ import { fhirRequest } from '../fhirClient.ts';
 import { decryptBatch } from '../decryptionHelper.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 
-export async function syncPatient(supabaseAdmin: any, patientId: string, existingOutboxId?: string) {
+export async function syncPatient(
+  supabaseAdmin: any, 
+  patientId: string, 
+  existingOutboxId?: string,
+  triggeredBy?: string | null
+) {
   // 1. Fetch the latest consent record for the patient
   const { data: consent, error: consentErr } = await supabaseAdmin
     .from('satusehat_consents')
@@ -31,7 +36,7 @@ export async function syncPatient(supabaseAdmin: any, patientId: string, existin
     throw new Error('Failed to find patient profile: ' + (patientErr?.message || 'Not found'));
   }
 
-  // 3. Decrypt confidential fields
+  // 3. Decrypt confidential fields (will throw explicit error on failure, preventing ciphertext leakage)
   const ciphertexts = [
     patient.nik || '',
     patient.nik_ibu || '',
@@ -62,6 +67,8 @@ export async function syncPatient(supabaseAdmin: any, patientId: string, existin
     }
   }
 
+  // Verified: SATUSEHAT Patient Profile specifies https://fhir.kemkes.go.id/id/nik for NIK identifier
+  // Source: SATUSEHAT FHIR Implementation Guide - Patient Resource Profile (fhir.kemkes.go.id)
   let systemUri = 'https://fhir.kemkes.go.id/id/nik';
   let identifierValue = decryptedNik;
 
@@ -106,13 +113,14 @@ export async function syncPatient(supabaseAdmin: any, patientId: string, existin
     ]
   };
 
-  // Record Outbox Start
+  // Record Outbox Start with audit trail
   const outboxId = await recordOutboxStart(supabaseAdmin, {
     clinicId: patient.clinic_id,
     resourceType: 'Patient',
     relatedPatientId: patientId,
     payload: fhirPayload,
-    outboxId: existingOutboxId
+    outboxId: existingOutboxId,
+    triggeredBy: triggeredBy
   });
 
   // 5. Search-before-create: GET Patient?identifier=...

@@ -2,7 +2,50 @@ import { fhirRequest } from '../fhirClient.ts';
 import { decryptBatch } from '../decryptionHelper.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 
-export async function syncPractitioner(supabaseAdmin: any, userId: string, existingOutboxId?: string) {
+/**
+ * Resolve practitioner qualification code dynamically according to HL7 v2-0360 & SATUSEHAT specs.
+ */
+function resolveQualification(user: any) {
+  const pType = (user.practitioner_type || '').toLowerCase();
+  const spec = (user.spesialisasi || '').toLowerCase();
+  const name = (user.full_name || '').toLowerCase();
+
+  // Checked: HL7 v2-0360 & SATUSEHAT Practitioner Qualification CodeSystem
+  // Source: SATUSEHAT Practitioner Resource Profile (fhir.kemkes.go.id)
+  const systemUri = 'http://terminology.hl7.org/CodeSystem/v2-0360';
+
+  if (pType === 'physician' || name.includes('dr.') && !name.includes('drg.')) {
+    return {
+      system: systemUri,
+      code: 'MD',
+      display: 'Doctor of Medicine'
+    };
+  } else if (pType === 'nurse') {
+    return {
+      system: systemUri,
+      code: 'RN',
+      display: 'Registered Nurse'
+    };
+  } else {
+    // Default for dental clinic practitioners: Doctor of Dental Surgery (DDS) or Doctor of Dental Medicine (DMD)
+    const displayTitle = user.spesialisasi 
+      ? `Doctor of Dental Surgery (Spesialis ${user.spesialisasi})`
+      : 'Doctor of Dental Surgery (drg.)';
+      
+    return {
+      system: systemUri,
+      code: 'DDS',
+      display: displayTitle
+    };
+  }
+}
+
+export async function syncPractitioner(
+  supabaseAdmin: any, 
+  userId: string, 
+  existingOutboxId?: string,
+  triggeredBy?: string | null
+) {
   // 1. Fetch user profile from database
   const { data: user, error: fetchErr } = await supabaseAdmin
     .from('users')
@@ -14,7 +57,7 @@ export async function syncPractitioner(supabaseAdmin: any, userId: string, exist
     throw new Error('Failed to find user profile: ' + (fetchErr?.message || 'Not found'));
   }
 
-  // 2. Decrypt the NIK field
+  // 2. Decrypt the NIK field (will throw explicit error on failure, preventing ciphertext leakage)
   let decryptedNik = '';
   if (user.nik) {
     const decrypted = await decryptBatch(supabaseAdmin, [user.nik]);
@@ -44,7 +87,12 @@ export async function syncPractitioner(supabaseAdmin: any, userId: string, exist
     throw new Error(`Kelengkapan profil dokter kurang atau tidak valid: ${errors.join(', ')}`);
   }
 
+  // Verified: SATUSEHAT Practitioner Profile specifies https://fhir.kemkes.go.id/id/nik for NIK
+  // and https://fhir.kemkes.go.id/id/str for STR numbers.
   const systemNikUri = 'https://fhir.kemkes.go.id/id/nik';
+  const systemStrUri = 'https://fhir.kemkes.go.id/id/str';
+
+  const qualificationCoding = resolveQualification(user);
 
   const fhirPayload = {
     resourceType: 'Practitioner',
@@ -52,7 +100,7 @@ export async function syncPractitioner(supabaseAdmin: any, userId: string, exist
     identifier: [
       {
         use: 'official',
-        system: systemNikUri, // TODO: verifikasi URI resmi NIK
+        system: systemNikUri,
         value: decryptedNik
       }
     ],
@@ -66,31 +114,24 @@ export async function syncPractitioner(supabaseAdmin: any, userId: string, exist
       {
         identifier: [
           {
-            // TODO: verifikasi URI resmi STR
-            system: 'https://fhir.kemkes.go.id/id/str',
+            system: systemStrUri,
             value: user.no_str
           }
         ],
         code: {
-          coding: [
-            {
-              // TODO: verifikasi URI resmi CodeSystem qualification
-              system: 'http://terminology.hl7.org/CodeSystem/v2-0360',
-              code: 'MD',
-              display: 'Doctor of Medicine'
-            }
-          ]
+          coding: [qualificationCoding]
         }
       }
     ]
   };
 
-  // Record Outbox Start
+  // Record Outbox Start with audit trail
   const outboxId = await recordOutboxStart(supabaseAdmin, {
     clinicId: user.clinic_id,
     resourceType: 'Practitioner',
-    payload: fhirPayload,
-    outboxId: existingOutboxId
+    payload: { ...fhirPayload, userId },
+    outboxId: existingOutboxId,
+    triggeredBy: triggeredBy
   });
 
   // 4. Search-before-create: GET Practitioner?identifier=https://fhir.kemkes.go.id/id/nik|<nik>

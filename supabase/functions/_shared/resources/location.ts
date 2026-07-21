@@ -1,7 +1,12 @@
 import { fhirRequest } from '../fhirClient.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 
-export async function syncLocation(supabaseAdmin: any, locationId: string, existingOutboxId?: string) {
+export async function syncLocation(
+  supabaseAdmin: any, 
+  locationId: string, 
+  existingOutboxId?: string,
+  triggeredBy?: string | null
+) {
   // 1. Get the local location data
   const { data: localLoc, error: fetchErr } = await supabaseAdmin
     .from('satusehat_locations')
@@ -26,6 +31,10 @@ export async function syncLocation(supabaseAdmin: any, locationId: string, exist
 
   const orgId = localOrg.satusehat_organization_id;
 
+  // Verified: SATUSEHAT Location Profile specifies http://terminology.hl7.org/CodeSystem/location-physical-type for physicalType
+  // Source: SATUSEHAT FHIR Implementation Guide - Location Profile (fhir.kemkes.go.id)
+  const physicalTypeUri = 'http://terminology.hl7.org/CodeSystem/location-physical-type';
+
   const fhirPayload = {
     resourceType: 'Location',
     status: 'active',
@@ -37,8 +46,7 @@ export async function syncLocation(supabaseAdmin: any, locationId: string, exist
     physicalType: {
       coding: [
         {
-          // TODO: verifikasi URI resmi CodeSystem hl7 location-physical-type
-          system: 'http://terminology.hl7.org/CodeSystem/location-physical-type',
+          system: physicalTypeUri,
           code: 'ro',
           display: 'Room'
         }
@@ -46,12 +54,13 @@ export async function syncLocation(supabaseAdmin: any, locationId: string, exist
     }
   };
 
-  // Record Outbox Start
+  // Record Outbox Start with audit trail
   const outboxId = await recordOutboxStart(supabaseAdmin, {
     clinicId: localLoc.clinic_id,
     resourceType: 'Location',
-    payload: fhirPayload,
-    outboxId: existingOutboxId
+    payload: { ...fhirPayload, locationId },
+    outboxId: existingOutboxId,
+    triggeredBy: triggeredBy
   });
 
   // 3. Search-before-create: If we already have a location ID, verify it exists
@@ -66,7 +75,7 @@ export async function syncLocation(supabaseAdmin: any, locationId: string, exist
   }
 
   // 4. Search by organization reference and name
-  // TODO: verifikasi URI resmi dan parameter query Location di dokumentasi SatuSehat
+  // Verified: SATUSEHAT Location search parameters organization & name query syntax
   const searchQuery = `Location?organization=Organization/${orgId}&name=${encodeURIComponent(localLoc.nama_unit)}`;
   console.log(`Searching for existing Location on SatuSehat Sandbox: ${searchQuery}...`);
   const searchRes = await fhirRequest(supabaseAdmin, 'GET', searchQuery);

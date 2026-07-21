@@ -1,17 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { getCorsHeaders } from "../_shared/corsHelper.ts";
 import { syncOrganization } from "../_shared/resources/organization.ts";
 import { syncLocation } from "../_shared/resources/location.ts";
 import { syncPractitioner } from "../_shared/resources/practitioner.ts";
 import { syncPatient } from "../_shared/resources/patient.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -36,29 +33,38 @@ serve(async (req) => {
       });
     }
 
-    // Verify credentials
-    let isAuthorized = false;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Item 6 Fix: Role-Based Access Control (RBAC) & Multi-tenant clinic verification
+    let callingUserId: string | null = null;
+    let callingUserRole: string | null = null;
+    let callingUserClinicId: string | null = null;
+    let isServiceRole = false;
+
     if (authHeader === `Bearer ${supabaseServiceKey}`) {
-      isAuthorized = true;
+      isServiceRole = true;
     } else {
       const userClient = createClient(supabaseUrl, supabaseAnonKey || supabaseServiceKey, {
         global: { headers: { Authorization: authHeader } }
       });
       const { data: { user }, error: authError } = await userClient.auth.getUser();
-      if (!authError && user) {
-        isAuthorized = true;
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized: Invalid credentials' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
-    }
+      callingUserId = user.id;
 
-    if (!isAuthorized) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid credentials' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+      const { data: profile } = await supabaseAdmin
+        .from('users')
+        .select('role, clinic_id')
+        .eq('id', user.id)
+        .maybeSingle();
 
-    // Create admin client
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+      callingUserRole = profile?.role || null;
+      callingUserClinicId = profile?.clinic_id || null;
+    }
 
     // Parse request body
     let body;
@@ -77,20 +83,59 @@ serve(async (req) => {
     switch (action) {
       case 'syncOrganization':
         if (!clinicId) throw new Error('clinicId is required for syncOrganization');
-        result = await syncOrganization(supabaseAdmin, clinicId);
+        if (!isServiceRole) {
+          if (callingUserRole !== 'admin') {
+            return new Response(JSON.stringify({ error: 'Forbidden: Only Admin role can sync Organization metadata' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+          if (clinicId !== callingUserClinicId) {
+            return new Response(JSON.stringify({ error: 'Forbidden: Multi-tenant access violation' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+        }
+        result = await syncOrganization(supabaseAdmin, clinicId, undefined, callingUserId);
         break;
+
       case 'syncLocation':
         if (!locationId) throw new Error('locationId is required for syncLocation');
-        result = await syncLocation(supabaseAdmin, locationId);
+        if (!isServiceRole) {
+          if (callingUserRole !== 'admin') {
+            return new Response(JSON.stringify({ error: 'Forbidden: Only Admin role can sync Location metadata' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+          const { data: loc } = await supabaseAdmin.from('satusehat_locations').select('clinic_id').eq('id', locationId).maybeSingle();
+          if (!loc || loc.clinic_id !== callingUserClinicId) {
+            return new Response(JSON.stringify({ error: 'Forbidden: Multi-tenant access violation' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+        }
+        result = await syncLocation(supabaseAdmin, locationId, undefined, callingUserId);
         break;
+
       case 'syncPractitioner':
         if (!userId) throw new Error('userId is required for syncPractitioner');
-        result = await syncPractitioner(supabaseAdmin, userId);
+        if (!isServiceRole) {
+          if (!['admin', 'dokter'].includes(callingUserRole || '')) {
+            return new Response(JSON.stringify({ error: 'Forbidden: Insufficient role privileges for Practitioner sync' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+          const { data: uCheck } = await supabaseAdmin.from('users').select('clinic_id').eq('id', userId).maybeSingle();
+          if (!uCheck || uCheck.clinic_id !== callingUserClinicId) {
+            return new Response(JSON.stringify({ error: 'Forbidden: Multi-tenant access violation' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+        }
+        result = await syncPractitioner(supabaseAdmin, userId, undefined, callingUserId);
         break;
+
       case 'syncPatient':
         if (!patientId) throw new Error('patientId is required for syncPatient');
-        result = await syncPatient(supabaseAdmin, patientId);
+        if (!isServiceRole) {
+          if (!['admin', 'dokter', 'resepsionis'].includes(callingUserRole || '')) {
+            return new Response(JSON.stringify({ error: 'Forbidden: Insufficient role privileges for Patient sync' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+          const { data: pCheck } = await supabaseAdmin.from('patients').select('clinic_id').eq('id', patientId).maybeSingle();
+          if (!pCheck || pCheck.clinic_id !== callingUserClinicId) {
+            return new Response(JSON.stringify({ error: 'Forbidden: Multi-tenant access violation' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+        }
+        result = await syncPatient(supabaseAdmin, patientId, undefined, callingUserId);
         break;
+
       default:
         return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
           status: 400,
@@ -110,7 +155,7 @@ serve(async (req) => {
       }
     );
   } catch (err: any) {
-    console.error('Error during SatuSehat sync execution:', err);
+    console.error('Error during SATUSEHAT sync execution:', err);
     return new Response(
       JSON.stringify({
         success: false,

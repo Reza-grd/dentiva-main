@@ -1,18 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { getCorsHeaders } from "../_shared/corsHelper.ts";
 import { buildAndSyncEncounter } from "../_shared/resources/encounter.ts";
 import { buildAndSyncConditions } from "../_shared/resources/condition.ts";
 import { buildAndSyncProcedures } from "../_shared/resources/procedure.ts";
 import { buildAndSyncMedicationRequests } from "../_shared/resources/medicationRequest.ts";
 import { buildAndSyncComposition } from "../_shared/resources/composition.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -37,29 +34,50 @@ serve(async (req) => {
       });
     }
 
-    // Verify credentials
-    let isAuthorized = false;
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Item 6 Fix: Strict Role-Based Access Control (RBAC) & Multi-tenant clinic verification
+    let callingUserId: string | null = null;
+    let callingUserRole: string | null = null;
+    let callingUserClinicId: string | null = null;
+    let isServiceRole = false;
+
     if (authHeader === `Bearer ${supabaseServiceKey}`) {
-      isAuthorized = true;
+      isServiceRole = true;
     } else {
       const userClient = createClient(supabaseUrl, supabaseAnonKey || supabaseServiceKey, {
         global: { headers: { Authorization: authHeader } }
       });
       const { data: { user }, error: authError } = await userClient.auth.getUser();
-      if (!authError && user) {
-        isAuthorized = true;
+      if (authError || !user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized: Invalid credentials' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
+      callingUserId = user.id;
+
+      const { data: profile } = await supabaseAdmin
+        .from('users')
+        .select('role, clinic_id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      callingUserRole = profile?.role || null;
+      callingUserClinicId = profile?.clinic_id || null;
     }
 
-    if (!isAuthorized) {
-      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid credentials' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Role check: Only admin or dokter (or service role) can trigger clinical visit sync
+    const ALLOWED_ROLES = ['admin', 'dokter'];
+    if (!isServiceRole && (!callingUserRole || !ALLOWED_ROLES.includes(callingUserRole))) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden: Insufficient role privileges to trigger clinical visit sync. Only Admin and Doctor roles are permitted.' }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
-
-    // Create admin client
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
     // Parse request body
     let body;
@@ -80,10 +98,29 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Starting SatuSehat Clinical Sync for Visit ID: ${visitId}...`);
+    // Multi-tenant Isolation Check: Verify visit belongs to caller's clinic
+    if (!isServiceRole && callingUserClinicId) {
+      const { data: vCheck } = await supabaseAdmin
+        .from('visits')
+        .select('clinic_id')
+        .eq('id', visitId)
+        .maybeSingle();
+
+      if (!vCheck || vCheck.clinic_id !== callingUserClinicId) {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden: Multi-tenant access violation. You cannot sync visits belonging to another clinic.' }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+    }
+
+    console.log(`Starting SATUSEHAT Clinical Sync for Visit ID: ${visitId} (Triggered by: ${callingUserId || 'service_role'})...`);
 
     // 1. Sync Encounter (Step 1)
-    const encounterId = await buildAndSyncEncounter(supabaseAdmin, visitId);
+    const encounterId = await buildAndSyncEncounter(supabaseAdmin, visitId, undefined, callingUserId);
 
     // 2. Fetch updated visit to retrieve patientSId, practitionerSId and date details
     const { data: visit, error: visitErr } = await supabaseAdmin
@@ -113,7 +150,9 @@ serve(async (req) => {
       visitId,
       patientSId,
       encounterId,
-      isoTimestamp
+      isoTimestamp,
+      undefined,
+      callingUserId
     );
 
     // 4. Sync Procedures (Step 3)
@@ -122,7 +161,9 @@ serve(async (req) => {
       visitId,
       patientSId,
       encounterId,
-      isoTimestamp
+      isoTimestamp,
+      undefined,
+      callingUserId
     );
 
     // 5. Sync MedicationRequests (Step 4)
@@ -131,7 +172,9 @@ serve(async (req) => {
       visitId,
       patientSId,
       encounterId,
-      isoTimestamp
+      isoTimestamp,
+      undefined,
+      callingUserId
     );
 
     // Save mapping list of successfully synced resources
@@ -159,7 +202,9 @@ serve(async (req) => {
         isoTimestamp,
         conditionIds,
         procedureIds,
-        medicationRequestIds
+        medicationRequestIds,
+        undefined,
+        callingUserId
       );
     } else {
       console.warn('Skipping Composition sync: A medical resume requires at least one successfully synced Condition/Diagnosis.');

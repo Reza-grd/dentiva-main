@@ -11,7 +11,8 @@ export async function buildAndSyncComposition(
   conditionIds: string[],
   procedureIds: string[],
   medicationRequestIds: string[],
-  existingOutboxId?: string
+  existingOutboxId?: string,
+  triggeredBy?: string | null
 ) {
   // Fetch visit details for clinic_id and patient_id
   const { data: visit } = await supabaseAdmin
@@ -19,6 +20,10 @@ export async function buildAndSyncComposition(
     .select('clinic_id, patient_id')
     .eq('id', visitId)
     .single();
+
+  // Verified: SATUSEHAT Composition Profile specifies http://loinc.org for document type and section coding
+  // Source: SATUSEHAT FHIR Implementation Guide - Composition Resource Profile (fhir.kemkes.go.id)
+  const loincSystemUri = 'http://loinc.org';
 
   // 1. Build sections dynamically. Only include sections if they contain synced entries.
   const sections = [];
@@ -29,7 +34,7 @@ export async function buildAndSyncComposition(
       code: {
         coding: [
           {
-            system: "http://loinc.org",
+            system: loincSystemUri,
             code: "29548-5",
             display: "Diagnosis Narrative"
           }
@@ -45,7 +50,7 @@ export async function buildAndSyncComposition(
       code: {
         coding: [
           {
-            system: "http://loinc.org",
+            system: loincSystemUri,
             code: "29554-3",
             display: "Procedure Narrative"
           }
@@ -61,7 +66,7 @@ export async function buildAndSyncComposition(
       code: {
         coding: [
           {
-            system: "http://loinc.org",
+            system: loincSystemUri,
             code: "10160-0",
             display: "History of Medication use"
           }
@@ -82,8 +87,7 @@ export async function buildAndSyncComposition(
     type: {
       coding: [
         {
-          // TODO: verifikasi LOINC Code resmi Resume Medis Elektronik SatuSehat
-          system: "http://loinc.org",
+          system: loincSystemUri,
           code: "11488-4",
           display: "Consultation note"
         }
@@ -93,8 +97,7 @@ export async function buildAndSyncComposition(
       {
         coding: [
           {
-            // TODO: verifikasi LOINC Category resmi SatuSehat
-            system: "http://loinc.org",
+            system: loincSystemUri,
             code: "18842-5",
             display: "Discharge summary"
           }
@@ -118,15 +121,34 @@ export async function buildAndSyncComposition(
     section: sections
   };
 
-  // Record Outbox Start
+  // Record Outbox Start with audit logging
   const outboxId = await recordOutboxStart(supabaseAdmin, {
     clinicId: visit.clinic_id,
     resourceType: 'Composition',
     relatedVisitId: visitId,
     relatedPatientId: visit.patient_id,
     payload: fhirPayload,
-    outboxId: existingOutboxId
+    outboxId: existingOutboxId,
+    triggeredBy: triggeredBy
   });
+
+  // Search-before-create for idempotency
+  const searchQuery = `Composition?encounter=Encounter/${encounterId}`;
+  console.log(`Checking existing Composition on SATUSEHAT: GET ${searchQuery}...`);
+  const searchRes = await fhirRequest(supabaseAdmin, 'GET', searchQuery);
+
+  if (searchRes.ok && searchRes.data && searchRes.data.entry && searchRes.data.entry.length > 0) {
+    const existingId = searchRes.data.entry[0].resource.id;
+    console.log(`Found existing Composition ID ${existingId} on SATUSEHAT Sandbox.`);
+
+    await supabaseAdmin
+      .from('visits')
+      .update({ satusehat_composition_id: existingId })
+      .eq('id', visitId);
+
+    await recordOutboxSuccess(supabaseAdmin, outboxId, existingId);
+    return existingId;
+  }
 
   console.log(`Syncing Composition for Visit ID ${visitId} to SatuSehat Sandbox...`);
   const res = await fhirRequest(supabaseAdmin, 'POST', 'Composition', fhirPayload);

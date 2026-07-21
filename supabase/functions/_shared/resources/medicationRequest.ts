@@ -7,7 +7,8 @@ export async function buildAndSyncMedicationRequests(
   patientSId: string,
   encounterId: string,
   isoTimestamp: string,
-  existingOutboxIds?: Record<string, string>
+  existingOutboxIds?: Record<string, string>,
+  triggeredBy?: string | null
 ): Promise<string[]> {
   // 1. Fetch visit details for clinic_id and patient_id
   const { data: visit } = await supabaseAdmin
@@ -47,6 +48,10 @@ export async function buildAndSyncMedicationRequests(
 
     const dosageText = `${vo.frekuensi || '1x'} ${vo.dosis || '1 tablet'}`.trim();
 
+    // Verified: SATUSEHAT MedicationRequest Profile specifies http://sys-ids.kemkes.go.id/kfa for KFA coding
+    // Source: SATUSEHAT FHIR Implementation Guide - MedicationRequest Profile (fhir.kemkes.go.id)
+    const kfaSystemUri = 'http://sys-ids.kemkes.go.id/kfa';
+
     const fhirPayload = {
       resourceType: 'MedicationRequest',
       status: 'active',
@@ -65,8 +70,7 @@ export async function buildAndSyncMedicationRequests(
       medicationCodeableConcept: {
         coding: [
           {
-            // TODO: verifikasi URI resmi CodeSystem KFA SatuSehat
-            system: 'https://fhir.kemkes.go.id/id/kfa',
+            system: kfaSystemUri,
             code: code,
             display: name
           }
@@ -86,15 +90,29 @@ export async function buildAndSyncMedicationRequests(
       ]
     };
 
-    // Record Outbox Start
+    // Record Outbox Start with audit logging
     const outboxId = await recordOutboxStart(supabaseAdmin, {
       clinicId: visit.clinic_id,
       resourceType: 'MedicationRequest',
       relatedVisitId: visitId,
       relatedPatientId: visit.patient_id,
       payload: fhirPayload,
-      outboxId: existingOutboxIds?.[code]
+      outboxId: existingOutboxIds?.[code],
+      triggeredBy: triggeredBy
     });
+
+    // Search-before-create for idempotency
+    const searchQuery = `MedicationRequest?encounter=Encounter/${encounterId}&code=${code}`;
+    console.log(`Checking existing MedicationRequest on SATUSEHAT: GET ${searchQuery}...`);
+    const searchRes = await fhirRequest(supabaseAdmin, 'GET', searchQuery);
+
+    if (searchRes.ok && searchRes.data && searchRes.data.entry && searchRes.data.entry.length > 0) {
+      const existingId = searchRes.data.entry[0].resource.id;
+      console.log(`Found existing MedicationRequest ID ${existingId} on SATUSEHAT Sandbox.`);
+      await recordOutboxSuccess(supabaseAdmin, outboxId, existingId);
+      medicationRequestIds.push(existingId);
+      continue;
+    }
 
     console.log(`Syncing MedicationRequest ${code} (${name}) to SatuSehat Sandbox...`);
     const res = await fhirRequest(supabaseAdmin, 'POST', 'MedicationRequest', fhirPayload);

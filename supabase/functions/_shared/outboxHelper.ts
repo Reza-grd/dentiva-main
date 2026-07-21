@@ -30,10 +30,12 @@ export interface OutboxParams {
   relatedPatientId?: string;
   payload: any;
   outboxId?: string;
+  triggeredBy?: string | null;
+  triggerSource?: 'manual_user' | 'auto_visit' | 'outbox_processor' | 'system_cron';
 }
 
 export async function recordOutboxStart(supabaseAdmin: any, params: OutboxParams): Promise<string> {
-  const { clinicId, resourceType, relatedVisitId, relatedPatientId, payload, outboxId } = params;
+  const { clinicId, resourceType, relatedVisitId, relatedPatientId, payload, outboxId, triggeredBy, triggerSource } = params;
 
   if (outboxId) {
     // Fetch current attempt count
@@ -45,15 +47,20 @@ export async function recordOutboxStart(supabaseAdmin: any, params: OutboxParams
 
     const newAttempt = (existing?.attempt_count || 0) + 1;
 
+    const updatePayload: Record<string, any> = {
+      status: 'processing',
+      payload: payload,
+      attempt_count: newAttempt,
+      last_attempt_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if (triggeredBy) updatePayload.triggered_by = triggeredBy;
+    if (triggerSource) updatePayload.trigger_source = triggerSource;
+
     await supabaseAdmin
       .from('satusehat_outbox')
-      .update({
-        status: 'processing',
-        payload: payload,
-        attempt_count: newAttempt,
-        last_attempt_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', outboxId);
 
     return outboxId;
@@ -70,7 +77,9 @@ export async function recordOutboxStart(supabaseAdmin: any, params: OutboxParams
       payload: payload,
       status: 'processing',
       attempt_count: 1,
-      last_attempt_at: new Date().toISOString()
+      last_attempt_at: new Date().toISOString(),
+      triggered_by: triggeredBy || null,
+      trigger_source: triggerSource || (triggeredBy ? 'manual_user' : 'system_cron')
     })
     .select('id')
     .single();
