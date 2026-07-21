@@ -3,10 +3,11 @@ import { decryptBatch } from '../decryptionHelper.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 
 /**
- * FIX A: SATUSEHAT Practitioner Qualification Builder
+ * FIX A & FIX G: SATUSEHAT Practitioner Qualification Builder
  * Official Structure Verified from SATUSEHAT Public Postman Collection (Request 0ghdxvo):
  * System: https://terminology.kemkes.go.id/v1-0302
- * Code: STR-KKI (Surat Tanda Registrasi)
+ * Code: STR-KKI (Unified registration type code for medical doctors and dentists under KKI)
+ * Display: "Surat Tanda Registrasi Dokter Gigi" (for dentists) vs "Surat Tanda Registrasi Dokter" (for physicians)
  * STR Identifier System: https://fhir.kemkes.go.id/id/str-kki-number
  */
 export async function syncPractitioner(

@@ -197,8 +197,10 @@ export async function buildAndSyncEncounter(
 }
 
 /**
- * FIX D: Update Encounter resource on SATUSEHAT to link created Condition diagnoses.
- * Executes PUT request to update Encounter.diagnosis array once Condition IDs are known.
+ * FIX F: Update Encounter resource on SATUSEHAT to link created Condition diagnoses.
+ * Verified Source: HL7 CodeSystem diagnosis-role (http://terminology.hl7.org/CodeSystem/diagnosis-role) & SATUSEHAT Encounter Profile.
+ * Uses 'CC' (Chief complaint) for primary diagnosis and 'DD' (Discharge diagnosis) for secondary diagnoses.
+ * Inpatient-only code 'AD' (Admission diagnosis) is completely excluded for outpatient dental clinic care.
  */
 export async function updateEncounterDiagnoses(
   supabaseAdmin: any,
@@ -215,8 +217,7 @@ export async function updateEncounterDiagnoses(
 
   const encounterPayload = getRes.data;
 
-  // Verified: SATUSEHAT Encounter Profile diagnosis linkage
-  // Source: SATUSEHAT FHIR Implementation Guide - Encounter Profile (fhir.kemkes.go.id)
+  // FIX F: Correct diagnosis-role coding for outpatient dental encounters ('CC' vs 'DD')
   encounterPayload.diagnosis = conditionIds.map((condId, index) => ({
     condition: {
       reference: `Condition/${condId}`,
@@ -226,8 +227,8 @@ export async function updateEncounterDiagnoses(
       coding: [
         {
           system: 'http://terminology.hl7.org/CodeSystem/diagnosis-role',
-          code: index === 0 ? 'CC' : 'AD',
-          display: index === 0 ? 'Chief complaint' : 'Admission diagnosis'
+          code: index === 0 ? 'CC' : 'DD',
+          display: index === 0 ? 'Chief complaint' : 'Discharge diagnosis'
         }
       ]
     },
