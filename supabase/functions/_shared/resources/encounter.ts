@@ -197,10 +197,30 @@ export async function buildAndSyncEncounter(
 }
 
 /**
- * FIX F: Update Encounter resource on SATUSEHAT to link created Condition diagnoses.
- * Verified Source: HL7 CodeSystem diagnosis-role (http://terminology.hl7.org/CodeSystem/diagnosis-role) & SATUSEHAT Encounter Profile.
- * Uses 'CC' (Chief complaint) for primary diagnosis and 'DD' (Discharge diagnosis) for secondary diagnoses.
- * Inpatient-only code 'AD' (Admission diagnosis) is completely excluded for outpatient dental clinic care.
+ * FIX F (Round 4 - Final): Update Encounter resource on SATUSEHAT to link created Condition diagnoses.
+ *
+ * SEARCH PERFORMED (2026-07-22):
+ *   1. Checked https://satusehat.kemkes.go.id/platform/docs/id/fhir/resources/encounter/#encounter-diagnosis-use
+ *      Finding: diagnosis.use IS documented and expected (marked mandatory with *). The system URI used is
+ *      "https://www.hl7.org/fhir/Codesystem-diagnosis-role". The page example shows "Admission diagnosis",
+ *      but explicitly defers which code to use to each interoperability playbook use-case.
+ *   2. Checked https://satusehat.kemkes.go.id/platform/docs/id/interoperability/rawat-jalan-gigi/ Section 16
+ *      ("Pembaruan Data Kunjungan"):
+ *      Finding: Confirms the POST-visit PUT includes "diagnosis primer, diagnosa sekunder" back to Encounter,
+ *      but defers the exact element mapping to the "Resume Medis - Rawat Jalan" and related modules.
+ *      No specific `use` code is given for dental outpatient encounters.
+ *   3. The "Resume Medis - Rawat Jalan" module and the Rawat Jalan Gigi terminology appendix were not checked
+ *      directly in this round; both would be needed to confirm the outpatient-specific `use` code.
+ *
+ * DECISION (per Round 4 task rules, Step 3):
+ *   Since no SATUSEHAT-specific guidance was found that confirms which `use` code is correct for Rawat Jalan Gigi
+ *   outpatient encounters, the `use` element is DROPPED entirely. `condition` + `rank` are kept — these are
+ *   unambiguous (a reference and an ordinal number). Omitting an unverified `use` is safer than asserting a
+ *   potentially wrong role code (CC/DD) into a government health record system. This is valid FHIR R4 since
+ *   `Encounter.diagnosis.use` is not required in base spec.
+ *
+ * NEEDS-HUMAN-VERIFICATION: Confirm whether SATUSEHAT's Rawat Jalan or Rawat Jalan Gigi Postman examples
+ *   include a `use` element in Encounter.diagnosis PUT payloads, and if so, which codes (CC/DD/other) are used.
  */
 export async function updateEncounterDiagnoses(
   supabaseAdmin: any,
@@ -217,20 +237,12 @@ export async function updateEncounterDiagnoses(
 
   const encounterPayload = getRes.data;
 
-  // FIX F: Correct diagnosis-role coding for outpatient dental encounters ('CC' vs 'DD')
+  // FIX F (Round 4): Drop the `use` element — no SATUSEHAT-specific outpatient code confirmed.
+  // Keep condition (reference) and rank (ordinal) only. See comment block above for full reasoning.
   encounterPayload.diagnosis = conditionIds.map((condId, index) => ({
     condition: {
       reference: `Condition/${condId}`,
       display: `Diagnosis ${index + 1}`
-    },
-    use: {
-      coding: [
-        {
-          system: 'http://terminology.hl7.org/CodeSystem/diagnosis-role',
-          code: index === 0 ? 'CC' : 'DD',
-          display: index === 0 ? 'Chief complaint' : 'Discharge diagnosis'
-        }
-      ]
     },
     rank: index + 1
   }));
