@@ -32,5 +32,15 @@ Since SATUSEHAT `MedicationRequest` references KFA codes inside a `contained` re
 `value`: `{visitId}-{visitObatId}`
 The system queries this identifier during sync; on search failure, it runs a fallback search by `encounter` and filters matched entries in-memory by KFA code.
 
-### 3. Outpatient Encounter Diagnosis Roles (Fix F)
-To align with outpatient care semantics for a dental clinic, the inpatient concept of "Admission diagnosis" (`AD`) is eliminated. Primary outpatient encounter diagnoses are labeled `CC` (Chief complaint), and secondary/subsequent diagnoses are labeled `DD` (Discharge diagnosis) using the official HL7 `diagnosis-role` CodeSystem.
+### 3. Outpatient Encounter Diagnosis Roles (Fix F) — NEEDS-HUMAN-VERIFICATION
+
+**History**: `AD` (Admission diagnosis, inpatient-only) → `CC`/`DD` (Round 3, unverified) → **`use` element removed entirely (Round 4, current).**
+
+**Current behavior (as of Round 4)**: `updateEncounterDiagnoses()` sends `Encounter.diagnosis` entries containing only `condition.reference` and `rank`. The `use` element is **not sent at all**. This is valid FHIR R4 (`use` is not required in base spec).
+
+**Why `use` was removed**: Two documentation sources were checked (see Fix F table row for details). Neither provided a SATUSEHAT-specific outpatient code for `diagnosis.use` — both deferred to other playbook pages. Sending an unverified code to a government health record system was judged worse than omitting the element.
+
+**Round 5 — Empirical sandbox test: NOT POSSIBLE in this environment.**
+Concrete reason: `SATUSEHAT_CLIENT_ID` and `SATUSEHAT_CLIENT_SECRET` are stored exclusively in Supabase's hosted Edge Function Secrets vault (`Deno.env.get(...)`). They do not exist in any local `.env`, `supabase/.env`, or `supabase/secrets.env` file. Without these credentials a token cannot be obtained, and no call can be made to `api-satusehat-stg.kemkes.go.id` from the local machine. This is **not** a network/firewall issue — it is a credentials-availability issue.
+
+**To resolve empirically**: A developer with access to the Supabase dashboard secrets must either (a) use `supabase functions serve --env-file` with a local copy of the secrets to invoke the Edge Function locally against sandbox, or (b) run a one-off test script inside the deployed Edge Function environment. The test payload to try is a PUT to `Encounter/{existing-sandbox-id}` with `diagnosis: [{ condition: { reference: "Condition/{id}" }, rank: 1 }]` (no `use`) and note whether the response is HTTP 200 or returns an `OperationOutcome` error/warning about the missing `use` element.
