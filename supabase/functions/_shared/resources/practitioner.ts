@@ -65,9 +65,22 @@ export async function syncPractitioner(
   const systemStrKkiUri = 'https://fhir.kemkes.go.id/id/str-kki-number';
   const qualificationSystemUri = 'https://terminology.kemkes.go.id/v1-0302';
 
+  const isNurse = (user.practitioner_type || '').toLowerCase() === 'nurse';
   const isDentist = (user.practitioner_type || 'dentist') === 'dentist' || (user.full_name || '').toLowerCase().includes('drg.');
-  const strDisplay = isDentist ? 'Surat Tanda Registrasi Dokter Gigi' : 'Surat Tanda Registrasi Dokter';
-  const strCode = user.qualification_code || 'STR-KKI';
+  
+  let strDisplay = 'Surat Tanda Registrasi Dokter';
+  let strCode = user.qualification_code || 'STR-KKI';
+  let issuerDisplay = 'Konsil Kedokteran Indonesia';
+  let issuerReference = 'Organization/10000003';
+  
+  if (isNurse) {
+    strDisplay = 'Surat Tanda Registrasi Perawat';
+    strCode = user.qualification_code || 'STR-KTKI';
+    issuerDisplay = 'Konsil Tenaga Kesehatan Indonesia';
+    issuerReference = 'Organization/10000004';
+  } else if (isDentist) {
+    strDisplay = 'Surat Tanda Registrasi Dokter Gigi';
+  }
 
   const fhirPayload = {
     resourceType: 'Practitioner',
@@ -104,8 +117,8 @@ export async function syncPractitioner(
           }
         ],
         issuer: {
-          display: 'Konsil Kedokteran Indonesia',
-          reference: 'Organization/10000003'
+          display: issuerDisplay,
+          reference: issuerReference
         },
         period: {
           end: user.str_berlaku_hingga
