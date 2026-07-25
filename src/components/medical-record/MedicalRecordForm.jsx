@@ -1204,7 +1204,7 @@ const MedicalRecordForm = () => {
                   <button onClick={() => setShowLegend(true)} className="px-3 py-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 text-xs font-semibold rounded-lg transition-colors border border-transparent hover:border-[var(--color-accent)]/20 dark:hover:border-gray-800 no-print">Bantuan Simbol</button>
                 </div>
               </div>
-              <div className="p-4 sm:p-6 bg-white dark:bg-gray-900">
+              <div className="p-4 sm:p-6 bg-white dark:bg-gray-900 overflow-x-auto touch-pan-x scrollbar-hide">
                 <Odontogram 
                   conditions={toothConditions} 
                   onChange={(newData) => setToothConditions(newData)} 

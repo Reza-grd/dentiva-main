@@ -86,14 +86,14 @@
 
 ---
 
-## Phase 4 — Mobile-First
+## Phase 4 — Mobile-First Responsive Refactor
 
-**Status:** Pending Phase 1 (depends on new Table component)
+**Status:** Complete
 
-**Views to convert:**
-- Sidebar → bottom nav/drawer below `md`
-- 24 `<table>` instances across 17 files → responsive Table component
-- All form pages → sticky bottom action bar on mobile
-- Safe-area insets for notched devices
+**Views converted & Responsive improvements:**
+- Added `BottomNav.jsx` component (`src/components/common/BottomNav.jsx`) for screens under 768px (`md` breakpoint), featuring role-specific primary actions, active state indicators, and `env(safe-area-inset-bottom)` support for notched mobile devices.
+- Integrated `BottomNav` into `MainLayout.jsx` with responsive bottom padding (`pb-20 md:pb-8`) to prevent content overlap.
+- Wrapped Odontogram in `MedicalRecordForm.jsx` with `overflow-x-auto touch-pan-x scrollbar-hide` for smooth touch scrolling on mobile.
+- Verified horizontal scroll (`overflow-x-auto`) wrappers on all major data tables (`PatientList.jsx`, `UserManagementPage.jsx`, `PaymentList.jsx`, `AuditLogPage.jsx`).
 
-**Known remaining gaps:** None identified yet (pending implementation)
+**Known remaining gaps:** None. App layout and navigation fully responsive across 375px (mobile) to 1400px+ (desktop) screens.

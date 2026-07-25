@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../common/Sidebar';
 import TopBar from './TopBar';
+import BottomNav from '../common/BottomNav';
 
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,12 +30,15 @@ const MainLayout = ({ children }) => {
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8 focus:outline-none"
+          className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8 pb-20 md:pb-8 focus:outline-none"
         >
           <div className="max-w-[1400px] mx-auto w-full">
             {children}
           </div>
         </main>
+
+        {/* Mobile Bottom Navigation Bar */}
+        <BottomNav />
       </div>
     </div>
   );
