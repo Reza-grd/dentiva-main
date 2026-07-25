@@ -87,6 +87,47 @@ serve(async (req) => {
       })
     }
 
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // Server-Side SaaS Feature Gating: whatsapp_reminders
+    let callingClinicId: string | null = null;
+    if (authHeader !== `Bearer ${supabaseServiceKey}`) {
+      const userClient = createClient(supabaseUrl, supabaseAnonKey || supabaseServiceKey, {
+        global: { headers: { Authorization: authHeader } }
+      })
+      const { data: { user } } = await userClient.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('users')
+          .select('clinic_id')
+          .eq('id', user.id)
+          .maybeSingle()
+        callingClinicId = profile?.clinic_id || null
+      }
+    }
+
+    if (callingClinicId) {
+      const { data: sub } = await supabase
+        .from('clinic_subscriptions')
+        .select('*, plan:subscription_plans(*)')
+        .eq('clinic_id', callingClinicId)
+        .eq('status', 'active')
+        .maybeSingle()
+
+      const hasWaFeature = sub?.plan?.features?.whatsapp_reminders === true
+      if (!hasWaFeature) {
+        return new Response(
+          JSON.stringify({
+            error: "Forbidden: WhatsApp Reminders feature is not included in your clinic's subscription plan. Please upgrade to Pro or Enterprise.",
+          }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        )
+      }
+    }
+
     let body;
     try {
       body = await req.json()

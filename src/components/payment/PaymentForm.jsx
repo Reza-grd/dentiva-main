@@ -5,7 +5,8 @@ import { paymentService } from '../../services/paymentService';
 import { visitService } from '../../services/visitService';
 import { treatmentService } from '../../services/treatmentService';
 import { useAuth } from '../../contexts/AuthContext';
-import { DollarSign, Plus, Trash2, Printer, Search, Check, AlertCircle, ChevronLeft, MessageSquare } from 'lucide-react';
+import { usePermission } from '../../contexts/PermissionsContext';
+import { DollarSign, Plus, Trash2, Printer, Search, Check, AlertCircle, ChevronLeft, MessageSquare, Lock } from 'lucide-react';
 import { useToast } from '../common/ToastNotification';
 import { parseDateLocal } from '../../utils/dateUtils';
 import { supabase } from '../../services/supabase';
@@ -14,6 +15,7 @@ import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 const PaymentForm = () => {
   const { visitId } = useParams();
   const { userProfile } = useAuth();
+  const { hasFeature } = usePermission();
   const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -1027,13 +1029,24 @@ const PaymentForm = () => {
             </button>
           )}
           {existingPayment && paymentData.status_pembayaran === 'paid' && (
-            <button 
-              onClick={handleResendWhatsApp} 
-              disabled={sendingWA} 
-              className="flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl font-semibold transition-colors shadow-sm w-full sm:w-auto disabled:opacity-50"
-            >
-              <MessageSquare size={18} /> {sendingWA ? 'Mengirim...' : 'Kirim Ulang Invoice WA'}
-            </button>
+            hasFeature('whatsapp_reminders') ? (
+              <button 
+                onClick={handleResendWhatsApp} 
+                disabled={sendingWA} 
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl font-semibold transition-colors shadow-sm w-full sm:w-auto disabled:opacity-50"
+              >
+                <MessageSquare size={18} /> {sendingWA ? 'Mengirim...' : 'Kirim Ulang Invoice WA'}
+              </button>
+            ) : (
+              <button 
+                onClick={() => toast.showToast('Fitur WhatsApp Notifikasi terkunci. Upgrade ke Paket Pro/Enterprise untuk membuka fitur ini.', 'warning')}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 rounded-xl font-semibold transition-colors shadow-sm w-full sm:w-auto cursor-pointer"
+                title="Fitur terkunci — Upgrade Paket Langganan"
+              >
+                <Lock size={16} className="text-amber-500" />
+                <MessageSquare size={18} className="opacity-50" /> Kirim Invoice WA (Paket Pro)
+              </button>
+            )
           )}
         </div>
       </div>

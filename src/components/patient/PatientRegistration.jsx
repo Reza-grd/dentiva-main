@@ -1223,21 +1223,32 @@ const PatientRegistration = () => {
 
       {errorModalMsg && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white dark:bg-[#14171F] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100 dark:border-gray-800">
             <div className="bg-red-500 px-6 py-4">
               <h2 className="text-white text-lg font-bold text-center">Pendaftaran Gagal</h2>
             </div>
-            <div className="p-6 space-y-6 text-center">
-              <div className="text-gray-700 font-medium">
+            <div className="p-6 space-y-4 text-center">
+              <div className="text-gray-700 dark:text-gray-300 font-medium text-sm leading-relaxed">
                 {errorModalMsg}
               </div>
-              <button
-                type="button"
-                onClick={() => setErrorModalMsg(null)}
-                className="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl transition-colors shadow-sm"
-              >
-                Coba Lagi
-              </button>
+              <div className="flex flex-col gap-2">
+                {errorModalMsg.includes('Batas') && (
+                  <button
+                    type="button"
+                    onClick={() => { setErrorModalMsg(null); navigate('/pricing'); }}
+                    className="w-full py-3 bg-[var(--color-accent)] hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-md text-sm"
+                  >
+                    Upgrade Paket Sekarang
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setErrorModalMsg(null)}
+                  className="w-full py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors text-sm"
+                >
+                  Tutup
+                </button>
+              </div>
             </div>
           </div>
         </div>

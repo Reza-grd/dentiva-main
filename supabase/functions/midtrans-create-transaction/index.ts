@@ -39,12 +39,23 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    const serverKey = Deno.env.get("MIDTRANS_SERVER_KEY") || "PLACEHOLDER_MIDTRANS_SERVER_KEY";
+    const serverKey = Deno.env.get("MIDTRANS_SERVER_KEY");
     const environment = Deno.env.get("MIDTRANS_ENVIRONMENT") || "sandbox";
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
         JSON.stringify({ error: "Supabase environment variables not configured" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (!serverKey) {
+      console.error("FATAL: MIDTRANS_SERVER_KEY is not configured in Supabase Edge Function Secrets.");
+      return new Response(
+        JSON.stringify({ error: "MIDTRANS_SERVER_KEY not configured in environment secrets" }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

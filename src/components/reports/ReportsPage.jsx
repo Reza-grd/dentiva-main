@@ -1,6 +1,8 @@
 import { useToast } from '../common/ToastNotification';
 import React, { useState, useEffect } from 'react';
-import { TrendingUp, Download, Calendar, BarChart3, Users, DollarSign } from 'lucide-react';
+import { usePermission } from '../../contexts/PermissionsContext';
+import { useNavigate } from 'react-router-dom';
+import { TrendingUp, Download, Calendar, BarChart3, Users, DollarSign, Lock, Sparkles } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { financialService } from '../../services/financialService';
@@ -14,10 +16,14 @@ const TREATMENT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
 
 const ReportsPage = () => {
   const toast = useToast();
+  const navigate = useNavigate();
+  const { hasFeature } = usePermission();
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
+  const canCustomReport = hasFeature('custom_reports');
 
   // BUG S-01 FIX: state untuk data real dari API (bukan dummy hardcoded)
   const [treatmentDistribution, setTreatmentDistribution] = useState([]);
@@ -200,6 +206,31 @@ const ReportsPage = () => {
         <p className="text-gray-600 dark:text-gray-400">Dashboard analisis bisnis klinik</p>
       </div>
 
+      {/* Upgrade Banner for Starter Plan */}
+      {!canCustomReport && (
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-indigo-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
+              <Lock size={20} />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+                Fitur Laporan Kustom & Ekspor Terkunci
+              </h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Ekspor berkas PDF/Excel & analisis mendalam memerlukan paket langganan Pro atau Enterprise.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/pricing')}
+            className="px-4 py-2 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-white text-xs font-bold rounded-xl shadow-md hover:brightness-110 transition-all whitespace-nowrap flex items-center gap-1.5"
+          >
+            <Sparkles size={14} /> Upgrade Sekarang
+          </button>
+        </div>
+      )}
+
       {/* Controls */}
       <div className="glass-panel mb-6 p-4 sm:p-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -238,16 +269,38 @@ const ReportsPage = () => {
 
           <div className="flex gap-2">
             <button
-              onClick={() => handleExport('pdf')}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              onClick={() => {
+                if (!canCustomReport) {
+                  toast.showToast('Ekspor PDF memerlukan Paket Pro/Enterprise. Silakan upgrade paket langganan Anda.', 'warning');
+                  return;
+                }
+                handleExport('pdf');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-sm transition-colors ${
+                canCustomReport
+                  ? 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-900 cursor-pointer'
+              }`}
             >
+              {!canCustomReport && <Lock size={14} className="text-amber-500" />}
               <Download size={16} />
               Export PDF
             </button>
             <button
-              onClick={() => handleExport('excel')}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg text-sm hover:bg-[var(--color-accent-secondary)] transition-colors shadow-lg shadow-[var(--color-accent)]/20"
+              onClick={() => {
+                if (!canCustomReport) {
+                  toast.showToast('Ekspor Excel memerlukan Paket Pro/Enterprise. Silakan upgrade paket langganan Anda.', 'warning');
+                  return;
+                }
+                handleExport('excel');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors shadow-lg ${
+                canCustomReport
+                  ? 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-secondary)] shadow-[var(--color-accent)]/20'
+                  : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 shadow-none cursor-pointer'
+              }`}
             >
+              {!canCustomReport && <Lock size={14} className="text-amber-500" />}
               <Download size={16} />
               Export Excel
             </button>

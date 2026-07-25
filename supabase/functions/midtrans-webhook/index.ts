@@ -34,11 +34,22 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const serverKey = Deno.env.get("MIDTRANS_SERVER_KEY") || "PLACEHOLDER_MIDTRANS_SERVER_KEY";
+    const serverKey = Deno.env.get("MIDTRANS_SERVER_KEY");
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(
         JSON.stringify({ error: "Supabase environment configuration missing" }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (!serverKey) {
+      console.error("FATAL: MIDTRANS_SERVER_KEY is not configured in Supabase Edge Function Secrets.");
+      return new Response(
+        JSON.stringify({ error: "MIDTRANS_SERVER_KEY not configured in environment secrets" }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -77,7 +88,7 @@ serve(async (req) => {
       `${order_id}${status_code}${gross_amount}${serverKey}`
     );
 
-    if (signature_key !== expectedSignature && serverKey !== "PLACEHOLDER_MIDTRANS_SERVER_KEY") {
+    if (signature_key !== expectedSignature) {
       console.error(`Invalid Midtrans Webhook signature for order ${order_id}`);
       return new Response(
         JSON.stringify({ error: "Invalid signature verification key" }),
