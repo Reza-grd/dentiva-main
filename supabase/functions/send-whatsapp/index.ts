@@ -140,7 +140,6 @@ serve(async (req) => {
 
     const { visitId, patientId, isTest, targetPhone, target, message, messageType, triggeredBy } = body
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const whapiToken = Deno.env.get('WHAPI_TOKEN')
 
     if (!whapiToken) {
@@ -162,11 +161,12 @@ serve(async (req) => {
         .maybeSingle();
 
       if (!visitErr && visit) {
+        const patientData: any = Array.isArray(visit.patient) ? visit.patient[0] : visit.patient;
         if (!finalPatientId) finalPatientId = visit.patient_id;
-        if (!finalPhone && visit.patient?.no_wa) finalPhone = visit.patient.no_wa;
+        if (!finalPhone && patientData?.no_wa) finalPhone = patientData.no_wa;
         
         // Consent check for normal messages
-        if (!isTest && visit.patient && visit.patient.wa_consent !== true) {
+        if (!isTest && patientData && patientData.wa_consent !== true) {
             console.log(`[SKIP] Patient ${finalPatientId} did not give WA consent.`);
             if (finalPatientId || visitId) {
                 await supabase.from('notification_logs').insert({

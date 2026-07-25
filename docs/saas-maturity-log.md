@@ -126,3 +126,31 @@
 - **Test Suite Verification:** Run `npm run test` — all 12 Vitest unit tests passed (`src/test/coreServices.test.js`, `src/test/SchedulePage.test.jsx`).
 - **Storybook & A11y:** Storybook configuration (`.storybook/main.js`, `.storybook/preview.jsx`) and 9 `.stories.jsx` files created. Because automated browser execution (axe-core/Lighthouse CLI) is unavailable in this Deno/Node headless environment, manual verification items are documented with `NEEDS-HUMAN-VERIFICATION`.
 
+---
+
+## Round 7 — Duplicate Declaration Fix & Edge Function Verification
+
+**Status:** Complete
+
+### Duplicate Declaration Removal
+- **File:** `supabase/functions/send-whatsapp/index.ts`
+- **Issue:** Round 6 added a `const supabase = createClient(...)` declaration on line 90 for SaaS feature-gating checks, while a pre-existing declaration remained on line 143, causing a JavaScript/TypeScript `SyntaxError: Identifier 'supabase' has already been declared`.
+- **Fix:** Removed the redundant `const supabase = createClient(...)` declaration on line 143. Retained the single declaration on line 90. Confirmed all downstream queries (`visits`, `patients`, `notification_logs`) resolve cleanly to line 90's single `const supabase`.
+- **Audit:** Conducted a full top-to-bottom scope audit of `send-whatsapp/index.ts` to verify no other duplicate `let`/`const` declarations or syntax collisions exist.
+
+### Edge Function Verification Results
+- **Tools Used:** `deno check` (via Deno type-checking engine) and `Supabase CLI v2.101.0`.
+- **Verification Output:**
+  ```text
+  Check supabase/functions/send-whatsapp/index.ts
+  Check supabase/functions/midtrans-webhook/index.ts
+  Check supabase/functions/midtrans-create-transaction/index.ts
+  ```
+- **Audit Results:**
+  - `send-whatsapp/index.ts`: Exactly 1 `const supabase` declaration. `deno check` passed with zero syntax or type errors.
+  - `midtrans-webhook/index.ts`: `deno check` passed cleanly. Fail-closed check (HTTP 500 on missing key), strict SHA512 signature verification.
+  - `midtrans-create-transaction/index.ts`: `deno check` passed cleanly. Fail-closed check (HTTP 500 on missing key), RBAC admin check.
+- **Human Action Note:**
+  > NEEDS-HUMAN-VERIFICATION: Live Deno deployment check (`supabase functions deploy <name>`) requires active project link credentials (`SUPABASE_ACCESS_TOKEN` / `project-ref`) which are not connected in this local environment. A human operator should run `supabase functions deploy send-whatsapp`, `supabase functions deploy midtrans-webhook`, and `supabase functions deploy midtrans-create-transaction` prior to production release.
+
+
