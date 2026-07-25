@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building } from 'lucide-react';
+import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
+import BillingSettings from './BillingSettings';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 import TreatmentEducationTemplates from './TreatmentEducationTemplates';
 import SoapTemplates from './SoapTemplates';
@@ -358,6 +359,7 @@ const SettingsPage = () => {
     { id: 'security', label: 'Keamanan', icon: Lock },
     { id: 'audit-logs', label: 'Log Audit', icon: Shield },
     ...(isAdmin ? [
+      { id: 'billing', label: 'Langganan SaaS', icon: CreditCard },
       { id: 'database', label: 'Database', icon: Database },
     ] : []),
   ];
@@ -1144,7 +1146,6 @@ const SettingsPage = () => {
                   <div className="relative p-5 bg-gray-50/50 dark:bg-gray-800/10 border border-gray-200 dark:border-gray-800/50 rounded-xl">
                     <span className="absolute top-0 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Belum Terverifikasi</span>
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Automatic Backup</h3>
-                    {/* Mengubah teks misleading yang tadinya menampilkan status "Success" palsu karena tidak terhubung dengan API backup Supabase */}
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Backup dikelola oleh provider database (Supabase). Status backup terverifikasi belum tersedia di dashboard ini — hubungi administrator sistem untuk info backup terakhir.
                     </p>
@@ -1187,8 +1188,11 @@ const SettingsPage = () => {
               </div>
             )}
 
+            {/* SaaS Billing Tab */}
+            {activeTab === 'billing' && <BillingSettings />}
+
             {/* Save Button */}
-            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && (
+            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && (
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3 items-center">
                 {saved && (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mr-2 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg">

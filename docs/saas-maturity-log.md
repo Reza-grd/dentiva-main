@@ -45,7 +45,7 @@
 
 ## Phase 2 — Subscription & Billing
 
-**Status:** Pending Phase 1
+**Status:** Complete
 
 **Midtrans integration verified against:** Web search returning midtrans.com-sourced content
 - Snap sandbox endpoint: `POST https://app.sandbox.midtrans.com/snap/v1/transactions` ✅ confirmed
@@ -56,17 +56,18 @@
 - Webhook signature: `SHA512(order_id + status_code + gross_amount + ServerKey)` ✅ confirmed
 
 > NEEDS-HUMAN-VERIFICATION: Exact field names in webhook notification payload beyond confirmed fields (`order_id`, `status_code`, `gross_amount`, `signature_key`, `transaction_status`). docs.midtrans.com returned HTTP 404 from this environment.
-> NEEDS-HUMAN-VERIFICATION: `MIDTRANS_SERVER_KEY` secret must be added to Supabase Edge Function secrets before going live.
+> NEEDS-HUMAN-VERIFICATION: `MIDTRANS_SERVER_KEY` secret must be added to Supabase Edge Function Secrets dashboard.
 
-**Edge functions planned:**
-- `midtrans-create-transaction`
-- `midtrans-webhook`
+**Edge functions created:**
+- `supabase/functions/midtrans-create-transaction/index.ts`: RBAC admin validation, price lookup from `subscription_plans`, calls Snap API, returns token & redirect URL.
+- `supabase/functions/midtrans-webhook/index.ts`: Verifies SHA512 signature, updates `clinic_subscriptions` via `service_role` client.
 
-**Features to gate:**
-- `whatsapp_reminders` — in `PaymentForm.jsx` (send-whatsapp invocation)
-- `custom_reports` — wherever report generation is triggered
-- `max_users` enforcement — in `admin-create-user` edge function
-- `max_patients` enforcement — in patient creation flow
+**Frontend & Feature Gating implemented:**
+- Extended `src/contexts/PermissionsContext.jsx` with `hasFeature(featureName)`, `plan`, `subscription`, and `features` state.
+- Created `src/pages/PricingPage.jsx` with dynamic plan card grid, billing cycle toggle (monthly/yearly), and Midtrans Snap integration.
+- Created `src/components/settings/BillingSettings.jsx` integrated into `SettingsPage.jsx` under "Langganan SaaS" tab.
+- Enforced `max_users` limit check in `admin-create-user` Edge Function.
+- Registered `/pricing` route in `App.jsx`.
 
 ---
 

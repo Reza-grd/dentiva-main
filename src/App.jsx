@@ -25,6 +25,7 @@ const CostingDashboard = lazy(() => import('./components/costing/CostingDashboar
 const TreatmentMaster = lazy(() => import('./components/treatments/TreatmentMaster'));
 const ReportsPage = lazy(() => import('./components/reports/ReportsPage'));
 const SettingsPage = lazy(() => import('./components/settings/SettingsPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ProfilePage = lazy(() => import('./components/profile/ProfilePage'));
 const DoctorProfilePage = lazy(() => import('./components/profile/DoctorProfilePage'));
 const SchedulePage = lazy(() => import('./components/schedule/SchedulePage'));
@@ -236,6 +237,12 @@ function App() {
           <Route path="/pengaturan" element={
             <ProtectedRoute>
               <SettingsPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/pricing" element={
+            <ProtectedRoute>
+              <PricingPage />
             </ProtectedRoute>
           } />
 

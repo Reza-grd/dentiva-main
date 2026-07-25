@@ -47,7 +47,7 @@ serve(async (req) => {
 
     const { data: profile } = await userClient
       .from('users')
-      .select('role')
+      .select('role, clinic_id')
       .eq('id', user.id)
       .single()
 
@@ -56,6 +56,37 @@ serve(async (req) => {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey)
+
+    // SaaS Quota Enforcement: Check max_users for caller's clinic
+    if (profile.clinic_id) {
+      const { data: sub } = await supabaseAdmin
+        .from('clinic_subscriptions')
+        .select('*, plan:subscription_plans(*)')
+        .eq('clinic_id', profile.clinic_id)
+        .eq('status', 'active')
+        .maybeSingle()
+
+      const maxUsers = sub?.plan?.max_users || 3 // Default Starter plan max_users is 3
+
+      const { count: currentUsersCount } = await supabaseAdmin
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('clinic_id', profile.clinic_id)
+
+      if (currentUsersCount !== null && currentUsersCount >= maxUsers) {
+        return new Response(
+          JSON.stringify({
+            error: `Batas maksimum pengguna (${maxUsers} user) untuk paket langganan Anda telah tercapai. Silakan upgrade paket langganan klinik Anda.`,
+          }),
+          {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        )
+      }
     }
 
     // Process request payload
