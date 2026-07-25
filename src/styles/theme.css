@@ -2,6 +2,7 @@
 
 :root {
   /* LIGHT THEME (Default) */
+  color-scheme: light;
   --color-bg: #F8FAFC;
   --color-card: #FFFFFF;
   --color-border: #E2E8F0;
@@ -11,6 +12,12 @@
   
   --color-accent: #6D28D9; /* Violet-700 */
   --color-accent-secondary: #4F46E5; /* Indigo-600 */
+  
+  /* Semantic Tokens */
+  --color-info: #3B82F6;
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
   
   /* Shadows - Subtle & Premium */
   --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.03);
@@ -24,6 +31,7 @@
 
 .dark {
   /* DARK THEME */
+  color-scheme: dark;
   --color-bg: #0B0E14;
   --color-card: #14171F; /* Slightly lighter than bg for cards */
   --color-border: #2A2D35;
@@ -33,6 +41,12 @@
   
   --color-accent: #6D28D9;
   --color-accent-secondary: #4F46E5;
+  
+  /* Semantic Tokens - Adjusted for dark mode contrast */
+  --color-info: #60A5FA;
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-danger: #F87171;
   
   /* Shadows - Subtle & Premium */
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.2);

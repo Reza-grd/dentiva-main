@@ -26,20 +26,20 @@
 
 ## Phase 1 — Design System Foundation
 
-**Status:** In Progress
+**Status:** Complete
 
 **Components added:**
-- `Dialog` (wrapping `@radix-ui/react-dialog` — already installed)
-- `Select`
-- `Table` (with responsive card-list below `md`)
-- `Tabs`
-- `Toast` + `ToastProvider`
-- `Skeleton`
-- `Tooltip`
+- `Dialog` (`src/components/ui/Dialog.jsx`) — wrapping `@radix-ui/react-dialog` with focus trap, escape close, and aria-labels.
+- `Select` (`src/components/ui/Select.jsx`) — cva-styled select primitive with helperText, error state, and aria attributes.
+- `Table` (`src/components/ui/Table.jsx`) — complete suite (`TableContainer`, `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableRow`, `TableHead`, `TableCell`, `TableCaption`) supporting dark mode and container overflow.
+- `Tabs` (`src/components/ui/Tabs.jsx`) — WAI-ARIA compliant tabbed interface with keyboard arrow & Enter/Space navigation.
+- `Toast` (`src/components/ui/Toast.jsx`) — queue-based toast system with `useToast()` hook and auto-dismiss.
+- `Skeleton` (`src/components/ui/Skeleton.jsx`) — animated shimmer placeholders (`Skeleton`, `SkeletonText`, `SkeletonCard`).
+- `Tooltip` (`src/components/ui/Tooltip.jsx`) — hover + keyboard focus tooltip with `aria-describedby` injection.
 
-**Token changes:** Extending `src/styles/theme.css` with missing semantic tokens (`--color-success`, `--color-warning`, `--color-info`, `color-scheme`).
+**Token changes:** Updated `src/styles/theme.css` with `color-scheme: light dark` and semantic tokens (`--color-info`, `--color-success`, `--color-warning`, `--color-danger`) for light & dark themes.
 
-**Storybook:** Being configured (Storybook 8.x + `@storybook/react-vite` + `@storybook/addon-a11y`). Dev server only — build output not committed.
+**Storybook:** Configured Storybook 8.x for Vite 5 (`.storybook/main.js`, `.storybook/preview.jsx`) with ThemeProvider integration, light/dark mode decorator, and `@storybook/addon-a11y`. Added `.stories.jsx` files for `Button`, `Card`, `Input`, `Select`, `Dialog`, `Table`, `Tabs`, `Skeleton`, `Tooltip`. Dev server script added (`npm run storybook`). Build output is not committed per user directive.
 
 ---
 
