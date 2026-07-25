@@ -57,6 +57,7 @@ const TopBar = ({ onMenuClick }) => {
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
+            aria-label="Buka menu navigasi"
             className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           >
             <Menu size={20} />
@@ -80,12 +81,14 @@ const TopBar = ({ onMenuClick }) => {
           <div className="flex items-center gap-1.5 bg-gray-50/80 dark:bg-gray-800/50 p-1 rounded-full border border-gray-100 dark:border-gray-700/50">
             <button
               onClick={toggleTheme}
+              aria-label="Aktifkan mode terang"
               className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'light' ? 'bg-white shadow-sm text-yellow-500' : 'text-gray-400 hover:text-gray-200'}`}
             >
               <Sun size={15} />
             </button>
             <button
               onClick={toggleTheme}
+              aria-label="Aktifkan mode gelap"
               className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'dark' ? 'bg-gray-700 shadow-sm text-blue-400' : 'text-gray-400 hover:text-gray-600'}`}
             >
               <Moon size={15} />
@@ -94,6 +97,7 @@ const TopBar = ({ onMenuClick }) => {
             <div className="relative flex items-center">
               <button
                 onClick={() => setShowColorPicker(!showColorPicker)}
+                aria-label="Ubah tema warna aksen"
                 className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
               >
                 <Palette size={15} />
@@ -107,6 +111,7 @@ const TopBar = ({ onMenuClick }) => {
                       <button
                         key={c}
                         onClick={() => { setPrimaryColor(c); setShowColorPicker(false); }}
+                        aria-label={`Pilih warna aksen ${c}`}
                         className="w-6 h-6 rounded-full border-2 border-white dark:border-gray-850 hover:scale-110 transition-transform focus:outline-none"
                         style={{
                           backgroundColor: c,
@@ -126,7 +131,10 @@ const TopBar = ({ onMenuClick }) => {
 
           {/* Notifications Placeholder */}
           <div className="relative">
-            <button className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+            <button
+              aria-label="Pemberitahuan / Notifikasi"
+              className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
               <Bell size={20} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0B0E14]"></span>
             </button>
@@ -136,6 +144,7 @@ const TopBar = ({ onMenuClick }) => {
           <div className="relative flex items-center">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
+              aria-label="Menu profil pengguna"
               className="flex items-center gap-3 p-1.5 pr-4 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-700/50 group"
             >
               <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 relative">

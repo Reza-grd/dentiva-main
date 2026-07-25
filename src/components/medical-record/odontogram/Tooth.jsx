@@ -172,7 +172,18 @@ const Tooth = ({ number, conditions = {}, isSelected, isBridgeTarget, onClick, o
   };
 
   return (
-    <div className="flex flex-col items-center mx-[2px] group flex-shrink-0" style={{ width: size + 4 }}>
+    <div
+      className="flex flex-col items-center group relative cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:ring-offset-1 rounded-lg p-0.5"
+      tabIndex={0}
+      role="button"
+      aria-label={`Gigi ${number}${conditions?.length ? ': ' + conditions.map(c => c.code).join(', ') : ' (Normal)'}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.(number);
+        }
+      }}
+    >
       {/* Number — above for upper jaw */}
       {upper && (
         <span className={`font-bold text-gray-700 mb-0.5 leading-none select-none ${primary ? 'text-[9px] text-indigo-600' : 'text-[10px]'}`}>

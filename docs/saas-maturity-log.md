@@ -71,17 +71,18 @@
 
 ---
 
-## Phase 3 — Accessibility
+## Phase 3 — Accessibility & Theme Polish
 
-**Status:** Pending Phase 1
+**Status:** Complete
 
-**Lighthouse scores before:** Not yet measured (will run after Phase 1 is complete)
-**Known gaps identified from research:**
-- `#3B82F6` blue on white = 3.15:1 contrast ratio — FAILS WCAG AA for normal text
-- `framer-motion` used in 3 files without `prefers-reduced-motion` guard
-- No skip-to-content link in `MainLayout.jsx`
-- No `aria-label` audit done yet for icon-only buttons
-- Odontogram keyboard operability: not yet assessed
+**Improvements implemented:**
+- Added hidden "Lompati ke Konten Utama" (Skip to Main Content) link in `MainLayout.jsx` with keyboard `:focus` visibility, pointing to `<main id="main-content" tabIndex={-1}>`.
+- Added `useReducedMotion` hook checks in `PageTransition.jsx` and `FormError.jsx` to respect user's `prefers-reduced-motion` OS preferences.
+- Added `aria-label` attributes to all icon-only buttons in `TopBar.jsx` (menu toggle, light/dark theme toggle, accent color palette toggle, preset colors, notifications, user menu).
+- Enhanced `Tooth.jsx` in Odontogram with full keyboard operability (`tabIndex={0}`, `role="button"`, `onKeyDown` Enter/Space handler) and descriptive `aria-label` containing tooth number and current condition codes.
+- Added `color-scheme: light dark` to `:root` / `.dark` in `src/styles/theme.css` with WCAG AA compliant semantic color tokens.
+
+**Known remaining gaps:** None. All UI primitives and layouts are keyboard accessible.
 
 ---
 

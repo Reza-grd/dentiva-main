@@ -7,6 +7,14 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background transition-colors duration-300">
+      {/* Skip to Content link for keyboard accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--color-accent)] focus:text-white focus:rounded-xl focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-white"
+      >
+        Lompati ke Konten Utama
+      </a>
+
       {/* Background ambient gradient for the AI futuristic feel */}
       <div className="fixed inset-0 pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-primary/5 dark:bg-accent-primary/10 blur-[100px]" />
@@ -18,7 +26,11 @@ const MainLayout = ({ children }) => {
       <div className="flex flex-1 flex-col overflow-hidden relative z-10">
         <TopBar onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8 focus:outline-none"
+        >
           <div className="max-w-[1400px] mx-auto w-full">
             {children}
           </div>
