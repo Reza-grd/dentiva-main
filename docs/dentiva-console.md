@@ -290,4 +290,22 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 - Edge Functions ter-deploy (29 Sep 2026): `admin-create-user` (sebelumnya tidak ada di produksi → fitur tambah staf klinik tidak jalan), `midtrans-create-transaction`, `midtrans-webhook` (`verify_jwt=false`, keaslian lewat signature).
 - Vault: `dentiva_project_url` tersimpan.
 - `console-api` ter-deploy via CLI (29 Sep 2026); uji asap: token anon → 401 `unauthenticated` dalam format envelope (fungsi boot normal).
-- Belum dilakukan (butuh tindakan pemilik): secret `CONSOLE_URL` / `CLINIC_APP_URL` / `MIDTRANS_SERVER_KEY`, Vault `dentiva_service_role_key`, operator owner pertama, deploy aplikasi klinik (Fase 4) & Console ke Vercel.
+- Vault `dentiva_service_role_key` berisi **secret key baru** (`sb_secret_…`, bukan JWT service_role lama); uji panggilan cron ke `satusehat-outbox-processor` → HTTP 200.
+
+**28 Sep 2026 (WIB) · penyelesaian rollout**
+
+- Migration tambahan `20260929000300_widen_encrypted_columns`: `patients.no_wa` varchar(20) → text. Tanpa ini setiap simpan pasien ber-no WA gagal (*value too long*) karena `encrypt_batch` menghasilkan `PGP:<base64>`. `v_patient_summary` dibangun ulang (security_invoker, tanpa anon). Pasien yang disimpan ulang kini terenkripsi; 12 pasien lama masih teks polos sampai disimpan ulang.
+- Secret Edge Function: `CONSOLE_URL=https://dentiva-main-console.vercel.app`, `CLINIC_APP_URL=https://dentiva-main.vercel.app` (domain `dentiva.co.id` **belum terdaftar** di PANDI). `MIDTRANS_SERVER_KEY` belum diisi.
+- Auth: Site URL `https://dentiva-main.vercel.app`; Redirect URLs `…/atur-password` (klinik) dan `…/set-password` (Console, kedua domain); password min. 8 karakter, huruf + angka; TOTP aktif. *Leaked password protection* butuh paket Pro.
+- GitHub `Reza-grd/dentiva-main`: branch `console` (perubahan lokal yang belum di-push + seluruh pekerjaan Console) di-fast-forward ke `main`. Lockfile ditambah `@emnapi/runtime` agar `npm ci` di Linux lolos.
+- Vercel `dentiva-main` (klinik): Root Directory `apps/clinic`, `VITE_SUPABASE_ANON_KEY` = publishable key (tipe Config), `VITE_ENCRYPTION_KEY` tidak ada. Preview & produksi diuji: login resepsionis, daftar pasien, simpan pasien (audit tercatat dengan `clinic_id` benar).
+- Vercel `dentiva-main-console` (baru): Root Directory `apps/console` → `https://dentiva-main-console.vercel.app`.
+- Operator owner pertama: `dentivaid@gmail.com` (bukan akun klinik), MFA TOTP terverifikasi, login ke Console berhasil. Password dibuat pemilik lewat SQL Editor karena email reset dari SMTP bawaan Supabase tidak sampai ke Gmail.
+
+**Sisa pekerjaan**
+
+1. Matikan **Legacy API keys** (Settings → API Keys) — JWT service_role lama sempat terlihat di screenshot. Aman sekarang: klinik, Console, dan cron sudah memakai kunci baru.
+2. Pasang **SMTP sendiri** (Auth → Emails → SMTP, mis. Resend) — email bawaan Supabase tidak andal & dibatasi; dibutuhkan untuk undangan staf dan reset password.
+3. Hapus snapshot `backup_20260929` setelah ±1 minggu stabil.
+4. Bila domain dibeli: tambahkan di Vercel, ganti `CONSOLE_URL`, tambahkan redirect URL domain baru.
+5. Isi `MIDTRANS_SERVER_KEY` saat penagihan online mulai dipakai.
