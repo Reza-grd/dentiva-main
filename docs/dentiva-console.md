@@ -289,4 +289,5 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
   - Security Advisor: semua ERROR hilang; sisa WARN = helper policy RLS & RPC yang memang dipakai aplikasi, dan *leaked password protection* (aktifkan di Dashboard → Auth).
 - Edge Functions ter-deploy (29 Sep 2026): `admin-create-user` (sebelumnya tidak ada di produksi → fitur tambah staf klinik tidak jalan), `midtrans-create-transaction`, `midtrans-webhook` (`verify_jwt=false`, keaslian lewat signature).
 - Vault: `dentiva_project_url` tersimpan.
-- Belum dilakukan (butuh tindakan pemilik): deploy `console-api` via CLI, secret `CONSOLE_URL` / `CLINIC_APP_URL` / `MIDTRANS_SERVER_KEY`, Vault `dentiva_service_role_key`, operator owner pertama, deploy aplikasi klinik (Fase 4) & Console ke Vercel.
+- `console-api` ter-deploy via CLI (29 Sep 2026); uji asap: token anon → 401 `unauthenticated` dalam format envelope (fungsi boot normal).
+- Belum dilakukan (butuh tindakan pemilik): secret `CONSOLE_URL` / `CLINIC_APP_URL` / `MIDTRANS_SERVER_KEY`, Vault `dentiva_service_role_key`, operator owner pertama, deploy aplikasi klinik (Fase 4) & Console ke Vercel.
