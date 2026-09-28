@@ -12,7 +12,7 @@
 --   * Hanya service_role (dipakai Edge Function console-api) yang bisa membaca/menulis.
 --   * JANGAN tambahkan `platform` ke "Exposed schemas" di Supabase Dashboard → API.
 --   * Aplikasi klinik membaca pengumuman hanya lewat fungsi
---     public.get_active_announcements() (SECURITY DEFINER, kolom terbatas).
+--     public.get_active_announcements() (dibuat di migration clinic_user_status).
 -- =============================================================================
 
 create schema if not exists platform;
@@ -217,44 +217,5 @@ alter default privileges in schema platform grant execute on functions to servic
 -- service_role tetap tidak boleh mengubah/menghapus audit (trigger di atas juga memblokir).
 revoke update, delete, truncate on platform.audit_logs from service_role;
 
--- -----------------------------------------------------------------------------
--- Jalur baca pengumuman untuk aplikasi klinik.
--- Mengembalikan pengumuman aktif sesuai status klinik & role user pemanggil.
--- -----------------------------------------------------------------------------
-create or replace function public.get_active_announcements()
-returns table (
-  id uuid,
-  title text,
-  body text,
-  severity text,
-  starts_at timestamptz,
-  ends_at timestamptz
-)
-language sql
-stable
-security definer
-set search_path = ''
-as $$
-  with me as (
-    select u.role, c.status as clinic_status
-    from public.users u
-    join public.clinics c on c.id = u.clinic_id
-    where u.id = auth.uid()
-  )
-  select a.id, a.title, a.body, a.severity, a.starts_at, a.ends_at
-  from platform.announcements a
-  cross join me
-  where a.starts_at <= now()
-    and (a.ends_at is null or a.ends_at > now())
-    and (
-      a.audience = 'all'
-      or (a.audience = 'trial'  and me.clinic_status = 'trial')
-      or (a.audience = 'active' and me.clinic_status = 'active')
-      or (a.audience = 'admins' and me.role = 'admin')
-    )
-  order by case a.severity when 'critical' then 0 when 'warning' then 1 else 2 end, a.starts_at desc
-  limit 5;
-$$;
-
-revoke all on function public.get_active_announcements() from public, anon;
-grant execute on function public.get_active_announcements() to authenticated;
+-- Jalur baca pengumuman untuk aplikasi klinik (public.get_active_announcements)
+-- ada di migration clinic_user_status karena memakai kolom clinics.status.

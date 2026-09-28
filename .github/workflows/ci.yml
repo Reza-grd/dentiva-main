@@ -38,6 +38,9 @@ jobs:
       - name: Unit tests (clinic, shared, console, console-api)
         run: npm test
 
+      - name: Migration smoke test (PGlite, tanpa Docker)
+        run: npm run db:smoke
+
       - name: Build clinic
         run: npm run build:clinic
 

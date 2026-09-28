@@ -94,6 +94,7 @@ npm run build          # build kedua aplikasi
 npm test               # tes unit klinik, console, shared, console-api
 npm run typecheck      # TypeScript
 npm run lint           # ESLint
+npm run db:smoke       # uji migration + RLS tanpa Docker (PGlite)
 npm run db:test        # tes RLS/pgTAP (Supabase lokal)
 npm run db:types       # generate tipe database ke packages/supabase
 ```

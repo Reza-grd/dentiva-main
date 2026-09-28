@@ -7,7 +7,8 @@
 --   oleh trigger; hapus setelah semua kode memakai `status`.
 -- * Klaim JWT app_metadata.clinic_id disinkronkan dari public.users.clinic_id,
 --   karena mulai migration 3 tidak ada lagi fallback ke klinik default.
--- * RPC untuk aplikasi klinik: get_my_account_status(), record_login().
+-- * RPC untuk aplikasi klinik: get_my_account_status(), record_login(),
+--   get_active_announcements().
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------
@@ -229,3 +230,45 @@ $$;
 
 revoke all on function public.record_login() from public, anon;
 grant execute on function public.record_login() to authenticated;
+
+-- -----------------------------------------------------------------------------
+-- 5. Jalur baca pengumuman untuk aplikasi klinik (platform.announcements).
+-- Mengembalikan pengumuman aktif sesuai status klinik & role user pemanggil.
+-- -----------------------------------------------------------------------------
+create or replace function public.get_active_announcements()
+returns table (
+  id uuid,
+  title text,
+  body text,
+  severity text,
+  starts_at timestamptz,
+  ends_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with me as (
+    select u.role, c.status as clinic_status
+    from public.users u
+    join public.clinics c on c.id = u.clinic_id
+    where u.id = auth.uid()
+  )
+  select a.id, a.title, a.body, a.severity, a.starts_at, a.ends_at
+  from platform.announcements a
+  cross join me
+  where a.starts_at <= now()
+    and (a.ends_at is null or a.ends_at > now())
+    and (
+      a.audience = 'all'
+      or (a.audience = 'trial'  and me.clinic_status = 'trial')
+      or (a.audience = 'active' and me.clinic_status = 'active')
+      or (a.audience = 'admins' and me.role = 'admin')
+    )
+  order by case a.severity when 'critical' then 0 when 'warning' then 1 else 2 end, a.starts_at desc
+  limit 5;
+$$;
+
+revoke all on function public.get_active_announcements() from public, anon;
+grant execute on function public.get_active_announcements() to authenticated;

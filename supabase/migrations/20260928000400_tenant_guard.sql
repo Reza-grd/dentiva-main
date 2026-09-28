@@ -154,7 +154,7 @@ begin
   end if;
 
   if out_expr !~* 'select\s+(public\.)?has_permission\(' then
-    out_expr := regexp_replace(out_expr, '(public\.)?has_permission\(('')[^'']*''(::(text|character varying))?)\)',
+    out_expr := regexp_replace(out_expr, '(public\.)?has_permission\((''[^'']*''(::(text|character varying))?)\)',
                                '( SELECT public.has_permission(\2) AS has_permission)', 'g');
   end if;
 

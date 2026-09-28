@@ -169,6 +169,7 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 | `npm test` | klinik (12) + Console (9) + kontrak/formatter (10) + router console-api (26) |
 | `npm run typecheck` | TypeScript: packages & console |
 | `npm run lint` | ESLint semua workspace |
+| `npm run db:smoke` | **Tanpa Docker**: Postgres WASM (PGlite) membangun skema lama sintetis (termasuk policy bocor migration 41), menjalankan ke-7 migration, lalu memeriksa 63 hal: isolasi, status, platform, audit, provisioning, billing, pemakaian, kualitas policy. Ikut di CI |
 | `npm run db:test` | pgTAP: isolasi antar-klinik, klinik/user suspended, klaim JWT palsu, skema platform tertutup, audit append-only, provisioning, billing, idempotensi Midtrans. **Butuh baseline dan Docker** |
 | `deno check supabase/functions/console-api/index.ts` | tipe Edge Function |
 
@@ -189,6 +190,7 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
    ```bash
    supabase link --project-ref <ref-staging>
    supabase db push                # baseline + 7 migration Console
+   npm run db:smoke                # cek cepat tanpa Docker
    supabase test db --linked       # pgTAP
    ```
 5. Jalankan `supabase/snippets/verify_tenant_isolation.sql` di staging. Kueri 1–6 harus kosong.
