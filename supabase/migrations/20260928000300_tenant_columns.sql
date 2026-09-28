@@ -2,7 +2,7 @@
 -- Dentiva Console · Fase 1 · Migration 3/7 — tenant_columns   (TAMBAHAN)
 -- -----------------------------------------------------------------------------
 -- Tidak ada di panduan awal, tapi WAJIB sebelum klinik kedua didaftarkan:
--- 18 tabel data klinik belum punya kolom clinic_id, sehingga tindakan, bahan,
+-- 19 tabel data klinik belum punya kolom clinic_id (18 dari repo + patient_visits di produksi), sehingga tindakan, bahan,
 -- stok, consent, template SOAP, dll. akan terlihat dan bisa diubah lintas klinik.
 --
 -- Migration ini:
@@ -47,7 +47,8 @@ declare
     -- turunan
     'material_batches', 'material_purchases', 'stok_movements', 'stok_opname',
     'treatment_materials', 'visit_treatments', 'visit_treatment_material_overrides',
-    'treatment_cost_snapshot', 'informed_consents', 'reminder_logs', 'satusehat_consents'
+    'treatment_cost_snapshot', 'informed_consents', 'reminder_logs', 'satusehat_consents',
+    'patient_visits'
   ];
 begin
   foreach t in array tenant_tables loop
@@ -177,6 +178,12 @@ begin
     from public.patients p where p.id = x.patient_id and x.clinic_id is null;
     update public.satusehat_consents set clinic_id = legacy where clinic_id is null;
   end if;
+
+  if to_regclass('public.patient_visits') is not null then
+    update public.patient_visits x set clinic_id = p.clinic_id
+    from public.patients p where p.id = x.patient_id and x.clinic_id is null;
+    update public.patient_visits set clinic_id = legacy where clinic_id is null;
+  end if;
 end $$;
 
 -- -----------------------------------------------------------------------------
@@ -197,7 +204,8 @@ begin
         'soap_templates', 'tier_weights', 'treatment_education',
         'material_batches', 'material_purchases', 'stok_movements', 'stok_opname',
         'treatment_materials', 'visit_treatments', 'visit_treatment_material_overrides',
-        'treatment_cost_snapshot', 'informed_consents', 'reminder_logs', 'satusehat_consents'
+        'treatment_cost_snapshot', 'informed_consents', 'reminder_logs', 'satusehat_consents',
+        'patient_visits'
       ])
   loop
     execute format('alter table public.%I alter column clinic_id set not null', t);

@@ -1,6 +1,7 @@
 -- =============================================================================
 -- Dentiva Console · Fase 1 · Migration 2/6 — clinic_user_status
 -- -----------------------------------------------------------------------------
+-- * Perbaikan bug produksi process_audit_log() (audit tanpa clinic_id).
 -- * public.clinics: status siklus hidup + profil kontak + stempel waktu.
 -- * public.users:  status (invited/active/suspended/deactivated), last_login_at, invited_by.
 --   Kolom is_active dipertahankan selama transisi dan DISINKRONKAN dua arah
@@ -10,6 +11,88 @@
 -- * RPC untuk aplikasi klinik: get_my_account_status(), record_login(),
 --   get_active_announcements().
 -- =============================================================================
+
+-- -----------------------------------------------------------------------------
+-- 0. PERBAIKAN BUG PRODUKSI — process_audit_log() tanpa clinic_id.
+--    Versi produksi menulis audit_logs TANPA clinic_id padahal kolomnya NOT NULL,
+--    sehingga setiap insert/update patients, visits, payments, users GAGAL
+--    (tidak ada penulisan data sejak 18 Jul 2026). Harus paling awal: bagian di
+--    bawah meng-update public.users, yang memicu trigger audit ini.
+--    Pertahankan perilakunya, tambahkan clinic_id; lewati audit jika tidak bisa
+--    ditautkan ke klinik (jangan gagalkan transaksi utama).
+-- -----------------------------------------------------------------------------
+do $$
+begin
+  if to_regprocedure('public.process_audit_log()') is null then
+    raise notice 'tenant_guard: public.process_audit_log() tidak ada, dilewati';
+    return;
+  end if;
+
+  execute $fn$
+    create or replace function public.process_audit_log()
+    returns trigger
+    language plpgsql
+    security definer
+    set search_path = ''
+    as $body$
+    declare
+      v_old jsonb := case when tg_op in ('UPDATE', 'DELETE') then to_jsonb(old) end;
+      v_new jsonb := case when tg_op in ('INSERT', 'UPDATE') then to_jsonb(new) end;
+      v_row jsonb := coalesce(v_new, v_old);
+      v_patient_id uuid;
+      v_visit_id uuid;
+      v_clinic_id uuid;
+      v_risk text := 'LOW';
+    begin
+      begin
+        v_patient_id := nullif(v_row ->> 'patient_id', '')::uuid;
+        v_visit_id := nullif(v_row ->> 'visit_id', '')::uuid;
+      exception when others then
+        null;
+      end;
+
+      if tg_table_name = 'patients' then
+        v_patient_id := (v_row ->> 'id')::uuid;
+      elsif tg_table_name = 'visits' then
+        v_visit_id := (v_row ->> 'id')::uuid;
+        v_patient_id := nullif(v_row ->> 'patient_id', '')::uuid;
+      end if;
+
+      if tg_table_name in ('visits', 'medical_history', 'clinical_data') then
+        v_risk := 'MEDIUM';
+      elsif tg_table_name = 'users' and tg_op = 'UPDATE' then
+        v_risk := 'HIGH';
+      end if;
+
+      v_clinic_id := coalesce(
+        nullif(v_row ->> 'clinic_id', '')::uuid,
+        public.get_user_clinic_id()
+      );
+      if v_clinic_id is null then
+        return coalesce(new, old);
+      end if;
+
+      insert into public.audit_logs (user_id, user_role, patient_id, visit_id, clinic_id, module, action,
+                                     previous_value, new_value, risk_level)
+      values (
+        auth.uid(),
+        coalesce(public.get_user_role(), 'system'),
+        -- audit tidak boleh gagal karena pasien/kunjungan sudah dihapus (FK)
+        case when tg_op = 'DELETE' and tg_table_name = 'patients' then null else v_patient_id end,
+        case when tg_op = 'DELETE' and tg_table_name = 'visits' then null else v_visit_id end,
+        v_clinic_id,
+        tg_table_name,
+        tg_op,
+        v_old,
+        v_new,
+        v_risk
+      );
+
+      return coalesce(new, old);
+    end;
+    $body$;
+  $fn$;
+end $$;
 
 -- -----------------------------------------------------------------------------
 -- 1. public.clinics

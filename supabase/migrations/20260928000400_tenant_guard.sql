@@ -24,6 +24,8 @@
 -- 5. public.clinics diberi RLS: user hanya bisa membaca kliniknya sendiri.
 --
 -- 6. Perbaikan public.dynamic_audit_trigger(): clinic_id selalu terisi.
+--    (Perbaikan process_audit_log() ada di migration clinic_user_status karena
+--    harus berjalan SEBELUM update pertama ke public.users.)
 -- =============================================================================
 
 -- -----------------------------------------------------------------------------

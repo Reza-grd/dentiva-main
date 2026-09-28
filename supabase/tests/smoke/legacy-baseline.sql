@@ -197,3 +197,43 @@ create policy legacy_clinical_rw on storage.objects for all to authenticated
   with check (bucket_id in ('radiologi', 'klinik', 'patient-photos', 'avatars'));
 grant usage on schema storage to anon, authenticated, service_role;
 grant all on storage.objects to anon, authenticated, service_role;
+
+-- ─── disamakan dengan PRODUKSI (hasil inspeksi 29 Sep 2026) ────────────────
+alter table public.audit_logs add column user_role text,
+  add column patient_id uuid references public.patients(id) on delete cascade,
+  add column visit_id uuid references public.visits(id) on delete cascade;
+
+-- versi produksi: TIDAK mengisi clinic_id (NOT NULL) → semua tulis gagal
+create or replace function public.process_audit_log() returns trigger language plpgsql security definer as $$
+declare v_old jsonb; v_new jsonb; v_patient_id uuid; v_visit_id uuid;
+begin
+  if tg_op = 'UPDATE' then v_old := to_jsonb(old); v_new := to_jsonb(new);
+  elsif tg_op = 'INSERT' then v_new := to_jsonb(new);
+  else v_old := to_jsonb(old); end if;
+  if tg_table_name = 'patients' then v_patient_id := coalesce(new.id, old.id); end if;
+  insert into public.audit_logs (user_id, user_role, patient_id, visit_id, module, action, previous_value, new_value, risk_level)
+  values (auth.uid(), coalesce(public.get_user_role(), 'system'), v_patient_id, v_visit_id, tg_table_name, tg_op, v_old, v_new, 'LOW');
+  return coalesce(new, old);
+end; $$;
+create trigger trg_audit_patients after insert or update or delete on public.patients for each row execute function public.process_audit_log();
+create trigger trg_audit_visits after insert or update or delete on public.visits for each row execute function public.process_audit_log();
+create trigger trg_audit_users after insert or update or delete on public.users for each row execute function public.process_audit_log();
+create trigger trg_audit_payments after insert or update or delete on public.payments for each row execute function public.process_audit_log();
+
+-- policy produksi: semua user login bisa membaca semua baris users
+create policy "Authenticated can view users" on public.users for select using (true);
+
+-- tabel lama di produksi tanpa clinic_id
+create table public.patient_visits (id uuid primary key default gen_random_uuid(), patient_id uuid references public.patients(id), visit_date date, chief_complaint text);
+
+-- bucket produksi: semuanya publik
+create table storage.buckets (id text primary key, name text, public boolean default false);
+insert into storage.buckets (id, name, public) values
+  ('patient-photos', 'patient-photos', true), ('radiologi', 'radiologi', true),
+  ('klinik', 'klinik', true), ('avatars', 'avatars', true);
+grant all on all tables in schema public to anon, authenticated, service_role;
+-- Data lama dibuat sebelum bug ini muncul → trigger diaktifkan setelah seeding (lihat smoke script).
+alter table public.patients disable trigger trg_audit_patients;
+alter table public.visits disable trigger trg_audit_visits;
+alter table public.users disable trigger trg_audit_users;
+alter table public.payments disable trigger trg_audit_payments;

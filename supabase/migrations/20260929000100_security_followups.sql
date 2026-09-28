@@ -8,7 +8,9 @@
 --      * clinic_id tidak bisa diubah siapa pun;
 --      * role / role_id / status / is_active hanya boleh diubah admin klinik;
 --      * status 'suspended' hanya boleh dipasang/dilepas tim Dentiva (Console).
--- 2. Storage: file klinis (radiologi, klinik, patient-photos) diisolasi per klinik
+-- 2. Storage: bucket radiologi, klinik, patient-photos dijadikan PRIVAT (di produksi
+--    ketiganya ternyata publik → siapa pun dengan URL bisa membuka rontgen/foto pasien;
+--    aplikasi sudah memakai signed URL). File klinis diisolasi per klinik
 --    berdasarkan folder pertama path (<clinic_id>/...). Avatar hanya bisa ditulis
 --    ke folder milik sendiri (<user_id>/...).
 -- 3. Nomor rekam medis (no_rm) per klinik: RM-000001 dst. untuk setiap klinik,
@@ -114,6 +116,11 @@ grant execute on function public.storage_object_in_my_clinic(text) to anon, auth
 
 do $$
 begin
+  if to_regclass('storage.buckets') is not null then
+    update storage.buckets set public = false
+    where id in ('radiologi', 'klinik', 'patient-photos') and public;
+  end if;
+
   if to_regclass('storage.objects') is null then
     raise notice 'security_followups: storage.objects tidak ada, policy storage dilewati';
     return;

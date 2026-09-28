@@ -79,6 +79,16 @@ const leak = await one("select count(*)::int as n from public.patients");
 ok(leak.n === 4, `SEBELUM migration: admin A melihat ${leak.n} pasien (bocor lintas klinik, sesuai temuan)`);
 await logout();
 
+// Bug produksi: process_audit_log() tidak mengisi audit_logs.clinic_id (NOT NULL)
+await db.exec(`alter table public.patients enable trigger trg_audit_patients;
+               alter table public.visits enable trigger trg_audit_visits;
+               alter table public.users enable trigger trg_audit_users;
+               alter table public.payments enable trigger trg_audit_payments;`);
+await loginAs(uA);
+await expectError(`insert into public.patients (no_rm, nama_lengkap, clinic_id) values ('A-BUG', 'x', '${A}')`,
+  /null value in column "clinic_id"|not-null|23502/, "SEBELUM migration: tambah pasien GAGAL (bug audit produksi direproduksi)");
+await logout();
+
 console.log("\n2. Menjalankan 7 migration Console");
 const dir = join(REPO, "supabase/migrations");
 // Baseline produksi (jika sudah dibuat) dilewati: skema sintetis di atas menggantikannya.
@@ -220,7 +230,23 @@ const noRls = await q(`select c.relname from pg_class c join pg_namespace n on n
   join pg_attribute a on a.attrelid=c.oid and a.attname='clinic_id' where n.nspname='public' and c.relkind='r' and not c.relrowsecurity`);
 ok(noRls.length === 0, "semua tabel ber-clinic_id punya RLS aktif", noRls);
 
-console.log("\n10. Tindak lanjut keamanan (security_followups)");
+console.log("\n10. Bug & kondisi produksi");
+await loginAs(uA);
+await db.exec(`insert into public.patients (nama_lengkap) values ('Pasien setelah perbaikan')`);
+ok((await one(`select count(*)::int as n from public.audit_logs where module = 'patients' and action = 'INSERT' and clinic_id = '${A}'`)).n >= 1,
+  "SESUDAH migration: tambah pasien berhasil + audit tercatat dengan clinic_id");
+ok((await one(`select count(*)::int as n from public.users`)).n === 1,
+  "policy produksi 'Authenticated can view users' (true) tertutup: hanya user klinik sendiri");
+await logout();
+await db.exec(`update public.users set full_name = 'Admin B (Console)' where id = '${uB}'`);
+ok(true, "update user tanpa JWT (Console) tidak gagal karena audit");
+ok((await one(`select count(*)::int as n from storage.buckets where id in ('radiologi','klinik','patient-photos') and public`)).n === 0,
+  "bucket radiologi/klinik/patient-photos kini privat");
+ok((await one(`select public from storage.buckets where id = 'avatars'`)).public === true, "bucket avatars tetap publik");
+ok((await one(`select count(*)::int as n from information_schema.columns where table_name = 'patient_visits' and column_name = 'clinic_id'`)).n === 1,
+  "patient_visits (tabel lama produksi) mendapat clinic_id");
+
+console.log("\n11. Tindak lanjut keamanan (security_followups)");
 const uD = "a0000000-0000-4000-8000-00000000000d";
 await db.exec(`insert into auth.users (id, email, raw_app_meta_data) values ('${uD}', 'd@x.test', '{"clinic_id":"${A}"}');
                insert into public.users (id, email, full_name, role, clinic_id, status) values ('${uD}', 'd@x.test', 'Dokter A', 'dokter', '${A}', 'invited');`);
