@@ -31,8 +31,9 @@
     "db:smoke": "node supabase/tests/smoke/migrations.smoke.mjs"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.3.0",
+    "@emnapi/runtime": "1.11.3",
     "typescript": "^5.6.3",
-    "vitest": "^4.1.10",
-    "@electric-sql/pglite": "^0.3.0"
+    "vitest": "^4.1.10"
   }
 }
