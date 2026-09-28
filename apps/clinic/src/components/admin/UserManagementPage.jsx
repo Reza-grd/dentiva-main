@@ -179,12 +179,23 @@ const UserManagementPage = () => {
                       <td className="p-4 text-right">
                         <button
                           onClick={() => toggleStatus(u)}
-                          className={`p-2 rounded-xl border transition-colors ${
-                            isActive 
-                              ? 'text-rose-600 border-rose-200 hover:bg-rose-500/10 dark:border-rose-900' 
+                          // Status 'suspended' dipasang tim Dentiva; hanya bisa dilepas dari Dentiva Console.
+                          disabled={u.status === 'suspended'}
+                          className={`p-2 rounded-xl border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                            isActive
+                              ? 'text-rose-600 border-rose-200 hover:bg-rose-500/10 dark:border-rose-900'
                               : 'text-emerald-600 border-emerald-200 hover:bg-emerald-500/10 dark:border-emerald-900'
                           }`}
-                          title={isActive ? "Nonaktifkan Akses" : "Aktifkan Akses"}
+                          title={
+                            u.status === 'suspended'
+                              ? 'Ditangguhkan oleh tim Dentiva — hubungi support@dentiva.co.id'
+                              : isActive ? "Nonaktifkan Akses" : "Aktifkan Akses"
+                          }
+                          aria-label={
+                            u.status === 'suspended'
+                              ? `${u.full_name} ditangguhkan oleh tim Dentiva`
+                              : `${isActive ? 'Nonaktifkan' : 'Aktifkan'} akses ${u.full_name}`
+                          }
                         >
                           {isActive ? <UserX size={18} /> : <UserCheck size={18} />}
                         </button>

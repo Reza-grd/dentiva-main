@@ -58,6 +58,7 @@ dentiva/
 | `20260928000500_billing_tables` | `invoices`, `payments`, penomoran `INV-YYYY-NNNNNN`, fungsi transaksional, order Midtrans dicatat di server, cron invoice jatuh tempo |
 | `20260928000600_usage_daily` | `usage_daily`, `collect_usage_daily()`, cron 00:15 WIB, view `clinic_overview`, `dashboard_summary()` |
 | `20260928000700_provision_clinic` | `provision_clinic()` (satu transaksi), `revoke_user_sessions()`, `write_audit()` |
+| `20260929000100_security_followups` | Guard kolom sensitif `users` (menutup eskalasi role), isolasi storage per klinik, nomor RM per klinik, cron SATUSEHAT lewat Vault |
 
 ### 3.2 Aturan akses tenant
 
@@ -151,6 +152,12 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 | 9 | Kuota pasien dan fitur paket hanya membaca langganan `active` | Klinik trial tidak mendapatkan fitur maupun batas paketnya | `trialing` dan `past_due` ikut dihitung |
 | 10 | Panduan menaruh arsip di `supabase/migrations/_archive/` | CLI memberi peringatan untuk file yang tidak sesuai pola | Arsip dipindah ke `supabase/archive/` |
 | 11 | Panduan menyebut `electron/` & `electron-builder.yml` | Tidak ada di repo ini | Dilewati. Jika aplikasi desktop ada di repo lain, arahkan build-nya ke `apps/clinic` |
+| 12 | Policy lama `users_update_own` tidak membatasi kolom | Dokter/resepsionis bisa mengubah `role` dirinya menjadi `admin` | Trigger `users_guard_sensitive`: role/status hanya oleh admin klinik; `clinic_id` tidak bisa diubah; status `suspended` khusus tim Dentiva |
+| 13 | Bucket `radiologi`, `klinik`, `patient-photos` hanya memeriksa "sudah login" | Staf klinik mana pun bisa membuka rontgen & foto pasien klinik lain bila tahu path-nya | Policy restrictive berdasarkan folder `<clinic_id>/…`; file warisan hanya untuk klinik warisan; avatar hanya bisa ditulis ke folder sendiri |
+| 14 | `no_rm` memakai sequence global | Klinik baru mendapat nomor RM yang melompat (mis. RM-004817) | Penomoran per klinik (`clinic_rm_counters`), UNIQUE `(clinic_id, no_rm)` |
+| 15 | Cron SATUSEHAT memakai placeholder `YOUR_SERVICE_ROLE_KEY` | Outbox SATUSEHAT tidak pernah diproses otomatis | Dijadwalkan ulang dengan URL & kunci dari Supabase Vault |
+| 16 | CSP klinik memakai `unsafe-inline` + `unsafe-eval` | Proteksi XSS lemah | Script tema dipindah ke `/theme-init.js`; CSP `script-src 'self' blob:` + `frame-ancestors 'none'` (bundle terverifikasi tanpa `eval`) |
+| 17 | `VITE_ENCRYPTION_KEY` dipakai di browser | Semua variabel `VITE_*` ikut ter-bundle → kunci enkripsi lama terbaca publik | Browser tidak lagi membaca kunci; build **gagal** jika variabel itu diset; skrip migrasi memakai `LEGACY_ENCRYPTION_KEY` |
 
 **Penyempurnaan tambahan:**
 - `get_user_clinic_id()` juga memeriksa status user, sehingga suspend user langsung memutus akses tanpa menunggu token kedaluwarsa. Klaim JWT dicocokkan dengan `public.users`, sehingga klaim palsu atau basi ditolak.
@@ -169,7 +176,7 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 | `npm test` | klinik (12) + Console (9) + kontrak/formatter (10) + router console-api (26) |
 | `npm run typecheck` | TypeScript: packages & console |
 | `npm run lint` | ESLint semua workspace |
-| `npm run db:smoke` | **Tanpa Docker**: Postgres WASM (PGlite) membangun skema lama sintetis (termasuk policy bocor migration 41), menjalankan ke-7 migration, lalu memeriksa 63 hal: isolasi, status, platform, audit, provisioning, billing, pemakaian, kualitas policy. Ikut di CI |
+| `npm run db:smoke` | **Tanpa Docker**: Postgres WASM (PGlite) membangun skema lama sintetis (termasuk policy bocor migration 41 & `users_update_own`), menjalankan semua migration, lalu memeriksa 80 hal: isolasi, status, platform, audit, provisioning, billing, pemakaian, eskalasi role, storage, nomor RM, cron. Ikut di CI |
 | `npm run db:test` | pgTAP: isolasi antar-klinik, klinik/user suspended, klaim JWT palsu, skema platform tertutup, audit append-only, provisioning, billing, idempotensi Midtrans. **Butuh baseline dan Docker** |
 | `deno check supabase/functions/console-api/index.ts` | tipe Edge Function |
 
@@ -193,7 +200,18 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
    npm run db:smoke                # cek cepat tanpa Docker
    supabase test db --linked       # pgTAP
    ```
-5. Jalankan `supabase/snippets/verify_tenant_isolation.sql` di staging. Kueri 1–6 harus kosong.
+5. Jalankan `supabase/snippets/verify_tenant_isolation.sql` di staging. Kueri 1–6 & 8 harus kosong.
+6. Simpan rahasia cron SATUSEHAT di Vault (SQL Editor, sekali per lingkungan):
+   ```sql
+   select vault.create_secret('https://<ref>.supabase.co', 'dentiva_project_url');
+   select vault.create_secret('<service-role-key>', 'dentiva_service_role_key');
+   ```
+7. **Migrasi enkripsi lama** (jika `verify_tenant_isolation.sql` kueri 8 tidak kosong):
+   ```bash
+   cd apps/clinic
+   SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=… LEGACY_ENCRYPTION_KEY=<kunci-lama> node scripts/migrate_encryption.js
+   ```
+   Lalu **hapus `VITE_ENCRYPTION_KEY` dari environment Vercel** (build klinik sekarang menolak berjalan bila variabel itu ada) dan rotasi service role key.
 
 ### B. Uji ujung-ke-ujung di staging
 1. Buat operator owner: undang user lewat Dashboard, lalu jalankan `supabase/snippets/create_first_operator.sql`.
@@ -229,7 +247,9 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 - [ ] Staging dibuat dan backup produksi tersimpan
 - [ ] Baseline dibuat dari produksi dan di-`repair` sebagai applied
 - [ ] `npm test`, `npm run build`, dan `supabase test db` lulus
-- [ ] `verify_tenant_isolation.sql`: kueri 1–6 kosong di staging
+- [ ] `verify_tenant_isolation.sql`: kueri 1–6 & 8 kosong di staging
+- [ ] Data `ENC:v1:` sudah dimigrasikan dan `VITE_ENCRYPTION_KEY` dihapus dari Vercel
+- [ ] Rahasia Vault `dentiva_project_url` & `dentiva_service_role_key` diset
 - [ ] Skema `platform` tidak ada di Exposed schemas
 - [ ] TOTP diaktifkan di Auth
 - [ ] Secret `CONSOLE_URL` & `CLINIC_APP_URL` diset, dan redirect URL didaftarkan
@@ -242,7 +262,7 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 
 ## 9. Pekerjaan lanjutan yang disarankan
 
-- **Storage per klinik**: policy bucket `radiologi` / `klinik` / `patient-photos` saat ini cukup `auth.role() = 'authenticated'`. Tambahkan pemeriksaan prefix `(storage.foldername(name))[1] = get_user_clinic_id()::text`.
-- **Nomor rekam medis** (`patients.no_rm`) masih unik global. Pertimbangkan penomoran per klinik.
-- **Cron SATUSEHAT lama** (`archive/legacy-migrations/47_…`) memakai placeholder `YOUR_SERVICE_ROLE_KEY`. Pastikan job di produksi memakai secret yang benar (sebaiknya lewat Vault).
+- **Storage lama**: kolom URL di `patient_media` masih menyimpan public URL untuk bucket yang kini privat. Pertimbangkan menyimpan path saja dan memakai signed URL (sudah dilakukan untuk foto pasien).
+- **Transaksi vs Pembayaran** di aplikasi klinik masih memakai komponen yang sama (TODO lama di `App.jsx`) — keputusan bisnis.
+- **SATUSEHAT Fix F** (`diagnosis.use`) masih perlu diuji di sandbox (lihat `docs/satusehat-remediation-log.md`).
 - Tahap lanjutan Console: ekspor laporan pendapatan ke Excel, pengingat tagihan via WhatsApp, riwayat login, dan akses dukungan dengan persetujuan admin klinik.

@@ -207,7 +207,7 @@ ok(n >= 4, `collect_usage_daily() menulis ${n} baris`);
 const dash = (await one("select platform.dashboard_summary(14) as d")).d;
 ok(dash.clinicsByStatus && typeof dash.mrrIdr === "number", "dashboard_summary() valid", dash);
 ok((await q("select * from platform.clinic_overview")).length === 4, "view clinic_overview (4 klinik)");
-ok((await q("select jobname from cron.job")).length === 2, "2 job cron terdaftar");
+ok((await q("select jobname from cron.job where jobname like 'platform-%'")).length === 2, "2 job cron platform terdaftar");
 
 console.log("\n9. Kualitas policy");
 const wrapped = await q(`select policyname, qual from pg_policies where schemaname='public' and tablename='patients'`);
@@ -219,6 +219,64 @@ ok(pk.map((r) => r.attname).join(",") === "clinic_id,tier", "PK tier_weights = (
 const noRls = await q(`select c.relname from pg_class c join pg_namespace n on n.oid=c.relnamespace
   join pg_attribute a on a.attrelid=c.oid and a.attname='clinic_id' where n.nspname='public' and c.relkind='r' and not c.relrowsecurity`);
 ok(noRls.length === 0, "semua tabel ber-clinic_id punya RLS aktif", noRls);
+
+console.log("\n10. Tindak lanjut keamanan (security_followups)");
+const uD = "a0000000-0000-4000-8000-00000000000d";
+await db.exec(`insert into auth.users (id, email, raw_app_meta_data) values ('${uD}', 'd@x.test', '{"clinic_id":"${A}"}');
+               insert into public.users (id, email, full_name, role, clinic_id, status) values ('${uD}', 'd@x.test', 'Dokter A', 'dokter', '${A}', 'invited');`);
+await loginAs(uD);
+await db.exec("select public.record_login()");
+await logout();
+ok((await one(`select status from public.users where id = '${uD}'`)).status === "active", "record_login(): dokter invited → active (tidak diblokir guard)");
+await loginAs(uD);
+await expectError(`update public.users set role = 'admin' where id = '${uD}'`, /Hanya admin klinik/, "dokter TIDAK bisa menjadikan dirinya admin (celah users_update_own)");
+await db.exec(`update public.users set full_name = 'drg. Dokter A' where id = '${uD}'`);
+ok(true, "dokter tetap bisa mengubah profil sendiri (nama)");
+await logout();
+await loginAs(uA);
+await db.exec(`update public.users set role = 'resepsionis' where id = '${uD}'`);
+ok((await one(`select role from public.users where id = '${uD}'`)).role === "resepsionis", "admin klinik bisa mengubah role staf");
+await expectError(`update public.users set status = 'suspended' where id = '${uD}'`, /khusus untuk tim Dentiva/, "admin klinik tidak bisa memakai status 'suspended'");
+await logout();
+await db.exec(`update public.users set status = 'suspended' where id = '${uD}'`); // oleh Console (tanpa JWT)
+await loginAs(uA);
+await expectError(`update public.users set is_active = true where id = '${uD}'`, /tim Dentiva/, "admin klinik tidak bisa membatalkan suspend dari Console (via is_active)");
+await expectError(`update public.users set clinic_id = '${B}' where id = '${uD}'`, /clinic_id|row-level/, "clinic_id pengguna tidak bisa dipindah");
+await logout();
+
+// Storage per klinik
+await db.exec(`insert into storage.objects (bucket_id, name) values
+  ('radiologi', '${A}/p1/xray.png'), ('radiologi', '${B}/p9/xray.png'), ('klinik', 'legacy-patient/foto.jpg')`);
+await loginAs(uA);
+const objsA = (await q(`select name from storage.objects order by name`)).map((r) => r.name);
+ok(objsA.length === 2 && objsA.includes(`${A}/p1/xray.png`) && objsA.includes("legacy-patient/foto.jpg"),
+  "klinik A melihat filenya + file warisan, bukan file klinik B", objsA);
+await expectError(`insert into storage.objects (bucket_id, name) values ('radiologi', '${B}/p9/sisip.png')`, /row-level security|42501/, "tidak bisa mengunggah ke folder klinik B");
+await db.exec(`insert into storage.objects (bucket_id, name) values ('radiologi', '${A}/p1/baru.png')`);
+ok(true, "bisa mengunggah ke folder klinik sendiri");
+await expectError(`insert into storage.objects (bucket_id, name) values ('avatars', '${uB}/foto.png')`, /row-level security|42501/, "avatar tidak bisa ditulis ke folder user lain");
+await db.exec(`insert into storage.objects (bucket_id, name) values ('avatars', '${uA}/foto.png')`);
+ok(true, "avatar bisa ditulis ke folder sendiri");
+await logout();
+await loginAs(uB);
+const objsB = (await q(`select name from storage.objects where bucket_id in ('radiologi', 'klinik') order by name`)).map((r) => r.name);
+ok(objsB.length === 1 && objsB[0] === `${B}/p9/xray.png`, "klinik B hanya melihat filenya (bukan file warisan)", objsB);
+await logout();
+
+// Nomor RM per klinik
+await loginAs(uA);
+const rmA = await one(`insert into public.patients (nama_lengkap) values ('Pasien RM A') returning no_rm, clinic_id`);
+await logout();
+await loginAs("d0000000-0000-4000-8000-0000000000d1");
+const rmNew = (await one(`insert into public.patients (nama_lengkap) values ('Pasien pertama') returning no_rm`)).no_rm;
+const rmNew2 = (await one(`insert into public.patients (nama_lengkap) values ('Pasien kedua') returning no_rm`)).no_rm;
+await logout();
+ok(rmNew === "RM-000001" && rmNew2 === "RM-000002", `klinik baru mulai dari RM-000001 (${rmNew}, ${rmNew2})`);
+ok(/^RM-\d{6}$/.test(rmA.no_rm) && rmA.clinic_id === A, `klinik warisan melanjutkan nomornya (${rmA.no_rm})`);
+
+// Cron SATUSEHAT
+const cronCmd = (await one(`select command from cron.job where jobname = 'process-satusehat-outbox'`))?.command ?? "";
+ok(/vault\.decrypted_secrets/.test(cronCmd) && !/YOUR_SERVICE_ROLE_KEY/.test(cronCmd), "cron SATUSEHAT memakai Vault, bukan placeholder");
 
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

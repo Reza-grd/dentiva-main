@@ -4,6 +4,20 @@ Dokumen ini mencatat riwayat perubahan dan perbaikan bug historis pada proyek De
 
 ---
 
+## [1.10.1] — 2026-09-29 · Tindak lanjut keamanan
+
+### Keamanan
+- **Eskalasi role ditutup**: dokter/resepsionis tidak bisa lagi mengubah `role` dirinya menjadi admin (policy lama `users_update_own`). Status `suspended` khusus untuk tim Dentiva.
+- **Storage per klinik**: rontgen, foto klinis, dan foto pasien hanya bisa diakses klinik pemiliknya. Avatar hanya bisa ditulis ke folder sendiri.
+- **CSP aplikasi klinik** tanpa `unsafe-inline` / `unsafe-eval`.
+- **Kunci enkripsi lama tidak lagi masuk bundle browser**. Build menolak `VITE_ENCRYPTION_KEY`; migrasi data memakai `LEGACY_ENCRYPTION_KEY`.
+- Cron SATUSEHAT memakai Supabase Vault (sebelumnya placeholder `YOUR_SERVICE_ROLE_KEY`).
+
+### Diubah
+- Nomor rekam medis per klinik (`RM-000001` untuk tiap klinik baru).
+
+---
+
 ## [1.10.0] — 2026-09-28 · Dentiva Console
 
 Detail arsitektur, perbedaan dari panduan, dan runbook rilis: [docs/dentiva-console.md](docs/dentiva-console.md).

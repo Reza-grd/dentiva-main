@@ -68,11 +68,15 @@ async function deriveKey(masterSecret, salt, iterations = 100000) {
 }
 
 export const encryptionService = {
-  // CONFIG CUTOFF: Change to false to permanently disable the client-side fallback
-  FALLBACK_ENABLED: true,
+  // Dekripsi format lama (ENC:v1:) di sisi klien HANYA untuk skrip Node (migrasi/verifikasi).
+  // Di browser kunci tidak pernah dibaca: variabel VITE_* ikut ter-bundle ke JavaScript
+  // publik, jadi kunci enkripsi tidak boleh ada di build aplikasi (vite.config.js menolaknya).
+  // Data lama wajib dimigrasikan ke enkripsi server dengan scripts/migrate_encryption.js.
+  // Aktif hanya bila kunci lama tersedia di lingkungan Node (di browser `process` tidak ada → selalu false).
+  FALLBACK_ENABLED: typeof process !== 'undefined' && !!(process.env?.LEGACY_ENCRYPTION_KEY || process.env?.VITE_ENCRYPTION_KEY),
 
-  // Vite environment key (strictly env-driven; no default fallback string allowed)
-  _masterKEK: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_ENCRYPTION_KEY) || (typeof process !== 'undefined' && process.env && process.env.VITE_ENCRYPTION_KEY) || null,
+  // Kunci lama hanya dari lingkungan Node (LEGACY_ENCRYPTION_KEY; VITE_ENCRYPTION_KEY diterima untuk kompatibilitas skrip).
+  _masterKEK: (typeof process !== 'undefined' && process.env && (process.env.LEGACY_ENCRYPTION_KEY || process.env.VITE_ENCRYPTION_KEY)) || null,
 
   /**
    * Derive local KEK salt for fallback decryption
@@ -89,7 +93,7 @@ export const encryptionService = {
    */
   async decryptLocalFallback(encryptedPayload, clinicId = 'default') {
     if (!this.FALLBACK_ENABLED) {
-      console.warn('[SECURITY] Fallback client-side decryption is disabled.');
+      console.warn('[SECURITY] Data terenkripsi format lama (ENC:v1:) ditemukan. Jalankan scripts/migrate_encryption.js untuk memigrasikannya ke enkripsi server.');
       return encryptedPayload;
     }
     if (!this._masterKEK) {

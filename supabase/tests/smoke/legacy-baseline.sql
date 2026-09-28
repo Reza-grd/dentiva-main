@@ -174,3 +174,26 @@ create policy "Subscriptions_Admin_UPDATE" on public.clinic_subscriptions for up
 grant usage on schema public to anon, authenticated, service_role;
 grant all on all tables in schema public to anon, authenticated, service_role;
 grant all on all sequences in schema public to anon, authenticated, service_role;
+
+-- ─── tambahan untuk migration security_followups ───────────────────────────
+-- policy lama yang membolehkan user mengubah barisnya sendiri tanpa batas kolom
+create policy users_update_own on public.users for update using (auth.uid() = id and clinic_id = public.get_user_clinic_id());
+
+-- nomor RM global lama
+create sequence public.seq_no_rm start 1;
+create function public.generate_no_rm() returns trigger as $$
+begin
+  if new.no_rm is null or new.no_rm = '' then
+    new.no_rm := 'RM-' || lpad(nextval('public.seq_no_rm')::text, 6, '0');
+  end if;
+  return new;
+end; $$ language plpgsql;
+create trigger trigger_generate_no_rm before insert on public.patients for each row execute function public.generate_no_rm();
+
+-- storage lama: cukup "authenticated"
+alter table storage.objects enable row level security;
+create policy legacy_clinical_rw on storage.objects for all to authenticated
+  using (bucket_id in ('radiologi', 'klinik', 'patient-photos', 'avatars'))
+  with check (bucket_id in ('radiologi', 'klinik', 'patient-photos', 'avatars'));
+grant usage on schema storage to anon, authenticated, service_role;
+grant all on storage.objects to anon, authenticated, service_role;

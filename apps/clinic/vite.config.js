@@ -3,6 +3,14 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
+// Kunci enkripsi TIDAK BOLEH ikut ter-bundle ke JavaScript publik (semua VITE_* bersifat publik).
+if (process.env.VITE_ENCRYPTION_KEY) {
+  throw new Error(
+    '[SECURITY] VITE_ENCRYPTION_KEY terdeteksi di environment build. Hapus dari Vercel/.env; ' +
+    'migrasikan data lama dengan scripts/migrate_encryption.js (pakai LEGACY_ENCRYPTION_KEY).'
+  )
+}
+
 export default defineConfig({
   plugins: [
     react(),

@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Pemeriksaan pasca-migration (jalankan di SQL Editor staging & produksi).
--- Semua kueri di bawah seharusnya mengembalikan 0 baris.
+-- Kueri 1–6 seharusnya kosong; kueri 8 seharusnya 0 di setiap baris.
 -- =============================================================================
 
 -- 1. Tabel public ber-clinic_id tanpa RLS aktif
@@ -53,6 +53,17 @@ select grantee, privilege_type, table_name
 from information_schema.role_table_grants
 where table_schema = 'platform' and grantee in ('anon', 'authenticated', 'PUBLIC');
 
--- 7. Job pg_cron Console terdaftar (seharusnya 2 baris — ini SATU-SATUNYA kueri yang tidak 0)
+-- 7. Job pg_cron Console terdaftar (seharusnya 2 baris)
 select jobname, schedule, active from cron.job
 where jobname in ('platform-collect-usage-daily', 'platform-mark-overdue-invoices');
+
+-- 8. Sisa data terenkripsi format lama (ENC:v1:) — wajib 0 sebelum VITE_ENCRYPTION_KEY dihapus.
+--    Jika > 0, jalankan apps/clinic/scripts/migrate_encryption.js (lihat runbook).
+select 'patients' as tabel, count(*) as sisa from public.patients
+where concat_ws('|', nama_lengkap, no_wa, alamat, nik, nik_ibu) like '%ENC:v1:%'
+union all
+select 'visits', count(*) from public.visits
+where concat_ws('|', diagnosa, keluhan, pemeriksaan_fisik, terapi, catatan_dokter) like '%ENC:v1:%'
+union all
+select 'medical_history', count(*) from public.medical_history
+where concat_ws('|', alergi_detail, riwayat_lain, konsumsi_obat) like '%ENC:v1:%';

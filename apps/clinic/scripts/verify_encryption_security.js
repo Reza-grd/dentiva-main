@@ -8,7 +8,7 @@
  *   SUPABASE_URL="your-supabase-url" \
  *   SUPABASE_ANON_KEY="your-anon-key" \
  *   SUPABASE_SERVICE_ROLE_KEY="your-service-role-key" \
- *   VITE_ENCRYPTION_KEY="your-old-client-key" \
+ *   LEGACY_ENCRYPTION_KEY="your-old-client-key" \
  *   node scripts/verify_encryption_security.js
  */
 
@@ -22,10 +22,10 @@ globalThis.window = { crypto: webcrypto };
 const supabaseUrl = process.env.SUPABASE_URL;
 const anonKey = process.env.SUPABASE_ANON_KEY;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const oldKey = process.env.VITE_ENCRYPTION_KEY;
+const oldKey = (process.env.LEGACY_ENCRYPTION_KEY || process.env.VITE_ENCRYPTION_KEY);
 if (!oldKey) {
-  console.error('[FATAL] VITE_ENCRYPTION_KEY tidak diset. Script ini tidak boleh dijalankan tanpa kunci enkripsi eksplisit.');
-  console.error('[FATAL] Jalankan ulang dengan: VITE_ENCRYPTION_KEY="kunci-anda" node scripts/verify_encryption_security.js');
+  console.error('[FATAL] LEGACY_ENCRYPTION_KEY tidak diset. Script ini tidak boleh dijalankan tanpa kunci enkripsi eksplisit.');
+  console.error('[FATAL] Jalankan ulang dengan: LEGACY_ENCRYPTION_KEY="kunci-anda" node scripts/verify_encryption_security.js');
   process.exit(1);
 }
 

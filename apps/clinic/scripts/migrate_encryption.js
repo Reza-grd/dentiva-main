@@ -14,7 +14,7 @@
  * Usage:
  *   SUPABASE_URL="your-supabase-url" \
  *   SUPABASE_SERVICE_ROLE_KEY="your-service-role-key" \
- *   VITE_ENCRYPTION_KEY="your-old-client-key" \
+ *   LEGACY_ENCRYPTION_KEY="your-old-client-key" \
  *   node scripts/migrate_encryption.js
  */
 
@@ -26,7 +26,7 @@ globalThis.window = { crypto: webcrypto };
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const oldViteKey = process.env.VITE_ENCRYPTION_KEY;
+const oldViteKey = (process.env.LEGACY_ENCRYPTION_KEY || process.env.VITE_ENCRYPTION_KEY);
 
 if (!supabaseUrl || !serviceKey) {
   console.error('Error: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env variables must be set.');
@@ -43,7 +43,7 @@ async function decryptLegacy(encryptedPayload, masterKey) {
     return encryptedPayload;
   }
   if (!masterKey) {
-    throw new Error('VITE_ENCRYPTION_KEY is required to decrypt legacy ENC:v1: payloads.');
+    throw new Error('LEGACY_ENCRYPTION_KEY is required to decrypt legacy ENC:v1: payloads.');
   }
   try {
     const deriveKey = async (secret, salt) => {
