@@ -99,62 +99,38 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Processing Midtrans Webhook: order=${order_id}, status=${transaction_status}, clinic=${clinic_id}`);
+    console.log(`Processing Midtrans Webhook: order=${order_id}, status=${transaction_status}`);
 
-    // Determine payment success status
-    const isSuccess =
-      (transaction_status === "capture" && fraud_status === "accept") ||
-      transaction_status === "settlement";
+    // Keputusan HANYA berdasarkan order yang tercatat di server (platform.payments).
+    // custom_field1/2/3 tidak ikut ditandatangani Midtrans sehingga tidak dipercaya.
+    const outcome =
+      (transaction_status === "capture" && fraud_status === "accept") || transaction_status === "settlement"
+        ? "success"
+        : transaction_status === "pending" || (transaction_status === "capture" && fraud_status === "challenge")
+        ? "pending"
+        : ["deny", "cancel", "expire", "failure"].includes(transaction_status)
+        ? "failed"
+        : "pending";
 
-    if (isSuccess && clinic_id && plan_id) {
-      const now = new Date();
-      const periodEnd = new Date(now);
+    const { data: settleResult, error: settleErr } = await supabaseAdmin.rpc("billing_settle_midtrans_order", {
+      p_order_id: order_id,
+      p_outcome: outcome,
+      p_gross_amount: Math.round(Number(gross_amount)),
+      p_raw: notification,
+    });
 
-      if (billing_cycle === "yearly") {
-        periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-      } else {
-        periodEnd.setMonth(periodEnd.getMonth() + 1);
-      }
+    if (settleErr) {
+      console.error(`Failed to settle Midtrans order ${order_id}:`, settleErr);
+      // 500 → Midtrans akan mengirim ulang notifikasi (proses idempoten).
+      return new Response(JSON.stringify({ success: false, error: "settlement_failed" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-      // Check if subscription record already exists for clinic
-      const { data: existingSub } = await supabaseAdmin
-        .from("clinic_subscriptions")
-        .select("id")
-        .eq("clinic_id", clinic_id)
-        .maybeSingle();
-
-      if (existingSub) {
-        // Update existing subscription
-        await supabaseAdmin
-          .from("clinic_subscriptions")
-          .update({
-            plan_id,
-            status: "active",
-            current_period_start: now.toISOString(),
-            current_period_end: periodEnd.toISOString(),
-            cancel_at_period_end: false,
-            updated_at: now.toISOString(),
-          })
-          .eq("id", existingSub.id);
-      } else {
-        // Insert new subscription
-        await supabaseAdmin.from("clinic_subscriptions").insert({
-          clinic_id,
-          plan_id,
-          status: "active",
-          current_period_start: now.toISOString(),
-          current_period_end: periodEnd.toISOString(),
-          cancel_at_period_end: false,
-        });
-      }
-      console.log(`Successfully activated subscription for clinic ${clinic_id} with plan ${plan_id}`);
-    } else if (transaction_status === "deny" || transaction_status === "cancel" || transaction_status === "expire") {
-      if (clinic_id) {
-        await supabaseAdmin
-          .from("clinic_subscriptions")
-          .update({ status: "past_due", updated_at: new Date().toISOString() })
-          .eq("clinic_id", clinic_id);
-      }
+    console.log(`Midtrans order ${order_id}: ${settleResult}`);
+    if (settleResult === "unknown_order" || settleResult === "amount_mismatch") {
+      console.warn(`Midtrans order ${order_id} needs manual review: ${settleResult} (reported clinic=${clinic_id}, plan=${plan_id}, cycle=${billing_cycle})`);
     }
 
     return new Response(

@@ -87,11 +87,11 @@ serve(async (req) => {
     // RBAC: Check calling user role and clinic_id
     const { data: profile } = await supabaseAdmin
       .from("users")
-      .select("role, clinic_id")
+      .select("role, clinic_id, status")
       .eq("id", user.id)
       .maybeSingle();
 
-    if (!profile || profile.role !== "admin") {
+    if (!profile || profile.role !== "admin" || !["active", "invited"].includes(profile.status ?? "active")) {
       return new Response(
         JSON.stringify({
           error: "Forbidden: Only clinic Admin can initiate subscription purchases.",
@@ -116,29 +116,37 @@ serve(async (req) => {
       );
     }
 
-    // Fetch subscription plan details
-    const { data: plan, error: planErr } = await supabaseAdmin
-      .from("subscription_plans")
-      .select("*")
-      .eq("id", plan_id)
-      .single();
-
-    if (planErr || !plan) {
+    if (billing_cycle !== "monthly" && billing_cycle !== "yearly") {
       return new Response(
-        JSON.stringify({ error: "Invalid subscription plan specified" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        JSON.stringify({ error: "billing_cycle harus 'monthly' atau 'yearly'" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const amount =
-      billing_cycle === "yearly"
-        ? Math.round(Number(plan.price_yearly))
-        : Math.round(Number(plan.price_monthly));
-
     const orderId = `SUB-${profile.clinic_id.substring(0, 8)}-${Date.now()}`;
+
+    // Catat order di server SEBELUM memanggil Midtrans. Nominal dihitung database
+    // dari katalog paket; webhook nanti hanya memercayai catatan ini (bukan custom_field
+    // yang tidak ikut ditandatangani Midtrans).
+    const { data: registered, error: regErr } = await supabaseAdmin
+      .rpc("billing_register_midtrans_order", {
+        p_order_id: orderId,
+        p_clinic_id: profile.clinic_id,
+        p_plan_id: plan_id,
+        p_billing_cycle: billing_cycle,
+      })
+      .single();
+
+    if (regErr || !registered) {
+      console.error("Failed to register Midtrans order:", regErr);
+      return new Response(
+        JSON.stringify({ error: "Paket tidak valid atau tidak aktif" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const amount = Number((registered as { amount_idr: number }).amount_idr);
+    const plan = { id: plan_id, name: (registered as { plan_name: string }).plan_name };
 
     // Construct Midtrans Snap API Payload
     const snapUrl =
@@ -165,6 +173,7 @@ serve(async (req) => {
         email: user.email,
         first_name: user.user_metadata?.full_name || "Admin",
       },
+      // Informasi saja (tidak dipakai webhook untuk keputusan apa pun).
       custom_field1: profile.clinic_id,
       custom_field2: plan.id,
       custom_field3: billing_cycle,
