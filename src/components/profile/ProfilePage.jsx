@@ -62,27 +62,26 @@ const ProfilePage = () => {
           <User className="text-[var(--color-accent)]" size={32} />
           Profil Saya
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">Kelola informasi pribadi dan data profil Anda</p>
+        <p className="text-text-muted">Kelola informasi pribadi dan data profil Anda</p>
       </div>
 
       <div className="glass-panel p-6 sm:p-8 rounded-2xl space-y-8">
         {/* Avatar Banner */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-border-color">
           <div 
-            className="w-24 h-24 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-lg"
-            style={{ background: 'linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary, var(--color-accent)))' }}
+            className="w-24 h-24 rounded-full flex items-center justify-center text-accent-primary bg-accent-primary/10 border border-accent-primary/20 font-bold text-3xl shadow-lg"
           >
             {getInitials(userProfile?.full_name)}
           </div>
           <div className="text-center sm:text-left space-y-1">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{userProfile?.full_name || 'User'}</h2>
+            <h2 className="text-xl font-bold text-text-primary">{userProfile?.full_name || 'User'}</h2>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-accent-primary/15 text-accent-primary border border-accent-primary/20">
                 <Shield size={12} />
                 {userProfile?.role === 'admin' ? 'Manajer Klinik' : userProfile?.role}
               </span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Terdaftar sejak: {userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</p>
+            <p className="text-xs text-text-muted">Terdaftar sejak: {userProfile?.created_at ? new Date(userProfile.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</p>
           </div>
         </div>
 
@@ -151,7 +150,7 @@ const ProfilePage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all hover:opacity-90 border-0 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>

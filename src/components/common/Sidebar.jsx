@@ -10,7 +10,6 @@ import { useTheme } from '../../contexts/ThemeContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { userProfile } = useAuth();
-  const { primaryColor } = useTheme();
   const role = userProfile?.role || 'admin';
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 1024);
 
@@ -83,24 +82,24 @@ const Sidebar = ({ isOpen, onClose }) => {
       <aside
         className={`
           flex flex-col flex-shrink-0 w-72 h-[100dvh] lg:h-screen
-          bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-r
-          border-gray-100 dark:border-gray-800 shadow-xl transition-transform duration-300 ease-in-out
+          bg-card/80 backdrop-blur-xl border-r
+          border-border shadow-xl transition-transform duration-300 ease-in-out
           ${isDesktop ? 'translate-x-0 static' : (isOpen ? 'translate-x-0 fixed left-0 top-0 z-50' : '-translate-x-full fixed left-0 top-0 z-50')}
         `}
       >
         {/* Logo */}
-        <div className="p-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
+        <div className="p-6 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-3">
             <img src="/dentiva-logo.png" alt="Dentiva Logo" className="h-10 w-auto rounded-xl shadow-sm" />
             <div>
-              <div className="font-bold text-2xl tracking-tighter text-gray-900 dark:text-white leading-none mb-1">Dentiva</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-none tracking-widest uppercase">Klinik Gigi</div>
+              <div className="font-bold text-2xl tracking-tighter text-text-primary leading-none mb-1">Dentiva</div>
+              <div className="text-xs text-text-muted font-medium leading-none tracking-widest uppercase">Klinik Gigi</div>
             </div>
           </div>
           <button
             onClick={onClose}
             aria-label="Tutup sidebar"
-            className="lg:hidden p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-text-muted hover:text-text-primary hover:bg-background rounded-lg transition-colors"
           >
             <X size={20} />
           </button>
@@ -113,7 +112,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               return (
                 <div
                   key={`g-${idx}`}
-                  className={`px-3 mb-2 text-[11px] font-bold text-gray-400/80 dark:text-gray-500 tracking-widest uppercase ${idx !== 0 ? 'mt-8' : ''}`}
+                  className={`px-3 mb-2 text-[11px] font-bold text-text-muted tracking-widest uppercase ${idx !== 0 ? 'mt-8' : ''}`}
                 >
                   {item.group}
                 </div>
@@ -140,7 +139,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   flex items-center gap-3 px-4 py-3 mb-1.5 rounded-2xl transition-all duration-200 group relative
                   ${isActive 
                     ? 'font-semibold' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200 font-medium'
+                    : 'text-text-muted hover:bg-background hover:text-text-primary font-medium'
                   }
                 `}
               >
@@ -148,7 +147,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   <>
                     <Icon
                       size={20}
-                      className={isActive ? 'text-white' : 'text-gray-500 group-hover:text-gray-700 dark:text-gray-400 dark:group-hover:text-gray-300'}
+                      className={isActive ? 'text-white' : 'text-text-muted group-hover:text-text-primary'}
                     />
                     <span className="text-[14px]">{item.label}</span>
                   </>
@@ -159,10 +158,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 mt-auto bg-white/30 dark:bg-black/20">
-          <div className="bg-gray-50/80 dark:bg-gray-900/80 rounded-2xl p-4 text-xs shadow-sm border border-gray-100/50 dark:border-gray-800/50">
-            <div className="font-semibold text-[var(--color-accent)]">Dentiva AI</div>
-            <div className="text-gray-500 dark:text-gray-400 font-medium mt-0.5">Platform © 2026</div>
+        <div className="p-4 border-t border-border mt-auto bg-card/30">
+          <div className="bg-background/80 rounded-2xl p-4 text-xs shadow-sm border border-border/50">
+            <div className="font-semibold text-accent-primary">Dentiva AI</div>
+            <div className="text-text-muted font-medium mt-0.5">Platform © 2026</div>
           </div>
         </div>
       </aside>

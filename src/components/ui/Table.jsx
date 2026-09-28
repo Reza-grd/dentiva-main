@@ -22,7 +22,7 @@ const TableContainer = forwardRef(
     <div
       ref={ref}
       className={cn(
-        "w-full rounded-2xl border border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md shadow-sm overflow-hidden",
+        "w-full rounded-2xl border border-border bg-card/80 backdrop-blur-md shadow-sm overflow-hidden",
         responsive && "overflow-x-auto",
         className
       )}
@@ -38,7 +38,7 @@ const Table = forwardRef(({ className, ...props }, ref) => (
   <table
     ref={ref}
     className={cn(
-      "w-full text-left text-sm text-gray-700 dark:text-gray-300 border-collapse",
+      "w-full text-left text-sm text-text-primary border-collapse",
       className
     )}
     {...props}
@@ -50,7 +50,7 @@ const TableHeader = forwardRef(({ className, ...props }, ref) => (
   <thead
     ref={ref}
     className={cn(
-      "bg-gray-50/80 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-800 text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold",
+      "bg-background/80 border-b border-border text-xs uppercase tracking-wider text-text-muted font-semibold",
       className
     )}
     {...props}
@@ -61,7 +61,7 @@ TableHeader.displayName = "TableHeader";
 const TableBody = forwardRef(({ className, ...props }, ref) => (
   <tbody
     ref={ref}
-    className={cn("divide-y divide-gray-100 dark:divide-gray-800/60", className)}
+    className={cn("divide-y divide-border", className)}
     {...props}
   />
 ));
@@ -71,7 +71,7 @@ const TableFooter = forwardRef(({ className, ...props }, ref) => (
   <tfoot
     ref={ref}
     className={cn(
-      "bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-800 font-medium text-gray-900 dark:text-gray-100",
+      "bg-background/50 border-t border-border font-medium text-text-primary",
       className
     )}
     {...props}
@@ -83,7 +83,7 @@ const TableRow = forwardRef(({ className, ...props }, ref) => (
   <tr
     ref={ref}
     className={cn(
-      "transition-colors hover:bg-gray-50/60 dark:hover:bg-gray-800/40 data-[state=selected]:bg-gray-100 dark:data-[state=selected]:bg-gray-800",
+      "transition-colors hover:bg-background/60 data-[state=selected]:bg-background",
       className
     )}
     {...props}
@@ -112,7 +112,7 @@ TableCell.displayName = "TableCell";
 const TableCaption = forwardRef(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-xs text-gray-500 dark:text-gray-400 p-2", className)}
+    className={cn("mt-4 text-xs text-text-muted p-2", className)}
     {...props}
   />
 ));

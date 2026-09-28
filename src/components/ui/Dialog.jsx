@@ -54,8 +54,8 @@ const DialogContent = forwardRef(({ className, children, ...props }, ref) => (
         // Sizing
         "w-full max-w-lg max-h-[90vh] overflow-y-auto",
         // Appearance — matches Card.jsx glassmorphism style
-        "rounded-2xl border border-gray-100 dark:border-gray-800",
-        "bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-md",
+        "rounded-2xl border border-border",
+        "bg-card/95 backdrop-blur-md",
         "shadow-xl",
         // Spacing
         "p-6",
@@ -75,10 +75,10 @@ const DialogContent = forwardRef(({ className, children, ...props }, ref) => (
       <DialogPrimitive.Close
         className={cn(
           "absolute right-4 top-4 rounded-lg p-1",
-          "text-gray-400 hover:text-gray-900 dark:hover:text-gray-100",
-          "hover:bg-gray-100 dark:hover:bg-gray-800",
+          "text-text-muted hover:text-text-primary",
+          "hover:bg-background",
           "transition-colors",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary",
           "disabled:pointer-events-none"
         )}
         aria-label="Tutup dialog"
@@ -116,7 +116,7 @@ const DialogTitle = forwardRef(({ className, ...props }, ref) => (
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight",
-      "text-gray-900 dark:text-gray-100",
+      "text-text-primary",
       className
     )}
     {...props}
@@ -127,7 +127,7 @@ DialogTitle.displayName = DialogPrimitive.Title.displayName;
 const DialogDescription = forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-gray-500 dark:text-gray-400", className)}
+    className={cn("text-sm text-text-muted", className)}
     {...props}
   />
 ));

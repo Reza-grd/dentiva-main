@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity } from 'lucide-react';
+import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity, Palette } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
@@ -8,6 +8,7 @@ import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 import TreatmentEducationTemplates from './TreatmentEducationTemplates';
 import SoapTemplates from './SoapTemplates';
 import { satusehatService } from '../../services/satusehatService';
+import ThemeGallery from '../common/ThemeGallery';
 
 const SettingsPage = () => {
   const { user, userProfile } = useAuth();
@@ -348,6 +349,7 @@ const SettingsPage = () => {
   };
 
   const tabs = [
+    { id: 'appearance', label: 'Tampilan Tema', icon: Palette },
     ...(isAdmin ? [
       { id: 'profile', label: 'Profil Klinik', icon: User },
       { id: 'notifications', label: 'Notifikasi', icon: Bell },
@@ -367,43 +369,49 @@ const SettingsPage = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-          <SettingsIcon className="text-[var(--color-accent)]" size={32} />
-          Pengaturan Sistem
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">Kelola konfigurasi dan preferensi sistem</p>
+      <div className="flex items-center gap-3 glass-panel p-6">
+        <SettingsIcon className="text-accent-primary" size={32} />
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">Pengaturan Sistem</h1>
+          <p className="text-sm text-text-muted mt-1">
+            Kelola profil klinik, preferensi tampilan, dan integrasi SATUSEHAT
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar Tabs */}
-        <div className="lg:col-span-1">
-          <div className="glass-panel p-2 rounded-2xl">
-            <nav className="space-y-1">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] font-semibold shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50/50 dark:hover:bg-gray-800/30'
-                    }`}
-                  >
-                    <Icon size={20} className={activeTab === tab.id ? 'text-[var(--color-accent)]' : ''} />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+        {/* Navigation Sidebar / Tabs */}
+        <div className="lg:col-span-1 glass-panel p-3 h-fit">
+          <nav className="flex lg:flex-col gap-1.5 overflow-x-auto no-scrollbar" aria-label="Pengaturan">
+            {navTabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-3 px-4 py-3 text-sm rounded-xl whitespace-nowrap transition-all text-left w-full ${
+                    isActive
+                      ? 'bg-accent-primary/15 text-accent-primary font-semibold shadow-sm border border-accent-primary/20'
+                      : 'text-text-muted hover:text-text-primary hover:bg-background'
+                  }`}
+                >
+                  <Icon size={20} className={isActive ? 'text-accent-primary' : ''} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
         {/* Content */}
         <div className="lg:col-span-3">
           <div className="glass-panel p-6 sm:p-8 rounded-2xl">
+            {/* Appearance Tab */}
+            {activeTab === 'appearance' && (
+              <ThemeGallery />
+            )}
+
             {/* Profile Tab */}
             {activeTab === 'profile' && (
               <div>

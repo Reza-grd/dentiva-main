@@ -45,70 +45,34 @@ const Navbar = ({ onMenuClick }) => {
 
   return (
     <nav
-      style={{
-        background: 'white',
-        borderBottom: '1px solid rgba(15,76,129,0.08)',
-        boxShadow: '0 2px 12px rgba(15,76,129,0.06)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 40,
-      }}
+      className="bg-card border-b border-border shadow-sm sticky top-0 z-40"
     >
-      <div style={{ padding: '0 20px', maxWidth: '100%' }}>
+      <div className="px-5 max-w-full">
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            height: 62,
-            gap: 12,
-          }}
+          className="flex items-center justify-between h-[62px] gap-3"
         >
           {/* Left: hamburger + logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div className="flex items-center gap-3.5">
             <button
               onClick={onMenuClick}
-              className="lg:hidden"
+              className="lg:hidden p-2 rounded-xl text-text-muted hover:bg-background transition-colors border-0 bg-transparent cursor-pointer flex"
               aria-label="Buka menu navigasi"
-              style={{
-                padding: 8,
-                borderRadius: 10,
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#475569',
-                display: 'flex',
-                transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}
             >
               <Menu size={22} />
             </button>
 
             {/* Logo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="flex items-center gap-2.5">
               <div
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: 12,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 4px 12px rgba(15,76,129,0.22)',
-                  flexShrink: 0,
-                  overflow: 'hidden',
-                  backgroundColor: '#fff'
-                }}
+                className="w-[38px] h-[38px] rounded-xl flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden bg-card border border-border"
               >
-                <img src="/dentiva-logo.png" alt="Dentiva Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/dentiva-logo.png" alt="Dentiva Logo" className="w-full h-full object-cover" />
               </div>
               <div className="hidden sm:block">
-                <div style={{ fontSize: 17, fontWeight: 800, color: '#0F4C81', lineHeight: 1.1 }}>
+                <div className="text-[17px] font-extrabold text-accent-primary leading-tight">
                   Dentiva
                 </div>
-                <div style={{ fontSize: 10.5, color: '#94a3b8', fontWeight: 500, letterSpacing: '0.04em' }}>
+                <div className="text-[10.5px] text-text-muted font-medium tracking-wider">
                   KLINIK GIGI
                 </div>
               </div>
@@ -117,75 +81,32 @@ const Navbar = ({ onMenuClick }) => {
 
           {/* Center: page title (desktop) */}
           <div
-            className="hidden md:flex"
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              gap: 6,
-              color: '#94a3b8',
-              fontSize: 13,
-              fontWeight: 500,
-            }}
+            className="hidden md:flex flex-1 justify-center items-center gap-1.5 text-text-muted text-xs font-medium"
           >
-            <span style={{ color: '#cbd5e1' }}>Dentiva</span>
-            <ChevronRight size={14} style={{ color: '#cbd5e1' }} />
-            <span style={{ color: '#475569', fontWeight: 600 }}>{pageTitle}</span>
+            <span className="opacity-70">Dentiva</span>
+            <ChevronRight size={14} className="opacity-50" />
+            <span className="text-text-primary font-semibold">{pageTitle}</span>
           </div>
 
           {/* Right: user */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          <div className="flex items-center gap-2.5 flex-shrink-0">
             {/* Name + role (desktop) */}
-            <div className="hidden md:block" style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: '#1e293b', lineHeight: 1.2 }}>
+            <div className="hidden md:block text-right">
+              <div className="text-[13.5px] font-semibold text-text-primary leading-snug">
                 {userProfile?.full_name || 'User'}
               </div>
               <span
-                style={{
-                  display: 'inline-block',
-                  padding: '1px 8px',
-                  fontSize: 10.5,
-                  fontWeight: 700,
-                  borderRadius: 99,
-                  background: rc.bg,
-                  color: rc.color,
-                  letterSpacing: '0.05em',
-                  textTransform: 'uppercase',
-                }}
+                className="inline-block px-2 py-0.5 text-[10.5px] font-bold rounded-full bg-accent-primary/10 text-accent-primary tracking-wider uppercase"
               >
                 {rc.label}
               </span>
             </div>
 
             {/* Avatar button */}
-            <div style={{ position: 'relative' }}>
+            <div className="relative">
               <button
                 onClick={() => setShowUserMenu(v => !v)}
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${rc.color}, ${rc.color}cc)`,
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: 'white',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 2px 8px rgba(15,76,129,0.2)',
-                  transition: 'transform 0.15s, box-shadow 0.15s',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform = 'scale(1.05)';
-                  e.currentTarget.style.boxShadow = '0 4px 14px rgba(15,76,129,0.3)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(15,76,129,0.2)';
-                }}
+                className="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-accent-primary to-accent-secondary border-0 cursor-pointer text-white text-sm font-bold flex items-center justify-center shadow-md hover:scale-105 transition-all flex-shrink-0"
               >
                 {initials}
               </button>
@@ -193,37 +114,20 @@ const Navbar = ({ onMenuClick }) => {
               {showUserMenu && (
                 <>
                   <div
-                    style={{ position: 'fixed', inset: 0, zIndex: 40 }}
+                    className="fixed inset-0 z-40"
                     onClick={() => setShowUserMenu(false)}
                   />
                   <div
-                    style={{
-                      position: 'absolute',
-                      right: 0,
-                      top: 'calc(100% + 8px)',
-                      width: 220,
-                      background: 'white',
-                      borderRadius: 14,
-                      boxShadow: '0 12px 40px rgba(15,30,50,0.15)',
-                      border: '1px solid rgba(15,76,129,0.08)',
-                      overflow: 'hidden',
-                      zIndex: 50,
-                      animation: 'scaleIn 0.2s cubic-bezier(0.16,1,0.3,1) both',
-                      transformOrigin: 'top right',
-                    }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-[220px] bg-card rounded-2xl shadow-2xl border border-border overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right"
                   >
                     {/* User info header */}
                     <div
-                      style={{
-                        padding: '14px 16px',
-                        borderBottom: '1px solid #f1f5f9',
-                        background: '#fafbfc',
-                      }}
+                      className="p-3.5 border-b border-border bg-background/50"
                     >
-                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#1e293b' }}>
+                      <div className="text-[13.5px] font-bold text-text-primary">
                         {userProfile?.full_name || 'User'}
                       </div>
-                      <div style={{ fontSize: 12, color: '#94a3b8', marginTop: 2 }}>
+                      <div className="text-xs text-text-muted mt-0.5 truncate">
                         {userProfile?.email || ''}
                       </div>
                     </div>
@@ -236,49 +140,19 @@ const Navbar = ({ onMenuClick }) => {
                       <button
                         key={i}
                         onClick={item.onClick}
-                        style={{
-                          width: '100%',
-                          padding: '10px 16px',
-                          background: 'none',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 10,
-                          fontSize: 13.5,
-                          color: '#374151',
-                          transition: 'background 0.15s',
-                        }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                        className="w-full px-4 py-2.5 bg-transparent border-0 cursor-pointer flex items-center gap-2.5 text-[13.5px] text-text-primary hover:bg-background transition-colors"
                       >
-                        <span style={{ color: '#94a3b8' }}>{item.icon}</span>
+                        <span className="text-text-muted">{item.icon}</span>
                         {item.label}
                       </button>
                     ))}
 
-                    <div style={{ borderTop: '1px solid #f1f5f9', margin: '4px 0' }} />
+                    <div className="border-t border-border my-1" />
 
                     {/* Logout */}
                     <button
                       onClick={handleLogout}
-                      style={{
-                        width: '100%',
-                        padding: '10px 16px',
-                        background: logoutHover ? '#fef2f2' : 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        fontSize: 13.5,
-                        color: '#EF4444',
-                        fontWeight: 600,
-                        transition: 'background 0.15s',
-                        marginBottom: 4,
-                      }}
-                      onMouseEnter={() => setLogoutHover(true)}
-                      onMouseLeave={() => setLogoutHover(false)}
+                      className="w-full px-4 py-2.5 bg-transparent border-0 cursor-pointer flex items-center gap-2.5 text-[13.5px] text-red-600 font-semibold hover:bg-red-500/10 transition-colors mb-1"
                     >
                       <LogOut size={15} />
                       Keluar

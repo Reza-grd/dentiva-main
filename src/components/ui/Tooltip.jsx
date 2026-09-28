@@ -79,8 +79,7 @@ const Tooltip = ({
           <div
             className={cn(
               "px-2.5 py-1.5 text-xs font-medium rounded-lg",
-              "bg-gray-800 dark:bg-gray-100",
-              "text-white dark:text-gray-900",
+              "bg-card border border-border text-text-primary",
               "shadow-lg",
               "animate-in fade-in duration-150"
             )}

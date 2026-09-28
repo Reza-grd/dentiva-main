@@ -140,39 +140,37 @@ const PaymentList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center">
-            <DollarSign className="text-[var(--color-accent)]" size={24} />
+          <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center">
+            <DollarSign className="text-accent-primary" size={24} />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Daftar Pembayaran</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Kelola semua transaksi pembayaran klinik</p>
+            <h1 className="text-2xl font-bold text-text-primary">Pembayaran & Kasir</h1>
+            <p className="text-sm text-text-muted mt-1">
+              Kelola transaksi pembayaran, faktur, dan kwitansi
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Transaksi</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.count}</p>
-            </div>
-            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <DollarSign className="text-gray-600 dark:text-gray-400" size={24} />
-            </div>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="glass-panel p-5 flex items-center justify-between group">
+          <div>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Transaksi</p>
+            <p className="text-2xl font-bold text-text-primary mt-1">{stats.count}</p>
+          </div>
+          <div className="w-12 h-12 bg-accent-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <FileText className="text-accent-primary" size={24} />
           </div>
         </div>
 
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Semua</p>
-              <p className="text-xl font-bold text-[var(--color-accent)]">{formatCurrency(stats.total)}</p>
-            </div>
-            <div className="w-12 h-12 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <DollarSign className="text-[var(--color-accent)]" size={24} />
-            </div>
+        <div className="glass-panel p-5 flex items-center justify-between group">
+          <div>
+            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Pendapatan</p>
+            <p className="text-xl font-bold text-accent-primary mt-1">{formatCurrency(stats.total)}</p>
+          </div>
+          <div className="w-12 h-12 bg-accent-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+            <DollarSign className="text-accent-primary" size={24} />
           </div>
         </div>
 

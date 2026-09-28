@@ -161,13 +161,13 @@ const MasterBahan = () => {
         </h3>
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-accent-primary text-white hover:opacity-90 transition-colors"
         >
           <Plus size={16} /> Tambah Bahan Baru
         </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">

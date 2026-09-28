@@ -115,8 +115,8 @@ const ToastItem = ({ toast, onDismiss }) => {
         // Layout
         "relative flex items-start gap-3 p-4 pr-10 w-full max-w-sm",
         // Appearance — matches Card glassmorphism style
-        "rounded-2xl border border-gray-100 dark:border-gray-800",
-        "bg-white/95 dark:bg-[#14171F]/95 backdrop-blur-md",
+        "rounded-2xl border border-border",
+        "bg-card/95 backdrop-blur-md",
         "shadow-xl",
         // Animation
         "animate-in slide-in-from-right-4 fade-in duration-300"
@@ -131,12 +131,12 @@ const ToastItem = ({ toast, onDismiss }) => {
       {/* Content */}
       <div className="flex-1 min-w-0">
         {toast.title && (
-          <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+          <p className="text-sm font-semibold text-text-primary leading-tight">
             {toast.title}
           </p>
         )}
         {toast.description && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 leading-snug">
+          <p className="text-sm text-text-muted mt-0.5 leading-snug">
             {toast.description}
           </p>
         )}
@@ -148,9 +148,9 @@ const ToastItem = ({ toast, onDismiss }) => {
         aria-label="Tutup notifikasi"
         className={cn(
           "absolute right-2 top-2 rounded-lg p-1",
-          "text-gray-400 hover:text-gray-700 dark:hover:text-gray-200",
-          "hover:bg-gray-100 dark:hover:bg-gray-800",
-          "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+          "text-text-muted hover:text-text-primary",
+          "hover:bg-background",
+          "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary"
         )}
       >
         <X className="h-3.5 w-3.5" aria-hidden="true" />

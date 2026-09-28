@@ -6,6 +6,7 @@ import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette, Bell, C
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
 import GlobalSearch from './GlobalSearch';
+import ThemeGallery from '../common/ThemeGallery';
 
 const ROUTE_LABELS = {
   '/admin': 'Dashboard Manajer Klinik',
@@ -26,7 +27,7 @@ const getInitials = (name) => {
 
 const TopBar = ({ onMenuClick }) => {
   const { userProfile, signOut } = useAuth();
-  const { theme, toggleTheme, primaryColor, setPrimaryColor } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -48,25 +49,23 @@ const TopBar = ({ onMenuClick }) => {
     profilePhotoUrl = data?.publicUrl;
   }
 
-  const PRESET_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-white/70 dark:bg-[#0B0E14]/70 border-b border-gray-100/50 dark:border-gray-800/50 transition-colors duration-200">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-card/70 border-b border-border/50 transition-colors duration-200">
       <div className="flex h-16 md:h-[72px] lg:h-20 items-center justify-between px-4 sm:px-6">
         {/* Left: Mobile Menu & Breadcrumb */}
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
             aria-label="Buka menu navigasi"
-            className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+            className="lg:hidden p-2 text-text-muted hover:bg-background rounded-lg transition-colors"
           >
             <Menu size={20} />
           </button>
           
-          <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-400 dark:text-gray-500 opacity-90">
+          <div className="hidden md:flex items-center gap-2 text-xs font-medium text-text-muted opacity-90">
             <span>Dentiva</span>
-            <ChevronRight size={12} className="text-gray-300 dark:text-gray-600" />
-            <span className="text-gray-800 dark:text-gray-200 text-sm font-bold opacity-100">{pageTitle}</span>
+            <ChevronRight size={12} className="text-text-muted opacity-60" />
+            <span className="text-text-primary text-sm font-bold opacity-100">{pageTitle}</span>
           </div>
         </div>
 
@@ -78,18 +77,18 @@ const TopBar = ({ onMenuClick }) => {
         {/* Right: Actions & User */}
         <div className="flex items-center gap-4 md:gap-6">
           {/* Theme Controls */}
-          <div className="flex items-center gap-1.5 bg-gray-50/80 dark:bg-gray-800/50 p-1 rounded-full border border-gray-100 dark:border-gray-700/50">
+          <div className="flex items-center gap-1.5 bg-background/80 p-1 rounded-full border border-border">
             <button
               onClick={toggleTheme}
               aria-label="Aktifkan mode terang"
-              className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'light' ? 'bg-white shadow-sm text-yellow-500' : 'text-gray-400 hover:text-gray-200'}`}
+              className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'light' ? 'bg-card shadow-sm text-amber-500' : 'text-text-muted hover:text-text-primary'}`}
             >
               <Sun size={15} />
             </button>
             <button
               onClick={toggleTheme}
               aria-label="Aktifkan mode gelap"
-              className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'dark' ? 'bg-gray-700 shadow-sm text-blue-400' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'dark' ? 'bg-accent-primary/20 shadow-sm text-accent-primary' : 'text-text-muted hover:text-text-primary'}`}
             >
               <Moon size={15} />
             </button>
@@ -98,7 +97,7 @@ const TopBar = ({ onMenuClick }) => {
               <button
                 onClick={() => setShowColorPicker(!showColorPicker)}
                 aria-label="Ubah tema warna aksen"
-                className="p-1.5 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                className="p-1.5 rounded-full text-text-muted hover:text-text-primary transition-colors"
               >
                 <Palette size={15} />
               </button>
@@ -106,37 +105,24 @@ const TopBar = ({ onMenuClick }) => {
               {showColorPicker && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowColorPicker(false)} />
-                  <div className="absolute right-0 top-full mt-2 p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-xl z-50 flex gap-2">
-                    {PRESET_COLORS.map(c => (
-                      <button
-                        key={c}
-                        onClick={() => { setPrimaryColor(c); setShowColorPicker(false); }}
-                        aria-label={`Pilih warna aksen ${c}`}
-                        className="w-6 h-6 rounded-full border-2 border-white dark:border-gray-850 hover:scale-110 transition-transform focus:outline-none"
-                        style={{
-                          backgroundColor: c,
-                          boxShadow: primaryColor === c
-                            ? `0 0 0 2px ${theme === 'dark' ? '#1F2937' : '#FFFFFF'}, 0 0 0 4px ${c}`
-                            : 'none'
-                        }}
-                      />
-                    ))}
+                  <div className="absolute right-0 top-full mt-2 w-80 p-4 bg-card border border-border rounded-2xl shadow-2xl z-50 animate-in fade-in slide-in-from-top-1">
+                    <ThemeGallery compact onSelect={() => setShowColorPicker(false)} />
                   </div>
                 </>
               )}
             </div>
           </div>
 
-          <div className="h-6 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
+          <div className="h-6 w-px bg-border hidden sm:block"></div>
 
           {/* Notifications Placeholder */}
           <div className="relative">
             <button
               aria-label="Pemberitahuan / Notifikasi"
-              className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-full text-text-muted hover:bg-background transition-colors"
             >
               <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0B0E14]"></span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-card"></span>
             </button>
           </div>
 
@@ -145,54 +131,54 @@ const TopBar = ({ onMenuClick }) => {
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
               aria-label="Menu profil pengguna"
-              className="flex items-center gap-3 p-1.5 pr-4 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-all duration-200 border border-transparent hover:border-gray-200 dark:hover:border-gray-700/50 group"
+              className="flex items-center gap-3 p-1.5 pr-4 rounded-full hover:bg-background transition-all duration-200 border border-transparent hover:border-border group"
             >
-              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 relative">
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-background shadow-sm border border-border relative">
                 {profilePhotoUrl ? (
                   <img src={profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div 
-                    className="w-full h-full flex items-center justify-center text-white font-bold text-xs bg-gradient-to-br from-[var(--color-accent)] to-[var(--color-accent-secondary)]"
+                    className="w-full h-full flex items-center justify-center text-white font-bold text-xs bg-gradient-to-br from-accent-primary to-accent-secondary"
                   >
                     {initials}
                   </div>
                 )}
               </div>
               <div className="hidden sm:block text-left">
-                <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-tight">
+                <div className="text-sm font-semibold text-text-primary leading-tight">
                   {formatDoctorName(userProfile) || userProfile?.full_name || 'User'}
                 </div>
                 <div className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 w-fit px-1.5 py-0.5 rounded-md ${
-                  userProfile?.role === 'admin' ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' :
-                  userProfile?.role === 'resepsionis' ? 'bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-400' :
-                  'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
+                  userProfile?.role === 'admin' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
+                  userProfile?.role === 'resepsionis' ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400' :
+                  'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
                 }`}>
                   {role}
                 </div>
               </div>
-              <ChevronDown size={14} className="text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-200 transition-colors ml-1 hidden sm:block" />
+              <ChevronDown size={14} className="text-text-muted group-hover:text-text-primary transition-colors ml-1 hidden sm:block" />
             </button>
 
             {showUserMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-[#14171F] border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl z-50 overflow-hidden transform origin-top-right animate-in fade-in zoom-in-95 duration-200">
-                  <div className="p-4 border-b border-gray-100 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-800/20">
-                    <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-2xl shadow-xl z-50 overflow-hidden transform origin-top-right animate-in fade-in zoom-in-95 duration-200">
+                  <div className="p-4 border-b border-border bg-background/50">
+                    <div className="text-sm font-bold text-text-primary">
                       {formatDoctorName(userProfile) || userProfile?.full_name || 'User'}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{userProfile?.email || ''}</div>
+                    <div className="text-xs text-text-muted truncate">{userProfile?.email || ''}</div>
                   </div>
                   <div className="p-2">
-                    <button onClick={() => { setShowUserMenu(false); navigate(userProfile?.role === 'dokter' ? '/dokter/profil-dokter' : '/profil'); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">
-                      <User size={16} className="text-gray-400" /> Profil Saya
+                    <button onClick={() => { setShowUserMenu(false); navigate(userProfile?.role === 'dokter' ? '/dokter/profil-dokter' : '/profil'); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-primary hover:bg-background rounded-xl transition-colors">
+                      <User size={16} className="text-text-muted" /> Profil Saya
                     </button>
-                    <button onClick={() => { setShowUserMenu(false); navigate('/pengaturan'); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors">
-                      <Settings size={16} className="text-gray-400" /> Pengaturan
+                    <button onClick={() => { setShowUserMenu(false); navigate('/pengaturan'); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-primary hover:bg-background rounded-xl transition-colors">
+                      <Settings size={16} className="text-text-muted" /> Pengaturan
                     </button>
                   </div>
-                  <div className="p-2 border-t border-gray-100 dark:border-gray-800/50">
-                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors">
+                  <div className="p-2 border-t border-border">
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-500/10 rounded-xl transition-colors">
                       <LogOut size={16} /> Keluar
                     </button>
                   </div>

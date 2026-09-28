@@ -79,8 +79,8 @@ const TabsList = forwardRef(({ className, children, ...props }, ref) => {
       onKeyDown={handleKeyDown}
       className={cn(
         "inline-flex items-center gap-1 rounded-xl p-1",
-        "bg-gray-100 dark:bg-gray-800/60",
-        "border border-gray-200 dark:border-gray-700",
+        "bg-background",
+        "border border-border",
         className
       )}
       {...props}
@@ -122,12 +122,12 @@ const TabsTrigger = forwardRef(({ className, value, children, disabled, ...props
         // Base
         "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium",
         "transition-all duration-200",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-1",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-1",
         "disabled:pointer-events-none disabled:opacity-50",
         // Active state
         isSelected
-          ? "bg-white dark:bg-[#09090b] text-gray-900 dark:text-gray-100 shadow-sm"
-          : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200",
+          ? "bg-card text-text-primary shadow-sm"
+          : "text-text-muted hover:text-text-primary",
         className
       )}
       {...props}

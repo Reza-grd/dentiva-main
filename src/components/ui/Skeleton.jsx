@@ -15,8 +15,8 @@ import { cn } from "../../lib/utils";
  */
 
 const skeletonVariants = cva(
-  // Base: animated shimmer effect
-  "animate-pulse bg-gray-200 dark:bg-gray-700",
+  // Base: animated pulse placeholders
+  "animate-pulse bg-border/60",
   {
     variants: {
       variant: {
@@ -68,7 +68,7 @@ const SkeletonText = ({ lines = 3, className }) => (
 const SkeletonCard = ({ className }) => (
   <div
     className={cn(
-      "rounded-2xl border border-gray-100 dark:border-gray-800 p-6 space-y-4",
+      "rounded-2xl border border-border p-6 space-y-4",
       className
     )}
     role="status"

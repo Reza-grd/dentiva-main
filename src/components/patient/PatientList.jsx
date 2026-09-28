@@ -113,19 +113,19 @@ const PatientList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center">
-            <Users size={24} className="text-[var(--color-accent)]" />
+          <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center">
+            <Users size={24} className="text-accent-primary" />
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Data Pasien</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Total {totalCount} {searchTerm || filterGender !== 'all' || filterStatus !== 'all' ? 'pasien cocok filter' : 'pasien terdaftar'}
+            <h1 className="text-2xl font-bold text-text-primary">Daftar Pasien</h1>
+            <p className="text-sm text-text-muted mt-1">
+              Kelola data seluruh pasien terdaftar di klinik
             </p>
           </div>
         </div>
         <button
-          onClick={() => navigate('/pasien/daftar')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95"
+          onClick={() => navigate('/pasien/registrasi')}
+          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 border-0 hover:opacity-90"
         >
           <UserPlus size={18} />
           Daftar Pasien Baru

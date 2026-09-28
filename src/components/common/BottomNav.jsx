@@ -49,7 +49,7 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#0B0E14]/90 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 px-2 py-1 shadow-lg"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-lg border-t border-border px-2 py-1 shadow-lg"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 8px)" }}
       aria-label="Navigasi bawah seluler"
     >
@@ -64,8 +64,8 @@ export default function BottomNav() {
               className={({ isActive }) =>
                 `flex flex-col items-center justify-center flex-1 h-full rounded-xl text-[10px] font-medium transition-colors ${
                   isActive
-                    ? "text-[var(--color-accent)] font-bold"
-                    : "text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+                    ? "text-accent-primary font-bold"
+                    : "text-text-muted hover:text-text-primary"
                 }`
               }
             >

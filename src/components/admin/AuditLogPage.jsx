@@ -90,17 +90,17 @@ const AuditLogPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-            <Shield size={24} className="text-blue-500" />
+          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
+            <Shield size={24} className="text-accent-primary" />
             Audit Log
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             Riwayat seluruh aksi yang tercatat di sistem — {totalCount.toLocaleString('id-ID')} entri total
           </p>
         </div>
         <button
           onClick={fetchLogs}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border text-sm font-medium hover:bg-background transition-colors shadow-sm text-text-primary"
         >
           <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
           Refresh
@@ -111,39 +111,39 @@ const AuditLogPage = () => {
       <div className="glass-panel p-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Dari Tanggal</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Dari Tanggal</label>
             <input
               type="date"
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Sampai Tanggal</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Sampai Tanggal</label>
             <input
               type="date"
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Modul</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Modul</label>
             <input
               type="text"
               value={moduleFilter}
               onChange={e => setModuleFilter(e.target.value)}
               placeholder="Cari modul..."
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Tingkat Risiko</label>
+            <label className="block text-xs font-medium text-text-muted mb-1">Tingkat Risiko</label>
             <select
               value={riskFilter}
               onChange={e => setRiskFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 rounded-lg border border-border bg-card text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-accent-primary"
             >
               <option value="">Semua</option>
               <option value="LOW">LOW</option>
@@ -158,12 +158,12 @@ const AuditLogPage = () => {
       {/* Table */}
       <div className="glass-panel overflow-hidden">
         {loading ? (
-          <div className="flex justify-center items-center py-20 text-gray-400">
+          <div className="flex justify-center items-center py-20 text-text-muted">
             <RefreshCw size={24} className="animate-spin mr-2" />
             Memuat log...
           </div>
         ) : logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-2">
+          <div className="flex flex-col items-center justify-center py-20 text-text-muted gap-2">
             <Shield size={40} className="opacity-30" />
             <p className="text-sm">Tidak ada log yang sesuai filter</p>
           </div>
@@ -171,40 +171,40 @@ const AuditLogPage = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 dark:border-gray-800">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                <tr className="border-b border-border">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider whitespace-nowrap">
                     <Clock size={12} className="inline mr-1" />Waktu
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
                     <User size={12} className="inline mr-1" />Pengguna
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Modul</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Pasien</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Risiko</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Modul</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Aksi</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Pasien</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Risiko</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-gray-800/60">
+              <tbody className="divide-y divide-border">
                 {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-gray-500 dark:text-gray-400 font-mono text-xs">
+                  <tr key={log.id} className="hover:bg-background/50 transition-colors">
+                    <td className="px-4 py-3 whitespace-nowrap text-text-muted font-mono text-xs">
                       {formatTs(log.timestamp)}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-gray-800 dark:text-gray-200">
+                      <div className="font-medium text-text-primary">
                         {log.actor?.full_name || '—'}
                       </div>
-                      <div className="text-xs text-gray-400">{log.user_role || ''}</div>
+                      <div className="text-xs text-text-muted">{log.user_role || ''}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 text-xs font-medium">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-accent-primary/10 text-accent-primary text-xs font-medium border border-accent-primary/20">
                         {log.module}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-700 dark:text-gray-300 max-w-[200px] truncate" title={log.action}>
+                    <td className="px-4 py-3 text-text-primary max-w-[200px] truncate" title={log.action}>
                       {log.action}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
+                    <td className="px-4 py-3 text-text-muted text-xs">
                       {log.patient ? (
                         <span>{log.patient.no_rm}</span>
                       ) : '—'}
@@ -223,21 +223,21 @@ const AuditLogPage = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-text-muted">
             Halaman {page} dari {totalPages} ({totalCount.toLocaleString('id-ID')} entri)
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-border hover:bg-background text-text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-border hover:bg-background text-text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight size={16} />
             </button>

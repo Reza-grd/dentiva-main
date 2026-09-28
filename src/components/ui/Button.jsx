@@ -8,12 +8,12 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-light)] focus-visible:ring-[var(--color-primary)] shadow-sm",
-        secondary: "bg-[var(--color-secondary)] text-white hover:bg-[var(--color-secondary-dark)] focus-visible:ring-[var(--color-secondary)] shadow-sm",
-        danger: "bg-[var(--color-danger)] text-white hover:bg-red-600 focus-visible:ring-[var(--color-danger)] shadow-sm",
-        outline: "border border-gray-300 dark:border-gray-700 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 focus-visible:ring-gray-400 dark:focus-visible:ring-gray-600",
-        ghost: "hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white text-gray-700 dark:text-gray-300 focus-visible:ring-gray-400",
-        link: "text-[var(--color-primary)] underline-offset-4 hover:underline focus-visible:ring-[var(--color-primary)]",
+        primary: "bg-accent-primary text-white hover:opacity-90 focus-visible:ring-accent-primary shadow-sm",
+        secondary: "bg-accent-secondary text-white hover:opacity-90 focus-visible:ring-accent-secondary shadow-sm",
+        danger: "bg-[var(--color-danger)] text-white hover:opacity-90 focus-visible:ring-[var(--color-danger)] shadow-sm",
+        outline: "border border-border bg-transparent hover:bg-background text-text-primary focus-visible:ring-accent-primary",
+        ghost: "hover:bg-background hover:text-text-primary text-text-muted focus-visible:ring-accent-primary",
+        link: "text-accent-primary underline-offset-4 hover:underline focus-visible:ring-accent-primary",
       },
       size: {
         default: "h-10 px-4 py-2",

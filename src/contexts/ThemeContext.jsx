@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { THEME_PALETTES, DEFAULT_PALETTE } from '../config/themePalettes';
 
 const ThemeContext = createContext();
 
@@ -6,25 +7,13 @@ export const useTheme = () => {
   return useContext(ThemeContext);
 };
 
-const getSecondaryColor = (hex) => {
-  const secondaries = {
-    '#3B82F6': '#1D4ED8', // blue -> dark blue
-    '#10B981': '#047857', // emerald -> dark emerald
-    '#F59E0B': '#D97706', // amber -> dark amber
-    '#EF4444': '#B91C1C', // red -> dark red
-    '#8B5CF6': '#6D28D9', // violet -> dark violet
-    '#EC4899': '#BE185D', // pink -> dark pink
-  };
-  return secondaries[hex] || hex;
-};
-
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem('theme') || 'light';
   });
 
-  const [primaryColor, setPrimaryColor] = useState(() => {
-    return localStorage.getItem('primaryColor') || '#3B82F6';
+  const [colorTheme, setColorTheme] = useState(() => {
+    return localStorage.getItem('colorTheme') || DEFAULT_PALETTE;
   });
 
   useEffect(() => {
@@ -42,18 +31,33 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--color-accent', primaryColor);
-    root.style.setProperty('--color-accent-secondary', getSecondaryColor(primaryColor));
-    localStorage.setItem('primaryColor', primaryColor);
-  }, [primaryColor]);
+    const palette = THEME_PALETTES[colorTheme] || THEME_PALETTES[DEFAULT_PALETTE];
+
+    root.style.setProperty('--color-accent', palette.accent);
+    root.style.setProperty('--color-accent-secondary', palette.accentSecondary);
+    root.style.setProperty('--color-dark-base', palette.darkBase);
+
+    localStorage.setItem('colorTheme', colorTheme);
+  }, [colorTheme]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
+  const activePalette = THEME_PALETTES[colorTheme] || THEME_PALETTES[DEFAULT_PALETTE];
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, primaryColor, setPrimaryColor }}>
+    <ThemeContext.Provider value={{ 
+      theme, 
+      toggleTheme, 
+      colorTheme, 
+      setColorTheme, 
+      THEME_PALETTES,
+      // Backward compatibility alias for primaryColor
+      primaryColor: activePalette.accent 
+    }}>
       {children}
     </ThemeContext.Provider>
   );
 };
+

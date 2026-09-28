@@ -28,10 +28,10 @@ export function RichTextEditor({ value, onChange, placeholder, className, error 
         formats={formats}
         placeholder={placeholder}
         className={cn(
-          "bg-white rounded-md transition-all duration-200 overflow-hidden",
+          "bg-card rounded-md transition-all duration-200 overflow-hidden text-text-primary",
           error 
             ? "border-red-500 ring-1 ring-red-400" 
-            : "border border-gray-200 hover:border-gray-300 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400"
+            : "border border-border hover:border-border focus-within:ring-2 focus-within:ring-accent-primary focus-within:border-accent-primary"
         )}
       />
       {error && (

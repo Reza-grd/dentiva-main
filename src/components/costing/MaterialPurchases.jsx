@@ -110,8 +110,8 @@ const MaterialPurchases = () => {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center gap-3">
+      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+        <div className="p-6 border-b border-border bg-background/50 flex items-center gap-3">
           <div className="p-2 bg-primary-100 text-primary-600 rounded-lg dark:bg-primary-900/50 dark:text-primary-400">
             <ShoppingCart size={24} />
           </div>
@@ -239,7 +239,7 @@ const MaterialPurchases = () => {
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-6 py-2.5 bg-accent-primary text-white rounded-lg font-medium hover:opacity-90 disabled:opacity-50 transition-colors"
             >
               {saving ? <LoadingSpinner size="sm" /> : <Plus size={18} />}
               {saving ? 'Memproses...' : 'Proses Pembelian'}

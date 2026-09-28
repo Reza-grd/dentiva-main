@@ -10,14 +10,14 @@ import { cn } from "../../lib/utils";
  */
 
 const selectVariants = cva(
-  "w-full appearance-none rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 pr-10 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50",
+  "w-full appearance-none rounded-xl border bg-card text-text-primary pr-10 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
         default:
-          "border-gray-300 dark:border-gray-700 focus:border-[var(--color-accent)] focus:ring-[var(--color-accent)]/20",
+          "border-border focus:border-accent-primary focus:ring-accent-primary/20",
         error:
-          "border-red-500 text-red-900 dark:text-red-300 focus:border-red-500 focus:ring-red-500/20",
+          "border-red-500 text-red-600 dark:text-red-400 focus:border-red-500 focus:ring-red-500/20",
       },
       size: {
         sm: "h-8 px-3 text-xs",
@@ -58,7 +58,7 @@ const Select = forwardRef(
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-xs font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300"
+            className="block text-xs font-semibold uppercase tracking-wider text-text-muted"
           >
             {label}
             {required && <span className="text-red-500 ml-0.5">*</span>}
@@ -84,7 +84,7 @@ const Select = forwardRef(
           >
             {children}
           </select>
-          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500">
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">
             <ChevronDown className="h-4 w-4" aria-hidden="true" />
           </div>
         </div>
@@ -98,7 +98,7 @@ const Select = forwardRef(
         ) : helperText ? (
           <p
             id={`${selectId}-helper`}
-            className="text-xs text-gray-500 dark:text-gray-400 mt-1"
+            className="text-xs text-text-muted mt-1"
           >
             {helperText}
           </p>

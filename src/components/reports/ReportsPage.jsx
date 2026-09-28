@@ -199,11 +199,11 @@ const ReportsPage = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-          <TrendingUp className="text-[var(--color-accent)]" size={32} />
+        <h1 className="text-xl md:text-3xl font-bold text-text-primary mb-2 flex items-center gap-3">
+          <TrendingUp className="text-accent-primary" size={32} />
           Laporan & Analisis
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">Dashboard analisis bisnis klinik</p>
+        <p className="text-text-muted">Dashboard analisis bisnis klinik</p>
       </div>
 
       {/* Upgrade Banner for Starter Plan */}
@@ -214,17 +214,17 @@ const ReportsPage = () => {
               <Lock size={20} />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-gray-900 dark:text-white flex items-center gap-1.5">
+              <h3 className="font-bold text-sm text-text-primary flex items-center gap-1.5">
                 Fitur Laporan Kustom & Ekspor Terkunci
               </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+              <p className="text-xs text-text-muted">
                 Ekspor berkas PDF/Excel & analisis mendalam memerlukan paket langganan Pro atau Enterprise.
               </p>
             </div>
           </div>
           <button
             onClick={() => navigate('/pricing')}
-            className="px-4 py-2 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-white text-xs font-bold rounded-xl shadow-md hover:brightness-110 transition-all whitespace-nowrap flex items-center gap-1.5"
+            className="px-4 py-2 bg-gradient-to-r from-accent-primary to-accent-secondary text-white text-xs font-bold rounded-xl shadow-md hover:opacity-90 transition-all whitespace-nowrap flex items-center gap-1.5 border-0"
           >
             <Sparkles size={14} /> Upgrade Sekarang
           </button>

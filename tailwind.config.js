@@ -15,6 +15,7 @@ export default {
         'text-muted': 'var(--color-muted)',
         'accent-primary': 'var(--color-accent)',
         'accent-secondary': 'var(--color-accent-secondary)',
+        'dark-base': 'var(--color-dark-base)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
