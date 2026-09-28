@@ -33,14 +33,14 @@
 ```bash
 git clone https://github.com/Reza-grd/dentiva-main.git
 cd dentiva-main
-npm install
+npm install   # menginstal semua workspace (apps/* dan packages/*)
 ```
 
 ---
 
 ## Environment Variables
 
-Buat file `.env` di root proyek (jangan pernah commit file ini — sudah ada di `.gitignore`):
+Buat file `apps/clinic/.env.local` (jangan pernah commit file ini — sudah ada di `.gitignore`):
 
 ```env
 # Supabase
@@ -72,65 +72,44 @@ supabase secrets set SATUSEHAT_ORGANIZATION_ID=<organization-id>
 
 ---
 
-## Menjalankan Migration Database
+## Struktur Monorepo
 
-Semua migration SQL ada di folder `supabase/migrations/` (bernomor urut 01–32). Jalankan **secara berurutan** di Supabase Dashboard → SQL Editor, atau gunakan Supabase CLI:
+```
+apps/clinic/        Aplikasi klinik (React + Vite, JavaScript)
+apps/console/       Dentiva Console — dashboard internal tim Dentiva (React + TypeScript)
+packages/ui/        Komponen UI bersama + tailwind preset
+packages/shared/    Konstanta, kontrak console-api, formatter
+packages/supabase/  Klien Supabase + tipe database
+supabase/           Migration (CLI), Edge Functions, tes pgTAP, snippet SQL
+docs/               Dokumentasi (lihat docs/dentiva-console.md)
+```
+
+## Perintah
 
 ```bash
-# Menggunakan Supabase CLI (jika sudah di-link ke project)
-npx supabase db push
+npm install            # sekali, dari root (npm workspaces)
+npm run dev            # aplikasi klinik  → http://localhost:3000
+npm run dev:console    # Dentiva Console  → http://localhost:5174
+npm run build          # build kedua aplikasi
+npm test               # tes unit klinik, console, shared, console-api
+npm run typecheck      # TypeScript
+npm run lint           # ESLint
+npm run db:test        # tes RLS/pgTAP (Supabase lokal)
+npm run db:types       # generate tipe database ke packages/supabase
 ```
 
-Jika menjalankan manual, eksekusi file dari `01_...sql` sampai `32_...sql` secara berurutan.
+Variabel lingkungan: salin `apps/clinic/.env.example` dan `apps/console/.env.example` menjadi `.env.local` di folder masing-masing.
 
----
+## Database & Migration
 
-## Menjalankan Dev Server
+Migration dikelola **Supabase CLI** di `supabase/migrations/` (nama berbasis waktu, satu topik per file). Aturannya:
 
-```bash
-npm run dev
-```
+- Buat migration baru dengan `npm run db:new -- <nama>`.
+- Migration yang sudah jalan di produksi **tidak pernah diedit**; perbaikan dibuat sebagai migration baru.
+- Setelah migration, jalankan `npm run db:types` supaya kode yang memakai kolom lama gagal saat build.
+- File lama bernomor manual (5–52) diarsipkan di `supabase/archive/`. Langkah baseline dari produksi ada di `supabase/archive/README.md`.
 
-Aplikasi akan berjalan di `http://localhost:5173`.
-
-### Perintah lainnya
-
-```bash
-npm run build    # Build production
-npm run preview  # Preview production build lokal
-npm run lint     # Jalankan ESLint
-npm run test     # Jalankan test suite (Vitest)
-```
-
----
-
-## Struktur Direktori
-
-```
-src/
-├── components/         # Komponen React
-│   ├── admin/          # Dashboard & tools admin
-│   ├── auth/           # Login, ProtectedRoute
-│   ├── common/         # Navbar, Sidebar, ImageViewer, dll.
-│   ├── dashboard/      # Dashboard per role
-│   ├── financial/      # Laporan keuangan
-│   ├── medical-record/ # Rekam medis, Odontogram, Informed Consent
-│   ├── patient/        # Daftar & detail pasien
-│   ├── payment/        # Form & daftar pembayaran
-│   ├── profile/        # Profil pengguna & dokter
-│   ├── queue/          # Display antrean (Smart TV)
-│   ├── reports/        # Laporan
-│   ├── schedule/       # Jadwal kunjungan
-│   ├── settings/       # Pengaturan klinik
-│   └── treatments/     # Master data tindakan
-├── contexts/           # React Context (Auth)
-├── services/           # Supabase service layer
-└── utils/              # Utility functions (logger, dateUtils, dll.)
-supabase/
-└── migrations/         # SQL migration files (01–32)
-scripts/                # Development & verification scripts
-public/                 # Static assets (logo, dll.)
-```
+Arsitektur Console, hak akses operator, dan runbook rilis ada di **[docs/dentiva-console.md](docs/dentiva-console.md)**.
 
 ---
 

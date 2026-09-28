@@ -4,6 +4,31 @@ Dokumen ini mencatat riwayat perubahan dan perbaikan bug historis pada proyek De
 
 ---
 
+## [1.10.0] — 2026-09-28 · Dentiva Console
+
+Detail arsitektur, perbedaan dari panduan, dan runbook rilis: [docs/dentiva-console.md](docs/dentiva-console.md).
+
+### Ditambahkan
+- **Monorepo** npm workspaces: `apps/clinic`, `apps/console`, `packages/{ui,shared,supabase}`.
+- **Dentiva Console** (`apps/console`): dashboard internal dengan MFA wajib. Modul: Dashboard, Klinik (wizard pendaftaran), Pengguna, Langganan & keuangan, Pemakaian, Audit, Operator, Pengumuman.
+- **Edge Function `console-api`**: satu pintu untuk semua aksi Console, dengan peta izin per role, validasi zod, dan audit log dalam transaksi yang sama.
+- **Skema `platform`**: operators, audit_logs (append-only), invoices, payments, usage_daily (pg_cron), clinic_notes, announcements.
+- Aplikasi klinik: halaman "Klinik ditangguhkan", halaman `/atur-password` untuk tautan undangan, banner pengumuman, dan pencatatan `last_login_at`.
+- Tes: pgTAP (isolasi tenant, billing, provisioning) dan tes router console-api.
+
+### Keamanan
+- **Isolasi tenant**: policy RESTRICTIVE `tenant_isolation` di semua tabel ber-`clinic_id`. Ini menutup celah policy migration 41 yang tidak memeriksa klinik.
+- `get_user_clinic_id()` tanpa fallback ke klinik default. Fungsi ini juga memeriksa status klinik dan user, serta mencocokkan klaim JWT dengan `public.users`.
+- `clinic_id` ditambahkan ke 18 tabel data klinik yang belum memilikinya. UNIQUE global diubah menjadi per klinik.
+- Webhook Midtrans tidak lagi memercayai `custom_field` yang tidak ditandatangani. Webhook kini idempoten dan mengecek nominal.
+- `admin-create-user` mengisi `clinic_id` dan klaim JWT. Fallback klinik default dihapus dari layanan storage.
+
+### Diubah
+- Migration lama dipindah ke `supabase/archive/`. Migration baru memakai Supabase CLI dengan nama berbasis waktu.
+- Status user memakai kolom `status` (`invited`/`active`/`suspended`/`deactivated`). `is_active` tetap disinkronkan selama transisi.
+
+---
+
 ## [1.9.2] — Feature Implementations
 
 ### Ditambahkan / Diperbaiki
