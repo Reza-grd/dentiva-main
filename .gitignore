@@ -67,3 +67,7 @@ storybook-static/
 # Playwright
 apps/*/playwright-report/
 apps/*/test-results/
+
+# Deno (lock dibuat lokal saat deno check)
+deno.lock
+!.env.example
