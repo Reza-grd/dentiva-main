@@ -13,6 +13,8 @@ Dokumen ini mencatat riwayat perubahan dan perbaikan bug historis pada proyek De
 - **Kunci enkripsi lama tidak lagi masuk bundle browser**. Build menolak `VITE_ENCRYPTION_KEY`; migrasi data memakai `LEGACY_ENCRYPTION_KEY`.
 - Cron SATUSEHAT memakai Supabase Vault (sebelumnya placeholder `YOUR_SERVICE_ROLE_KEY`).
 
+- **Hasil inspeksi produksi**: `process_audit_log()` membuat semua penulisan pasien/kunjungan/pembayaran/user gagal sejak 18 Jul 2026 (diperbaiki); bucket klinis publik → privat; 4 view `v_*` bisa dibaca anon tanpa login → `security_invoker` + akses anon dicabut; fungsi SECURITY DEFINER tidak lagi bisa dipanggil anon; `search_path` tetap.
+
 ### Diubah
 - Nomor rekam medis per klinik (`RM-000001` untuk tiap klinik baru).
 

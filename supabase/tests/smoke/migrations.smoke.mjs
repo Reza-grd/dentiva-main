@@ -84,6 +84,10 @@ await db.exec(`alter table public.patients enable trigger trg_audit_patients;
                alter table public.visits enable trigger trg_audit_visits;
                alter table public.users enable trigger trg_audit_users;
                alter table public.payments enable trigger trg_audit_payments;`);
+await db.exec("set role anon");
+const viewLeak = (await one("select count(*)::int as n from public.v_patient_summary")).n;
+await db.exec("reset role");
+ok(viewLeak === 4, `SEBELUM migration: anon (tanpa login) membaca ${viewLeak} pasien lewat v_patient_summary`);
 await loginAs(uA);
 await expectError(`insert into public.patients (no_rm, nama_lengkap, clinic_id) values ('A-BUG', 'x', '${A}')`,
   /null value in column "clinic_id"|not-null|23502/, "SEBELUM migration: tambah pasien GAGAL (bug audit produksi direproduksi)");
@@ -245,6 +249,21 @@ ok((await one(`select count(*)::int as n from storage.buckets where id in ('radi
 ok((await one(`select public from storage.buckets where id = 'avatars'`)).public === true, "bucket avatars tetap publik");
 ok((await one(`select count(*)::int as n from information_schema.columns where table_name = 'patient_visits' and column_name = 'clinic_id'`)).n === 1,
   "patient_visits (tabel lama produksi) mendapat clinic_id");
+
+await db.exec("set role anon");
+await expectError("select * from public.v_patient_summary", /permission denied/, "anon tidak bisa lagi membaca v_patient_summary");
+await db.exec("reset role");
+await loginAs(uB);
+const viewRows = (await q("select clinic_id from public.v_patient_summary")).map((r) => r.clinic_id);
+ok(viewRows.length === 1 && viewRows.every((c) => c === B), "v_patient_summary (security_invoker) hanya berisi pasien klinik sendiri", viewRows);
+await logout();
+await db.exec("set role anon");
+await expectError("select public.get_my_account_status()", /permission denied/, "anon tidak bisa memanggil RPC SECURITY DEFINER");
+await db.exec("reset role");
+const mutable = await q(`select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname = 'public' and p.prokind = 'f'
+    and not exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')`);
+ok(mutable.length === 0, "semua fungsi public punya search_path tetap", mutable.map((m) => m.proname));
 
 console.log("\n11. Tindak lanjut keamanan (security_followups)");
 const uD = "a0000000-0000-4000-8000-00000000000d";

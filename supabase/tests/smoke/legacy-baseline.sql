@@ -237,3 +237,9 @@ alter table public.patients disable trigger trg_audit_patients;
 alter table public.visits disable trigger trg_audit_visits;
 alter table public.users disable trigger trg_audit_users;
 alter table public.payments disable trigger trg_audit_payments;
+
+-- view produksi (tanpa security_invoker = berjalan sebagai pemilik, melewati RLS) + grant anon
+create view public.v_patient_summary as
+  select p.id, p.no_rm, p.nama_lengkap, p.clinic_id, (select count(*) from public.visits v where v.patient_id = p.id) as total_visits
+  from public.patients p where p.deleted_at is null;
+grant select on public.v_patient_summary to anon, authenticated, service_role;

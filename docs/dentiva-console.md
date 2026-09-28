@@ -58,7 +58,8 @@ dentiva/
 | `20260928000500_billing_tables` | `invoices`, `payments`, penomoran `INV-YYYY-NNNNNN`, fungsi transaksional, order Midtrans dicatat di server, cron invoice jatuh tempo |
 | `20260928000600_usage_daily` | `usage_daily`, `collect_usage_daily()`, cron 00:15 WIB, view `clinic_overview`, `dashboard_summary()` |
 | `20260928000700_provision_clinic` | `provision_clinic()` (satu transaksi), `revoke_user_sessions()`, `write_audit()` |
-| `20260929000100_security_followups` | Guard kolom sensitif `users` (menutup eskalasi role), isolasi storage per klinik, nomor RM per klinik, cron SATUSEHAT lewat Vault |
+| `20260929000100_security_followups` | Guard kolom sensitif `users` (menutup eskalasi role), bucket klinis privat + isolasi storage per klinik, nomor RM per klinik, cron SATUSEHAT lewat Vault |
+| `20260929000200_advisor_hardening` | View `v_*` menjadi `security_invoker` & tertutup untuk anon, cabut EXECUTE fungsi SECURITY DEFINER dari anon, `search_path` tetap untuk semua fungsi |
 
 ### 3.2 Aturan akses tenant
 
@@ -157,6 +158,11 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 | 14 | `no_rm` memakai sequence global | Klinik baru mendapat nomor RM yang melompat (mis. RM-004817) | Penomoran per klinik (`clinic_rm_counters`), UNIQUE `(clinic_id, no_rm)` |
 | 15 | Cron SATUSEHAT memakai placeholder `YOUR_SERVICE_ROLE_KEY` | Outbox SATUSEHAT tidak pernah diproses otomatis | Dijadwalkan ulang dengan URL & kunci dari Supabase Vault |
 | 16 | CSP klinik memakai `unsafe-inline` + `unsafe-eval` | Proteksi XSS lemah | Script tema dipindah ke `/theme-init.js`; CSP `script-src 'self' blob:` + `frame-ancestors 'none'` (bundle terverifikasi tanpa `eval`) |
+| 18 | **Produksi:** `process_audit_log()` menulis `audit_logs` tanpa `clinic_id` (NOT NULL) | Setiap insert/update pasien, kunjungan, pembayaran, user **gagal** — tidak ada data baru sejak 18 Jul 2026 | Diperbaiki di awal migration 2 (harus sebelum update pertama ke `users`) |
+| 19 | **Produksi:** bucket `radiologi`, `klinik`, `patient-photos` publik | Rontgen & foto pasien bisa dibuka tanpa login oleh siapa pun yang punya URL | Dijadikan privat (aplikasi sudah memakai signed URL) |
+| 20 | **Produksi:** 4 view `v_*` SECURITY DEFINER + grant ke `anon` | Ringkasan pasien & pendapatan semua klinik terbaca **tanpa login** memakai anon key | `security_invoker = true`, akses anon dicabut |
+| 21 | **Produksi:** 20 fungsi SECURITY DEFINER bisa dipanggil anon, 33 fungsi tanpa `search_path` | Permukaan serangan RPC; risiko search_path hijacking | EXECUTE dicabut dari anon; `search_path = public, extensions` |
+| 22 | **Produksi:** policy `users` "Authenticated can view users" (`true`) | Semua user login bisa membaca data semua user | Tertutup oleh `tenant_isolation` restrictive |
 | 17 | `VITE_ENCRYPTION_KEY` dipakai di browser | Semua variabel `VITE_*` ikut ter-bundle → kunci enkripsi lama terbaca publik | Browser tidak lagi membaca kunci; build **gagal** jika variabel itu diset; skrip migrasi memakai `LEGACY_ENCRYPTION_KEY` |
 
 **Penyempurnaan tambahan:**
@@ -176,7 +182,7 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 | `npm test` | klinik (12) + Console (9) + kontrak/formatter (10) + router console-api (26) |
 | `npm run typecheck` | TypeScript: packages & console |
 | `npm run lint` | ESLint semua workspace |
-| `npm run db:smoke` | **Tanpa Docker**: Postgres WASM (PGlite) membangun skema lama sintetis (termasuk policy bocor migration 41 & `users_update_own`), menjalankan semua migration, lalu memeriksa 80 hal: isolasi, status, platform, audit, provisioning, billing, pemakaian, eskalasi role, storage, nomor RM, cron. Ikut di CI |
+| `npm run db:smoke` | **Tanpa Docker**: Postgres WASM (PGlite) membangun skema lama sintetis **yang disamakan dengan produksi** (policy bocor migration 41, `users_update_own`, `process_audit_log` rusak, view SECURITY DEFINER, bucket publik), mereproduksi bug-bug itu, menjalankan semua migration, lalu memeriksa 93 hal: isolasi, status, platform, audit, provisioning, billing, pemakaian, eskalasi role, storage, nomor RM, cron. Ikut di CI |
 | `npm run db:test` | pgTAP: isolasi antar-klinik, klinik/user suspended, klaim JWT palsu, skema platform tertutup, audit append-only, provisioning, billing, idempotensi Midtrans. **Butuh baseline dan Docker** |
 | `deno check supabase/functions/console-api/index.ts` | tipe Edge Function |
 
@@ -228,7 +234,7 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 2. `supabase link --project-ref <ref-produksi>`
 3. `supabase migration repair --status applied 20260927000000`
 4. `supabase db push`
-5. Dashboard → **Authentication → Multi-Factor → TOTP: enabled**.
+5. Dashboard → **Authentication → Multi-Factor → TOTP: enabled**, dan **Authentication → Passwords → Leaked password protection: enabled**.
 6. Dashboard → **API → Exposed schemas**: pastikan `platform` **tidak** ada di daftar.
 7. Deploy fungsi:
    ```bash
