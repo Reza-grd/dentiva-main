@@ -257,6 +257,14 @@ await loginAs(uB);
 const viewRows = (await q("select clinic_id from public.v_patient_summary")).map((r) => r.clinic_id);
 ok(viewRows.length === 1 && viewRows.every((c) => c === B), "v_patient_summary (security_invoker) hanya berisi pasien klinik sendiri", viewRows);
 await logout();
+
+ok((await one(`select data_type from information_schema.columns where table_name = 'patients' and column_name = 'no_wa'`)).data_type === "text",
+  "patients.no_wa muat ciphertext PGP: (text, bukan varchar(20))");
+await db.exec(`update public.patients set no_wa = 'PGP:' || repeat('x', 200) where clinic_id = '${B}'`);
+ok((await one(`select length(no_wa) as n from public.v_patient_summary where clinic_id = '${B}'`)).n === 204,
+  "v_patient_summary dibangun ulang dan tetap menampilkan no_wa");
+ok((await one(`select reloptions::text as o from pg_class where oid = 'public.v_patient_summary'::regclass`)).o.includes("security_invoker=true"),
+  "v_patient_summary tetap security_invoker setelah dibangun ulang");
 await db.exec("set role anon");
 await expectError("select public.get_my_account_status()", /permission denied/, "anon tidak bisa memanggil RPC SECURITY DEFINER");
 await db.exec("reset role");

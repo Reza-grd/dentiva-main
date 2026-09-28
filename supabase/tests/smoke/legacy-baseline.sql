@@ -63,6 +63,7 @@ $$ select exists (select 1 from public.users where id = auth.uid()) $$;
 create table public.patients (
   id uuid primary key default gen_random_uuid(), no_rm varchar(50) unique not null,
   nama_lengkap varchar(255) not null, clinic_id uuid not null references public.clinics(id),
+  no_wa varchar(20), -- produksi: terlalu sempit untuk ciphertext PGP:
   deleted_at timestamptz
 );
 create table public.visits (
@@ -240,6 +241,6 @@ alter table public.payments disable trigger trg_audit_payments;
 
 -- view produksi (tanpa security_invoker = berjalan sebagai pemilik, melewati RLS) + grant anon
 create view public.v_patient_summary as
-  select p.id, p.no_rm, p.nama_lengkap, p.clinic_id, (select count(*) from public.visits v where v.patient_id = p.id) as total_visits
+  select p.id, p.no_rm, p.nama_lengkap, p.no_wa, p.clinic_id, (select count(*) from public.visits v where v.patient_id = p.id) as total_visits
   from public.patients p where p.deleted_at is null;
 grant select on public.v_patient_summary to anon, authenticated, service_role;
