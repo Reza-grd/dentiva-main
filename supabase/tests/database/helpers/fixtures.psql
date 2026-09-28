@@ -1,0 +1,82 @@
+-- =============================================================================
+-- Fixture bersama untuk tes pgTAP Dentiva Console.
+-- Dipanggil dari tiap file tes dengan: \ir helpers/fixtures.psql (ekstensi .psql agar tidak dijalankan sebagai tes)
+-- Semua dijalankan di dalam transaksi tes (di-ROLLBACK di akhir).
+--
+--   Klinik A  (active)   admin A, dokter A (suspended nanti di tes)
+--   Klinik B  (active)   admin B
+--   Klinik S  (suspended)
+-- =============================================================================
+
+create extension if not exists pgtap with schema extensions;
+
+-- Helper: login sebagai user tertentu (meniru JWT Supabase).
+create or replace function pg_temp.login_as(p_user uuid)
+returns void
+language plpgsql
+as $$
+declare
+  v_claims jsonb;
+begin
+  select jsonb_build_object(
+           'sub', au.id,
+           'role', 'authenticated',
+           'aal', 'aal1',
+           'app_metadata', coalesce(au.raw_app_meta_data, '{}'::jsonb))
+  into v_claims
+  from auth.users au where au.id = p_user;
+
+  perform set_config('request.jwt.claims', v_claims::text, true);
+  perform set_config('request.jwt.claim.sub', p_user::text, true);
+  execute 'set local role authenticated';
+end;
+$$;
+
+create or replace function pg_temp.logout()
+returns void
+language plpgsql
+as $$
+begin
+  execute 'reset role';
+  perform set_config('request.jwt.claims', '', true);
+  perform set_config('request.jwt.claim.sub', '', true);
+end;
+$$;
+
+-- Klinik
+insert into public.clinics (id, name, slug, status) values
+  ('aaaaaaaa-0000-4000-8000-000000000001', 'Klinik A', 'klinik-a-test', 'active'),
+  ('bbbbbbbb-0000-4000-8000-000000000002', 'Klinik B', 'klinik-b-test', 'active');
+insert into public.clinics (id, name, slug, status, suspended_reason) values
+  ('cccccccc-0000-4000-8000-000000000003', 'Klinik S', 'klinik-s-test', 'suspended', 'Tes');
+
+-- Akun Auth
+insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, created_at, updated_at) values
+  ('a0000000-0000-4000-8000-00000000000a', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-a@test.local', '{}', now(), now()),
+  ('a0000000-0000-4000-8000-00000000000d', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'dokter-a@test.local', '{}', now(), now()),
+  ('b0000000-0000-4000-8000-00000000000b', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-b@test.local', '{}', now(), now()),
+  ('c0000000-0000-4000-8000-00000000000c', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-s@test.local', '{}', now(), now()),
+  ('0e000000-0000-4000-8000-0000000000e0', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'operator@test.local', '{}', now(), now());
+
+-- Profil user klinik (trigger mengisi app_metadata.clinic_id)
+insert into public.users (id, email, full_name, role, clinic_id, status) values
+  ('a0000000-0000-4000-8000-00000000000a', 'admin-a@test.local',  'Admin A',  'admin',  'aaaaaaaa-0000-4000-8000-000000000001', 'active'),
+  ('a0000000-0000-4000-8000-00000000000d', 'dokter-a@test.local', 'Dokter A', 'dokter', 'aaaaaaaa-0000-4000-8000-000000000001', 'active'),
+  ('b0000000-0000-4000-8000-00000000000b', 'admin-b@test.local',  'Admin B',  'admin',  'bbbbbbbb-0000-4000-8000-000000000002', 'active'),
+  ('c0000000-0000-4000-8000-00000000000c', 'admin-s@test.local',  'Admin S',  'admin',  'cccccccc-0000-4000-8000-000000000003', 'active');
+
+-- Operator Console
+insert into platform.operators (user_id, full_name, role) values
+  ('0e000000-0000-4000-8000-0000000000e0', 'Operator Tes', 'owner');
+
+-- Data klinik (disisipkan sebagai postgres, RLS tidak berlaku)
+insert into public.clinic_settings (clinic_id, key, value) values
+  ('aaaaaaaa-0000-4000-8000-000000000001', 'test_marker', 'A'),
+  ('bbbbbbbb-0000-4000-8000-000000000002', 'test_marker', 'B'),
+  ('cccccccc-0000-4000-8000-000000000003', 'test_marker', 'S');
+
+insert into public.patients (no_rm, nama_lengkap, clinic_id) values
+  ('TEST-A-1', 'Pasien A1', 'aaaaaaaa-0000-4000-8000-000000000001'),
+  ('TEST-A-2', 'Pasien A2', 'aaaaaaaa-0000-4000-8000-000000000001'),
+  ('TEST-B-1', 'Pasien B1', 'bbbbbbbb-0000-4000-8000-000000000002'),
+  ('TEST-S-1', 'Pasien S1', 'cccccccc-0000-4000-8000-000000000003');
