@@ -60,3 +60,10 @@ fix_*.py
 apply_*.py
 flatten_*.py
 wa_*.ps1
+
+# Storybook build
+storybook-static/
+
+# Playwright
+apps/*/playwright-report/
+apps/*/test-results/

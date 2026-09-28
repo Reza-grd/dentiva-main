@@ -1,0 +1,53 @@
+/*
+ * @dentiva/ui — base design tokens.
+ * Consumed by apps/console. apps/clinic keeps its own theme files
+ * (src/styles/theme.css + index.css) which define the same variable names.
+ */
+
+:root {
+  color-scheme: light;
+  --color-bg: #f6f7f9;
+  --color-card: #ffffff;
+  --color-border: #e3e6eb;
+  --color-text: #0f172a;
+  --color-muted: #5b6475;
+  --color-accent: #1d4ed8;
+  --color-accent-secondary: #0f172a;
+  --color-dark-base: #0b0f17;
+
+  --color-info: #2563eb;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 1px rgba(15, 23, 42, 0.02);
+  --shadow-card-hover: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-glow: 0 0 0 3px rgba(29, 78, 216, 0.15);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-full: 9999px;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-bg: #0b0f17;
+  --color-card: #121826;
+  --color-border: #232b3b;
+  --color-text: #e8ecf3;
+  --color-muted: #94a0b4;
+  --color-accent: #4f7df0;
+  --color-accent-secondary: #1e293b;
+
+  --color-info: #60a5fa;
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 6px 16px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 0 3px rgba(79, 125, 240, 0.25);
+}

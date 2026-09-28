@@ -1,0 +1,19 @@
+{
+  "name": "@dentiva/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Konstanta role & status, kontrak console-api, format Rupiah/tanggal.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

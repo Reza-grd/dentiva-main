@@ -1,33 +1,77 @@
-name: Dentiva EMR CI Pipeline
+name: Dentiva CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  web:
+    name: Lint, test & build (clinic + console)
     runs-on: ubuntu-latest
-
+    env:
+      # Nilai palsu hanya untuk build; aplikasi tidak memanggil Supabase saat build.
+      VITE_SUPABASE_URL: https://ci-placeholder.supabase.co
+      VITE_SUPABASE_ANON_KEY: ci-placeholder-anon-key
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-        cache: 'npm'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-    - name: Install Dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Run Linter
-      run: npm run lint
+      - name: Lint
+        run: npm run lint
 
-    - name: Run Tests
-      run: npm run test
+      - name: Typecheck (packages + console)
+        run: npm run typecheck
 
-    - name: Build Application
-      run: npm run build
+      - name: Unit tests (clinic, shared, console, console-api)
+        run: npm test
+
+      - name: Build clinic
+        run: npm run build:clinic
+
+      - name: Build console
+        run: npm run build:console
+
+  database:
+    name: Migration & RLS tests (pgTAP)
+    runs-on: ubuntu-latest
+    # Butuh baseline skema produksi di supabase/migrations (lihat supabase/archive/README.md).
+    if: ${{ hashFiles('supabase/migrations/*_baseline.sql') != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase
+        run: supabase db start
+
+      - name: Run pgTAP tests
+        run: supabase test db
+
+  edge-functions:
+    name: Deno check (console-api)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Type-check console-api
+        working-directory: supabase/functions/console-api
+        run: deno check index.ts
