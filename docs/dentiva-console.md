@@ -272,3 +272,19 @@ Temuan ini muncul saat membaca kode dan migration yang ada. Semuanya sudah ditan
 - **Transaksi vs Pembayaran** di aplikasi klinik masih memakai komponen yang sama (TODO lama di `App.jsx`) — keputusan bisnis.
 - **SATUSEHAT Fix F** (`diagnosis.use`) masih perlu diuji di sandbox (lihat `docs/satusehat-remediation-log.md`).
 - Tahap lanjutan Console: ekspor laporan pendapatan ke Excel, pengingat tagihan via WhatsApp, riwayat login, dan akses dukungan dengan persetujuan admin klinik.
+
+---
+
+## 10. Log penerapan produksi
+
+**29 Sep 2026 · proyek `ggwratzhpukgsiduqely`** (via Supabase MCP, atas instruksi pemilik)
+
+- Backup CLI **tidak** dibuat (keputusan pemilik). Sebagai gantinya dibuat snapshot di dalam database: skema `backup_20260929` berisi salinan 63 tabel `public`, metadata `auth.users`, status bucket, job cron, definisi fungsi, policy, constraint, dan view. Akses anon/authenticated dicabut. **Hapus skema ini setelah aplikasi terverifikasi stabil** (`drop schema backup_20260929 cascade;`), karena isinya salinan data pasien.
+- 9 migration diterapkan berurutan, semuanya sukses; riwayat di `supabase_migrations.schema_migrations` diselaraskan dengan nama file repo.
+- Verifikasi pasca-migration:
+  - Data utuh: 13 pasien, 24 kunjungan, 14 pembayaran, 4 user.
+  - Sesi resepsionis (disimulasikan, di-rollback): melihat seluruh data kliniknya; **tambah pasien & kunjungan kembali berhasil** (gagal sejak 18 Jul 2026); eskalasi role ke admin ditolak.
+  - Anon: view, tabel pasien, RPC, skema platform → ditolak / 0 baris.
+  - Bucket `radiologi`, `klinik`, `patient-photos` privat; `avatars` publik.
+  - Security Advisor: semua ERROR hilang; sisa WARN = helper policy RLS & RPC yang memang dipakai aplikasi, dan *leaked password protection* (aktifkan di Dashboard → Auth).
+- Belum dilakukan: deploy Edge Functions (`console-api`, `midtrans-*`, `admin-create-user`), rahasia Vault cron SATUSEHAT, operator owner pertama, deploy aplikasi klinik (Fase 4) & Console ke Vercel.
