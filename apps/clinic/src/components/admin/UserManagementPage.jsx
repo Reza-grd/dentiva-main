@@ -6,6 +6,10 @@ import { UserPlus, Shield, UserX, UserCheck, RefreshCw, Edit2, ShieldAlert } fro
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userManagementSchema } from '../../utils/validationSchemas';
+// Status akun (kolom users.status); is_active dipakai sebagai cadangan selama masa transisi.
+const STATUS_LABEL = { invited: 'Diundang', active: 'Aktif', suspended: 'Ditangguhkan', deactivated: 'Nonaktif' };
+const isUserActive = (u) => (u.status ? ['invited', 'active'].includes(u.status) : u.is_active !== false);
+
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,7 +68,7 @@ const UserManagementPage = () => {
   };
 
   const toggleStatus = (user) => {
-    const isCurrentlyActive = user.is_active !== false;
+    const isCurrentlyActive = isUserActive(user);
     setConfirmDialog({
       isOpen: true,
       user,
@@ -142,7 +146,8 @@ const UserManagementPage = () => {
                 </tr>
               ) : (
                 users.map(u => {
-                  const isActive = u.is_active !== false;
+                  const isActive = isUserActive(u);
+                  const statusLabel = STATUS_LABEL[u.status] ?? (isActive ? 'Aktif' : 'Nonaktif');
                   return (
                     <tr key={u.id} className="hover:bg-background/50 transition-colors">
                       <td className="p-4">
@@ -168,7 +173,7 @@ const UserManagementPage = () => {
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
                             : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                         }`}>
-                          {isActive ? 'Aktif' : 'Nonaktif'}
+                          {statusLabel}
                         </span>
                       </td>
                       <td className="p-4 text-right">

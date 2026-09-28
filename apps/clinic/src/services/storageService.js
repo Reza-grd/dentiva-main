@@ -8,7 +8,10 @@ export const storageService = {
    */
   async getSessionClinicId() {
     const { data: { session } } = await supabase.auth.getSession();
-    return session?.user?.app_metadata?.clinic_id || 'd0000000-0000-0000-0000-000000000000';
+    const clinicId = session?.user?.app_metadata?.clinic_id;
+    // Tanpa fallback ke klinik default: file tanpa clinic_id tidak boleh diunggah.
+    if (!clinicId) throw new Error('Sesi tidak memiliki klinik. Silakan login ulang.');
+    return clinicId;
   },
 
   /**

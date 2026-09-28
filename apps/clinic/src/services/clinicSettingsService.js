@@ -33,7 +33,7 @@ export const clinicSettingsService = {
         .from('clinic_settings')
         .upsert(
           [{ key, value, updated_at: new Date().toISOString() }],
-          { onConflict: 'key' }
+          { onConflict: 'clinic_id,key' } // unik per klinik (migration tenant_columns)
         )
         .select()
         .single();
@@ -59,7 +59,7 @@ export const clinicSettingsService = {
 
       const { data, error } = await supabase
         .from('clinic_settings')
-        .upsert(rows, { onConflict: 'key' })
+        .upsert(rows, { onConflict: 'clinic_id,key' })
         .select();
 
       if (error) throw error;

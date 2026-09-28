@@ -56,7 +56,10 @@ export const PermissionsProvider = ({ children }) => {
           .from('clinic_subscriptions')
           .select('*, plan:subscription_plans(*)')
           .eq('clinic_id', clinicId)
-          .eq('status', 'active')
+          // Klinik trial & menunggak tetap memakai fitur paketnya.
+          .in('status', ['trialing', 'active', 'past_due'])
+          .order('current_period_end', { ascending: false })
+          .limit(1)
           .maybeSingle();
 
         if (subErr) {

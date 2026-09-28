@@ -17,6 +17,9 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
+  // Status akun & klinik dari RPC get_my_account_status() (lihat migration clinic_user_status).
+  // Tetap terbaca walau klinik ditangguhkan, sehingga aplikasi bisa menampilkan alasannya.
+  const [accountStatus, setAccountStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const toast = useToast();
@@ -102,6 +105,7 @@ export const AuthProvider = ({ children }) => {
             if (mounted) {
               setUser(null);
               setUserProfile(null);
+              setAccountStatus(null);
               state.currentUserId = null;
             }
           }
@@ -164,10 +168,41 @@ export const AuthProvider = ({ children }) => {
     };
   }, [user]);
 
+  const fetchAccountStatus = async () => {
+    const { data, error } = await supabase.rpc('get_my_account_status').maybeSingle();
+    if (error) {
+      // Fungsi belum ada (migration Console belum dijalankan) → perilaku lama.
+      logger.debug('get_my_account_status unavailable:', error.message);
+      return null;
+    }
+    return data;
+  };
+
   const fetchUserProfile = async (userId) => {
     try {
       logger.debug('Fetching user profile for:', userId);
-      
+
+      const status = await fetchAccountStatus();
+      setAccountStatus(status);
+
+      if (status && ['suspended', 'deactivated'].includes(status.user_status)) {
+        await supabase.auth.signOut();
+        setAccountStatus(null);
+        toast.error(
+          status.user_status === 'suspended'
+            ? 'Akun Anda sedang ditangguhkan. Silakan hubungi admin klinik.'
+            : 'Akun Anda telah dinonaktifkan. Silakan hubungi admin klinik.'
+        );
+        throw new Error('Akun tidak aktif');
+      }
+
+      if (status && !status.has_access) {
+        // Klinik tidak aktif (ditangguhkan / ditutup / menunggu aktivasi).
+        // Profil tidak bisa dibaca karena RLS; App menampilkan halaman klinik tidak aktif.
+        setUserProfile(null);
+        return null;
+      }
+
       const { data, error } = await supabase
         .from('users')
         .select('*')
@@ -179,7 +214,7 @@ export const AuthProvider = ({ children }) => {
         throw error; // Lempar error agar bisa di-catch di pemanggil
       }
 
-      if (data.is_active === false) {
+      if (data.status ? !['invited', 'active'].includes(data.status) : data.is_active === false) {
         await supabase.auth.signOut();
         toast.error('Akun Anda telah dinonaktifkan. Silakan hubungi administrator.');
         throw new Error('Akun dinonaktifkan');
@@ -219,11 +254,19 @@ export const AuthProvider = ({ children }) => {
       // Tangkap error agar loading tidak stuck di true, dan kembalikan error ke caller.
       try {
         await fetchUserProfile(data.user.id);
+        // Catat waktu login & ubah status 'invited' → 'active' pada login pertama.
+        supabase.rpc('record_login').then(({ error: rlErr }) => {
+          if (rlErr) logger.debug('record_login failed:', rlErr.message);
+        });
       } catch (profileError) {
         console.error('Profile fetch failed after login:', profileError);
         // Logout dari Supabase Auth karena profil tidak tersedia
         await supabase.auth.signOut();
-        throw new Error('Akun ditemukan tapi data profil belum ada. Hubungi administrator.');
+        throw new Error(
+          profileError?.message === 'Akun tidak aktif'
+            ? 'Akun Anda tidak aktif. Hubungi admin klinik.'
+            : 'Akun ditemukan tapi data profil belum ada. Hubungi administrator.'
+        );
       }
 
       return { success: true, data };
@@ -278,7 +321,8 @@ export const AuthProvider = ({ children }) => {
       
       setUser(null);
       setUserProfile(null);
-      
+      setAccountStatus(null);
+
       return { success: true };
     } catch (error) {
       setError(error.message);
@@ -313,9 +357,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshAccountStatus = async () => {
+    if (!user) return null;
+    return fetchUserProfile(user.id);
+  };
+
   const value = {
     user,
     userProfile,
+    accountStatus,
+    refreshAccountStatus,
     loading,
     error,
     signIn,

@@ -47,11 +47,11 @@ serve(async (req) => {
 
     const { data: profile } = await userClient
       .from('users')
-      .select('role, clinic_id')
+      .select('role, clinic_id, status')
       .eq('id', user.id)
       .single()
 
-    if (!profile || profile.role !== 'admin') {
+    if (!profile || profile.role !== 'admin' || !['active', 'invited'].includes(profile.status ?? 'active')) {
       return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -66,7 +66,9 @@ serve(async (req) => {
         .from('clinic_subscriptions')
         .select('*, plan:subscription_plans(*)')
         .eq('clinic_id', profile.clinic_id)
-        .eq('status', 'active')
+        .in('status', ['trialing', 'active', 'past_due'])
+        .order('current_period_end', { ascending: false })
+        .limit(1)
         .maybeSingle()
 
       const maxUsers = sub?.plan?.max_users || 3 // Default Starter plan max_users is 3
@@ -75,6 +77,7 @@ serve(async (req) => {
         .from('users')
         .select('id', { count: 'exact', head: true })
         .eq('clinic_id', profile.clinic_id)
+        .in('status', ['invited', 'active'])
 
       if (currentUsersCount !== null && currentUsersCount >= maxUsers) {
         return new Response(
@@ -102,6 +105,20 @@ serve(async (req) => {
 
     const { email, password, full_name, role, phone } = body
 
+    if (!profile.clinic_id) {
+      return new Response(JSON.stringify({ error: 'Akun admin tidak terhubung ke klinik' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (!['admin', 'dokter', 'resepsionis'].includes(role)) {
+      return new Response(JSON.stringify({ error: 'Role tidak valid' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     if (!email || !password || !full_name || !role) {
       return new Response(JSON.stringify({ error: 'Missing required fields (email, password, full_name, role)' }), {
         status: 400,
@@ -116,6 +133,8 @@ serve(async (req) => {
       email,
       password,
       email_confirm: true,
+      // Klaim tenant di JWT; juga disinkronkan trigger users_sync_clinic_claim.
+      app_metadata: { clinic_id: profile.clinic_id },
     })
 
     if (createError) {
@@ -134,7 +153,8 @@ serve(async (req) => {
         full_name,
         role,
         phone: phone || null,
-        is_active: true
+        clinic_id: profile.clinic_id,
+        status: 'active',
       }])
 
     if (profileError) {
@@ -151,7 +171,7 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })

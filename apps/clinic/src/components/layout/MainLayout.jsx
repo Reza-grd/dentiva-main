@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from '../common/Sidebar';
 import TopBar from './TopBar';
 import BottomNav from '../common/BottomNav';
+import AnnouncementBanner from './AnnouncementBanner';
 
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,6 +34,7 @@ const MainLayout = ({ children }) => {
           className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8 pb-20 md:pb-8 focus:outline-none"
         >
           <div className="max-w-[1400px] mx-auto w-full">
+            <AnnouncementBanner />
             {children}
           </div>
         </main>

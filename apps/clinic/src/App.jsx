@@ -3,6 +3,8 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
+import SetPasswordPage from './components/auth/SetPasswordPage';
+import ClinicUnavailable from './components/auth/ClinicUnavailable';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -36,11 +38,21 @@ const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
 
 function App() {
-  const { loading, user, userProfile, signOut } = useAuth();
+  const { loading, user, userProfile, accountStatus, signOut } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
+  }
+
+  // Tautan undangan / reset password: boleh dibuka sebelum profil termuat.
+  if (location.pathname === '/atur-password') {
+    return <SetPasswordPage />;
+  }
+
+  // Klinik ditangguhkan / ditutup / belum aktif (dikelola dari Dentiva Console).
+  if (user && accountStatus && !accountStatus.has_access) {
+    return <ClinicUnavailable />;
   }
 
   if (user && !userProfile) {

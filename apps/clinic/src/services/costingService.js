@@ -75,7 +75,7 @@ export const costingService = {
           total_overhead_bulanan: totalOverhead,
           total_bobot_estimasi: totalWeight,
           catatan
-        }, { onConflict: 'periode' })
+        }, { onConflict: 'clinic_id,periode' }) // unik per klinik
         .select()
         .single();
       if (error) throw error;

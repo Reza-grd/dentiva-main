@@ -94,7 +94,7 @@ export const userManagementService = {
     try {
       const { data, error } = await supabase
         .from('users')
-        .update({ is_active: isActive })
+        .update({ status: isActive ? 'active' : 'deactivated' }) // is_active disinkronkan trigger
         .eq('id', userId)
         .select()
         .single();
@@ -102,7 +102,7 @@ export const userManagementService = {
       if (error) throw error;
 
       const actionText = isActive ? 'Mengaktifkan kembali' : 'Menonaktifkan';
-      await this.logAudit(isActive ? 'REACTIVATE' : 'DEACTIVATE', `${actionText} akun staf ${userName || userId}`, { is_active: !isActive }, { is_active: isActive });
+      await this.logAudit(isActive ? 'REACTIVATE' : 'DEACTIVATE', `${actionText} akun staf ${userName || userId}`, { status: isActive ? 'deactivated' : 'active' }, { status: isActive ? 'active' : 'deactivated' });
 
       return { success: true, data };
     } catch (error) {
