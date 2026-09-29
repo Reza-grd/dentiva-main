@@ -121,10 +121,6 @@ const LoginPage = () => {
           </div>
         </div>
 
-        {/* Bottom SVG dental illustration (subtle) */}
-        <div className="absolute bottom-8 right-10 opacity-[0.06] text-[160px] select-none pointer-events-none">
-          🦷
-        </div>
       </div>
 
       {/* ========== RIGHT PANEL (form) ========== */}

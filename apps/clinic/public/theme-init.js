@@ -15,7 +15,22 @@
   root.style.setProperty('--color-accent', p.accent);
   root.style.setProperty('--color-accent-secondary', p.accentSecondary);
   root.style.setProperty('--color-dark-base', p.darkBase);
-  if (localStorage.getItem('theme') === 'dark') {
-    root.classList.add('dark');
+  // Terang/gelap per akun (KEEP IN SYNC: src/contexts/ThemeContext.jsx).
+  // Belum login / belum pernah memilih → terang.
+  try {
+    var uid = null;
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf('sb-') === 0 && k.slice(-11) === '-auth-token') {
+        var s = JSON.parse(localStorage.getItem(k) || 'null');
+        uid = s && s.user && s.user.id;
+        break;
+      }
+    }
+    if (uid && localStorage.getItem('theme:' + uid) === 'dark') {
+      root.classList.add('dark');
+    }
+  } catch (e) {
+    /* storage tidak tersedia → terang */
   }
 })();

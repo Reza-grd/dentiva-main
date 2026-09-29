@@ -27,7 +27,7 @@ const getInitials = (name) => {
 
 const TopBar = ({ onMenuClick }) => {
   const { userProfile, signOut } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setThemeMode } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -79,15 +79,17 @@ const TopBar = ({ onMenuClick }) => {
           {/* Theme Controls */}
           <div className="flex items-center gap-1.5 bg-background/80 p-1 rounded-full border border-border">
             <button
-              onClick={toggleTheme}
+              onClick={() => setThemeMode('light')}
               aria-label="Aktifkan mode terang"
+              aria-pressed={theme === 'light'}
               className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'light' ? 'bg-card shadow-sm text-amber-500' : 'text-text-muted hover:text-text-primary'}`}
             >
               <Sun size={15} />
             </button>
             <button
-              onClick={toggleTheme}
+              onClick={() => setThemeMode('dark')}
               aria-label="Aktifkan mode gelap"
+              aria-pressed={theme === 'dark'}
               className={`p-1.5 rounded-full transition-all duration-200 ${theme === 'dark' ? 'bg-accent-primary/20 shadow-sm text-accent-primary' : 'text-text-muted hover:text-text-primary'}`}
             >
               <Moon size={15} />
