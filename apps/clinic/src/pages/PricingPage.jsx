@@ -17,6 +17,9 @@ import { Tabs, TabsList, TabsTrigger } from "@dentiva/ui";
 import { SkeletonCard } from "@dentiva/ui";
 import { Check, ShieldCheck, Zap, Sparkles, HelpCircle } from "lucide-react";
 
+// Batas ≥ 9999 di subscription_plans berarti "tanpa batas".
+const isUnlimited = (n) => Number(n) >= 9999;
+
 export default function PricingPage() {
   const { userProfile } = useAuth();
   const { plan: currentPlan, subscription } = usePermission();
@@ -176,7 +179,7 @@ export default function PricingPage() {
                     <CardDescription className="mt-2">
                       {p.name === "Starter" && "Cocok untuk praktik mandiri / 1 dokter."}
                       {p.name === "Pro" && "Ideal untuk klinik tumbuh dengan tim dokter."}
-                      {p.name === "Enterprise" && "Solusi tanpa batas untuk jaringan klinik besar."}
+                      {p.name === "Enterprise" && "Untuk klinik besar dengan banyak dokter & staf, plus dukungan prioritas."}
                     </CardDescription>
                   </CardHeader>
 
@@ -187,7 +190,7 @@ export default function PricingPage() {
                         {formatIDR(price)}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        per klinik / {billingCycle === "yearly" ? "tahun" : "bulan"}
+                        per lokasi klinik / {billingCycle === "yearly" ? "tahun" : "bulan"}
                       </div>
                     </div>
 
@@ -195,11 +198,11 @@ export default function PricingPage() {
                     <div className="space-y-2.5 text-sm text-gray-700 dark:text-gray-300">
                       <div className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                        <span>Maksimal <strong>{p.max_users} Pengguna</strong> (Dokter/Staff)</span>
+                        <span>{isUnlimited(p.max_users) ? <><strong>Pengguna tanpa batas</strong> (Dokter/Staff)</> : <>Maksimal <strong>{p.max_users} Pengguna</strong> (Dokter/Staff)</>}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                        <span>Hingga <strong>{p.max_patients.toLocaleString()} Pasien</strong></span>
+                        <span>{isUnlimited(p.max_patients) ? <strong>Pasien tanpa batas</strong> : <>Hingga <strong>{p.max_patients.toLocaleString("id-ID")} Pasien</strong></>}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
@@ -225,6 +228,12 @@ export default function PricingPage() {
                           Laporan Laba/Rugi & Costing Treatment
                         </span>
                       </div>
+                      {p.features?.priority_support && (
+                        <div className="flex items-center gap-2">
+                          <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                          <span>Dukungan prioritas & bantuan migrasi data</span>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </div>
@@ -245,6 +254,11 @@ export default function PricingPage() {
           })}
         </div>
       )}
+
+      <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+        Setiap langganan berlaku untuk satu lokasi klinik. Punya beberapa cabang? Daftarkan tiap cabang sebagai klinik
+        tersendiri — pengelolaan multi-cabang dalam satu akun belum tersedia.
+      </p>
 
       {/* Trust badge & FAQ footer */}
       <div className="rounded-2xl bg-gray-50 dark:bg-gray-900/60 border border-gray-100 dark:border-gray-800 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-600 dark:text-gray-400">

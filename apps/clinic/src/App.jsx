@@ -197,12 +197,8 @@ function App() {
             </ProtectedRoute>
           } />
 
-          {/* TODO: Saat ini Transaksi sengaja memakai komponen PaymentList yang sama dengan Pembayaran sebagai perbaikan sementara. Jika secara bisnis keduanya harus dibedakan, maka ganti komponen di sini nantinya. */}
-          <Route path="/admin/transaksi" element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <PaymentList />
-            </ProtectedRoute>
-          } />
+          {/* Transaksi dulu duplikat Pembayaran; alamat lama dialihkan agar bookmark tetap jalan. */}
+          <Route path="/admin/transaksi" element={<Navigate to="/admin/pembayaran" replace />} />
 
           <Route path="/admin/treatments" element={
             <ProtectedRoute allowedRoles={['admin']}>
@@ -312,11 +308,7 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/resepsionis/transaksi" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
-              <PaymentList />
-            </ProtectedRoute>
-          } />
+          <Route path="/resepsionis/transaksi" element={<Navigate to="/resepsionis/pembayaran" replace />} />
 
           <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
           <Route path="*" element={<Navigate to={getDefaultRoute()} replace />} />

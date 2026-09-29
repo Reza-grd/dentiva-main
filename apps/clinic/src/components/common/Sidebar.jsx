@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, Receipt, User, Shield,
+  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -30,7 +30,6 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: CalendarClock,   label: 'Jadwal Dokter',    path: `${baseUrl}/jadwal-dokter` },
         { group: 'KEUANGAN' },
         { icon: DollarSign,      label: 'Pembayaran',       path: `${baseUrl}/pembayaran` },
-        { icon: Receipt,         label: 'Transaksi',          path: `${baseUrl}/transaksi` },
         { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
         { group: 'LAINNYA' },
         { icon: Package,         label: 'Master Treatment', path: `${baseUrl}/treatments` },
