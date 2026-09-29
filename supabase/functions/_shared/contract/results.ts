@@ -40,6 +40,7 @@ export type ActionResults = {
   "clinics.checkSlug": { available: boolean };
   "clinics.create": ProvisionResult;
   "clinics.update": Clinic;
+  "clinics.approve": Clinic;
   "clinics.activate": Clinic;
   "clinics.suspend": Clinic;
   "clinics.close": Clinic;

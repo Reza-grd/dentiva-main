@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity, Palette } from 'lucide-react';
+import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity, Palette, Monitor } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
@@ -9,6 +9,7 @@ import TreatmentEducationTemplates from './TreatmentEducationTemplates';
 import SoapTemplates from './SoapTemplates';
 import { satusehatService } from '../../services/satusehatService';
 import ThemeGallery from '../common/ThemeGallery';
+import QueueDisplayLinks from './QueueDisplayLinks';
 
 const SettingsPage = () => {
   const { user, userProfile } = useAuth();
@@ -16,7 +17,12 @@ const SettingsPage = () => {
 
   const { settings: clinicSettings, updateSettings: updateClinicSettings } = useClinicSettings();
   const isAdmin = userProfile?.role === 'admin';
-  const [activeTab, setActiveTab] = useState(isAdmin ? 'profile' : 'security');
+  const [activeTab, setActiveTab] = useState(() => {
+    // ?tab= dipakai tautan panduan onboarding; non-admin hanya boleh membuka tab umum.
+    const fromUrl = new URLSearchParams(window.location.search).get('tab');
+    const allowed = isAdmin || ['appearance', 'security', 'audit-logs'].includes(fromUrl);
+    return (fromUrl && allowed ? fromUrl : null) || (isAdmin ? 'profile' : 'security');
+  });
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState({});
   const [testPhone, setTestPhone] = useState('');
@@ -219,9 +225,9 @@ const SettingsPage = () => {
   const [formData, setFormData] = useState(() => {
     const defaults = {
       clinicName: 'Dentiva Dental Clinic',
-      clinicAddress: 'Jl. Contoh No. 123, Jakarta',
-      clinicPhone: '021-12345678',
-      clinicEmail: 'info@Dentiva.com',
+      clinicAddress: '',
+      clinicPhone: '',
+      clinicEmail: '',
       timezone: 'Asia/Jakarta',
       currency: 'IDR',
       language: 'id',
@@ -271,6 +277,8 @@ const SettingsPage = () => {
         ...prev,
         clinicName: clinicSettings.clinic_name || prev.clinicName,
         clinicPhone: clinicSettings.clinic_phone || prev.clinicPhone,
+        clinicAddress: clinicSettings.clinic_address ?? prev.clinicAddress,
+        clinicEmail: clinicSettings.clinic_email ?? prev.clinicEmail,
         waPaymentConfirmationEnabled: clinicSettings.wa_payment_confirmation_enabled !== 'false',
         waReminderH1DayEnabled: clinicSettings.wa_reminder_h1_day_enabled !== 'false',
         waReminderH1HourEnabled: clinicSettings.wa_reminder_h1_hour_enabled !== 'false',
@@ -297,6 +305,9 @@ const SettingsPage = () => {
       const { success, error } = await updateClinicSettings({
         clinic_name: formData.clinicName,
         clinic_phone: formData.clinicPhone,
+        // Dulu alamat & email hanya tersimpan di localStorage browser ini.
+        clinic_address: formData.clinicAddress.trim(),
+        clinic_email: formData.clinicEmail.trim(),
         wa_payment_confirmation_enabled: String(formData.waPaymentConfirmationEnabled),
         wa_reminder_h1_day_enabled: String(formData.waReminderH1DayEnabled),
         wa_reminder_h1_hour_enabled: String(formData.waReminderH1HourEnabled),
@@ -357,6 +368,7 @@ const SettingsPage = () => {
       { id: 'treatment-education', label: 'Edukasi Perawatan', icon: MessageSquare },
       { id: 'soap-templates', label: 'Template SOAP', icon: Save },
       { id: 'satusehat', label: 'SATUSEHAT', icon: Shield },
+      { id: 'queue-display', label: 'Layar Antrean TV', icon: Monitor },
     ] : []),
     { id: 'security', label: 'Keamanan', icon: Lock },
     { id: 'audit-logs', label: 'Log Audit', icon: Shield },
@@ -383,7 +395,7 @@ const SettingsPage = () => {
         {/* Navigation Sidebar / Tabs */}
         <div className="lg:col-span-1 glass-panel p-3 h-fit">
           <nav className="flex lg:flex-col gap-1.5 overflow-x-auto no-scrollbar" aria-label="Pengaturan">
-            {navTabs.map((tab) => {
+            {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
@@ -1199,8 +1211,10 @@ const SettingsPage = () => {
             {/* SaaS Billing Tab */}
             {activeTab === 'billing' && <BillingSettings />}
 
+            {activeTab === 'queue-display' && <QueueDisplayLinks />}
+
             {/* Save Button */}
-            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && (
+            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && activeTab !== 'queue-display' && (
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3 items-center">
                 {saved && (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mr-2 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg">

@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@dentiva/ui';
 import { Badge } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
+import OnboardingChecklist from './OnboardingChecklist';
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, isCurrency }) => {
@@ -210,6 +211,9 @@ const AdminDashboard = () => {
               Refresh
             </button>
           </div>
+
+          {/* ── Panduan klinik baru (hilang otomatis bila selesai) ─── */}
+          <OnboardingChecklist />
 
           {/* ── Error Banner ─────────────────────────────────────── */}
           {statsError && (

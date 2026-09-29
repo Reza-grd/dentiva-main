@@ -1,10 +1,12 @@
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth, isPendingSignup } from './contexts/AuthContext';
 import LoginPage from './components/auth/LoginPage';
 import SetPasswordPage from './components/auth/SetPasswordPage';
 import ClinicUnavailable from './components/auth/ClinicUnavailable';
+import CompleteRegistration from './components/auth/CompleteRegistration';
+import RegisterClinicPage from './components/auth/RegisterClinicPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -53,6 +55,11 @@ function App() {
   // Klinik ditangguhkan / ditutup / belum aktif (dikelola dari Dentiva Console).
   if (user && accountStatus && !accountStatus.has_access) {
     return <ClinicUnavailable />;
+  }
+
+  // Pendaftar mandiri yang sudah verifikasi email tapi belum mengirim data klinik.
+  if (user && !userProfile && !accountStatus && isPendingSignup(user)) {
+    return <CompleteRegistration />;
   }
 
   if (user && !userProfile) {
@@ -120,10 +127,13 @@ function App() {
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-          {/* Public Queue Display — for TV in waiting room */}
+          {/* Layar antrean TV (tanpa login): token dibuat admin di Pengaturan → Layar Antrean TV.
+              /queue-display lama tanpa token menampilkan petunjuk membuat tautan. */}
+          <Route path="/antrean/:token" element={<QueueDisplay />} />
           <Route path="/queue-display" element={<QueueDisplay />} />
 
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/daftar" element={user ? <Navigate to="/" replace /> : <RegisterClinicPage />} />
           
           <Route path="/admin/*" element={
             <ProtectedRoute allowedRoles={['admin']}>

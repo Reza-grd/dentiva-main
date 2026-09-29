@@ -13,7 +13,8 @@ create schema cron;
 
 create table auth.users (
   id uuid primary key, instance_id uuid, aud text, role text, email text,
-  raw_app_meta_data jsonb default '{}', created_at timestamptz, updated_at timestamptz
+  raw_app_meta_data jsonb default '{}', created_at timestamptz, updated_at timestamptz,
+  email_confirmed_at timestamptz
 );
 create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid);
 create function auth.uid() returns uuid language sql stable as

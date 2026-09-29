@@ -142,6 +142,12 @@ export const ACTIONS = {
     params: z.object({ clinicId: id, patch: clinicProfile.partial() }),
     description: "Ubah profil klinik (nama, kontak, alamat).",
   },
+  "clinics.approve": {
+    roles: OWNER_SUPPORT,
+    mutates: true,
+    params: z.object({ clinicId: id, trialDays: z.number().int().min(1).max(90).default(14), reason: optionalReason }),
+    description: "Setujui pendaftaran mandiri: klinik 'pending' menjadi trial.",
+  },
   "clinics.activate": {
     roles: OWNER_SUPPORT,
     mutates: true,

@@ -204,6 +204,28 @@ export const update: H<"clinics.update"> = async (ctx, p) => {
   return after;
 };
 
+/** Pendaftaran mandiri (register_clinic) → trial mulai saat disetujui. */
+export const approve: H<"clinics.approve"> = async (ctx, p) => {
+  const before = await loadClinic(ctx.sql, p.clinicId, true);
+  if (before.status !== "pending") throw precondition(`Hanya klinik berstatus pending yang bisa disetujui (saat ini: ${before.status})`);
+
+  await ctx.sql`
+    update public.clinics
+    set status = 'trial', trial_ends_at = now() + make_interval(days => ${p.trialDays}::int)
+    where id = ${p.clinicId}
+  `;
+  await ctx.sql`
+    update public.clinic_subscriptions cs
+    set status = 'trialing', current_period_start = now(), current_period_end = c.trial_ends_at, updated_at = now()
+    from public.clinics c
+    where c.id = cs.clinic_id and cs.clinic_id = ${p.clinicId}
+  `;
+
+  const after = await loadClinic(ctx.sql, p.clinicId);
+  ctx.audit({ targetType: "clinic", targetId: p.clinicId, clinicId: p.clinicId, reason: p.reason ?? null, before, after });
+  return after;
+};
+
 export const activate: H<"clinics.activate"> = async (ctx, p) => {
   const before = await loadClinic(ctx.sql, p.clinicId, true);
   if (before.status === "active") throw precondition("Klinik sudah aktif");

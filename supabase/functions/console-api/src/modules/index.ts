@@ -26,6 +26,7 @@ export const handlers: HandlerRegistry<AnySql> = {
   "clinics.checkSlug": clinics.checkSlug,
   "clinics.create": clinics.create,
   "clinics.update": clinics.update,
+  "clinics.approve": clinics.approve,
   "clinics.activate": clinics.activate,
   "clinics.suspend": clinics.suspend,
   "clinics.close": clinics.close,

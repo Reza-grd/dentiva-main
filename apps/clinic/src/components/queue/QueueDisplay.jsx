@@ -1,51 +1,42 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
-import { encryptionService } from '../../services/encryptionService';
-import { Clock, Users, UserCheck, Activity, Stethoscope, CalendarCheck } from 'lucide-react';
+import { Clock, Users, UserCheck, Activity, Stethoscope, CalendarCheck, MonitorOff } from 'lucide-react';
 
 // ─────────────────────────────────────────────
 //  QUEUE DISPLAY — Smart TV Waiting Room Screen
+//  Dibuka lewat /antrean/<token> TANPA login. Data diambil dari RPC
+//  get_queue_display(): server hanya mengirim nomor urut, inisial pasien,
+//  nama dokter, jam, dan status — tidak ada nama lengkap/No. RM/kontak.
 // ─────────────────────────────────────────────
 
 const REFRESH_INTERVAL_MS = 10000; // 10 seconds
 
 const QueueDisplay = () => {
+  const { token } = useParams();
   const [visits, setVisits] = useState([]);
+  const [clinicName, setClinicName] = useState('');
+  const [unavailable, setUnavailable] = useState(null); // null | 'invalid' | 'inactive'
   const [currentTime, setCurrentTime] = useState(new Date());
   const [loading, setLoading] = useState(true);
   const intervalRef = useRef(null);
   const clockRef = useRef(null);
 
-  // ─── Fetch today's visits ──────────────────
-  const fetchTodayVisits = async () => {
+  // ─── Fetch today's queue (minimal data) ────
+  const fetchQueue = async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
-      const { data, error } = await supabase
-        .from('visits')
-        .select(`
-          id, status, jam_kunjungan, nomor_antrian, created_at,
-          patient:patients(nama_lengkap, no_rm),
-          dokter:users!dokter_id(full_name)
-        `)
-        .eq('tanggal_kunjungan', today)
-        .order('created_at', { ascending: true });
-
+      const { data, error } = await supabase.rpc('get_queue_display', { p_token: token || '' });
       if (error) throw error;
-
-      // Decrypt patient names
-      if (data && data.length > 0) {
-        const payloads = [];
-        data.forEach(v => {
-          payloads.push(v.patient?.nama_lengkap || '');
-        });
-        const decrypted = await encryptionService.decryptBatch(payloads);
-        data.forEach((v, i) => {
-          if (v.patient) v.patient.nama_lengkap = decrypted[i];
-        });
+      if (!data?.ok) {
+        setUnavailable(data?.reason === 'inactive' ? 'inactive' : 'invalid');
+        setVisits([]);
+        return;
       }
-
-      setVisits(data || []);
+      setUnavailable(null);
+      setClinicName(data.clinic_name || '');
+      setVisits(data.visits || []);
     } catch (err) {
+      // Gangguan jaringan: pertahankan tampilan terakhir, coba lagi di interval berikutnya.
       console.error('Queue fetch error:', err);
     } finally {
       setLoading(false);
@@ -53,47 +44,20 @@ const QueueDisplay = () => {
   };
 
   useEffect(() => {
-    fetchTodayVisits();
-
-    // Auto-refresh data
-    intervalRef.current = setInterval(fetchTodayVisits, REFRESH_INTERVAL_MS);
-
-    // Live clock
+    fetchQueue();
+    intervalRef.current = setInterval(fetchQueue, REFRESH_INTERVAL_MS);
     clockRef.current = setInterval(() => setCurrentTime(new Date()), 1000);
-
-    // Supabase Realtime subscription for instant updates
-    const channel = supabase
-      .channel('queue-display-visits')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'visits' }, () => {
-        fetchTodayVisits();
-      })
-      .subscribe();
-
     return () => {
       clearInterval(intervalRef.current);
       clearInterval(clockRef.current);
-      supabase.removeChannel(channel);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   // ─── Categorize visits ─────────────────────
   const ongoingVisits = visits.filter(v => v.status === 'ongoing');
-  const waitingVisits = visits.filter(v => !v.status || v.status === 'scheduled');
+  const waitingVisits = visits.filter(v => v.status === 'waiting');
   const completedVisits = visits.filter(v => v.status === 'completed');
-
-  // ─── Helpers ───────────────────────────────
-  const getInitials = (name) => {
-    if (!name) return '?';
-    return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
-  };
-
-  // Privacy: tampilkan nama depan + inisial nama belakang ("Budi Santoso" → "Budi S.")
-  const maskedName = (name) => {
-    if (!name) return 'Pasien';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0];
-    return `${parts[0]} ${parts[parts.length - 1][0]}.`;
-  };
 
   const formatTime = (date) => {
     return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -104,6 +68,19 @@ const QueueDisplay = () => {
   };
 
   // ─── Render ────────────────────────────────
+  if (unavailable) {
+    return (
+      <div className="queue-display-loading">
+        <MonitorOff size={48} />
+        <p>
+          {unavailable === 'inactive'
+            ? 'Layar antrean tidak tersedia: klinik sedang tidak aktif.'
+            : 'Tautan layar antrean tidak valid atau sudah dicabut. Minta admin klinik membuat tautan baru di Pengaturan → Layar Antrean TV.'}
+        </p>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="queue-display-loading">
@@ -122,7 +99,7 @@ const QueueDisplay = () => {
             <Stethoscope size={32} />
           </div>
           <div>
-            <h1 className="queue-clinic-name">NeuroDent Dental Clinic</h1>
+            <h1 className="queue-clinic-name">{clinicName}</h1>
             <p className="queue-date">{formatDate(currentTime)}</p>
           </div>
         </div>
@@ -149,14 +126,14 @@ const QueueDisplay = () => {
           ) : (
             <div className="queue-now-serving-list">
               {ongoingVisits.map((v, idx) => (
-                <div key={v.id} className="queue-now-serving-card" style={{ animationDelay: `${idx * 0.15}s` }}>
+                <div key={v.no} className="queue-now-serving-card" style={{ animationDelay: `${idx * 0.15}s` }}>
                   <div className="queue-now-serving-avatar">
-                    {getInitials(v.patient?.nama_lengkap)}
+                    {v.no}
                   </div>
                   <div className="queue-now-serving-info">
-                    <p className="queue-now-serving-name">{maskedName(v.patient?.nama_lengkap)}</p>
+                    <p className="queue-now-serving-name">Antrean {v.no} · {v.initials}</p>
                     <p className="queue-now-serving-doctor">
-                      <Stethoscope size={14} /> {v.dokter?.full_name || 'Dokter'}
+                      <Stethoscope size={14} /> {v.doctor || 'Dokter'}
                     </p>
                   </div>
                   <div className="queue-now-serving-badge">
@@ -188,15 +165,15 @@ const QueueDisplay = () => {
             ) : (
               <div className="queue-waiting-list">
                 {waitingVisits.map((v, idx) => (
-                  <div key={v.id} className="queue-waiting-row" style={{ animationDelay: `${idx * 0.08}s` }}>
-                    <span className="queue-order-number">{idx + 1}</span>
+                  <div key={v.no} className="queue-waiting-row" style={{ animationDelay: `${idx * 0.08}s` }}>
+                    <span className="queue-order-number">{v.no}</span>
                     <div className="queue-waiting-info">
-                      <span className="queue-waiting-name">{maskedName(v.patient?.nama_lengkap)}</span>
-                      <span className="queue-waiting-doctor">{v.dokter?.full_name || '-'}</span>
+                      <span className="queue-waiting-name">{v.initials}</span>
+                      <span className="queue-waiting-doctor">{v.doctor || '-'}</span>
                     </div>
-                    {v.jam_kunjungan && (
+                    {v.time && (
                       <span className="queue-waiting-time">
-                        <Clock size={14} /> {v.jam_kunjungan}
+                        <Clock size={14} /> {v.time}
                       </span>
                     )}
                   </div>
@@ -232,7 +209,7 @@ const QueueDisplay = () => {
       <footer className="queue-footer">
         <div className="queue-ticker">
           <span className="queue-ticker-text">
-            🦷 Selamat datang di NeuroDent Dental Clinic — Mohon bersabar, kami akan segera memanggil Anda. Terima kasih telah mempercayakan kesehatan gigi Anda kepada kami. 🦷
+            🦷 Selamat datang di {clinicName} — Mohon bersabar, kami akan segera memanggil Anda. Terima kasih telah mempercayakan kesehatan gigi Anda kepada kami. 🦷
           </span>
         </div>
       </footer>

@@ -13,8 +13,10 @@ const COPY = {
     body: 'Layanan Dentiva untuk klinik ini telah berakhir. Data rekam medis tetap disimpan sesuai ketentuan retensi.',
   },
   pending: {
-    title: 'Klinik menunggu aktivasi',
-    body: 'Pendaftaran klinik Anda sedang diproses oleh tim Dentiva.',
+    title: 'Pendaftaran sedang diverifikasi',
+    body:
+      'Terima kasih! Pendaftaran klinik Anda sudah kami terima dan sedang diverifikasi tim Dentiva (biasanya 1×24 jam kerja). ' +
+      'Setelah disetujui, klinik Anda langsung mendapat masa uji coba gratis 14 hari — klik "Periksa lagi" atau masuk kembali nanti.',
   },
 };
 

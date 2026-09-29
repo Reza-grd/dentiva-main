@@ -265,6 +265,19 @@ ok((await one(`select length(no_wa) as n from public.v_patient_summary where cli
   "v_patient_summary dibangun ulang dan tetap menampilkan no_wa");
 ok((await one(`select reloptions::text as o from pg_class where oid = 'public.v_patient_summary'::regclass`)).o.includes("security_invoker=true"),
   "v_patient_summary tetap security_invoker setelah dibangun ulang");
+
+// Layar antrean TV
+ok((await one(`select public.queue_initials('Budi  Santoso Putra') as i`)).i === "B. S.", "queue_initials: hanya 2 inisial");
+ok((await one(`select public.queue_initials(null) as i`)).i === "-", "queue_initials: nama kosong → '-'");
+await db.exec("set role anon");
+ok((await one(`select public.get_queue_display('pendek') as r`)).r.ok === false, "anon: token tidak valid → ok=false tanpa data");
+await expectError("select * from public.queue_display_links", /permission denied/, "anon tidak bisa membaca tabel tautan layar antrean");
+await expectError("select public.create_queue_display_link('x')", /permission denied/, "anon tidak bisa membuat tautan layar antrean");
+await db.exec("reset role");
+await loginAs(uB);
+await expectError("insert into public.queue_display_links (clinic_id, token_hash, token_hint) values ('" + B + "', 'x', 'x')",
+  /permission denied/, "staf tidak bisa menulis tabel tautan langsung (hanya lewat RPC)");
+await logout();
 await db.exec("set role anon");
 await expectError("select public.get_my_account_status()", /permission denied/, "anon tidak bisa memanggil RPC SECURITY DEFINER");
 await db.exec("reset role");
@@ -330,6 +343,35 @@ ok(/^RM-\d{6}$/.test(rmA.no_rm) && rmA.clinic_id === A, `klinik warisan melanjut
 // Cron SATUSEHAT
 const cronCmd = (await one(`select command from cron.job where jobname = 'process-satusehat-outbox'`))?.command ?? "";
 ok(/vault\.decrypted_secrets/.test(cronCmd) && !/YOUR_SERVICE_ROLE_KEY/.test(cronCmd), "cron SATUSEHAT memakai Vault, bukan placeholder");
+
+// Pendaftaran klinik mandiri (menunggu persetujuan)
+console.log("\n9. Pendaftaran mandiri");
+const uR = "e0000000-0000-4000-8000-0000000000e1", uU = "e0000000-0000-4000-8000-0000000000e2";
+await db.exec(`insert into auth.users (id, email, email_confirmed_at) values ('${uR}', 'daftar@klinik.test', now()), ('${uU}', 'belum@klinik.test', null)`);
+const regSql = `select public.register_clinic('Klinik Senyum Ceria', '0812-3456-7890', 'Bandung', 'Jawa Barat', 'drg. Rina', '081234567890') as id`;
+await db.exec("set role anon");
+await expectError(regSql, /permission denied/, "anon tidak bisa memanggil register_clinic");
+await db.exec("reset role");
+await loginAs(uU);
+await expectError(regSql, /Verifikasi email/, "email belum terverifikasi ditolak");
+await logout();
+await loginAs(uR);
+await expectError(`select public.register_clinic('Klinik X', '12', null, null, 'drg. X', '12')`, /telepon tidak valid/, "nomor telepon divalidasi");
+const regId = (await one(regSql)).id;
+ok(!!regId, "klinik pendaftaran mandiri dibuat");
+await expectError(regSql, /sudah terhubung/, "satu akun hanya bisa mendaftarkan satu klinik");
+await logout();
+const rc = await one(`select c.status, c.slug, c.trial_ends_at, u.role, u.status as ustatus from public.clinics c join public.users u on u.clinic_id = c.id where c.id = '${regId}'`);
+ok(rc.status === "pending" && rc.trial_ends_at === null, "status klinik 'pending' tanpa masa trial", rc);
+ok(rc.slug === "klinik-senyum-ceria" && rc.role === "admin", "slug dibuat dari nama; pemilik = admin", rc);
+await loginAs(uR);
+ok((await one("select public.get_user_clinic_id() as c")).c === null, "klinik pending belum punya akses data (RLS)");
+ok((await one("select has_access from public.get_my_account_status()")).has_access === false, "status akun: menunggu (has_access=false)");
+await logout();
+await db.exec(`update auth.users set email_confirmed_at = now() where id = '${uB}'`);
+await loginAs(uB);
+await expectError(regSql, /sudah terhubung/, "staf klinik lain tidak bisa mendaftarkan klinik baru");
+await logout();
 
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

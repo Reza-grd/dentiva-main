@@ -6,6 +6,9 @@ import { useToast } from '../components/common/ToastNotification';
 
 const AuthContext = createContext({});
 
+/** Akun hasil pendaftaran mandiri yang belum menyelesaikan pendaftaran klinik. */
+export const isPendingSignup = (user) => Boolean(user?.user_metadata?.signup_clinic);
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -207,11 +210,18 @@ export const AuthProvider = ({ children }) => {
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Profile fetch error:', error);
         throw error; // Lempar error agar bisa di-catch di pemanggil
+      }
+
+      if (!data) {
+        // Belum terhubung ke klinik mana pun — mis. pendaftar mandiri yang baru
+        // memverifikasi email. App menampilkan formulir penyelesaian pendaftaran.
+        setUserProfile(null);
+        return null;
       }
 
       if (data.status ? !['invited', 'active'].includes(data.status) : data.is_active === false) {
@@ -253,7 +263,11 @@ export const AuthProvider = ({ children }) => {
       // BUG FIX: fetchUserProfile bisa throw jika profil belum ada di tabel users.
       // Tangkap error agar loading tidak stuck di true, dan kembalikan error ke caller.
       try {
-        await fetchUserProfile(data.user.id);
+        const profile = await fetchUserProfile(data.user.id);
+        if (!profile && !isPendingSignup(data.user)) {
+          const status = await fetchAccountStatus();
+          if (!status) throw new Error('Profil tidak ditemukan');
+        }
         // Catat waktu login & ubah status 'invited' → 'active' pada login pertama.
         supabase.rpc('record_login').then(({ error: rlErr }) => {
           if (rlErr) logger.debug('record_login failed:', rlErr.message);
@@ -278,39 +292,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signUp = async (email, password, userData) => {
-    try {
-      setLoading(true);
-      setError(null);
+  /**
+   * Pendaftaran klinik mandiri (halaman /daftar). Hanya membuat akun Auth; data
+   * klinik disimpan di user_metadata.signup_clinic lalu diproses oleh RPC
+   * register_clinic() SETELAH email terverifikasi (klinik berstatus 'pending'
+   * sampai disetujui tim Dentiva). Staf klinik tidak mendaftar di sini —
+   * mereka diundang admin klinik.
+   */
+  const signUpClinic = async ({ email, password, ownerName, ownerPhone, clinicName, clinicPhone, city, province }) => {
+    const { data, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/daftar/lanjut`,
+        data: {
+          full_name: ownerName,
+          signup_clinic: { clinic_name: clinicName, clinic_phone: clinicPhone, city, province, owner_phone: ownerPhone },
+        },
+      },
+    });
+    if (authError) return { success: false, error: authError.message };
+    // Jika konfirmasi email dinonaktifkan di Supabase, sesi langsung tersedia.
+    return { success: true, needsEmailConfirmation: !data.session };
+  };
 
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-      });
+  const completeClinicRegistration = async (form) => {
+    const { error: rpcError } = await supabase.rpc('register_clinic', {
+      p_clinic_name: form.clinicName,
+      p_clinic_phone: form.clinicPhone,
+      p_city: form.city || null,
+      p_province: form.province || null,
+      p_owner_name: form.ownerName,
+      p_owner_phone: form.ownerPhone,
+    });
+    if (rpcError) return { success: false, error: rpcError.message };
+    // Klaim clinic_id baru ada di JWT setelah refresh.
+    await supabase.auth.refreshSession();
+    if (user) await fetchUserProfile(user.id);
+    return { success: true };
+  };
 
-      if (authError) throw authError;
-
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: authData.user.id,
-            email: email,
-            full_name: userData.full_name,
-            role: userData.role || 'resepsionis',
-            phone: userData.phone || null,
-          },
-        ]);
-
-      if (profileError) throw profileError;
-
-      return { success: true, data: authData };
-    } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
-    }
+  const requestPasswordReset = async (email) => {
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/atur-password`,
+    });
+    return resetError ? { success: false, error: resetError.message } : { success: true };
   };
 
   const signOut = async () => {
@@ -370,7 +396,9 @@ export const AuthProvider = ({ children }) => {
     loading,
     error,
     signIn,
-    signUp,
+    signUpClinic,
+    completeClinicRegistration,
+    requestPasswordReset,
     signOut,
     updateProfile,
   };

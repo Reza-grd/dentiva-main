@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -27,11 +27,12 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
 
-  const { signIn, user, userProfile } = useAuth();
+  const { signIn, requestPasswordReset, user, userProfile } = useAuth();
+  const [resetState, setResetState] = useState(null); // null | 'sending' | 'sent'
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, getValues, formState: { errors, isSubmitting } } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' }
   });
@@ -49,6 +50,23 @@ const LoginPage = () => {
       setServerError('Terjadi kesalahan. Silakan coba lagi.');
       toast.error(err.message || 'Terjadi kesalahan saat login');
     }
+  };
+
+  const onForgotPassword = async () => {
+    const email = (getValues('email') || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setServerError('Isi email Anda di kolom Email terlebih dahulu, lalu klik "Lupa password?".');
+      return;
+    }
+    setServerError('');
+    setResetState('sending');
+    const res = await requestPasswordReset(email);
+    if (!res.success) {
+      setResetState(null);
+      setServerError(res.error);
+      return;
+    }
+    setResetState('sent');
   };
 
   return (
@@ -188,6 +206,22 @@ const LoginPage = () => {
                 </div>
               </div>
 
+              <div className="flex justify-end -mt-2">
+                <button
+                  type="button"
+                  onClick={onForgotPassword}
+                  disabled={isSubmitting || resetState === 'sending'}
+                  className="text-xs font-medium text-accent-primary hover:underline bg-transparent border-0 cursor-pointer"
+                >
+                  {resetState === 'sending' ? 'Mengirim…' : 'Lupa password?'}
+                </button>
+              </div>
+              {resetState === 'sent' && (
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 -mt-2">
+                  Jika email terdaftar, tautan untuk membuat password baru sudah dikirim. Periksa juga folder Spam.
+                </p>
+              )}
+
               {/* Submit Button */}
               <div className="pt-2">
                 <Button
@@ -199,6 +233,10 @@ const LoginPage = () => {
                 </Button>
               </div>
             </form>
+            <p className="mt-6 text-sm text-center text-text-muted">
+              Belum menggunakan Dentiva?{' '}
+              <Link to="/daftar" className="font-semibold text-accent-primary hover:underline">Daftarkan klinik Anda</Link>
+            </p>
           </CardContent>
         </Card>
 

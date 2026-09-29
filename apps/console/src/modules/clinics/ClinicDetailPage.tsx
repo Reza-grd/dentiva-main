@@ -23,7 +23,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useConsoleMutation, useConsoleQuery } from "@/lib/query";
 import { useAuth } from "@/lib/auth";
 
-type Dialog = null | "activate" | "suspend" | "close" | "extend" | "plan" | "edit";
+type Dialog = null | "approve" | "activate" | "suspend" | "close" | "extend" | "plan" | "edit";
 
 const INVALIDATE = ["clinics.", "dashboard.", "users.", "billing.", "usage.", "audit."];
 
@@ -102,9 +102,16 @@ export function ClinicDetailPage() {
 function ClinicActions({ clinic, onOpen }: { clinic: Clinic; onOpen: (d: Dialog) => void }) {
   return (
     <>
+      {clinic.status === "pending" && (
+        <Can action="clinics.approve">
+          <Button size="sm" className="gap-1.5" onClick={() => onOpen("approve")}>
+            <CheckCircle2 className="h-4 w-4" /> Setujui pendaftaran
+          </Button>
+        </Can>
+      )}
       {clinic.status !== "active" && clinic.status !== "closed" && (
         <Can action="clinics.activate">
-          <Button size="sm" className="gap-1.5" onClick={() => onOpen("activate")}>
+          <Button size="sm" variant={clinic.status === "pending" ? "outline" : "primary"} className="gap-1.5" onClick={() => onOpen("activate")}>
             <CheckCircle2 className="h-4 w-4" /> Aktifkan
           </Button>
         </Can>
@@ -327,7 +334,9 @@ function NotesSection({ clinicId }: { clinicId: string }) {
 
 function ClinicDialogs({ clinic, detail, dialog, onClose }: { clinic: Clinic; detail: ClinicDetail; dialog: Dialog; onClose: () => void }) {
   const opts = { invalidate: INVALIDATE, onSuccess: onClose };
+  const approve = useConsoleMutation("clinics.approve", { ...opts, successMessage: "Pendaftaran disetujui — klinik mulai trial" });
   const activate = useConsoleMutation("clinics.activate", { ...opts, successMessage: "Klinik diaktifkan" });
+  const [trialDays, setTrialDays] = useState(14);
   const suspend = useConsoleMutation("clinics.suspend", { ...opts, successMessage: "Klinik ditangguhkan" });
   const close = useConsoleMutation("clinics.close", { ...opts, successMessage: "Klinik ditutup" });
   const extend = useConsoleMutation("clinics.extendTrial", { ...opts, successMessage: "Trial diperpanjang" });
@@ -339,6 +348,22 @@ function ClinicDialogs({ clinic, detail, dialog, onClose }: { clinic: Clinic; de
 
   return (
     <>
+      <ReasonDialog
+        open={dialog === "approve"}
+        onOpenChange={(o) => !o && onClose()}
+        title={`Setujui pendaftaran ${clinic.name}?`}
+        description="Klinik mendaftar sendiri dan menunggu verifikasi. Setelah disetujui, pemilik bisa langsung masuk dan masa uji coba dimulai hari ini. Pastikan data klinik wajar (nama, kota, kontak) — hubungi pemilik bila ragu."
+        confirmLabel={`Setujui · trial ${trialDays} hari`}
+        variant="primary"
+        requireReason={false}
+        isPending={approve.isPending}
+        onConfirm={(reason) => approve.mutate({ clinicId: clinic.id, trialDays, reason: reason || undefined })}
+      >
+        <Field label="Lama trial (hari)" htmlFor="approve-days" required>
+          <Input id="approve-days" type="number" min={1} max={90} value={trialDays} onChange={(e) => setTrialDays(Math.max(1, Math.min(90, Number(e.target.value) || 1)))} />
+        </Field>
+      </ReasonDialog>
+
       <ReasonDialog
         open={dialog === "activate"}
         onOpenChange={(o) => !o && onClose()}
