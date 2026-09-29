@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
+import { decryptBatch } from "../_shared/decryptionHelper.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -82,6 +83,12 @@ serve(async (req) => {
       throw new Error('Whapi.cloud Token is not configured')
     }
 
+    // nama_lengkap & no_wa tersimpan terenkripsi (PGP:…) — dekripsi di server sebelum dipakai.
+    const decryptPatient = async (p: any) => {
+      const [nama, wa] = await decryptBatch(supabase, [p.nama_lengkap || '', p.no_wa || ''])
+      return { ...p, nama_lengkap: nama, no_wa: wa }
+    }
+
     // Helper to format Doctor Name
     const getDocName = (doc: any) => {
       if (!doc) return 'Dokter Gigi'
@@ -139,7 +146,7 @@ serve(async (req) => {
       if (tomorrowErr) throw tomorrowErr
 
       for (const visit of (tomorrowVisits || [])) {
-        const patient = visit.patient
+        const patient = visit.patient ? await decryptPatient(visit.patient) : null
         if (!patient?.no_wa) continue
 
         // Check logs to prevent duplicate H-1 Day sends
@@ -233,7 +240,7 @@ serve(async (req) => {
       })
 
       for (const visit of h1HourVisits) {
-        const patient = visit.patient
+        const patient = visit.patient ? await decryptPatient(visit.patient) : null
         if (!patient?.no_wa) continue
 
         // Check logs to prevent duplicate H-1 Hour sends

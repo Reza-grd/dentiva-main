@@ -104,7 +104,7 @@ create table public.clinic_subscriptions (
 
 -- 18 tables without clinic_id
 create table public.treatments (id uuid primary key default gen_random_uuid(), kode_treatment varchar(50) unique not null, nama text);
-create table public.master_bahan (id uuid primary key default gen_random_uuid(), kode_bahan varchar(50) unique not null);
+create table public.master_bahan (id uuid primary key default gen_random_uuid(), kode_bahan varchar(50) unique not null, kode_kfa text, kode_bentuk_sediaan text);
 create table public.overhead_costs (id uuid primary key default gen_random_uuid(), nama text);
 create table public.overhead_monthly_target (id uuid primary key default gen_random_uuid(), periode text, total numeric, unique (periode));
 create table public.soap_templates (id uuid primary key default gen_random_uuid(), created_by uuid, nama text);

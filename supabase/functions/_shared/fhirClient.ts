@@ -1,4 +1,4 @@
-import { getSatuSehatBaseUrl } from './satusehatConfig.ts';
+import { getSatuSehatBaseUrl, assertEnvironmentAllowed } from './satusehatConfig.ts';
 import { getAccessToken } from './satusehatAuth.ts';
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -9,6 +9,8 @@ export async function fhirRequest(
   resourcePath: string,
   body?: object
 ): Promise<{ ok: boolean; status: number; data: any }> {
+  // Penulisan ke SATUSEHAT produksi dikunci sampai uji sandbox lulus & disetujui.
+  if (method !== 'GET') assertEnvironmentAllowed();
   const token = await getAccessToken(supabaseAdmin);
   const { fhir } = getSatuSehatBaseUrl();
   const url = `${fhir}/${resourcePath}`;

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, CheckCircle, AlertCircle, Package, Layers } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { inventoryService } from '../../services/inventoryService';
+import { supabase } from '../../services/supabase';
+import KfaPicker from './KfaPicker';
 
 const MasterBahan = () => {
   const [materials, setMaterials] = useState([]);
@@ -25,6 +27,9 @@ const MasterBahan = () => {
     is_active: true,
     kode_kfa: ''
   });
+
+  // Produk KFA yang dipilih di formulir; diverifikasi server setelah item disimpan.
+  const [kfaSelected, setKfaSelected] = useState(null);
 
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [selectedMaterial, setSelectedMaterial] = useState(null);
@@ -57,18 +62,33 @@ const MasterBahan = () => {
       ...formData,
       id: editTarget?.id,
       faktor_konversi: Number(formData.faktor_konversi) || 1,
-      stok_minimum: Number(formData.stok_minimum) || 0
+      stok_minimum: Number(formData.stok_minimum) || 0,
+      kode_kfa: formData.kode_kfa || null
     };
 
     const res = await inventoryService.upsertMasterBahan(payload);
-    if (res.success) {
-      setSuccess('Master bahan berhasil disimpan');
-      closeModal();
-      loadData();
-    } else {
+    if (!res.success) {
       setError(res.error);
+      setSaving(false);
+      return;
     }
+
+    let kfaWarning = null;
+    if (kfaSelected) {
+      const { data, error: fnError } = await supabase.functions.invoke('satusehat-kfa', {
+        body: { action: 'verify', masterBahanId: res.data.id, kfaCode: kfaSelected.kfa_code },
+      });
+      if (fnError || data?.error) {
+        const msg = data?.error || (await fnError?.context?.json?.().then((b) => b?.error).catch(() => null));
+        kfaWarning = `Item tersimpan, tetapi kode KFA belum terverifikasi: ${msg || 'KFA SATUSEHAT tidak dapat dihubungi'}`;
+      }
+    }
+
     setSaving(false);
+    closeModal();
+    loadData();
+    if (kfaWarning) setError(kfaWarning);
+    else setSuccess('Master bahan berhasil disimpan');
   };
 
   const handleDelete = async (id) => {
@@ -119,6 +139,7 @@ const MasterBahan = () => {
   const closeModal = () => {
     setShowModal(false);
     setEditTarget(null);
+    setKfaSelected(null);
     setError(null);
   };
 
@@ -190,7 +211,9 @@ const MasterBahan = () => {
                     <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
                       <div>{m.nama_bahan}</div>
                       {m.kode_kfa && (
-                        <div className="text-[10px] text-gray-500 font-mono mt-0.5">KFA: {m.kode_kfa}</div>
+                        <div className={`text-[10px] font-mono mt-0.5 ${m.kfa_verified_at ? 'text-emerald-600' : 'text-amber-600'}`}>
+                          KFA {m.kode_kfa} · {m.kfa_verified_at ? 'terverifikasi' : 'belum terverifikasi'}
+                        </div>
                       )}
                       {m.stok_saat_ini <= m.stok_minimum && (
                         <span className="mt-1 inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700">
@@ -287,15 +310,21 @@ const MasterBahan = () => {
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Kode KFA SatuSehat (Kamus Farmasi dan Alat Kesehatan)
                   </label>
-                  <input
-                    type="text"
-                    value={formData.kode_kfa || ''}
-                    onChange={e => setFormData({...formData, kode_kfa: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
-                    placeholder="Masukkan 8-10 digit Kode KFA (Contoh: 93000001)"
+                  <KfaPicker
+                    value={editTarget && formData.kode_kfa === editTarget.kode_kfa ? editTarget : { kode_kfa: formData.kode_kfa }}
+                    selected={kfaSelected}
+                    defaultKeyword={formData.nama_bahan}
+                    onSelect={(item) => {
+                      setKfaSelected(item);
+                      setFormData((f) => ({ ...f, kode_kfa: item.kfa_code }));
+                    }}
+                    onClear={() => {
+                      setKfaSelected(null);
+                      setFormData((f) => ({ ...f, kode_kfa: '' }));
+                    }}
                   />
                   <p className="text-[11px] text-gray-500 mt-1">
-                    Kode KFA resmi Kemenkes RI untuk integrasi e-resep ke SatuSehat.
+                    Wajib untuk obat yang diresepkan: hanya kode yang terverifikasi dari KFA SATUSEHAT yang dikirim sebagai e-resep.
                   </p>
                 </div>
                 <div className="md:col-span-2 flex items-center gap-2 mt-2">

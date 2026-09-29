@@ -4,6 +4,29 @@ Dokumen ini mencatat riwayat perubahan dan perbaikan bug historis pada proyek De
 
 ---
 
+## [1.11.0] — 2026-09-30 · Kesiapan jual: KFA, SATUSEHAT, pendaftaran mandiri
+
+### Ditambahkan
+- **Pendaftaran klinik mandiri** (`/daftar`): verifikasi email → klinik berstatus *menunggu* → disetujui tim Dentiva di Console (**Setujui pendaftaran**, trial 1–90 hari).
+- **Panduan "Siapkan klinik Anda"** di dashboard admin: profil, tarif, dokter, jadwal, resepsionis, SATUSEHAT.
+- **Layar antrean TV tanpa login** (`/antrean/<token>`, dibuat di Pengaturan → Layar Antrean TV). Server hanya mengirim nomor, inisial, nama dokter.
+- **Pencarian obat KFA resmi** (API KFA v2) di Master Bahan; kode diverifikasi server.
+- **Uji sandbox SATUSEHAT** (`satusehat-sandbox-verify`) + kunci produksi sampai uji lulus. Lihat `docs/satusehat-sandbox-runbook.md`.
+- "Lupa password?" di halaman login klinik.
+
+### Diperbaiki
+- **Halaman Pengaturan crash** (`navTabs` tidak terdefinisi) sejak refactor tema.
+- Alamat & email klinik kini tersimpan di database (dulu hanya di browser).
+- Host sandbox SATUSEHAT usang; nama pasien terenkripsi terkirim ke SATUSEHAT; nama & nomor WA terenkripsi di pengingat/pesan WhatsApp.
+- Layar antrean memakai kolom `nomor_antrian` yang tidak ada dan nama klinik tetap "NeuroDent".
+
+### Diubah
+- Menu **Transaksi** (duplikat Pembayaran) dihapus; alamat lama dialihkan.
+- Paket **Enterprise** tidak lagi diklaim untuk "jaringan klinik" — harga per lokasi klinik.
+- `xlsx` 0.18.5 (npm, tak dirawat) → 0.20.3 dari CDN resmi SheetJS.
+
+---
+
 ## [1.10.1] — 2026-09-29 · Tindak lanjut keamanan
 
 ### Keamanan

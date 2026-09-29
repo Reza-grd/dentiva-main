@@ -1,4 +1,4 @@
-import { getSatuSehatBaseUrl } from './satusehatConfig.ts';
+import { getSatuSehatBaseUrl, getSatuSehatEnv } from './satusehatConfig.ts';
 
 export async function getAccessToken(supabaseAdmin: any): Promise<string> {
   const now = new Date();
@@ -14,8 +14,10 @@ export async function getAccessToken(supabaseAdmin: any): Promise<string> {
     console.error('Error fetching cached token:', cacheError);
   }
 
-  // Check if token exists and is valid (with 60 seconds buffer)
-  if (cached && new Date(cached.expires_at) > new Date(now.getTime() + 60_000)) {
+  // Check if token exists, is valid (with 60 seconds buffer), and belongs to the
+  // current environment (token sandbox tidak boleh dipakai ke produksi & sebaliknya).
+  const environment = getSatuSehatEnv();
+  if (cached && cached.environment === environment && new Date(cached.expires_at) > new Date(now.getTime() + 60_000)) {
     return cached.access_token;
   }
 
@@ -50,7 +52,6 @@ export async function getAccessToken(supabaseAdmin: any): Promise<string> {
 
   const expiresSeconds = Number(json.expires_in) || 3600;
   const expiresAt = new Date(Date.now() + expiresSeconds * 1000);
-  const environment = Deno.env.get('SATUSEHAT_ENVIRONMENT') || 'sandbox';
 
   // Upsert the new cached token
   const { error: upsertError } = await supabaseAdmin

@@ -1,5 +1,7 @@
 import { fhirRequest } from '../fhirClient.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
+import { decryptBatch } from '../decryptionHelper.ts';
+import { getDiagnosisUseCoding } from '../satusehatConfig.ts';
 
 export async function buildAndSyncEncounter(
   supabaseAdmin: any, 
@@ -64,6 +66,8 @@ export async function buildAndSyncEncounter(
   const patientSId = visit.patient.satusehat_patient_id;
   const practitionerSId = visit.doctor.satusehat_practitioner_id;
   const locationSId = location.satusehat_location_id;
+  // nama_lengkap tersimpan terenkripsi (PGP:…); jangan pernah mengirim ciphertext ke SATUSEHAT.
+  const [patientName] = await decryptBatch(supabaseAdmin, [visit.patient.nama_lengkap || '']);
 
   const datePart = visit.tanggal_kunjungan || new Date().toISOString().split('T')[0];
   const timePart = visit.jam_kunjungan || '08:00';
@@ -97,7 +101,7 @@ export async function buildAndSyncEncounter(
     },
     subject: {
       reference: `Patient/${patientSId}`,
-      display: visit.patient.nama_lengkap
+      display: patientName
     },
     participant: [
       {
@@ -237,13 +241,16 @@ export async function updateEncounterDiagnoses(
 
   const encounterPayload = getRes.data;
 
-  // FIX F (Round 4): Drop the `use` element — no SATUSEHAT-specific outpatient code confirmed.
-  // Keep condition (reference) and rank (ordinal) only. See comment block above for full reasoning.
+  // FIX F: `use` hanya dikirim bila kodenya sudah dikonfirmasi lewat uji sandbox
+  // (secret SATUSEHAT_DIAGNOSIS_USE = DD | CC | AD; lihat satusehat-sandbox-verify).
+  // Tanpa konfirmasi, `use` dihilangkan — lebih aman daripada kode yang salah.
+  const useCoding = getDiagnosisUseCoding();
   encounterPayload.diagnosis = conditionIds.map((condId, index) => ({
     condition: {
       reference: `Condition/${condId}`,
       display: `Diagnosis ${index + 1}`
     },
+    ...(useCoding ? { use: { coding: [useCoding] } } : {}),
     rank: index + 1
   }));
 

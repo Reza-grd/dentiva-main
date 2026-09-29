@@ -373,5 +373,22 @@ await loginAs(uB);
 await expectError(regSql, /sudah terhubung/, "staf klinik lain tidak bisa mendaftarkan klinik baru");
 await logout();
 
+// KFA: kolom verifikasi hanya bisa diisi service_role (Edge Function satusehat-kfa)
+console.log("\n10. Verifikasi KFA");
+await loginAs(uB);
+const mb = await one(`insert into public.master_bahan (kode_bahan, kode_kfa, kfa_nama, kfa_verified_at) values ('OBT-KFA-1', '93000001', 'Palsu', now()) returning id, kfa_verified_at, kfa_nama`);
+ok(mb.kfa_verified_at === null && mb.kfa_nama === null, "browser tidak bisa menandai kode KFA terverifikasi saat insert");
+await logout();
+await q(`select set_config('request.jwt.claims', '{"role":"service_role"}', false)`);
+await db.exec(`update public.master_bahan set kode_kfa = '93001234', kfa_nama = 'Amoxicillin 500 mg', kfa_verified_at = now() where id = '${mb.id}'`);
+await q(`select set_config('request.jwt.claims', '', false)`);
+ok((await one(`select kfa_verified_at is not null as v from public.master_bahan where id = '${mb.id}'`)).v, "service_role bisa menyimpan verifikasi KFA");
+await loginAs(uB);
+await db.exec(`update public.master_bahan set kfa_verified_at = now() - interval '1 day', kfa_nama = 'Ubah' where id = '${mb.id}'`);
+ok((await one(`select kfa_nama from public.master_bahan where id = '${mb.id}'`)).kfa_nama === "Amoxicillin 500 mg", "browser tidak bisa mengubah nama/verifikasi KFA");
+await db.exec(`update public.master_bahan set kode_kfa = '93009999' where id = '${mb.id}'`);
+ok((await one(`select kfa_verified_at is null as v from public.master_bahan where id = '${mb.id}'`)).v, "kode KFA diubah dari browser → status verifikasi dihapus");
+await logout();
+
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

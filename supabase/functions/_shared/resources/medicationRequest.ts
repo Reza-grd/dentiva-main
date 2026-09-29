@@ -37,7 +37,7 @@ export async function buildAndSyncMedicationRequests(
       dosis,
       frekuensi,
       qty,
-      master_bahan(nama_bahan, kode_kfa, kode_bentuk_sediaan)
+      master_bahan(nama_bahan, kode_kfa, kode_bentuk_sediaan, kfa_nama, kfa_bentuk_sediaan_nama, kfa_verified_at)
     `)
     .eq('visit_id', visitId);
 
@@ -52,13 +52,22 @@ export async function buildAndSyncMedicationRequests(
   for (const vo of (voList || [])) {
     const mb: any = vo.master_bahan;
     const code = mb?.kode_kfa;
-    const bentukSediaanCode = mb?.kode_bentuk_sediaan || 'BS066';
-    const name = vo.nama_obat || mb?.nama_bahan || 'Obat';
+    const localName = vo.nama_obat || mb?.nama_bahan || 'Obat';
 
-    if (!code) {
-      console.warn(`[WARNING] Prescription item ID ${vo.id} (${name}) has no kode_kfa. Skipping MedicationRequest sync.`);
+    // Hanya kode yang sudah dicek ke API KFA (Edge Function satusehat-kfa) yang dikirim.
+    // Kode ketikan bebas / contoh (93000001, …) membuat resep ditolak atau tercatat salah.
+    if (!code || !mb?.kfa_verified_at) {
+      console.warn(`[WARNING] Prescription item ID ${vo.id} (${localName}) has no verified KFA code. Skipping MedicationRequest sync.`);
       continue;
     }
+    if (!mb?.kode_bentuk_sediaan) {
+      console.warn(`[WARNING] Prescription item ID ${vo.id} (${localName}) KFA ${code} has no dosage form. Skipping MedicationRequest sync.`);
+      continue;
+    }
+    // display harus sesuai nama resmi KFA, bukan nama lokal klinik.
+    const name = mb.kfa_nama || localName;
+    const bentukSediaanCode = mb.kode_bentuk_sediaan;
+    const bentukSediaanName = mb.kfa_bentuk_sediaan_nama || bentukSediaanCode;
 
     const dosageText = `${vo.frekuensi || '1x'} ${vo.dosis || '1 tablet'}`.trim();
     const kfaSystemUri = 'http://sys-ids.kemkes.go.id/kfa';
@@ -107,7 +116,7 @@ export async function buildAndSyncMedicationRequests(
               {
                 system: 'http://terminology.kemkes.go.id/CodeSystem/medication-form',
                 code: bentukSediaanCode,
-                display: 'Tablet / Sediaan Obat'
+                display: bentukSediaanName
               }
             ]
           }
