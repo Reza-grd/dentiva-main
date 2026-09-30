@@ -64,6 +64,9 @@ if (isProd && dsn) {
 }
 
 import { PermissionsProvider } from './contexts/PermissionsContext';
+import { installDesktopLinkHandler } from './utils/platform';
+
+installDesktopLinkHandler();
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -3,6 +3,7 @@ import { Monitor, Copy, Check, Trash2, ExternalLink, ShieldCheck } from 'lucide-
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, Button, Badge, Input } from '@dentiva/ui';
 import { supabase } from '../../services/supabase';
 import { useToast } from '../common/ToastNotification';
+import { PUBLIC_APP_URL, openExternal } from '../../utils/platform';
 
 const formatDateTime = (iso) =>
   iso ? new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
@@ -46,7 +47,7 @@ export default function QueueDisplayLinks() {
       toast.error(error.message);
       return;
     }
-    setNewLink({ url: `${window.location.origin}/antrean/${data.token}`, label: label || 'Layar ruang tunggu' });
+    setNewLink({ url: `${PUBLIC_APP_URL}/antrean/${data.token}`, label: label || 'Layar ruang tunggu' });
     setCopied(false);
     setLabel('');
     load();
@@ -112,7 +113,7 @@ export default function QueueDisplayLinks() {
                   {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />}
                   {copied ? 'Tersalin' : 'Salin tautan'}
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => window.open(newLink.url, '_blank', 'noopener')}>
+                <Button size="sm" variant="outline" onClick={() => openExternal(newLink.url)}>
                   <ExternalLink className="w-4 h-4 mr-1" /> Buka
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => setNewLink(null)}>

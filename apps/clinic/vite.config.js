@@ -11,10 +11,12 @@ if (process.env.VITE_ENCRYPTION_KEY) {
   )
 }
 
-export default defineConfig({
+// Mode "desktop" (Tauri): tanpa service worker PWA — pembaruan lewat updater Tauri,
+// dan dev server tidak membuka browser.
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
-    VitePWA({
+    mode !== 'desktop' && VitePWA({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
@@ -46,7 +48,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true
+    open: mode !== 'desktop',
+    strictPort: mode === 'desktop'
   },
   build: {
     outDir: 'dist',
@@ -72,4 +75,4 @@ export default defineConfig({
     setupFiles: './src/test/setup.js',
     exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**']
   }
-})
+}))

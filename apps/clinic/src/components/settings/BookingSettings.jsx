@@ -5,6 +5,7 @@ import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 import { useToast } from '../common/ToastNotification';
+import { PUBLIC_APP_URL, openExternal } from '../../utils/platform';
 
 /** Aktifkan booking online & bagikan tautan publik /booking/<slug>. */
 export default function BookingSettings() {
@@ -21,7 +22,7 @@ export default function BookingSettings() {
       .then(({ data }) => setSlug(data?.slug ?? null));
   }, [userProfile?.clinic_id]);
 
-  const url = slug ? `${window.location.origin}/booking/${slug}` : '';
+  const url = slug ? `${PUBLIC_APP_URL}/booking/${slug}` : '';
 
   const toggle = async () => {
     const res = await updateSettings({ online_booking_enabled: enabled ? 'false' : 'true' });
@@ -56,7 +57,7 @@ export default function BookingSettings() {
               <Button size="sm" variant="outline" className="gap-1" onClick={async () => { await navigator.clipboard.writeText(url); setCopied(true); }}>
                 {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? 'Tersalin' : 'Salin'}
               </Button>
-              <Button size="sm" variant="ghost" className="gap-1" onClick={() => window.open(url, '_blank', 'noopener')}>
+              <Button size="sm" variant="ghost" className="gap-1" onClick={() => openExternal(url)}>
                 <ExternalLink size={14} /> Buka
               </Button>
             </div>

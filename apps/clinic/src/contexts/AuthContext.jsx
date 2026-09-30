@@ -3,6 +3,7 @@ import { supabase } from '../services/supabase';
 import { encryptionService } from '../services/encryptionService';
 import logger from '../utils/logger';
 import { useToast } from '../components/common/ToastNotification';
+import { PUBLIC_APP_URL } from '../utils/platform';
 
 const AuthContext = createContext({});
 
@@ -304,7 +305,7 @@ export const AuthProvider = ({ children }) => {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/daftar/lanjut`,
+        emailRedirectTo: `${PUBLIC_APP_URL}/daftar/lanjut`,
         data: {
           full_name: ownerName,
           signup_clinic: { clinic_name: clinicName, clinic_phone: clinicPhone, city, province, owner_phone: ownerPhone },
@@ -334,7 +335,7 @@ export const AuthProvider = ({ children }) => {
 
   const requestPasswordReset = async (email) => {
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/atur-password`,
+      redirectTo: `${PUBLIC_APP_URL}/atur-password`,
     });
     return resetError ? { success: false, error: resetError.message } : { success: true };
   };

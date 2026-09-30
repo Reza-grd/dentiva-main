@@ -1,0 +1,95 @@
+name: Dentiva Desktop (Windows & macOS)
+
+# Membangun installer Tauri:
+#   - Windows: .exe (NSIS) + .msi
+#   - macOS:   .dmg universal (Intel + Apple Silicon)
+# Jalankan manual (Actions → Dentiva Desktop → Run workflow) atau push tag desktop-v1.10.0.
+# Tag → draft GitHub Release; manual → artefak unduhan di halaman run.
+#
+# Variabel repository (Settings → Secrets and variables → Actions → Variables):
+#   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (publishable key), VITE_PUBLIC_APP_URL,
+#   VITE_SENTRY_DSN (opsional).
+# Tanda tangan kode (menyusul; tanpa ini installer tetap jadi, tetapi SmartScreen/Gatekeeper memberi peringatan):
+#   macOS: APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY, APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID
+#   Windows: sertifikat code-signing / Azure Trusted Signing
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['desktop-v*']
+    # Uji build otomatis saat berkas desktop berubah
+    branches: ['console']
+    paths: ['apps/desktop/**', '.github/workflows/desktop.yml']
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            args: ''
+            rust_targets: ''
+          - name: macOS (universal)
+            os: macos-latest
+            args: '--target universal-apple-darwin'
+            rust_targets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+    runs-on: ${{ matrix.os }}
+    env:
+      VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      VITE_PUBLIC_APP_URL: ${{ vars.VITE_PUBLIC_APP_URL }}
+      VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Periksa konfigurasi Supabase
+        shell: bash
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
+            echo "::warning::Variabel VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY belum diisi — installer uji tidak akan bisa login."
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+
+      - run: npm ci
+
+      - uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: apps/desktop
+          tauriScript: npx tauri
+          args: ${{ matrix.args }}
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: 'Dentiva Desktop ${{ github.ref_name }}'
+          releaseDraft: true
+          prerelease: false
+
+      - name: Simpan installer sebagai artefak
+        uses: actions/upload-artifact@v4
+        with:
+          name: dentiva-${{ runner.os }}
+          if-no-files-found: error
+          path: |
+            apps/desktop/src-tauri/target/**/release/bundle/nsis/*.exe
+            apps/desktop/src-tauri/target/**/release/bundle/msi/*.msi
+            apps/desktop/src-tauri/target/**/release/bundle/dmg/*.dmg
