@@ -23,13 +23,14 @@ export const ICD9CM_DENTAL = [
 
   // ── 23.7: Perawatan Saluran Akar (Endodontik) ────────────────────────────
   { code: '23.70', description: 'Perawatan saluran akar gigi (PSA / Endodontik)', category: 'Endodontik', verified_source: 'CMS ICD-9-CM Vol 3' },
-  { code: '23.71', description: 'Pulpotomi pulpa gigi', category: 'Endodontik', verified_source: 'CMS ICD-9-CM Vol 3' },
-  { code: '23.72', description: 'Pulpektomi pulpa gigi', category: 'Endodontik', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '23.71', description: 'Perawatan saluran akar dengan irigasi', category: 'Endodontik', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '23.72', description: 'Perawatan saluran akar dengan apikoektomi', category: 'Endodontik', verified_source: 'CMS ICD-9-CM Vol 3' },
   { code: '23.73', description: 'Apikoektomi (reseksi apeks akar gigi)', category: 'Endodontik', verified_source: 'CMS ICD-9-CM Vol 3' },
 
   // ── 24.0 - 24.5: Periodonsia & Operasi Gusi/Rahang ────────────────────────
   { code: '24.0', description: 'Insisi gusi / drainase abses rongga mulut', category: 'Periodonsia', verified_source: 'CMS ICD-9-CM Vol 3' },
-  { code: '24.12', description: 'Biopsi gusi / mukosa mulut', category: 'Diagnostik', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '24.11', description: 'Biopsi gusi', category: 'Diagnostik', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '24.12', description: 'Biopsi tulang alveolar', category: 'Diagnostik', verified_source: 'CMS ICD-9-CM Vol 3' },
   { code: '24.2', description: 'Gingivektomi / gingivoplasti (pemotongan gusi)', category: 'Periodonsia', verified_source: 'CMS ICD-9-CM Vol 3' },
   { code: '24.31', description: 'Eksisi lesi gusi / eksisi mukokel', category: 'Bedah Mulut', verified_source: 'CMS ICD-9-CM Vol 3' },
   { code: '24.4', description: 'Eksisi kista / lesi tulang rahang', category: 'Bedah Mulut', verified_source: 'CMS ICD-9-CM Vol 3' },
@@ -40,6 +41,16 @@ export const ICD9CM_DENTAL = [
   { code: '87.12', description: 'Foto Rontgen Periapikal / Bitewing (Dental X-ray)', category: 'Radiologi', verified_source: 'CMS ICD-9-CM Vol 3' },
 
   // ── 96.54: Preventif / Profilaksis ───────────────────────────────────────
+  { code: '23.49', description: 'Restorasi gigi lainnya (termasuk veneer)', category: 'Restorasi', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '23.5', description: 'Implantasi gigi (replantasi/transplantasi)', category: 'Bedah Mulut', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '23.6', description: 'Implan gigi prostetik', category: 'Prostodonsia', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '24.39', description: 'Tindakan lain pada gusi (mis. kuretase)', category: 'Periodonsia', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '24.6', description: 'Pembukaan gigi (exposure of tooth)', category: 'Bedah Mulut', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '24.7', description: 'Pemasangan alat ortodonti (behel/kawat gigi)', category: 'Ortodonti', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '24.8', description: 'Tindakan ortodonti lainnya (kontrol/penyesuaian)', category: 'Ortodonti', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '24.99', description: 'Tindakan gigi lainnya', category: 'Lainnya', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '89.31', description: 'Pemeriksaan gigi', category: 'Diagnostik', verified_source: 'CMS ICD-9-CM Vol 3' },
+  { code: '99.97', description: 'Pemasangan gigi tiruan (denture)', category: 'Prostodonsia', verified_source: 'CMS ICD-9-CM Vol 3' },
   { code: '96.54', description: 'Scaling & Polishing (pembersihan karang gigi)', category: 'Preventif', verified_source: 'CMS ICD-9-CM Vol 3' }
 ];
 
