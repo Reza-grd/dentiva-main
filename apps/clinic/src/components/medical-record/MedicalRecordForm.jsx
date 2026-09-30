@@ -338,7 +338,7 @@ const MedicalRecordForm = () => {
 
       if (error) throw error;
       // Isi SOAP tersimpan terenkripsi (PGP:…) — dekripsi di server sebelum ditampilkan.
-      const FIELDS = ['keluhan', 'pemeriksaan_fisik', 'diagnosa', 'terapi', 'catatan_dokter'];
+      const FIELDS = ['keluhan', 'pemeriksaan_fisik', 'diagnosa', 'terapi', 'catatan_dokter', 'kode_icd10'];
       const rows = data || [];
       const plain = await encryptionService.decryptBatch(rows.flatMap(r => FIELDS.map(f => r[f] || '')));
       const versions = rows.map((r, i) => {

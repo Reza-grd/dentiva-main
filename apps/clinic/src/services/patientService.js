@@ -296,6 +296,7 @@ export const patientService = {
         decryptPayloads.push(v.pemeriksaan_fisik || '');
         decryptPayloads.push(v.terapi || '');
         decryptPayloads.push(v.catatan_dokter || '');
+        decryptPayloads.push(v.kode_icd10 || '');
       });
 
       // 2. Decrypt in a single RPC call
@@ -325,6 +326,7 @@ export const patientService = {
         v.pemeriksaan_fisik = decrypted[decryptIdx++];
         v.terapi = decrypted[decryptIdx++];
         v.catatan_dokter = decrypted[decryptIdx++];
+        v.kode_icd10 = decrypted[decryptIdx++] || null;
       });
 
       return {
@@ -810,10 +812,9 @@ export const patientService = {
   async deletePatient(patientId) {
     try {
       // 1. Fetch all media for this patient to prevent storage orphans
+      // (lewat RPC: baris patient_media hanya terbaca oleh dokter)
       const { data: mediaFiles, error: mediaError } = await supabase
-        .from('patient_media')
-        .select('*')
-        .eq('patient_id', patientId);
+        .rpc('get_patient_media_paths', { p_patient_id: patientId });
         
       if (mediaError) throw mediaError;
 

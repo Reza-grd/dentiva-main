@@ -22,19 +22,15 @@ export async function buildAndSyncConditions(
     throw new Error('Failed to fetch diagnosis for conditions sync: ' + (fetchErr?.message || 'Not found'));
   }
 
-  if (!visit.kode_icd10) {
+  // 2. Decrypt kode ICD-10 & diagnosa (disegel 'PGPM:'; throws on failure, preventing ciphertext leakage)
+  const [kodeIcd10, decryptedDiagnosa] = await decryptBatch(supabaseAdmin, [visit.kode_icd10 || '', visit.diagnosa || '']);
+
+  if (!kodeIcd10) {
     console.log(`No ICD-10 code found for visit ${visitId}. Skipping condition sync.`);
     return [];
   }
 
-  // 2. Decrypt diagnosa (will throw error on failure, preventing ciphertext leakage)
-  let decryptedDiagnosa = '';
-  if (visit.diagnosa) {
-    const decrypted = await decryptBatch(supabaseAdmin, [visit.diagnosa]);
-    decryptedDiagnosa = decrypted[0] || '';
-  }
-
-  const codes = visit.kode_icd10.split(',').map((c: string) => c.trim()).filter(Boolean);
+  const codes = kodeIcd10.split(',').map((c: string) => c.trim()).filter(Boolean);
   const conditionIds: string[] = [];
 
   for (const code of codes) {

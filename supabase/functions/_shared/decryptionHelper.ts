@@ -7,7 +7,7 @@ export async function decryptBatch(supabaseAdmin: any, payloads: string[]): Prom
 
   for (let i = 0; i < payloads.length; i++) {
     const val = payloads[i];
-    if (val && val.startsWith('PGP:')) {
+    if (val && (val.startsWith('PGP:') || val.startsWith('PGPM:'))) {
       processed[i] = ''; // placeholder
       pgpPayloads.push(val);
       pgpIndices.push(i);
@@ -31,7 +31,7 @@ export async function decryptBatch(supabaseAdmin: any, payloads: string[]): Prom
 
     pgpIndices.forEach((origIdx, batchIdx) => {
       const decryptedVal = data[batchIdx];
-      if (typeof decryptedVal === 'string' && decryptedVal.startsWith('PGP:')) {
+      if (typeof decryptedVal === 'string' && (decryptedVal.startsWith('PGP') || decryptedVal.startsWith('[Terbatas'))) {
         throw new Error(`PHI Decryption Failed: Item at index ${origIdx} failed to decrypt properly.`);
       }
       processed[origIdx] = decryptedVal || '';

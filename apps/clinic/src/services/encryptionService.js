@@ -163,7 +163,8 @@ export const encryptionService = {
       const val = ciphertextsArray[i];
       if (val && val.startsWith('ENC:v1:')) {
         processed[i] = await this.decryptLocalFallback(val);
-      } else if (val && val.startsWith('PGP:')) {
+      } else if (val && (val.startsWith('PGP:') || val.startsWith('PGPM:'))) {
+        // PGPM: = isi rekam medis; server hanya membukanya untuk dokter
         processed[i] = null; // placeholder for server-side decrypted value
         pgpPayloads.push(val);
         pgpIndices.push(i);

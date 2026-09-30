@@ -16,6 +16,7 @@ async function decryptVisitsList(list) {
     payloads.push(v.pemeriksaan_fisik || '');
     payloads.push(v.terapi || '');
     payloads.push(v.catatan_dokter || '');
+    payloads.push(v.kode_icd10 || '');
 
     // Nested Patient PII fields
     if (v.patient) {
@@ -34,6 +35,7 @@ async function decryptVisitsList(list) {
     v.pemeriksaan_fisik = decrypted[idx++];
     v.terapi = decrypted[idx++];
     v.catatan_dokter = decrypted[idx++];
+    v.kode_icd10 = decrypted[idx++] || null;
 
     if (v.patient) {
       v.patient.nama_lengkap = decrypted[idx++];
