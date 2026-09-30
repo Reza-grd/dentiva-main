@@ -141,7 +141,6 @@ serve(async (req) => {
 
     const { visitId, patientId, isTest, targetPhone, target, message, messageType, triggeredBy } = body
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
     const whapiToken = Deno.env.get('WHAPI_TOKEN')
 
     if (!whapiToken) {
