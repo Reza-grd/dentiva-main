@@ -10,6 +10,7 @@ import SoapTemplates from './SoapTemplates';
 import { satusehatService } from '../../services/satusehatService';
 import ThemeGallery from '../common/ThemeGallery';
 import QueueDisplayLinks from './QueueDisplayLinks';
+import PaymentSettings from './PaymentSettings';
 
 const SettingsPage = () => {
   const { user, userProfile } = useAuth();
@@ -369,6 +370,7 @@ const SettingsPage = () => {
       { id: 'soap-templates', label: 'Template SOAP', icon: Save },
       { id: 'satusehat', label: 'SATUSEHAT', icon: Shield },
       { id: 'queue-display', label: 'Layar Antrean TV', icon: Monitor },
+      { id: 'payments', label: 'Pembayaran & QRIS', icon: CreditCard },
     ] : []),
     { id: 'security', label: 'Keamanan', icon: Lock },
     { id: 'audit-logs', label: 'Log Audit', icon: Shield },
@@ -1213,8 +1215,10 @@ const SettingsPage = () => {
 
             {activeTab === 'queue-display' && <QueueDisplayLinks />}
 
+            {activeTab === 'payments' && <PaymentSettings />}
+
             {/* Save Button */}
-            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && activeTab !== 'queue-display' && (
+            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && activeTab !== 'queue-display' && activeTab !== 'payments' && (
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3 items-center">
                 {saved && (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mr-2 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg">

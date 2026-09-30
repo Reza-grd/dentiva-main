@@ -11,6 +11,7 @@ import { useToast } from '../common/ToastNotification';
 import { parseDateLocal } from '../../utils/dateUtils';
 import { supabase } from '../../services/supabase';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
+import QrisPanel from './QrisPanel';
 
 const PaymentForm = () => {
   const { visitId } = useParams();
@@ -1445,6 +1446,7 @@ const PaymentForm = () => {
               >
                 <option value="">-- Pilih Metode --</option>
                 <option value="cash">Cash</option>
+                <option value="qris">QRIS</option>
                 <option value="transfer">Transfer Bank</option>
                 <option value="debit">Debit Card</option>
                 <option value="credit">Credit Card</option>
@@ -1452,6 +1454,7 @@ const PaymentForm = () => {
               </select>
               <FieldError name="metode_pembayaran" />
             </div>
+            {paymentData.metode_pembayaran === 'qris' && <QrisPanel amount={calculateTotals().totalBayar} />}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Status Pembayaran <span className="text-red-500">*</span></label>
               <select
