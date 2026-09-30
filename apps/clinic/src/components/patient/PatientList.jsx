@@ -6,6 +6,7 @@ import PatientAvatar from '../common/PatientAvatar';
 import { useToast } from '../common/ToastNotification';
 import { useAuth } from '../../contexts/AuthContext';
 import { patientService } from '../../services/patientService';
+import PatientImportModal from './PatientImportModal';
 import { Users, UserPlus, Eye, Edit, Calendar, Phone, MapPin, User, Search, Filter } from 'lucide-react';
 
 const PatientList = () => {
@@ -25,6 +26,7 @@ const PatientList = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const { userProfile } = useAuth();
+  const [showImport, setShowImport] = useState(false);
 
   // Debounce search term to minimize query hits
   useEffect(() => {
@@ -123,14 +125,25 @@ const PatientList = () => {
             </p>
           </div>
         </div>
+        <div className="flex gap-2">
+        {userProfile?.role === 'admin' && (
+          <button
+            onClick={() => setShowImport(true)}
+            className="px-4 py-2.5 text-sm font-semibold rounded-xl border border-border text-text-primary hover:bg-background transition-colors"
+          >
+            Impor Excel
+          </button>
+        )}
         <button
-          onClick={() => navigate('/pasien/registrasi')}
+          onClick={() => navigate('/pasien/daftar')}
           className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 border-0 hover:opacity-90"
         >
           <UserPlus size={18} />
           Daftar Pasien Baru
         </button>
+        </div>
       </div>
+      {showImport && <PatientImportModal onClose={() => setShowImport(false)} onImported={loadPatients} />}
 
       {/* Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

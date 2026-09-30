@@ -370,7 +370,7 @@ const AdminDashboard = () => {
                     loading={loadingRecent}
                     action={
                       <button
-                        onClick={() => navigate('/jadwal')}
+                        onClick={() => navigate('/admin/jadwal')}
                         className="text-xs text-primary-600 hover:underline font-medium"
                       >
                         Lihat semua →

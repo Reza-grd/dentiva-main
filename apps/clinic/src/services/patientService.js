@@ -348,6 +348,38 @@ export const patientService = {
     }
   },
 
+  /**
+   * Impor banyak pasien sekaligus (hasil utils/patientImport). Dienkripsi di server
+   * per potongan 50 baris; nomor RM dibuat trigger generate_no_rm. Batas kuota paket
+   * (trigger max pasien) tetap berlaku.
+   */
+  async importPatients(rows, onProgress) {
+    const FIELDS = ['nama_lengkap', 'no_wa', 'alamat', 'nik', 'nik_ibu'];
+    const { data: authData } = await supabase.auth.getUser();
+    let inserted = 0;
+    const failures = [];
+    for (let i = 0; i < rows.length; i += 50) {
+      const chunk = rows.slice(i, i + 50);
+      try {
+        const encrypted = await encryptionService.encryptBatch(chunk.flatMap((r) => FIELDS.map((f) => r[f] || '')));
+        const payload = chunk.map((r, j) => {
+          const out = { ...r, registered_by: authData.user?.id };
+          FIELDS.forEach((f, k) => {
+            out[f] = r[f] ? encrypted[j * FIELDS.length + k] : null;
+          });
+          return out;
+        });
+        const { error } = await supabase.from('patients').insert(payload);
+        if (error) throw error;
+        inserted += chunk.length;
+      } catch (error) {
+        failures.push({ from: i + 1, to: i + chunk.length, error: error.message });
+      }
+      onProgress?.(Math.min(i + chunk.length, rows.length), rows.length);
+    }
+    return { inserted, failures };
+  },
+
   async createPatient(patientData) {
     try {
       const { data: authData } = await supabase.auth.getUser();
