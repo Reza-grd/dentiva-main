@@ -44,17 +44,14 @@ export async function syncOrganization(
     throw new Error(`Invalid Organization ID on SatuSehat: HTTP ${res.status} - ${errText}`);
   }
   
-  // 3. Save sync confirmation timestamp
+  // 3. Save sync confirmation timestamp (kolom updated_at; last_synced_at tidak pernah ada)
   const { error: upsertErr } = await supabaseAdmin
     .from('satusehat_organizations')
-    .upsert({
-      clinic_id: clinicId,
-      satusehat_organization_id: orgId,
-      last_synced_at: new Date().toISOString()
-    });
+    .update({ updated_at: new Date().toISOString() })
+    .eq('clinic_id', clinicId);
 
   if (upsertErr) {
-    console.error('Warning: Failed to update last_synced_at for organization:', upsertErr);
+    console.error('Warning: Failed to update sync timestamp for organization:', upsertErr);
   }
 
   await recordOutboxSuccess(supabaseAdmin, outboxId, orgId);

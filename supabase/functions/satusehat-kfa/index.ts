@@ -51,7 +51,8 @@ function toItem(p: KfaProduct) {
   };
 }
 
-async function kfaGet(admin: ReturnType<typeof createClient>, path: string) {
+// deno-lint-ignore no-explicit-any
+async function kfaGet(admin: any, path: string) {
   const token = await getAccessToken(admin);
   const res = await fetch(`${getKfaBaseUrl()}${path}`, {
     headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },

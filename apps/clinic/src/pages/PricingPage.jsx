@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../services/supabase";
 import { useAuth } from "../contexts/AuthContext";
 import { usePermission } from "../contexts/PermissionsContext";
-import { useToast } from "@dentiva/ui";
+// Toast aplikasi klinik (main.jsx); useToast dari @dentiva/ui butuh provider lain → dulu halaman crash.
+import { useToast } from "../components/common/ToastNotification";
 import {
   Card,
   CardHeader,
@@ -23,7 +24,9 @@ const isUnlimited = (n) => Number(n) >= 9999;
 export default function PricingPage() {
   const { userProfile } = useAuth();
   const { plan: currentPlan, subscription } = usePermission();
-  const { toast } = useToast();
+  const { addToast } = useToast();
+  const toast = ({ title, description, variant = "info" }) =>
+    addToast(description ? `${title} — ${description}` : title, variant === "default" ? "info" : variant);
 
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);

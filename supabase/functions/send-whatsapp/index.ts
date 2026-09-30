@@ -112,7 +112,10 @@ serve(async (req) => {
         .from('clinic_subscriptions')
         .select('*, plan:subscription_plans(*)')
         .eq('clinic_id', callingClinicId)
-        .eq('status', 'active')
+        // Klinik trial boleh mencoba fitur paketnya (dulu hanya 'active' → trial selalu 403).
+        .in('status', ['trialing', 'active'])
+        .order('current_period_end', { ascending: false })
+        .limit(1)
         .maybeSingle()
 
       const hasWaFeature = sub?.plan?.features?.whatsapp_reminders === true
@@ -141,6 +144,24 @@ serve(async (req) => {
 
     const { visitId, patientId, isTest, targetPhone, target, message, messageType, triggeredBy } = body
 
+    // Isolasi klinik: data dibaca dengan service role, jadi pastikan kunjungan/pasien
+    // milik klinik pemanggil (dulu staf klinik A bisa memicu pesan ke pasien klinik B).
+    if (authHeader !== `Bearer ${supabaseServiceKey}`) {
+      const forbidden = () => new Response(JSON.stringify({ error: 'Forbidden: data bukan milik klinik Anda' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+      if (!callingClinicId) return forbidden()
+      if (visitId) {
+        const { data: v } = await supabase.from('visits').select('clinic_id').eq('id', visitId).maybeSingle()
+        if (!v || v.clinic_id !== callingClinicId) return forbidden()
+      }
+      if (patientId) {
+        const { data: p } = await supabase.from('patients').select('clinic_id').eq('id', patientId).maybeSingle()
+        if (!p || p.clinic_id !== callingClinicId) return forbidden()
+      }
+    }
+
     const whapiToken = Deno.env.get('WHAPI_TOKEN')
 
     if (!whapiToken) {
@@ -155,11 +176,13 @@ serve(async (req) => {
     let finalPatientId = patientId
 
     if (!finalPhone && visitId) {
-      const { data: visit, error: visitErr } = await supabase
+      const { data: visitRow, error: visitErr } = await supabase
         .from('visits')
         .select(`patient_id, patient:patients(no_wa, wa_consent)`)
         .eq('id', visitId)
         .maybeSingle();
+      // deno-lint-ignore no-explicit-any
+      const visit = visitRow as any;
 
       if (!visitErr && visit) {
         if (!finalPatientId) finalPatientId = visit.patient_id;

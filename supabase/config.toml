@@ -419,3 +419,7 @@ import_map = "./functions/console-api/deno.json"
 [functions.midtrans-webhook]
 # Midtrans tidak mengirim JWT Supabase; keaslian dicek lewat signature SHA-512.
 verify_jwt = false
+
+[functions.whatsapp-webhook]
+# Meta tidak mengirim JWT Supabase; keaslian dicek lewat X-Hub-Signature-256 (WHATSAPP_APP_SECRET).
+verify_jwt = false

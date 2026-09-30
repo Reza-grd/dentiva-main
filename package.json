@@ -28,7 +28,8 @@
     "db:test": "supabase test db",
     "db:new": "supabase migration new",
     "storybook": "npm run storybook -w @dentiva/clinic",
-    "db:smoke": "node supabase/tests/smoke/migrations.smoke.mjs"
+    "db:smoke": "node supabase/tests/smoke/migrations.smoke.mjs",
+    "check:functions": "bash scripts/check-edge-functions.sh"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.3.0",

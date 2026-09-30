@@ -31,9 +31,11 @@ export const ToastProvider = ({ children }) => {
   const error   = useCallback((msg, dur) => addToast(msg, 'error',   dur), [addToast]);
   const warning = useCallback((msg, dur) => addToast(msg, 'warning', dur), [addToast]);
   const info    = useCallback((msg, dur) => addToast(msg, 'info',    dur), [addToast]);
+  // Alias yang dipakai beberapa halaman (dulu memanggil fungsi yang tidak ada → error saat diklik).
+  const showToast = useCallback((msg, type = 'info', dur) => addToast(msg, type, dur), [addToast]);
 
   return (
-    <ToastContext.Provider value={{ addToast, success, error, warning, info }}>
+    <ToastContext.Provider value={{ addToast, success, error, warning, info, showToast }}>
       {children}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </ToastContext.Provider>

@@ -22,7 +22,7 @@ export async function buildAndSyncProcedures(
     .from('visit_treatments')
     .select(`
       id,
-      treatment:treatments(nama_tindakan, kode_icd9cm, kode_snomed_ct)
+      treatment:treatments(nama_treatment, kode_icd9cm, kode_snomed_ct)
     `)
     .eq('visit_id', visitId);
 
@@ -35,7 +35,7 @@ export async function buildAndSyncProcedures(
   for (const vt of (vtList || [])) {
     const icd9Code = vt.treatment?.kode_icd9cm;
     const snomedCode = vt.treatment?.kode_snomed_ct;
-    const name = vt.treatment?.nama_tindakan || 'Tindakan Gigi';
+    const name = vt.treatment?.nama_treatment || 'Tindakan Gigi';
 
     if (!icd9Code && !snomedCode) {
       console.warn(`[WARNING] Treatment ID ${vt.id} (${name}) has neither kode_icd9cm nor kode_snomed_ct. Skipping procedure sync.`);
