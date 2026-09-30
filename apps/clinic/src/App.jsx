@@ -38,6 +38,8 @@ const DoctorSchedulePage = lazy(() => import('./components/schedule/DoctorSchedu
 const QueueDisplay = lazy(() => import('./components/queue/QueueDisplay'));
 const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
+const BookingPage = lazy(() => import('./pages/BookingPage'));
+const BookingRequests = lazy(() => import('./components/schedule/BookingRequests'));
 
 function App() {
   const { loading, user, userProfile, accountStatus, signOut } = useAuth();
@@ -130,6 +132,13 @@ function App() {
           {/* Layar antrean TV (tanpa login): token dibuat admin di Pengaturan → Layar Antrean TV.
               /queue-display lama tanpa token menampilkan petunjuk membuat tautan. */}
           <Route path="/antrean/:token" element={<QueueDisplay />} />
+          {/* Booking online publik (tanpa login) */}
+          <Route path="/booking/:slug" element={<BookingPage />} />
+          <Route path="/booking-requests" element={
+            <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+              <BookingRequests />
+            </ProtectedRoute>
+          } />
           <Route path="/queue-display" element={<QueueDisplay />} />
 
           <Route path="/login" element={<LoginPage />} />

@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield,
+  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -28,6 +28,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { group: 'KLINIK' },
         { icon: Calendar,        label: 'Jadwal Kunjungan', path: `${baseUrl}/jadwal` },
         { icon: CalendarClock,   label: 'Jadwal Dokter',    path: `${baseUrl}/jadwal-dokter` },
+        { icon: CalendarCheck,   label: 'Booking Online',   path: '/booking-requests' },
         { group: 'KEUANGAN' },
         { icon: DollarSign,      label: 'Pembayaran',       path: `${baseUrl}/pembayaran` },
         { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
@@ -58,6 +59,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: Users,           label: 'Data Pasien',        path: '/pasien' },
         { group: 'OPERASIONAL' },
         { icon: Calendar,        label: 'Jadwal',             path: `${baseUrl}/jadwal` },
+        { icon: CalendarCheck,   label: 'Booking Online',     path: '/booking-requests' },
         { icon: ClipboardList,   label: 'Riwayat Kunjungan', path: `${baseUrl}/kunjungan` },
         { icon: DollarSign,      label: 'Pembayaran',         path: `${baseUrl}/pembayaran` },
       ],

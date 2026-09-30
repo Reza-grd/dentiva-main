@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PhotoUpload from '../common/PhotoUpload';
 import { useToast } from '../common/ToastNotification';
 import ScheduleVisitForm from './ScheduleVisitForm';
@@ -53,11 +53,13 @@ const PatientRegistration = () => {
   // Pekerjaan "Lainnya" free text
   const [pekerjaanLainnya, setPekerjaanLainnya] = useState('');
 
+  // Prefill dari Booking Online ("Daftarkan pasien")
+  const fromBooking = useLocation().state?.fromBooking;
   const [formData, setFormData] = useState({
-    nama_lengkap: '', nama_kk: '', tempat_lahir: '', tanggal_lahir: '', jenis_kelamin: '', umur: '',
+    nama_lengkap: fromBooking?.nama || '', nama_kk: '', tempat_lahir: '', tanggal_lahir: '', jenis_kelamin: '', umur: '',
     agama: '', pendidikan_terakhir: '', pekerjaan: '', status_pernikahan: '', jaminan_kesehatan: '',
     golongan_darah: '', alamat_detail: '', provinsi: '', kabupaten: '', kecamatan: '', desa: '',
-    no_wa: '', no_telepon: '', dokter_keluarga: '', dokter_gigi_keluarga: '', rujukan_dari: '',
+    no_wa: fromBooking?.no_wa || '', no_telepon: '', dokter_keluarga: '', dokter_gigi_keluarga: '', rujukan_dari: '',
     berat_badan: '', tinggi_badan: '', keluhan_awal: '', wa_consent: false,
     nik: '', nik_ibu: '', identitas_alternatif_jenis: 'NIK'
   });
