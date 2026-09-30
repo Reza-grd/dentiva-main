@@ -56,6 +56,26 @@ export const treatmentService = {
   },
 
   // Create new treatment
+  /**
+   * Impor tarif standar (data/treatmentTemplates.js). Kode yang sudah ada di
+   * klinik dilewati — tidak menimpa harga yang sudah diatur.
+   */
+  async importTemplates(templates, existingCodes = []) {
+    try {
+      const taken = new Set(existingCodes.map((c) => String(c).toUpperCase()));
+      const rows = templates
+        .filter((t) => !taken.has(t.kode_treatment.toUpperCase()))
+        .map((t) => ({ ...t, is_active: true }));
+      if (rows.length === 0) return { success: true, inserted: 0 };
+      const { error } = await supabase.from('treatments').insert(rows);
+      if (error) throw error;
+      return { success: true, inserted: rows.length };
+    } catch (error) {
+      console.error('Error importing treatment templates:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
   async createTreatment(treatmentData) {
     try {
       const { data, error } = await supabase

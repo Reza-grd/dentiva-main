@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, Search, Package, DollarSign } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { treatmentService } from '../../services/treatmentService';
 import ICD9CMPicker from '../common/ICD9CMPicker';
+import { TREATMENT_TEMPLATES } from '../../data/treatmentTemplates';
 
 const TreatmentMaster = () => {
   const toast = useToast();
@@ -68,6 +69,19 @@ const TreatmentMaster = () => {
       toast.error(result.error || 'Gagal menyimpan treatment');
     }
   };
+
+  const [importing, setImporting] = useState(false);
+  const handleImportTemplates = async () => {
+    if (!window.confirm(`Impor ${TREATMENT_TEMPLATES.length} tarif standar? Kode yang sudah ada tidak diubah. Harga hanya contoh — sesuaikan setelah impor.`)) return;
+    setImporting(true);
+    const res = await treatmentService.importTemplates(TREATMENT_TEMPLATES, treatments.map(t => t.kode_treatment));
+    setImporting(false);
+    if (!res.success) return toast.error('Gagal impor: ' + res.error);
+    toast.success(res.inserted ? `${res.inserted} tarif standar ditambahkan. Sesuaikan harganya.` : 'Semua tarif standar sudah ada.');
+    loadTreatments();
+  };
+
+  const withoutIcd9 = treatments.filter(t => t.is_active !== false && !t.kode_icd9cm).length;
 
   const handleEdit = (treatment) => {
     setEditingTreatment(treatment);
@@ -148,15 +162,32 @@ const TreatmentMaster = () => {
               className="input-field pl-10"
             />
           </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="btn btn-primary w-full md:w-auto"
-          >
-            <Plus size={20} />
-            Tambah Treatment
-          </button>
+          <div className="flex gap-2 w-full md:w-auto">
+            <button
+              onClick={handleImportTemplates}
+              disabled={importing}
+              className="btn btn-secondary w-full md:w-auto"
+              title="Tambahkan daftar tindakan gigi umum lengkap dengan kode ICD-9-CM"
+            >
+              {importing ? 'Mengimpor…' : 'Impor tarif standar'}
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="btn btn-primary w-full md:w-auto"
+            >
+              <Plus size={20} />
+              Tambah Treatment
+            </button>
+          </div>
         </div>
       </div>
+
+      {withoutIcd9 > 0 && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 p-4 text-sm text-amber-800 dark:text-amber-300">
+          <strong>{withoutIcd9} tindakan belum memiliki kode ICD-9-CM.</strong> Tindakan tanpa kode tidak akan terkirim ke
+          SATUSEHAT sebagai Procedure. Edit tindakan lalu pilih kodenya (pemeriksaan/konsultasi dan estetik memang tidak punya kode).
+        </div>
+      )}
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
