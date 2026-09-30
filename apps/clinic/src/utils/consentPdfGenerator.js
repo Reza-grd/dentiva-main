@@ -50,7 +50,8 @@ export const generateConsentPdf = (consent, clinic) => {
   const dateStr = format(new Date(consent.created_at), 'dd MMMM yyyy', { locale: id });
   const signY = textY + 70;
   
-  doc.text(`${clinic?.city || 'Jakarta'}, ${dateStr}`, 130, signY);
+  // Tanpa kota tetap: dulu selalu "Jakarta" untuk klinik mana pun.
+  doc.text(dateStr, 130, signY);
   
   doc.text(`Dokter Pemeriksa,`, 30, signY + 10);
   doc.text(`Pasien,`, 140, signY + 10);

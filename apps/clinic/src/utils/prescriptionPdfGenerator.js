@@ -17,7 +17,7 @@ export const generatePrescriptionPdf = (visit, patient, doctor, clinic) => {
   // --- Header: Clinic Info ---
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
-  doc.text(clinic?.name || 'Klinik Gigi NeuroDent', pageWidth / 2, 20, { align: 'center' });
+  doc.text(clinic?.name || 'Klinik Gigi', pageWidth / 2, 20, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);

@@ -26,10 +26,13 @@ import PrescriptionEntry from './PrescriptionEntry';
 import { prescriptionService } from '../../services/prescriptionService';
 import { generatePrescriptionPdf } from '../../utils/prescriptionPdfGenerator';
 import { RichTextEditor } from '../ui/RichTextEditor';
+import { encryptionService } from '../../services/encryptionService';
+import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 
 const MedicalRecordForm = () => {
   const { patientId } = useParams();
   const { userProfile } = useAuth();
+  const { settings: clinicSettings } = useClinicSettings();
   const toast = useToast();
   const navigate = useNavigate();
 
@@ -334,7 +337,16 @@ const MedicalRecordForm = () => {
         .order('version', { ascending: false });
 
       if (error) throw error;
-      setVersionModal(prev => ({ ...prev, versions: data || [], loading: false }));
+      // Isi SOAP tersimpan terenkripsi (PGP:…) — dekripsi di server sebelum ditampilkan.
+      const FIELDS = ['keluhan', 'pemeriksaan_fisik', 'diagnosa', 'terapi', 'catatan_dokter'];
+      const rows = data || [];
+      const plain = await encryptionService.decryptBatch(rows.flatMap(r => FIELDS.map(f => r[f] || '')));
+      const versions = rows.map((r, i) => {
+        const out = { ...r };
+        FIELDS.forEach((f, j) => { out[f] = plain[i * FIELDS.length + j]; });
+        return out;
+      });
+      setVersionModal(prev => ({ ...prev, versions, loading: false }));
     } catch (error) {
       toast.error('Gagal memuat riwayat versi: ' + error.message);
       setVersionModal(prev => ({ ...prev, loading: false }));
@@ -342,11 +354,19 @@ const MedicalRecordForm = () => {
   };
 
   const handleRestoreVersion = async (versionNumber) => {
+    // Permenkes 24/2022: perubahan rekam medis harus disertai alasan (tercatat di versi baru).
+    const reason = window.prompt(`Alasan memulihkan rekam medis ke versi #${versionNumber}:`);
+    if (reason === null) return;
+    if (reason.trim().length < 5) {
+      toast.error('Alasan minimal 5 karakter.');
+      return;
+    }
     try {
       setSaving(true);
-      const { error } = await supabase.rpc('restore_visit_version', {
+      const { error } = await supabase.rpc('restore_emr_version', {
         p_visit_id: versionModal.visitId,
-        p_version: versionNumber
+        p_version: versionNumber,
+        p_reason: reason.trim()
       });
 
       if (error) throw error;
@@ -1326,9 +1346,7 @@ const MedicalRecordForm = () => {
                             {!visit._isNew && (
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setSelectedVersion({ isOpen: true, visitId: visit.id });
-                                }}
+                                onClick={() => openVersionModal(visit.id)}
                                 className="px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 rounded-lg transition-colors"
                               >
                                 Riwayat Versi
@@ -1337,7 +1355,11 @@ const MedicalRecordForm = () => {
                             {!visit._isNew && visit.prescriptions && visit.prescriptions.length > 0 && (
                               <button
                                 type="button"
-                                onClick={() => generatePrescriptionPdf(visit, patient, userProfile, { name: 'NeuroDent Clinic', address: 'Jl. Contoh Alamat No. 123', city: 'Jakarta' })}
+                                onClick={() => generatePrescriptionPdf(visit, patient, userProfile, {
+                                  name: clinicSettings?.clinic_name || 'Klinik Gigi',
+                                  address: clinicSettings?.clinic_address || '',
+                                  city: clinicSettings?.clinic_phone ? `Telp. ${clinicSettings.clinic_phone}` : '',
+                                })}
                                 className="px-2.5 py-1 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 rounded-lg transition-colors flex items-center gap-1"
                               >
                                 <Printer size={14} /> Cetak Resep
@@ -1438,7 +1460,11 @@ const MedicalRecordForm = () => {
                                 <button
                                   key={c.id}
                                   type="button"
-                                  onClick={() => generateConsentPdf(c, { name: 'NeuroDent Clinic', address: 'Jl. Contoh Alamat No. 123', city: 'Jakarta' })}
+                                  onClick={() => generateConsentPdf(c, {
+                                    name: clinicSettings?.clinic_name || 'Klinik Gigi',
+                                    address: clinicSettings?.clinic_address || '',
+                                    city: clinicSettings?.clinic_phone ? `Telp. ${clinicSettings.clinic_phone}` : '',
+                                  })}
                                   className="px-3 py-1.5 text-xs bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg flex items-center gap-2 hover:border-teal-400 transition-colors"
                                 >
                                   <FileText size={14} className="text-teal-500"/> {c.treatment_type}
@@ -1633,6 +1659,7 @@ const MedicalRecordForm = () => {
                       </div>
                       <span className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1">{v.change_summary || 'Perubahan tersimpan'}</span>
                       <span className="text-[10px] font-semibold text-gray-400 mt-1">Oleh: {v.users?.full_name || 'System'}</span>
+                      {v.reason && <span className="text-[10px] text-gray-500 italic line-clamp-2">Alasan: {v.reason}</span>}
                     </button>
                   ))
                 )}
@@ -1648,12 +1675,14 @@ const MedicalRecordForm = () => {
                         <span className="font-bold text-sm text-gray-800 dark:text-white">Versi #{selectedVersion.version}</span>
                         <p className="text-[10px] text-gray-400 mt-0.5">Diedit pada {new Date(selectedVersion.changed_at).toLocaleString('id-ID')}</p>
                       </div>
+                      {['admin', 'dokter'].includes(userProfile?.role) && (
                       <button
                         onClick={() => handleRestoreVersion(selectedVersion.version)}
                         className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors active:scale-95 shadow-sm"
                       >
                         Pulihkan ke Versi Ini
                        </button>
+                      )}
                      </div>
 
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1672,6 +1701,14 @@ const MedicalRecordForm = () => {
                        <div>
                          <span className="text-[10px] font-bold text-gray-400 uppercase">Terapi (P)</span>
                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.terapi || '-'}</p>
+                       </div>
+                       <div>
+                         <span className="text-[10px] font-bold text-gray-400 uppercase">Kode ICD-10</span>
+                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.kode_icd10 || '-'}</p>
+                       </div>
+                       <div>
+                         <span className="text-[10px] font-bold text-gray-400 uppercase">Catatan Dokter</span>
+                         <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.catatan_dokter || '-'}</p>
                        </div>
                      </div>
                    </div>
