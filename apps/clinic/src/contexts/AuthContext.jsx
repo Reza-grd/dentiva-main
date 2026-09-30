@@ -344,7 +344,15 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
+
+      // Cache pengaturan klinik tidak boleh terbawa ke pengguna/klinik berikutnya di komputer yang sama.
+      try {
+        localStorage.removeItem('clinic_settings');
+        localStorage.removeItem('Dentiva_clinic_settings');
+      } catch {
+        /* storage tidak tersedia */
+      }
+
       setUser(null);
       setUserProfile(null);
       setAccountStatus(null);
