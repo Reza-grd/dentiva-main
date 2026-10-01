@@ -45,10 +45,25 @@ def logo_fit(size):
 def paste_center(img, l, cx, cy):
     img.paste(l, (int(cx - l.width / 2), int(cy - l.height / 2)), l)
 
-# Sumber ikon aplikasi: logo dengan padding 8% di kanvas persegi transparan
-side = int(max(logo.size) * 1.16)
-icon = Image.new("RGBA", (side, side), (0, 0, 0, 0))
-paste_center(icon, logo, side / 2, side / 2)
+# Sumber ikon aplikasi: ubin ikon resmi (app-icon-original.jpg) tanpa latar putih & bayangan.
+# Ubin berupa persegi membulat: kiri 126, kanan 1123, atas 87, bawah 1127, radius ±230 px.
+ORIG = ROOT / "apps/desktop/branding/app-icon-original.jpg"
+if ORIG.exists():
+    src = Image.open(ORIG).convert("RGBA")
+    L, T, R, B, RAD = 127, 88, 1123, 1126, 230
+    SS = 4  # supersampling untuk tepi halus
+    mask = Image.new("L", (src.width * SS, src.height * SS), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([L * SS, T * SS, R * SS, B * SS], radius=RAD * SS, fill=255)
+    mask = mask.resize(src.size, Image.LANCZOS)
+    src.putalpha(mask)
+    tile = src.crop((L, T, R + 1, B + 1))
+    side = int(max(tile.size) * 1.04)  # sedikit ruang agar tidak terpotong di ikon kecil
+    icon = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    icon.paste(tile, ((side - tile.width) // 2, (side - tile.height) // 2), tile)
+else:
+    side = int(max(logo.size) * 1.16)
+    icon = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    paste_center(icon, logo, side / 2, side / 2)
 icon.resize((1024, 1024), Image.LANCZOS).save(ROOT / "apps/desktop/branding/icon-source.png")
 
 def text_center(d, cx, y, s, f, fill):
