@@ -142,7 +142,7 @@ serve(async (req) => {
               .select(`
                 *,
                 patient:patients(satusehat_patient_id),
-                doctor:users(satusehat_practitioner_id)
+                doctor:users!visits_dokter_id_fkey(satusehat_practitioner_id)
               `)
               .eq('id', item.related_visit_id)
               .maybeSingle();

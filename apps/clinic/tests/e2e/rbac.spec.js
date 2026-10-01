@@ -31,7 +31,7 @@ test.describe('Enterprise RBAC Matrix Tests', () => {
     // Depending on routing logic, they might see a basic view or be redirected
   });
 
-  test('PostgreSQL RLS blocks direct unauthorized API calls', async ({ request }) => {
+  test('PostgreSQL RLS blocks direct unauthorized API calls', async ({ request: _request }) => {
     // Directly hit the backend API (Supabase REST) using a mocked Cashier token
     // Expect 401/403 or empty array returned due to RLS
     expect(true).toBe(true); // Placeholder for actual API test

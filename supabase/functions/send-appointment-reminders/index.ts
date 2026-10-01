@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
         .from('visits')
         .select(`id, clinic_id, patient_id, tanggal_kunjungan, jam_kunjungan,
                  patient:patients (nama_lengkap, no_wa, wa_consent),
-                 dokter:users (full_name, gelar_depan, gelar_belakang)`)
+                 dokter:users!visits_dokter_id_fkey (full_name, gelar_depan, gelar_belakang)`)
         .eq('tanggal_kunjungan', date)
         .eq('status', 'scheduled')
         .is('deleted_at', null)

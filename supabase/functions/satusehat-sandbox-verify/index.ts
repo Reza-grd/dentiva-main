@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
 
   const { data: visit } = await admin
     .from("visits")
-    .select("tanggal_kunjungan, jam_kunjungan, patient:patients(satusehat_patient_id), doctor:users(satusehat_practitioner_id)")
+    .select("tanggal_kunjungan, jam_kunjungan, patient:patients(satusehat_patient_id), doctor:users!visits_dokter_id_fkey(satusehat_practitioner_id)")
     .eq("id", visitId)
     .maybeSingle();
   const patientSId = (visit as any)?.patient?.satusehat_patient_id;

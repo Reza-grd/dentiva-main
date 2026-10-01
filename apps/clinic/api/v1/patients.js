@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js';
 
 // Vercel Serverless Function to act as API v1 for 3rd Party Integrations
 export default async function handler(req, res) {

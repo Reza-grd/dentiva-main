@@ -15,7 +15,7 @@ export async function buildAndSyncEncounter(
     .select(`
       *,
       patient:patients(nama_lengkap, satusehat_patient_id),
-      doctor:users(full_name, satusehat_practitioner_id)
+      doctor:users!visits_dokter_id_fkey(full_name, satusehat_practitioner_id)
     `)
     .eq('id', visitId)
     .maybeSingle();
