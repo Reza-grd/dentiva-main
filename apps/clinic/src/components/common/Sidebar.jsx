@@ -91,7 +91,9 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* Logo */}
         <div className="p-6 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-3">
-            <img src="/dentiva-logo.png" alt="Dentiva Logo" className="h-10 w-auto rounded-xl shadow-sm" />
+            <span className="h-10 w-10 shrink-0 rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-black/5 flex items-center justify-center">
+              <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="h-full w-full object-contain" />
+            </span>
             <div>
               <div className="font-bold text-2xl tracking-tighter text-text-primary leading-none mb-1">Dentiva</div>
               <div className="text-xs text-text-muted font-medium leading-none tracking-widest uppercase">Klinik Gigi</div>

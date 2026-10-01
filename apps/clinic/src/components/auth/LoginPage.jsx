@@ -81,8 +81,8 @@ const LoginPage = () => {
 
         {/* Logo */}
         <div className="flex items-center gap-3.5 mb-14 relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-3xl shadow-lg border border-white/20 overflow-hidden">
-            <img src="/dentiva-logo.png" alt="Dentiva Logo" className="w-full h-full object-cover" />
+          <div className="w-14 h-14 rounded-2xl bg-white p-2 flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
+            <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <div className="text-2xl font-extrabold text-white tracking-tight leading-none mb-1">
@@ -128,8 +128,8 @@ const LoginPage = () => {
       <div className="flex-1 flex flex-col justify-center items-center px-6 sm:px-8 py-10 overflow-y-auto bg-background transition-colors duration-300">
         {/* Mobile logo */}
         <div className="lg:hidden mb-8 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-card shadow-lg flex items-center justify-center text-2xl mx-auto mb-3 overflow-hidden border border-border">
-            <img src="/dentiva-logo.png" alt="Dentiva Logo" className="w-full h-full object-cover" />
+          <div className="w-14 h-14 rounded-2xl bg-white p-2 shadow-lg flex items-center justify-center mx-auto mb-3 overflow-hidden border border-border">
+            <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="w-full h-full object-contain" />
           </div>
           <div className="text-2xl font-extrabold text-accent-primary">
             Dentiva

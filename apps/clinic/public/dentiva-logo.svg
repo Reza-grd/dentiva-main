@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="385 250 510 515" role="img" aria-label="Dentiva"><title>Dentiva</title><defs>
+ <linearGradient id="g" x1="560" y1="270" x2="870" y2="740" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#EED9A4"/><stop offset=".45" stop-color="#C99D4E"/><stop offset="1" stop-color="#9A6E2C"/></linearGradient>
+ <linearGradient id="n" x1="0" y1="330" x2="0" y2="760" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#2B5288"/><stop offset="1" stop-color="#16315C"/></linearGradient>
+ <linearGradient id="t" x1="0" y1="585" x2="0" y2="665" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#1E3F70"/><stop offset="1" stop-color="#B98C40"/></linearGradient>
+</defs><g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="15">
+ <g stroke="url(#n)">
+  <path d="M436 362 V452 L494 500 V608 L541 660 V718"/>
+  <path d="M534 452 V582 L606 514"/>
+  <path d="M426 578 C426 640 446 682 486 710"/>
+  <path d="M541 660 L630 578 H696 Q713 578 713 595"/>
+ </g>
+ <path d="M713 595 C714 625 718 648 724 668" stroke="url(#t)"/>
+ <path d="M724 668 C734 708 748 726 770 722 C796 717 808 660 826 590 C846 512 872 420 866 352 C860 290 818 270 778 282 C756 289 742 300 722 296 C694 290 668 268 620 270 C578 272 548 300 546 338 C544 378 578 398 620 400 L666 400" stroke="url(#g)"/>
+ <g stroke="url(#n)" stroke-width="12" fill="#FFFFFF">
+  <circle cx="436" cy="340" r="20"/><circle cx="534" cy="430" r="20"/>
+  <circle cx="624" cy="496" r="20"/><circle cx="426" cy="556" r="20"/>
+  <circle cx="541" cy="740" r="20"/>
+ </g>
+</g></svg>
