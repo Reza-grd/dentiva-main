@@ -13,6 +13,12 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 import { AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
+import { DOWNLOAD_URL } from './utils/platform';
+
+function ExternalRedirect({ to }) {
+  React.useEffect(() => { window.location.replace(to); }, [to]);
+  return null;
+}
 
 const AdminDashboard = lazy(() => import('./components/dashboard/AdminDashboard'));
 const DoctorDashboard = lazy(() => import('./components/dashboard/DoctorDashboard'));
@@ -39,7 +45,6 @@ const QueueDisplay = lazy(() => import('./components/queue/QueueDisplay'));
 const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
-const DownloadPage = lazy(() => import('./pages/DownloadPage'));
 const BookingRequests = lazy(() => import('./components/schedule/BookingRequests'));
 
 function App() {
@@ -135,8 +140,8 @@ function App() {
           <Route path="/antrean/:token" element={<QueueDisplay />} />
           {/* Booking online publik (tanpa login) */}
           <Route path="/booking/:slug" element={<BookingPage />} />
-          {/* Halaman unduhan aplikasi desktop (publik) */}
-          <Route path="/unduh" element={<DownloadPage />} />
+          {/* Halaman unduhan ada di website resmi (dentiva.id/unduh) */}
+          <Route path="/unduh" element={<ExternalRedirect to={DOWNLOAD_URL} />} />
           <Route path="/booking-requests" element={
             <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
               <BookingRequests />

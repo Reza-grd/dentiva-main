@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { isDesktop } from '../../utils/platform';
+import { isDesktop, DOWNLOAD_URL } from '../../utils/platform';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -236,7 +236,7 @@ const LoginPage = () => {
             </p>
             {!isDesktop && (
               <p className="mt-2 text-sm text-center text-text-muted">
-                <Link to="/unduh" className="font-semibold text-accent-primary hover:underline">Unduh aplikasi desktop</Link>
+                <a href={DOWNLOAD_URL} className="font-semibold text-accent-primary hover:underline">Unduh aplikasi desktop</a>
                 {' '}untuk Windows &amp; macOS
               </p>
             )}

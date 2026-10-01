@@ -7,6 +7,9 @@
  */
 export const isDesktop = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
+/** Halaman unduhan aplikasi desktop di website resmi. */
+export const DOWNLOAD_URL = 'https://dentiva.id/unduh';
+
 const FALLBACK_PUBLIC_URL = 'https://dentiva-main.vercel.app';
 
 export const PUBLIC_APP_URL = (

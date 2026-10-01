@@ -55,14 +55,15 @@ Gambar installer dibuat dari logo: `python apps/desktop/branding/generate.py`
 (→ `src-tauri/installer/`: sidebar & header NSIS, banner & dialog MSI, latar DMG),
 lalu ikon aplikasi: `npm run icon -w @dentiva/desktop`.
 
-## Merilis ke halaman unduhan (/unduh)
-Halaman publik `/unduh` (tautan di halaman login) membaca bucket Supabase Storage
-**`downloads`** (publik, hanya baca) dan otomatis menampilkan berkas terbaru per jenis.
+## Merilis ke halaman unduhan
+Halaman unduhan ada di **website resmi**: `https://dentiva.id/unduh` (repo `Reza-grd/dentiva_website`,
+berkas `unduh.html`). Rute `/unduh` di aplikasi hanya mengalihkan ke sana.
+Berkas installer disimpan di bucket Supabase Storage **`downloads`** (publik, hanya baca).
 
 1. Jalankan workflow *Dentiva Desktop*, unduh artefak `dentiva-Windows` & `dentiva-macOS`.
 2. Supabase Dashboard → Storage → `downloads` → **Upload file**: unggah apa adanya
-   `Dentiva_<versi>_x64-setup.exe`, `Dentiva_<versi>_x64_en-US.msi`, `Dentiva_<versi>_universal.dmg`.
-3. Halaman `/unduh` langsung menampilkan versi baru (versi dibaca dari nama berkas).
-   Berkas versi lama boleh dihapus.
+   `Dentiva_<versi>_x64-setup.exe` dan `Dentiva_<versi>_universal.dmg`.
+3. Di repo website, ubah `var VERSION = "..."` di `unduh.html` ke versi baru, lalu deploy.
+   Ukuran & tanggal berkas dibaca otomatis dari server unduhan.
 
 Rencana tahap 3: unggah otomatis dari workflow + auto-update.
