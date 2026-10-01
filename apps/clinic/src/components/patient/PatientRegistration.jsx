@@ -112,7 +112,7 @@ const PatientRegistration = () => {
       tanggal_kunjungan: scheduleData.tanggal_kunjungan,
       jam_kunjungan: scheduleData.jam_kunjungan,
       keluhan: scheduleData.keluhan,
-      catatan: scheduleData.catatan,
+      catatan_dokter: scheduleData.catatan || null,
       status: 'scheduled'
     });
     setLoading(false);
