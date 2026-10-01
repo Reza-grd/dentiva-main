@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { isDesktop } from '../../utils/platform';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -233,6 +234,12 @@ const LoginPage = () => {
               Belum menggunakan Dentiva?{' '}
               <Link to="/daftar" className="font-semibold text-accent-primary hover:underline">Daftarkan klinik Anda</Link>
             </p>
+            {!isDesktop && (
+              <p className="mt-2 text-sm text-center text-text-muted">
+                <Link to="/unduh" className="font-semibold text-accent-primary hover:underline">Unduh aplikasi desktop</Link>
+                {' '}untuk Windows &amp; macOS
+              </p>
+            )}
           </CardContent>
         </Card>
 

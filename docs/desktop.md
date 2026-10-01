@@ -49,3 +49,20 @@ npm run build -w @dentiva/desktop    # installer di apps/desktop/src-tauri/targe
 
 Catatan uji: jendela cetak kwitansi (`PaymentForm` → `window.open`) perlu diganti
 cetak langsung di tahap 2; di WebView desktop dialog cetak mungkin tidak muncul.
+
+## Branding installer
+Gambar installer dibuat dari logo: `python apps/desktop/branding/generate.py`
+(→ `src-tauri/installer/`: sidebar & header NSIS, banner & dialog MSI, latar DMG),
+lalu ikon aplikasi: `npm run icon -w @dentiva/desktop`.
+
+## Merilis ke halaman unduhan (/unduh)
+Halaman publik `/unduh` (tautan di halaman login) membaca bucket Supabase Storage
+**`downloads`** (publik, hanya baca) dan otomatis menampilkan berkas terbaru per jenis.
+
+1. Jalankan workflow *Dentiva Desktop*, unduh artefak `dentiva-Windows` & `dentiva-macOS`.
+2. Supabase Dashboard → Storage → `downloads` → **Upload file**: unggah apa adanya
+   `Dentiva_<versi>_x64-setup.exe`, `Dentiva_<versi>_x64_en-US.msi`, `Dentiva_<versi>_universal.dmg`.
+3. Halaman `/unduh` langsung menampilkan versi baru (versi dibaca dari nama berkas).
+   Berkas versi lama boleh dihapus.
+
+Rencana tahap 3: unggah otomatis dari workflow + auto-update.

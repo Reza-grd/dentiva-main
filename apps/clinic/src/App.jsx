@@ -39,6 +39,7 @@ const QueueDisplay = lazy(() => import('./components/queue/QueueDisplay'));
 const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
+const DownloadPage = lazy(() => import('./pages/DownloadPage'));
 const BookingRequests = lazy(() => import('./components/schedule/BookingRequests'));
 
 function App() {
@@ -134,6 +135,8 @@ function App() {
           <Route path="/antrean/:token" element={<QueueDisplay />} />
           {/* Booking online publik (tanpa login) */}
           <Route path="/booking/:slug" element={<BookingPage />} />
+          {/* Halaman unduhan aplikasi desktop (publik) */}
+          <Route path="/unduh" element={<DownloadPage />} />
           <Route path="/booking-requests" element={
             <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
               <BookingRequests />

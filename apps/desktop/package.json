@@ -7,7 +7,7 @@
     "tauri": "tauri",
     "dev": "tauri dev",
     "build": "tauri build",
-    "icon": "tauri icon ../clinic/public/dentiva-logo.png"
+    "icon": "tauri icon branding/icon-source.png && node -e \"require('fs').rmSync('src-tauri/icons/android',{recursive:true,force:true});require('fs').rmSync('src-tauri/icons/ios',{recursive:true,force:true})\""
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"
