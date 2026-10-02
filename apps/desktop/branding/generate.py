@@ -50,7 +50,8 @@ def paste_center(img, l, cx, cy):
 ORIG = ROOT / "apps/desktop/branding/app-icon-original.jpg"
 if ORIG.exists():
     src = Image.open(ORIG).convert("RGBA")
-    L, T, R, B, RAD = 127, 88, 1123, 1126, 230
+    # inset 6 px: buang garis tepi terang bawaan gambar asli (terlihat di latar gelap)
+    L, T, R, B, RAD = 127 + 6, 88 + 6, 1123 - 6, 1126 - 6, 224
     SS = 4  # supersampling untuk tepi halus
     mask = Image.new("L", (src.width * SS, src.height * SS), 0)
     ImageDraw.Draw(mask).rounded_rectangle([L * SS, T * SS, R * SS, B * SS], radius=RAD * SS, fill=255)
