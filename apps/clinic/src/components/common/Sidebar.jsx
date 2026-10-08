@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck,
+  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -32,6 +32,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { group: 'KEUANGAN' },
         { icon: DollarSign,      label: 'Pembayaran',       path: `${baseUrl}/pembayaran` },
         { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
+        { icon: Sparkles,        label: 'Asisten AI',       path: `${baseUrl}/asisten-ai` },
         { group: 'LAINNYA' },
         { icon: Package,         label: 'Master Treatment', path: `${baseUrl}/treatments` },
         { icon: DollarSign,      label: 'Biaya & Modal',    path: `${baseUrl}/costing` },

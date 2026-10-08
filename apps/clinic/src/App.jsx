@@ -31,6 +31,7 @@ const MedicalRecordList = lazy(() => import('./components/medical-record/Medical
 const PaymentForm = lazy(() => import('./components/payment/PaymentForm'));
 const PaymentList = lazy(() => import('./components/payment/PaymentList'));
 const FinancialDashboard = lazy(() => import('./components/financial/FinancialDashboard'));
+const AiAssistantPage = lazy(() => import('./components/ai/AiAssistantPage'));
 const CostingDashboard = lazy(() => import('./components/costing/CostingDashboard'));
 const TreatmentMaster = lazy(() => import('./components/treatments/TreatmentMaster'));
 const ReportsPage = lazy(() => import('./components/reports/ReportsPage'));
@@ -236,6 +237,12 @@ function App() {
           <Route path="/admin/costing" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <CostingDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin/asisten-ai" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AiAssistantPage />
             </ProtectedRoute>
           } />
 

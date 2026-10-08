@@ -1,0 +1,19 @@
+/* Isi jawaban Asisten AI (HTML dari miniMarkdown) */
+.ai-md { font-size: 0.95rem; line-height: 1.6; color: var(--color-text); }
+.ai-md > * + * { margin-top: 0.6rem; }
+.ai-md h4 { font-weight: 700; font-size: 1rem; }
+.ai-md ul, .ai-md ol { padding-left: 1.25rem; }
+.ai-md ul { list-style: disc; }
+.ai-md ol { list-style: decimal; }
+.ai-md li + li { margin-top: 0.2rem; }
+.ai-md code { font-size: 0.85em; padding: 0.1rem 0.35rem; border-radius: 0.35rem; background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.ai-md .md-table { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 0.75rem; }
+.ai-md table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.ai-md th { text-align: left; font-weight: 600; padding: 0.55rem 0.75rem; background: color-mix(in srgb, var(--color-accent) 8%, transparent); white-space: nowrap; }
+.ai-md td { padding: 0.5rem 0.75rem; border-top: 1px solid var(--color-border); }
+.ai-md td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ai-dots span { display: inline-block; width: 6px; height: 6px; margin: 0 2px; border-radius: 50%; background: currentColor; opacity: .35; animation: ai-dot 1.2s infinite ease-in-out; }
+.ai-dots span:nth-child(2) { animation-delay: .15s; }
+.ai-dots span:nth-child(3) { animation-delay: .3s; }
+@keyframes ai-dot { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .ai-dots span { animation: none; } }

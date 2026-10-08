@@ -1,6 +1,6 @@
 # Rencana pengembangan: Asisten AI Dentiva (keuangan & manajemen klinik)
 
-Disusun 8 Okt 2026. Status: rencana, belum dikerjakan.
+Disusun 8 Okt 2026. Status: **Minggu 1 (fondasi) & Fase A (Tanya Keuangan) selesai dibangun 8 Okt 2026**, menunggu `ANTHROPIC_API_KEY` untuk uji coba (lihat `docs/ai-uji-pertanyaan.md`).
 
 ## 1. Ringkasan
 
