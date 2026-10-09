@@ -65,7 +65,7 @@ Deno.test("geminiInteract: endpoint Interactions, kunci & Api-Revision di header
     globalThis.fetch = (() => Promise.resolve(new Response(JSON.stringify({ error: { code: "resource_exhausted", message: "Quota exceeded" } }), { status: 429 }))) as typeof fetch;
     const err = await assertRejects(() => geminiInteract("K", {}), GeminiError);
     assertEquals((err as GeminiError).status, 429);
-    assertEquals((err as GeminiError).message, "Quota exceeded");
+    assertEquals((err as GeminiError).message, "HTTP 429 Quota exceeded");
   } finally {
     globalThis.fetch = orig;
   }
