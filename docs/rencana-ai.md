@@ -1,6 +1,10 @@
 # Rencana pengembangan: Asisten AI Dentiva (keuangan & manajemen klinik)
 
-Disusun 8 Okt 2026. Status: **Minggu 1 (fondasi) & Fase A (Tanya Keuangan) selesai dibangun 8 Okt 2026**, menunggu `ANTHROPIC_API_KEY` untuk uji coba (lihat `docs/ai-uji-pertanyaan.md`).
+Disusun 8 Okt 2026. Status:
+- **Fondasi & Fase A (Tanya Keuangan)**: selesai 8 Okt 2026.
+- **Fase C, D, E**: selesai dibangun 9 Okt 2026 (lihat bagian 9).
+- Semua fitur AI menunggu `ANTHROPIC_API_KEY` untuk uji coba (lihat `docs/ai-uji-pertanyaan.md`).
+- Fase B (laporan & peringatan otomatis via WA/cron) belum dikerjakan.
 
 ## 1. Ringkasan
 
@@ -119,3 +123,20 @@ Angka nyata diukur di fase uji (log `ai_usage`), lalu dipakai untuk menetapkan k
 Sebaiknya selesai lebih dulu: Supabase & Vercel Pro (backup, pemakaian komersial),
 Sentry DSN (pemantauan error), nomor WA & data badan usaha di website, dan peringatan otomatis
 saat fungsi terjadwal gagal (agar laporan AI tidak diam-diam berhenti).
+
+## 9. Yang sudah dibangun (9 Okt 2026)
+
+| Fase | Fitur | Lokasi |
+|---|---|---|
+| C | Halaman **Pengeluaran** (tambah/ubah/hapus, ringkasan per kategori, foto bukti) | `/admin/pengeluaran` |
+| C | **Pindai nota (AI)**: foto → draf (tanggal, pemasok, no. nota, total, kategori, barang); admin wajib memeriksa & menyimpan; peringatan nota ganda (no. nota sama, atau jumlah sama ±3 hari) | edge `ai-assistant` mode `receipt` |
+| D | Alat AI `simulasi_harga`, `titik_impas`, `proyeksi_arus_kas` (angka dihitung SQL, AI hanya menjelaskan) | RPC `ai_price_simulation`, `ai_break_even`, `ai_cashflow_projection` |
+| E | Alat AI `ringkasan_hari_ini`, `beban_jadwal_dokter`, `statistik_recall` | RPC `ai_today_summary`, `ai_doctor_schedule_load`, `ai_recall_stats` |
+| E | Halaman **Recall Pasien** (admin & resepsionis): pasien ≥ N bulan tidak kembali tanpa jadwal mendatang, tautan WA berisi pesan (hanya bila pasien mengizinkan WA), catatan sudah dihubungi; template pesan bisa disusun AI tanpa data pasien | `/admin/recall`, `/resepsionis/recall`, tabel `recall_contacts` |
+| E | **Console: Kesehatan klinik**: skor 0–100 + alasan (login staf, tren kunjungan, pencatatan pembayaran, tagihan, trial, adopsi fitur) | `platform.clinic_health()`, aksi `insights.clinicHealth`, Dashboard Console |
+
+Catatan desain:
+- Proyeksi arus kas memakai rata-rata 3 bulan penuh terakhir (lebih stabil daripada garis tren bila ada satu bulan ekstrem); tren tetap dilaporkan sebagai informasi.
+- BEP memakai overhead bulanan (menu Biaya & Modal); bila kosong, rata-rata pengeluaran. Rasio biaya bahan dari snapshot HPP bila ada.
+- Skor kesehatan klinik di Console sengaja **tanpa model AI** (aturan tetap, bisa dijelaskan) dan hanya memakai angka agregat.
+- Pemakaian pindai nota & draf template dihitung ke kuota AI bulanan yang sama (`ai_usage.feature` = `receipt_scan` / `recall_template`).

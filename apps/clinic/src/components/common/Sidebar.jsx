@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles,
+  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles, Receipt, BellRing,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -29,8 +29,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: Calendar,        label: 'Jadwal Kunjungan', path: `${baseUrl}/jadwal` },
         { icon: CalendarClock,   label: 'Jadwal Dokter',    path: `${baseUrl}/jadwal-dokter` },
         { icon: CalendarCheck,   label: 'Booking Online',   path: '/booking-requests' },
+        { icon: BellRing,        label: 'Recall Pasien',    path: `${baseUrl}/recall` },
         { group: 'KEUANGAN' },
         { icon: DollarSign,      label: 'Pembayaran',       path: `${baseUrl}/pembayaran` },
+        { icon: Receipt,         label: 'Pengeluaran',      path: `${baseUrl}/pengeluaran` },
         { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
         { icon: Sparkles,        label: 'Asisten AI',       path: `${baseUrl}/asisten-ai` },
         { group: 'LAINNYA' },
@@ -61,6 +63,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { group: 'OPERASIONAL' },
         { icon: Calendar,        label: 'Jadwal',             path: `${baseUrl}/jadwal` },
         { icon: CalendarCheck,   label: 'Booking Online',     path: '/booking-requests' },
+        { icon: BellRing,        label: 'Recall Pasien',      path: `${baseUrl}/recall` },
         { icon: ClipboardList,   label: 'Riwayat Kunjungan', path: `${baseUrl}/kunjungan` },
         { icon: DollarSign,      label: 'Pembayaran',         path: `${baseUrl}/pembayaran` },
       ],

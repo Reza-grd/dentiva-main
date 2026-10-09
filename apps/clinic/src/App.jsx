@@ -32,6 +32,8 @@ const PaymentForm = lazy(() => import('./components/payment/PaymentForm'));
 const PaymentList = lazy(() => import('./components/payment/PaymentList'));
 const FinancialDashboard = lazy(() => import('./components/financial/FinancialDashboard'));
 const AiAssistantPage = lazy(() => import('./components/ai/AiAssistantPage'));
+const ExpensesPage = lazy(() => import('./components/financial/ExpensesPage'));
+const RecallPage = lazy(() => import('./components/recall/RecallPage'));
 const CostingDashboard = lazy(() => import('./components/costing/CostingDashboard'));
 const TreatmentMaster = lazy(() => import('./components/treatments/TreatmentMaster'));
 const ReportsPage = lazy(() => import('./components/reports/ReportsPage'));
@@ -237,6 +239,24 @@ function App() {
           <Route path="/admin/costing" element={
             <ProtectedRoute allowedRoles={['admin']}>
               <CostingDashboard />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin/pengeluaran" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ExpensesPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/admin/recall" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <RecallPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/resepsionis/recall" element={
+            <ProtectedRoute allowedRoles={['resepsionis']}>
+              <RecallPage />
             </ProtectedRoute>
           } />
 

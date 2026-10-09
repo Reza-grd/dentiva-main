@@ -6,6 +6,7 @@ import { Can, LinkButton, Section, StatCard } from "@/components/misc";
 import { ErrorState, LoadingBlock } from "@/components/States";
 import { useConsoleQuery } from "@/lib/query";
 import { useAuth } from "@/lib/auth";
+import { ClinicHealthSection } from "./ClinicHealthSection";
 
 export function DashboardPage() {
   const { operator } = useAuth();
@@ -115,6 +116,10 @@ export function DashboardPage() {
               )}
             </Section>
           </div>
+
+          <Can action="insights.clinicHealth">
+            <ClinicHealthSection />
+          </Can>
         </div>
       )}
     </>

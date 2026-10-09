@@ -36,4 +36,28 @@ export const aiService = {
     }
     return { success: true, data };
   },
+
+  /** Foto nota (JPEG base64) → { draft, status }. Tidak menyimpan apa pun. */
+  async scanReceipt(base64, mediaType = 'image/jpeg') {
+    const { data, error } = await supabase.functions.invoke('ai-assistant', {
+      body: { mode: 'receipt', image: base64, media_type: mediaType },
+    });
+    if (error) {
+      const e = await invokeError(error);
+      return { success: false, error: e.message, status: e.status };
+    }
+    return { success: true, data };
+  },
+
+  /** Draf template WA recall dengan placeholder {nama} → { template, status }. */
+  async draftRecallTemplate(instruction = '') {
+    const { data, error } = await supabase.functions.invoke('ai-assistant', {
+      body: { mode: 'recall_template', instruction },
+    });
+    if (error) {
+      const e = await invokeError(error);
+      return { success: false, error: e.message, status: e.status };
+    }
+    return { success: true, data };
+  },
 };

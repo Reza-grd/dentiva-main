@@ -9,6 +9,7 @@ import * as audit from "./audit.ts";
 import * as billing from "./billing.ts";
 import * as clinics from "./clinics.ts";
 import * as dashboard from "./dashboard.ts";
+import * as insights from "./insights.ts";
 import * as operators from "./operators.ts";
 import * as usage from "./usage.ts";
 import * as users from "./users.ts";
@@ -51,6 +52,8 @@ export const handlers: HandlerRegistry<AnySql> = {
 
   "usage.clinic": usage.clinic,
   "usage.overview": usage.overview,
+
+  "insights.clinicHealth": insights.clinicHealth,
 
   "audit.list": audit.list,
 

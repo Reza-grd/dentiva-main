@@ -333,6 +333,14 @@ export const ACTIONS = {
     description: "Pemakaian terakhir semua klinik vs batas paket.",
   },
 
+  // ─── Wawasan ───────────────────────────────────────────────────────────────
+  "insights.clinicHealth": {
+    roles: ALL,
+    mutates: false,
+    params: z.object({ limit: z.number().int().min(1).max(500).default(50) }),
+    description: "Skor kesehatan klinik 0–100 (aturan tetap) beserta alasan dan adopsi fitur; tanpa data pasien.",
+  },
+
   // ─── Audit ─────────────────────────────────────────────────────────────────
   "audit.list": {
     roles: ALL,

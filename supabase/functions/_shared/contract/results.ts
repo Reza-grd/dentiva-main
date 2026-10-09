@@ -32,6 +32,34 @@ export interface UsageOverviewItem {
   latest: UsageDay | null;
 }
 
+export type ClinicHealthLevel = "sehat" | "perhatian" | "berisiko";
+
+export interface ClinicHealthItem {
+  id: string;
+  name: string;
+  status: string;
+  plan_name: string | null;
+  score: number;
+  level: ClinicHealthLevel;
+  reasons: string[];
+  metrics: {
+    days_inactive: number | null;
+    visits_30: number;
+    visits_prev_30: number;
+    payments_30: number;
+    overdue_invoices: number;
+    users: number;
+    features_used: number;
+  };
+}
+
+export interface ClinicHealthReport {
+  generatedAt: string;
+  summary: { total: number; sehat: number; perhatian: number; berisiko: number };
+  adoption: { booking: number; whatsapp: number; satusehat: number; ai: number; expenses: number };
+  clinics: ClinicHealthItem[];
+}
+
 export type ActionResults = {
   "operators.me": Operator;
   "dashboard.summary": DashboardSummary;
@@ -62,6 +90,7 @@ export type ActionResults = {
   "billing.payments.confirmManual": { payment: Payment; invoice: Invoice };
   "usage.clinic": UsageDay[];
   "usage.overview": Paginated<UsageOverviewItem>;
+  "insights.clinicHealth": ClinicHealthReport;
   "audit.list": Paginated<AuditEntry>;
   "operators.list": Operator[];
   "operators.invite": Operator;

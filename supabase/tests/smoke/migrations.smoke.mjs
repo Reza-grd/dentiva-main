@@ -221,6 +221,10 @@ ok(n >= 4, `collect_usage_daily() menulis ${n} baris`);
 const dash = (await one("select platform.dashboard_summary(14) as d")).d;
 ok(dash.clinicsByStatus && typeof dash.mrrIdr === "number", "dashboard_summary() valid", dash);
 ok((await q("select * from platform.clinic_overview")).length === 4, "view clinic_overview (4 klinik)");
+// clinic_health() memakai kolom produksi yang tidak ada di baseline sintetis → cek hak akses saja
+const healthAcl = await one(`select has_function_privilege('authenticated', 'platform.clinic_health(int)', 'execute') as auth_exec,
+  has_function_privilege('service_role', 'platform.clinic_health(int)', 'execute') as svc_exec`);
+ok(!healthAcl.auth_exec && healthAcl.svc_exec, "clinic_health() hanya untuk service_role (console-api)", healthAcl);
 ok((await q("select jobname from cron.job where jobname like 'platform-%'")).length === 2, "2 job cron platform terdaftar");
 
 console.log("\n9. Kualitas policy");

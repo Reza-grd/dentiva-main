@@ -7,13 +7,24 @@ import { miniMarkdown } from '../../utils/miniMarkdown';
 import { useToast } from '../common/ToastNotification';
 import './ai-assistant.css';
 
-const SUGGESTIONS = [
-  'Berapa pendapatan bulan ini dibanding bulan lalu?',
-  'Tindakan apa yang paling menguntungkan dalam 3 bulan terakhir?',
-  'Bandingkan pendapatan dan pengeluaran bulan ini.',
-  'Bagaimana kinerja tiap dokter bulan ini?',
-  'Bahan apa yang stoknya menipis atau hampir kadaluarsa?',
-  'Ada kunjungan selesai yang belum dibayar?',
+const SUGGESTION_GROUPS = [
+  { label: 'Keuangan', items: [
+    'Berapa pendapatan bulan ini dibanding bulan lalu?',
+    'Tindakan apa yang paling menguntungkan dalam 3 bulan terakhir?',
+    'Bandingkan pendapatan dan pengeluaran bulan ini.',
+    'Ada kunjungan selesai yang belum dibayar?',
+  ] },
+  { label: 'Perencanaan', items: [
+    'Kalau harga scaling naik 10%, berapa dampaknya per bulan?',
+    'Berapa titik impas (BEP) klinik per bulan?',
+    'Proyeksikan arus kas 3 bulan ke depan.',
+  ] },
+  { label: 'Manajemen', items: [
+    'Ringkas kondisi klinik hari ini.',
+    'Beri saran jadwal dokter berdasarkan pola kunjungan.',
+    'Berapa pasien yang perlu di-recall?',
+    'Bahan apa yang stoknya menipis atau hampir kadaluarsa?',
+  ] },
 ];
 const TOOL_LABEL = {
   ringkasan_pendapatan: 'Pendapatan',
@@ -23,6 +34,12 @@ const TOOL_LABEL = {
   statistik_kunjungan: 'Kunjungan',
   peringatan_stok: 'Stok bahan',
   kunjungan_belum_dibayar: 'Belum dibayar',
+  simulasi_harga: 'Simulasi harga',
+  titik_impas: 'BEP',
+  proyeksi_arus_kas: 'Arus kas',
+  ringkasan_hari_ini: 'Hari ini',
+  beban_jadwal_dokter: 'Jadwal dokter',
+  statistik_recall: 'Recall',
 };
 const MAX_LEN = 1000;
 const STORE_KEY = 'dentiva-ai-chat';
@@ -94,10 +111,10 @@ export default function AiAssistantPage() {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Sparkles className="text-[var(--color-accent)]" /> Asisten Keuangan
+          <Sparkles className="text-[var(--color-accent)]" /> Asisten AI
           <Badge variant="warning">Beta</Badge>
         </h1>
-        <p className="text-sm text-gray-500">Tanyakan kondisi keuangan dan operasional klinik dalam bahasa sehari-hari.</p>
+        <p className="text-sm text-gray-500">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
       </div>
       {status?.aktif && (
         <div className="flex items-center gap-2 flex-wrap">
@@ -155,7 +172,7 @@ export default function AiAssistantPage() {
           </div>
           <ul className="space-y-3 text-sm text-gray-700 dark:text-gray-200">
             <li className="flex gap-3"><Database size={18} className="shrink-0 text-[var(--color-accent)] mt-0.5" />
-              Yang dikirim ke AI hanya <strong>angka ringkasan</strong> (total, jumlah, per tindakan/dokter/kategori), dan hanya saat Anda bertanya.</li>
+              Yang dikirim ke AI hanya <strong>angka ringkasan</strong> (total, jumlah, per tindakan/dokter/kategori) saat Anda bertanya, serta <strong>foto nota pembelian</strong> saat Anda memakai Pindai nota.</li>
             <li className="flex gap-3"><Lock size={18} className="shrink-0 text-[var(--color-accent)] mt-0.5" />
               <span><strong>Tidak ada</strong> nama, NIK, kontak, atau isi rekam medis pasien yang dikirim.</span></li>
             <li className="flex gap-3"><ShieldCheck size={18} className="shrink-0 text-[var(--color-accent)] mt-0.5" />
@@ -191,12 +208,19 @@ export default function AiAssistantPage() {
                   <p className="font-semibold text-gray-900 dark:text-white">Mau tahu apa tentang klinik hari ini?</p>
                   <p className="text-sm text-gray-500">Pilih contoh di bawah atau ketik pertanyaan Anda sendiri.</p>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-2 text-left">
-                  {SUGGESTIONS.map((s) => (
-                    <button key={s} type="button" onClick={() => ask(s)}
-                      className="text-sm px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[var(--color-accent)] hover:bg-[color-mix(in_srgb,var(--color-accent)_6%,transparent)] transition-colors text-gray-700 dark:text-gray-200">
-                      {s}
-                    </button>
+                <div className="space-y-4 text-left">
+                  {SUGGESTION_GROUPS.map((g) => (
+                    <div key={g.label}>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">{g.label}</p>
+                      <div className="grid sm:grid-cols-2 gap-2">
+                        {g.items.map((s) => (
+                          <button key={s} type="button" onClick={() => ask(s)}
+                            className="text-sm px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[var(--color-accent)] hover:bg-[color-mix(in_srgb,var(--color-accent)_6%,transparent)] transition-colors text-gray-700 dark:text-gray-200">
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
