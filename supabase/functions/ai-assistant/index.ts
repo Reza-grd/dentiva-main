@@ -257,9 +257,11 @@ function apiErrorMessage(err: unknown): string {
   const isApi = err instanceof Anthropic.APIError || err instanceof GeminiError;
   console.error("ai-assistant error:", isApi ? `${(err as { status?: number }).status} ${(err as Error).message}` : err);
   const busy = err instanceof Anthropic.RateLimitError || (err instanceof GeminiError && err.status === 429);
-  return busy
-    ? "Asisten AI sedang sibuk atau batas pemakaian penyedia AI tercapai. Coba lagi sebentar lagi."
-    : "Asisten AI sedang tidak dapat dihubungi. Coba lagi nanti.";
+  const keyRejected = err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError ||
+    (err instanceof GeminiError && (err.status === 401 || err.status === 403));
+  if (busy) return "Asisten AI sedang sibuk atau batas pemakaian penyedia AI tercapai. Coba lagi sebentar lagi.";
+  if (keyRejected) return "Kunci API penyedia AI ditolak. Pengelola Dentiva perlu memeriksa atau mengganti kunci AI.";
+  return "Asisten AI sedang tidak dapat dihubungi. Coba lagi nanti.";
 }
 
 const clip = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
