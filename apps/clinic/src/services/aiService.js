@@ -57,12 +57,15 @@ export const aiService = {
   },
 
   /**
-   * Laporan singkat Dashboard → { brief: { ringkasan, poin[], saran }, generated_at, cached }.
-   * Server memakai laporan tersimpan bila masih segar; refresh=true meminta yang baru.
+   * Catatan Dashboard → { brief: { ringkasan, poin[], saran } | null, generated_at, cached, empty? }.
+   * Bawaan: hanya membaca catatan tersimpan (diperbarui otomatis 00.00 & 12.00 WIB) — tanpa menunggu AI.
+   * refresh=true meminta AI menyusun ulang sekarang.
    */
   async getBrief(refresh = false, variant = 'admin') {
     const mode = variant === 'staff' ? 'staff_brief' : 'brief';
-    const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { mode, refresh } });
+    const { data, error } = await supabase.functions.invoke('ai-assistant', {
+      body: refresh ? { mode, refresh: true } : { mode, cached_only: true },
+    });
     if (error) {
       const e = await invokeError(error);
       return { success: false, error: e.message, status: e.status, httpStatus: error?.context?.status };

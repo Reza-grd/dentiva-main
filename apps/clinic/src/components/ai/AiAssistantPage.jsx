@@ -21,6 +21,11 @@ const SUGGESTION_GROUPS = [
     'Berapa titik impas (BEP) klinik per bulan?',
     'Proyeksikan arus kas 3 bulan ke depan.',
   ] },
+  { label: 'Panduan Dentiva', items: [
+    'Bagaimana cara membuat tautan layar antrean TV?',
+    'Bagaimana cara mengaktifkan booking online untuk pasien?',
+    'Apa saja yang perlu diisi agar HPP dan margin tindakan terhitung?',
+  ] },
   { label: 'Manajemen', items: [
     'Ringkas kondisi klinik hari ini.',
     'Beri saran jadwal dokter berdasarkan pola kunjungan.',

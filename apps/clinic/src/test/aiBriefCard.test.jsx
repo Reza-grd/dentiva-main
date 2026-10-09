@@ -77,6 +77,18 @@ describe('Kartu Asisten AI di Dashboard', () => {
   });
 });
 
+describe('Catatan belum tersedia', () => {
+  it('menampilkan jadwal otomatis dan tombol "Susun sekarang" yang meminta catatan baru', async () => {
+    ai.getBrief.mockResolvedValueOnce({ success: true, data: { brief: null, empty: true } })
+      .mockResolvedValueOnce({ success: true, data: { brief, generated_at: new Date().toISOString() } });
+    wrap();
+    expect(await screen.findByText(/disiapkan otomatis pukul 00.00 dan 12.00 WIB/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Susun sekarang/ }));
+    await waitFor(() => expect(ai.getBrief).toHaveBeenLastCalledWith(true, 'admin'));
+    expect(await screen.findByText(brief.ringkasan)).toBeInTheDocument();
+  });
+});
+
 describe('Kartu tugas resepsionis', () => {
   const staffBrief = {
     ringkasan: 'Hari ini 3 pasien menunggu; drg. Ahmad praktik 08:00–17:00.',

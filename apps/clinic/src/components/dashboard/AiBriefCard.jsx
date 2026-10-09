@@ -47,6 +47,10 @@ export default function AiBriefCard({ variant = 'admin' }) {
     const res = await aiService.getBrief(refresh, variant);
     if (!mounted.current) return;
     setRefreshing(false);
+    if (res.success && !res.data.brief) {
+      setState({ phase: 'empty' });
+      return;
+    }
     if (res.success) {
       setState({ phase: 'ready', brief: res.data.brief, generatedAt: res.data.generated_at, stale: Boolean(res.data.stale) });
       return;
@@ -117,6 +121,19 @@ export default function AiBriefCard({ variant = 'admin' }) {
           </div>
         )}
 
+        {state.phase === 'empty' && (
+          <div className="space-y-3">
+            <p className="ai-brief__lead">
+              {isStaff
+                ? 'Catatan tugas disiapkan otomatis pukul 00.00 dan 12.00 WIB. Anda juga dapat menyusunnya sekarang.'
+                : 'Catatan hari ini disiapkan otomatis pukul 00.00 dan 12.00 WIB. Anda juga dapat menyusunnya sekarang.'}
+            </p>
+            <button type="button" disabled={refreshing} onClick={() => load(true)} className="ai-brief__link">
+              {refreshing ? 'Menyusun…' : 'Susun sekarang'} <ArrowRight size={14} />
+            </button>
+          </div>
+        )}
+
         {state.phase === 'error' && (
           <div className="space-y-2">
             <p className="ai-brief__lead opacity-80">Catatan hari ini belum dapat disusun. {state.error}</p>
@@ -162,7 +179,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
           </>
         )}
 
-        {!isStaff && (state.phase === 'ready' || state.phase === 'error') && (
+        {!isStaff && (state.phase === 'ready' || state.phase === 'error' || state.phase === 'empty') && (
           <form onSubmit={ask} className="ai-brief__ask">
             <Sparkles size={16} className="shrink-0 opacity-50" />
             <input
@@ -182,7 +199,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
         {state.phase === 'ready' && (
           <p className="text-[11px] tracking-wide opacity-50">
             {state.stale ? 'Layanan AI sedang ramai — menampilkan catatan terakhir' : 'Disusun AI dari data klinik'}
-            {' · '}diperbarui {getRelativeTime(state.generatedAt)} · periksa kembali angka penting
+            {' · '}diperbarui {getRelativeTime(state.generatedAt)} · otomatis pukul 00.00 & 12.00 WIB
           </p>
         )}
       </div>

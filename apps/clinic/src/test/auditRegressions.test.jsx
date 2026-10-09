@@ -80,7 +80,11 @@ describe('Layar antrean TV (#4 data minimal)', () => {
         <Routes><Route path="/antrean/:token" element={<QueueDisplay />} /></Routes>
       </MemoryRouter>,
     );
-    expect(await screen.findByText('Antrean 1 · B. S.')).toBeInTheDocument();
+    // Pasien yang dipanggil: nomor besar + inisial; antrean berikutnya: nomor + inisial
+    expect(await screen.findByText('B. S.')).toBeInTheDocument();
+    expect(screen.getByText('01')).toBeInTheDocument();
+    expect(screen.getByText('R.')).toBeInTheDocument();
+    expect(screen.getByText('02')).toBeInTheDocument();
     expect(screen.getAllByText('Klinik Senyum').length).toBeGreaterThan(0);
     expect(rpc).toHaveBeenCalledWith('get_queue_display', { p_token: 'tok' });
   });
