@@ -75,7 +75,9 @@ describe('teks persetujuan sesuai penyedia AI', () => {
 });
 
 describe('teks persetujuan Groq', () => {
-  it('Groq gratis disebut sebagai uji coba', () => {
-    expect(providerNotice({ configured: true, provider: 'groq', free_tier: true })).toContain('Groq versi gratis');
+  it('menyebut Groq dan tidak menyebut Google', () => {
+    const t = providerNotice({ configured: true, provider: 'groq', free_tier: true });
+    expect(t).toContain('Groq');
+    expect(t).not.toContain('Google');
   });
 });

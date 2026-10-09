@@ -291,7 +291,7 @@ export default function AiAssistantPage() {
         <span>
           Hanya angka ringkasan (dan foto nota yang Anda pindai) yang dikirim ke AI. Tidak ada data identitas atau rekam medis pasien.
           {provider?.configured && <> Penyedia: {provider.label}.</>}
-          {provider?.free_tier && <> Versi gratis: data dapat dipakai Google untuk meningkatkan layanannya.</>}
+          {provider?.provider === 'gemini' && provider.free_tier && <> Versi gratis: data dapat dipakai Google untuk meningkatkan layanannya.</>}
         </span>
         <button type="button" disabled={toggling} onClick={() => toggle(false)} className="inline-flex items-center gap-1 hover:text-red-500">
           <Power size={12} /> Nonaktifkan Asisten AI

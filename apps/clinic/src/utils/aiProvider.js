@@ -7,9 +7,7 @@ export function providerNotice(info) {
       : 'Data diproses oleh Google Gemini (layanan berbayar, di luar Indonesia); data tidak dipakai Google untuk melatih modelnya.';
   }
   if (info.provider === 'groq') {
-    return info.free_tier
-      ? 'Data diproses oleh Groq versi gratis (di luar Indonesia). Disarankan hanya untuk uji coba; mutu jawaban dan pembacaan nota dapat lebih rendah.'
-      : 'Data diproses oleh Groq (layanan berbayar, di luar Indonesia).';
+    return 'Data diproses oleh Groq (penyedia AI di luar Indonesia) memakai model AI terbuka. Disarankan untuk uji coba; periksa kembali hasilnya, terutama pembacaan nota.';
   }
   return 'Data diproses oleh Anthropic Claude (di luar Indonesia); data tidak dipakai untuk melatih model.';
 }

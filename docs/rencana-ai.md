@@ -147,17 +147,19 @@ Diatur lewat Supabase → Edge Functions → Secrets (atau `npx supabase secrets
 
 | Secret | Isi | Keterangan |
 |---|---|---|
-| `AI_PROVIDER` | `anthropic`, `gemini`, atau `groq` | Opsional. Bila kosong: pakai Claude bila `ANTHROPIC_API_KEY` ada, selain itu Gemini. |
+| `AI_PROVIDER` | `anthropic`, `groq`, atau `gemini` | Opsional. Bila kosong: Claude bila kuncinya ada, lalu Groq, lalu Gemini. |
+| `GROQ_API_KEY` | kunci dari console.groq.com → API Keys (`gsk_…`) | Wajib bila memakai Groq (gratis, tanpa kartu kredit). |
+| `GROQ_MODEL` / `GROQ_VISION_MODEL` | bawaan `openai/gpt-oss-120b` / `qwen/qwen3.8-27b` | Opsional. Model vision dipakai untuk pindai nota (status preview di Groq). |
 | `GEMINI_API_KEY` | kunci dari aistudio.google.com → Get API key | Wajib bila memakai Gemini. |
 | `GEMINI_MODEL` | mis. `gemini-flash-latest` | Opsional; bawaan `gemini-flash-latest` (Flash versi stabil terbaru). |
 | `GEMINI_PAID` | `true` | Isi hanya bila proyek Google sudah berbayar. Mengubah teks persetujuan di aplikasi. |
 | `ANTHROPIC_API_KEY` | kunci dari console.anthropic.com | Wajib bila memakai Claude. |
-| `GROQ_API_KEY` | kunci dari console.groq.com → API Keys | Wajib bila memakai Groq (`AI_PROVIDER=groq`). |
-| `GROQ_MODEL` | mis. `openai/gpt-oss-120b` | Opsional; model chat + alat + template. |
-| `GROQ_VISION_MODEL` | mis. `qwen/qwen3.8-27b` | Opsional; harus model yang bisa membaca gambar (pindai nota). |
 
 Perubahan secret langsung berlaku (tanpa deploy ulang). Aplikasi menampilkan penyedia aktif di halaman
 Asisten AI, dan teks persetujuan otomatis menyesuaikan.
+
+Catatan Gemini (9 Okt 2026): kunci format baru `AQ.` dari AI Studio ditolak Google (401 ACCESS_TOKEN_TYPE_UNSUPPORTED) baik lewat
+generateContent maupun Interactions API; adaptor sudah memakai Interactions API sehingga langsung jalan begitu Google memperbaikinya.
 
 Penting — **Gemini versi gratis**: menurut ketentuan Google, data yang dikirim lewat kuota gratis dapat dipakai
 Google untuk meningkatkan produknya dan dapat dibaca peninjau manusia. Yang dikirim Dentiva hanya angka ringkasan
@@ -165,8 +167,3 @@ keuangan dan foto nota pembelian (tanpa identitas/rekam medis pasien), tetapi gu
 uji coba. Untuk klinik pelanggan, pakai Gemini berbayar (`GEMINI_PAID=true`) atau Claude.
 Biaya Gemini dicatat 0 di `ai_usage` (token tetap dicatat); tagihan Gemini berbayar dipantau di Google AI Studio.
 Batas kuota gratis Gemini bisa berubah; bila tercapai, aplikasi menampilkan "batas pemakaian penyedia AI tercapai".
-
-Catatan Gemini (9 Okt 2026): AI Studio kini hanya mengeluarkan kunci format `AQ.`, dan saat ini kunci tersebut
-ditolak Google (401 ACCESS_TOKEN_TYPE_UNSUPPORTED) — masalah di sisi Google. Sementara itu uji coba memakai Groq.
-Groq sering mengganti model; bila model bawaan dihentikan, ganti lewat `GROQ_MODEL` / `GROQ_VISION_MODEL`
-(lihat console.groq.com/docs/models).
