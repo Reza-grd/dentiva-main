@@ -213,11 +213,11 @@ const AdminDashboard = () => {
             </button>
           </div>
 
+          {/* ── Catatan Asisten AI (sapaan + laporan singkat) ─────── */}
+          <AiBriefCard variant="admin" />
+
           {/* ── Panduan klinik baru (hilang otomatis bila selesai) ─── */}
           <OnboardingChecklist />
-
-          {/* ── Catatan Asisten AI (sapaan + laporan singkat) ─────── */}
-          <AiBriefCard />
 
           {/* ── Error Banner ─────────────────────────────────────── */}
           {statsError && (

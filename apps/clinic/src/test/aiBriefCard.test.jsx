@@ -13,11 +13,12 @@ function AskTarget() {
   const loc = useLocation();
   return <p>Halaman AI: {loc.state?.ask}</p>;
 }
-const wrap = () => render(
-  <MemoryRouter initialEntries={['/admin']}>
+const wrap = (variant = 'admin') => render(
+  <MemoryRouter initialEntries={['/home']}>
     <Routes>
-      <Route path="/admin" element={<AiBriefCard />} />
+      <Route path="/home" element={<AiBriefCard variant={variant} />} />
       <Route path="/admin/asisten-ai" element={<AskTarget />} />
+      <Route path="/booking-requests" element={<p>Halaman booking</p>} />
     </Routes>
   </MemoryRouter>,
 );
@@ -43,7 +44,7 @@ describe('Kartu Asisten AI di Dashboard', () => {
     expect(screen.getByText('Penting')).toBeInTheDocument();
     expect(screen.getByText('Kabar baik')).toBeInTheDocument();
     expect(screen.getByText(brief.saran)).toBeInTheDocument();
-    expect(ai.getBrief).toHaveBeenCalledWith(false);
+    expect(ai.getBrief).toHaveBeenCalledWith(false, 'admin');
   });
 
   it('tombol perbarui meminta laporan baru', async () => {
@@ -51,7 +52,7 @@ describe('Kartu Asisten AI di Dashboard', () => {
     wrap();
     await screen.findByText(brief.ringkasan);
     fireEvent.click(screen.getByRole('button', { name: 'Perbarui laporan' }));
-    await waitFor(() => expect(ai.getBrief).toHaveBeenLastCalledWith(true));
+    await waitFor(() => expect(ai.getBrief).toHaveBeenLastCalledWith(true, 'admin'));
   });
 
   it('kolom tanya membuka Asisten AI dengan pertanyaannya', async () => {
@@ -73,5 +74,41 @@ describe('Kartu Asisten AI di Dashboard', () => {
     ai.getBrief.mockResolvedValue({ success: false, error: 'x', httpStatus: 503 });
     const { container } = wrap();
     await waitFor(() => expect(container.querySelector('.ai-brief')).toBeNull());
+  });
+});
+
+describe('Kartu tugas resepsionis', () => {
+  const staffBrief = {
+    ringkasan: 'Hari ini 3 pasien menunggu; drg. Ahmad praktik 08:00–17:00.',
+    poin: [
+      { tingkat: 'penting', judul: '2 booking menunggu konfirmasi', teks: 'Konfirmasi agar pasien mendapat kepastian jadwal.', aksi: 'booking' },
+      { tingkat: 'perhatian', judul: '4 pasien besok', teks: 'Kirim pengingat sore ini.' },
+    ],
+    saran: 'Konfirmasi booking online terlebih dahulu.',
+  };
+
+  it('memakai mode staf, tanpa kolom tanya, tombol membuka halaman terkait', async () => {
+    ai.getBrief.mockResolvedValue({ success: true, data: { brief: staffBrief, generated_at: new Date().toISOString() } });
+    wrap('staff');
+    expect(await screen.findByText(staffBrief.ringkasan)).toBeInTheDocument();
+    expect(ai.getBrief).toHaveBeenCalledWith(false, 'staff');
+    expect(screen.getByText(/Tugas meja depan hari ini/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Tanyakan pada Asisten AI')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /Buka/ })).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: /Buka booking/ }));
+    expect(await screen.findByText('Halaman booking')).toBeInTheDocument();
+  });
+
+  it('disembunyikan untuk resepsionis bila admin belum mengaktifkan AI', async () => {
+    ai.getBrief.mockResolvedValue({ success: false, error: 'x', httpStatus: 403, status: { tersedia_di_paket: true, aktif: false } });
+    const { container } = wrap('staff');
+    await waitFor(() => expect(ai.getBrief).toHaveBeenCalled());
+    await waitFor(() => expect(container.querySelector('.ai-brief')).toBeNull());
+  });
+
+  it('menandai catatan lama saat layanan AI sedang ramai', async () => {
+    ai.getBrief.mockResolvedValue({ success: true, data: { brief: staffBrief, generated_at: new Date().toISOString(), stale: true } });
+    wrap('staff');
+    expect(await screen.findByText(/Layanan AI sedang ramai/)).toBeInTheDocument();
   });
 });

@@ -60,8 +60,9 @@ export const aiService = {
    * Laporan singkat Dashboard → { brief: { ringkasan, poin[], saran }, generated_at, cached }.
    * Server memakai laporan tersimpan bila masih segar; refresh=true meminta yang baru.
    */
-  async getBrief(refresh = false) {
-    const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { mode: 'brief', refresh } });
+  async getBrief(refresh = false, variant = 'admin') {
+    const mode = variant === 'staff' ? 'staff_brief' : 'brief';
+    const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { mode, refresh } });
     if (error) {
       const e = await invokeError(error);
       return { success: false, error: e.message, status: e.status, httpStatus: error?.context?.status };

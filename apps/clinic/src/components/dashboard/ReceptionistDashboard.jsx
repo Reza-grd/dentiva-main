@@ -17,6 +17,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@dentiva/ui';
 import { Badge } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
 import PageTransition from '../common/PageTransition';
+import AiBriefCard from './AiBriefCard';
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
@@ -157,6 +158,9 @@ const ReceptionistDashboard = () => {
               </button>
             </div>
           </div>
+
+          {/* ── Catatan tugas dari Asisten AI (tanpa angka keuangan) ── */}
+          <AiBriefCard variant="staff" />
 
           {/* ── Stats Row ────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
