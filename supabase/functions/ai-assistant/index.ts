@@ -18,6 +18,7 @@
  *   GEMINI_API_KEY     kunci Google AI Studio
  *   GEMINI_MODEL       opsional, bawaan "gemini-flash-latest"
  *   GEMINI_PAID        "true" bila proyek Google sudah berbayar (data tidak dipakai Google untuk pelatihan)
+ *   GEMINI_THINKING    opsional: minimal | low | medium | high (bawaan "low" — jawaban lebih cepat)
  *   GROQ_API_KEY       kunci Groq (console.groq.com); AI_PROVIDER=groq
  *   GROQ_MODEL         opsional, bawaan "openai/gpt-oss-120b" (chat & template)
  *   GROQ_VISION_MODEL  opsional, bawaan "qwen/qwen3.8-27b" (pindai nota)
@@ -309,6 +310,7 @@ function sanitizeReceipt(raw: any, today: string) {
 type Provider = {
   name: "anthropic" | "gemini" | "groq"; label: string; model: string; key: string; freeTier: boolean;
   visionModel?: string;
+  thinking?: string;
 };
 
 function resolveProvider(): Provider | null {
@@ -331,6 +333,8 @@ function resolveProvider(): Provider | null {
     return {
       name: "gemini", label: free ? "Google Gemini (versi gratis)" : "Google Gemini",
       model: Deno.env.get("GEMINI_MODEL")?.trim() || "gemini-flash-latest", key: gk, freeTier: free,
+      thinking: ["minimal", "low", "medium", "high"].includes((Deno.env.get("GEMINI_THINKING") ?? "").trim().toLowerCase())
+        ? (Deno.env.get("GEMINI_THINKING") ?? "").trim().toLowerCase() : "low",
     };
   };
   if (pref === "gemini" || pref === "google") return gemini();
@@ -415,6 +419,7 @@ async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], us
     const r = readInteraction(await geminiInteract(p.key, {
       model: p.model,
       system_instruction: SYSTEM,
+      generation_config: { thinking_level: p.thinking ?? "low" },
       input: history,
       tools: GEMINI_TOOLS,
     }));
@@ -493,6 +498,7 @@ async function structured(p: Provider, input: StructuredInput, usage: Usage): Pr
     const r = readInteraction(await geminiInteract(p.key, {
       model: p.model,
       system_instruction: input.system,
+      generation_config: { thinking_level: p.thinking ?? "low" },
       input: [{
         type: "user_input",
         content: [

@@ -26,7 +26,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self' https://ggwratzhpukgsiduqely.supabase.co; script-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://ggwratzhpukgsiduqely.supabase.co /dentiva-logo.png; connect-src 'self' https://ggwratzhpukgsiduqely.supabase.co wss://ggwratzhpukgsiduqely.supabase.co blob: https://gate.whapi.cloud https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; frame-ancestors 'none'"
+          "value": "default-src 'self' https://ggwratzhpukgsiduqely.supabase.co; script-src 'self' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://ggwratzhpukgsiduqely.supabase.co; connect-src 'self' https://ggwratzhpukgsiduqely.supabase.co wss://ggwratzhpukgsiduqely.supabase.co blob: https://gate.whapi.cloud https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; frame-ancestors 'none'"
         },
         {
           "key": "Permissions-Policy",
