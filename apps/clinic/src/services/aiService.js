@@ -56,6 +56,19 @@ export const aiService = {
     return { success: true, data };
   },
 
+  /**
+   * Laporan singkat Dashboard → { brief: { ringkasan, poin[], saran }, generated_at, cached }.
+   * Server memakai laporan tersimpan bila masih segar; refresh=true meminta yang baru.
+   */
+  async getBrief(refresh = false) {
+    const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { mode: 'brief', refresh } });
+    if (error) {
+      const e = await invokeError(error);
+      return { success: false, error: e.message, status: e.status, httpStatus: error?.context?.status };
+    }
+    return { success: true, data };
+  },
+
   /** Draf template WA recall dengan placeholder {nama} → { template, status }. */
   async draftRecallTemplate(instruction = '') {
     const { data, error } = await supabase.functions.invoke('ai-assistant', {

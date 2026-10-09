@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
@@ -67,6 +68,9 @@ export default function AiAssistantPage() {
   const [agree, setAgree] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [provider, setProvider] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pendingAsk = useRef(location.state?.ask || '');
   const endRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -97,6 +101,16 @@ export default function AiAssistantPage() {
     }
     inputRef.current?.focus();
   };
+
+  // Pertanyaan dari kolom tanya di Dashboard: kirim sekali setelah status AI siap.
+  useEffect(() => {
+    if (!pendingAsk.current || !status?.aktif || busy) return;
+    const q = pendingAsk.current;
+    pendingAsk.current = '';
+    navigate(location.pathname, { replace: true, state: null });
+    ask(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status?.aktif]);
 
   const toggle = async (enabled) => {
     setToggling(true);

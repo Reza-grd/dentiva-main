@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@dentiva/ui';
 import { Badge } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
 import OnboardingChecklist from './OnboardingChecklist';
+import AiBriefCard from './AiBriefCard';
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, isCurrency }) => {
@@ -214,6 +215,9 @@ const AdminDashboard = () => {
 
           {/* ── Panduan klinik baru (hilang otomatis bila selesai) ─── */}
           <OnboardingChecklist />
+
+          {/* ── Catatan Asisten AI (sapaan + laporan singkat) ─────── */}
+          <AiBriefCard />
 
           {/* ── Error Banner ─────────────────────────────────────── */}
           {statsError && (

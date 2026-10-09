@@ -1,0 +1,68 @@
+/* Kartu Asisten AI di Dashboard — tenang, elegan, mengikuti warna aksen klinik. */
+.ai-brief {
+  color: var(--color-text, #0f172a);
+  border-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--color-accent) 7%, var(--color-card, #ffffff)) 0%,
+      var(--color-card, #ffffff) 55%,
+      color-mix(in srgb, var(--color-accent) 4%, var(--color-card, #ffffff)) 100%);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -18px color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+.ai-brief__glow {
+  position: absolute; right: -80px; top: -90px; width: 260px; height: 260px; border-radius: 9999px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--color-accent) 22%, transparent), transparent);
+  pointer-events: none;
+}
+.ai-brief__eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--color-accent);
+}
+.ai-brief__greeting {
+  font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.75rem); font-weight: 600; letter-spacing: -0.015em; line-height: 1.2;
+}
+.ai-brief__lead { font-size: 0.975rem; line-height: 1.7; max-width: 68ch; opacity: 0.85; }
+.ai-brief__point {
+  border-radius: 0.9rem; padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--color-card, #ffffff) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 10%, rgb(148 163 184 / 0.25));
+  backdrop-filter: blur(6px);
+}
+.dark .ai-brief__point { background: rgb(255 255 255 / 0.03); border-color: rgb(255 255 255 / 0.08); }
+.ai-brief__advice {
+  display: flex; gap: 0.6rem; font-size: 0.925rem; line-height: 1.6; padding: 0.85rem 1rem; border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border-left: 3px solid var(--color-accent);
+}
+.ai-brief__ask {
+  display: flex; align-items: center; gap: 0.6rem; padding: 0.35rem 0.4rem 0.35rem 0.9rem; border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-card, #ffffff) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 16%, rgb(148 163 184 / 0.3));
+  transition: border-color .2s, box-shadow .2s;
+}
+.ai-brief__ask:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+}
+.dark .ai-brief__ask { background: rgb(255 255 255 / 0.04); border-color: rgb(255 255 255 / 0.1); }
+.ai-brief__send {
+  display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 9999px; color: #fff;
+  background: var(--color-accent); transition: opacity .2s, transform .2s;
+}
+.ai-brief__send:disabled { opacity: 0.35; }
+.ai-brief__send:not(:disabled):hover { transform: translateX(2px); }
+.ai-brief__icon-btn {
+  display: grid; place-items: center; width: 2.1rem; height: 2.1rem; border-radius: 9999px; opacity: 0.6;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent); transition: opacity .2s;
+}
+.ai-brief__icon-btn:hover { opacity: 1; }
+.ai-brief__link {
+  display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; font-weight: 600; color: var(--color-accent);
+}
+.ai-brief__shimmer {
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgb(148 163 184 / 0.18), rgb(148 163 184 / 0.32), rgb(148 163 184 / 0.18));
+  background-size: 200% 100%; animation: ai-brief-shimmer 1.6s ease-in-out infinite;
+}
+@keyframes ai-brief-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .ai-brief__shimmer { animation: none; } }
