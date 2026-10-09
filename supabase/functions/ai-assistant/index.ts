@@ -305,8 +305,10 @@ type Provider = { name: "anthropic" | "gemini"; label: string; model: string; ke
 
 function resolveProvider(): Provider | null {
   const pref = (Deno.env.get("AI_PROVIDER") ?? "").trim().toLowerCase();
-  const ak = Deno.env.get("ANTHROPIC_API_KEY");
-  const gk = Deno.env.get("GEMINI_API_KEY");
+  // Bersihkan spasi/baris baru/tanda kutip yang sering ikut tertempel saat mengisi secret.
+  const cleanKey = (v?: string) => v?.trim().replace(/^["']|["']$/g, "").trim() || undefined;
+  const ak = cleanKey(Deno.env.get("ANTHROPIC_API_KEY"));
+  const gk = cleanKey(Deno.env.get("GEMINI_API_KEY"));
   const anthropic = (): Provider | null =>
     ak ? { name: "anthropic", label: "Anthropic Claude", model: MODEL, key: ak, freeTier: false } : null;
   const gemini = (): Provider | null => {

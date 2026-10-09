@@ -36,8 +36,16 @@ export async function geminiInteract(apiKey: string, body: Json): Promise<Json> 
     headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey, "Api-Revision": API_REVISION },
     body: JSON.stringify({ store: false, ...body }),
   });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new GeminiError(res.status, data?.error?.message ?? `HTTP ${res.status}`);
+  const raw = await res.text();
+  let data: Json = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch { /* bukan JSON */ }
+  if (!res.ok) {
+    // Detail untuk log server (tanpa kunci): pesan error, header otentikasi, atau potongan isi respons.
+    const detail = data?.error?.message
+      ?? [res.headers.get("www-authenticate"), raw.slice(0, 300)].filter(Boolean).join(" | ")
+      ?? "";
+    throw new GeminiError(res.status, `HTTP ${res.status}${detail ? ` ${detail}` : ""}`);
+  }
   return data;
 }
 
