@@ -13,21 +13,16 @@
  * dikirim ke model.
  *
  * Penyedia AI dipilih lewat Supabase secrets (tanpa ubah kode):
- *   AI_PROVIDER        "anthropic" | "gemini" | "groq" (opsional; bila kosong: Anthropic, lalu Gemini, lalu Groq —
- *                      yang kuncinya terpasang)
+ *   AI_PROVIDER        "anthropic" | "gemini" (opsional; bila kosong: Anthropic bila kuncinya ada, lalu Gemini)
  *   ANTHROPIC_API_KEY  kunci Claude
  *   GEMINI_API_KEY     kunci Google AI Studio
  *   GEMINI_MODEL       opsional, bawaan "gemini-flash-latest"
  *   GEMINI_PAID        "true" bila proyek Google sudah berbayar (data tidak dipakai Google untuk pelatihan)
- *   GROQ_API_KEY       kunci console.groq.com
- *   GROQ_MODEL         opsional, bawaan "openai/gpt-oss-120b" (chat + alat + template)
- *   GROQ_VISION_MODEL  opsional, bawaan "qwen/qwen3.8-27b" (pindai nota; harus model yang bisa membaca gambar)
  * Tanpa kunci untuk penyedia terpilih → 503. Mode "info" memberi tahu penyedia aktif ke aplikasi.
  */
 import Anthropic from "npm:@anthropic-ai/sdk@^0.110.0";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
-import { GeminiError, geminiGenerate, readResponse, toGeminiSchema } from "./gemini.ts";
-import { extractJson, groqChat, GroqError, readGroq } from "./groq.ts";
+import { GeminiError, geminiInteract, readInteraction, toGeminiSchema, userText } from "./gemini.ts";
 
 const MODEL = "claude-opus-5-5";
 // USD per 1 juta token (Claude Opus 5.5): masuk, keluar, baca cache, tulis cache (5 menit = 1,25× masuk)
@@ -259,12 +254,11 @@ const textOf = (response: any): string =>
   response.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
 
 function apiErrorMessage(err: unknown): string {
-  const http = err instanceof GeminiError || err instanceof GroqError ? err.status : null;
-  const isApi = err instanceof Anthropic.APIError || http !== null;
+  const isApi = err instanceof Anthropic.APIError || err instanceof GeminiError;
   console.error("ai-assistant error:", isApi ? `${(err as { status?: number }).status} ${(err as Error).message}` : err);
-  const busy = err instanceof Anthropic.RateLimitError || http === 429;
+  const busy = err instanceof Anthropic.RateLimitError || (err instanceof GeminiError && err.status === 429);
   const keyRejected = err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError ||
-    http === 401 || http === 403;
+    (err instanceof GeminiError && (err.status === 401 || err.status === 403));
   if (busy) return "Asisten AI sedang sibuk atau batas pemakaian penyedia AI tercapai. Coba lagi sebentar lagi.";
   if (keyRejected) return "Kunci API penyedia AI ditolak. Pengelola Dentiva perlu memeriksa atau mengganti kunci AI.";
   return "Asisten AI sedang tidak dapat dihubungi. Coba lagi nanti.";
@@ -307,16 +301,12 @@ function sanitizeReceipt(raw: any, today: string) {
 }
 
 // ---------------- penyedia AI ----------------
-type Provider = {
-  name: "anthropic" | "gemini" | "groq"; label: string; model: string; key: string; freeTier: boolean;
-  visionModel?: string;
-};
+type Provider = { name: "anthropic" | "gemini"; label: string; model: string; key: string; freeTier: boolean };
 
 function resolveProvider(): Provider | null {
   const pref = (Deno.env.get("AI_PROVIDER") ?? "").trim().toLowerCase();
   const ak = Deno.env.get("ANTHROPIC_API_KEY");
   const gk = Deno.env.get("GEMINI_API_KEY");
-  const qk = Deno.env.get("GROQ_API_KEY");
   const anthropic = (): Provider | null =>
     ak ? { name: "anthropic", label: "Anthropic Claude", model: MODEL, key: ak, freeTier: false } : null;
   const gemini = (): Provider | null => {
@@ -327,19 +317,9 @@ function resolveProvider(): Provider | null {
       model: Deno.env.get("GEMINI_MODEL")?.trim() || "gemini-flash-latest", key: gk, freeTier: free,
     };
   };
-  const groq = (): Provider | null => {
-    if (!qk) return null;
-    const free = (Deno.env.get("GROQ_PAID") ?? "").trim().toLowerCase() !== "true";
-    return {
-      name: "groq", label: free ? "Groq (versi gratis)" : "Groq", key: qk, freeTier: free,
-      model: Deno.env.get("GROQ_MODEL")?.trim() || "openai/gpt-oss-120b",
-      visionModel: Deno.env.get("GROQ_VISION_MODEL")?.trim() || "qwen/qwen3.8-27b",
-    };
-  };
   if (pref === "gemini" || pref === "google") return gemini();
   if (pref === "anthropic" || pref === "claude") return anthropic();
-  if (pref === "groq") return groq();
-  return anthropic() ?? gemini() ?? groq();
+  return anthropic() ?? gemini();
 }
 
 type ChatTurn = { role: "user" | "assistant"; content: string };
@@ -391,76 +371,51 @@ async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[],
   return { answer: TOO_MANY_STEPS, refused: false };
 }
 
-const GEMINI_TOOLS = [{
-  functionDeclarations: TOOLS.map((t) => {
-    const schema = t.input_schema as { properties?: Record<string, unknown> };
-    const hasArgs = Object.keys(schema.properties ?? {}).length > 0;
-    return { name: t.name, description: t.description, ...(hasArgs ? { parameters: toGeminiSchema(schema) } : {}) };
-  }),
-}];
+const GEMINI_TOOLS = TOOLS.map((t) => {
+  const schema = t.input_schema as { properties?: Record<string, unknown> };
+  const hasArgs = Object.keys(schema.properties ?? {}).length > 0;
+  return {
+    type: "function", name: t.name, description: t.description,
+    ...(hasArgs ? { parameters: toGeminiSchema(schema) } : {}),
+  };
+});
 
-function addGeminiUsage(u: Usage, r: ReturnType<typeof readResponse>) {
+const GEMINI_NO_ANSWER = "Maaf, Asisten AI tidak memberi jawaban. Coba ulangi pertanyaan.";
+
+function addGeminiUsage(u: Usage, r: ReturnType<typeof readInteraction>) {
   u.input += r.usage.input;
   u.output += r.usage.output;
   u.cacheRead += r.usage.cacheRead;
 }
 
 async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>): Promise<ChatResult> {
+  // Riwayat stateless: giliran pengguna = user_input, jawaban sebelumnya = model_output.
   // deno-lint-ignore no-explicit-any
-  const contents: any[] = turns.map((t) => ({ role: t.role === "assistant" ? "model" : "user", parts: [{ text: t.content }] }));
+  const history: any[] = turns.map((t) => t.role === "user"
+    ? userText(t.content)
+    : { type: "model_output", content: [{ type: "text", text: t.content }] });
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-    const r = readResponse(await geminiGenerate(p.key, p.model, {
-      systemInstruction: { parts: [{ text: SYSTEM }] },
-      contents,
+    const r = readInteraction(await geminiInteract(p.key, {
+      model: p.model,
+      system_instruction: SYSTEM,
+      input: history,
       tools: GEMINI_TOOLS,
-      generationConfig: { maxOutputTokens: 16000 },
     }));
     addGeminiUsage(usage, r);
-    if (r.blocked) return { answer: REFUSED_CHAT, refused: true };
-    if (r.calls.length === 0) {
-      const answer = r.text || "Maaf, Asisten AI tidak memberi jawaban. Coba ulangi pertanyaan.";
-      return { answer: answer + (r.truncated ? TRUNCATED : ""), refused: false };
-    }
+    if (r.failed) throw new GeminiError(502, `interaction ${r.status}`);
+    if (r.calls.length === 0) return { answer: r.text || GEMINI_NO_ANSWER, refused: false };
     if (round === MAX_TOOL_ROUNDS) break;
-    // Bagian dari model dikirim balik apa adanya (termasuk thoughtSignature) sesuai aturan Gemini.
-    contents.push({ role: "model", parts: r.parts });
-    const responses = await Promise.all(r.calls.map(async (c) => {
+    // Langkah model (thought + function_call) dikirim balik apa adanya, lalu hasil fungsi.
+    history.push(...r.modelSteps);
+    const results = await Promise.all(r.calls.map(async (c) => {
       toolsUsed.add(c.name);
       const res = await runTool(db, c.name, c.args ?? {});
-      let response: unknown;
-      if (res.isError) response = { error: res.content };
-      else {
-        try { response = { result: JSON.parse(res.content) }; } catch { response = { result: res.content }; }
-      }
-      return { functionResponse: { name: c.name, ...(c.id ? { id: c.id } : {}), response } };
+      return {
+        type: "function_result", name: c.name, ...(c.id ? { call_id: c.id } : {}),
+        result: [{ type: "text", text: res.isError ? `ERROR: ${res.content}` : res.content }],
+      };
     }));
-    contents.push({ role: "user", parts: responses });
-  }
-  return { answer: TOO_MANY_STEPS, refused: false };
-}
-
-async function chatGroq(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>): Promise<ChatResult> {
-  // deno-lint-ignore no-explicit-any
-  const messages: any[] = [{ role: "system", content: SYSTEM }, ...turns.map((t) => ({ role: t.role, content: t.content }))];
-  const tools = TOOLS.map((t) => ({ type: "function", function: { name: t.name, description: t.description, parameters: t.input_schema } }));
-  for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-    const r = readGroq(await groqChat(p.key, { model: p.model, messages, tools, tool_choice: "auto", max_completion_tokens: 8000 }));
-    usage.input += r.usage.input;
-    usage.output += r.usage.output;
-    if (r.blocked) return { answer: REFUSED_CHAT, refused: true };
-    if (r.calls.length === 0) {
-      const answer = r.text || "Maaf, Asisten AI tidak memberi jawaban. Coba ulangi pertanyaan.";
-      return { answer: answer + (r.truncated ? TRUNCATED : ""), refused: false };
-    }
-    if (round === MAX_TOOL_ROUNDS) break;
-    messages.push({ role: "assistant", content: r.message.content ?? null, tool_calls: r.message.tool_calls });
-    for (const c of r.calls) {
-      toolsUsed.add(c.name);
-      const res = c.args === null
-        ? { content: "Argumen alat bukan JSON yang valid", isError: true }
-        : await runTool(db, c.name, c.args);
-      messages.push({ role: "tool", tool_call_id: c.id, content: res.isError ? `ERROR: ${res.content}` : res.content });
-    }
+    history.push(...results);
   }
   return { answer: TOO_MANY_STEPS, refused: false };
 }
@@ -472,44 +427,22 @@ type StructuredInput = {
 
 /** Satu panggilan dengan keluaran JSON terstruktur; mengembalikan teks JSON mentah. */
 async function structured(p: Provider, input: StructuredInput, usage: Usage): Promise<{ text: string; refused: boolean }> {
-  if (p.name === "groq") {
-    // Mode JSON umum (didukung model teks & gambar); bentuk dijaga lewat skema di instruksi + sanitasi server.
-    const system = `${input.system}\n\nBalas HANYA dengan satu objek JSON yang sesuai skema JSON berikut, tanpa teks lain:\n${JSON.stringify(input.schema)}`;
-    const content = input.image
-      ? [
-        { type: "text", text: input.text },
-        { type: "image_url", image_url: { url: `data:${input.image.media_type};base64,${input.image.data}` } },
-      ]
-      : input.text;
-    const r = readGroq(await groqChat(p.key, {
-      model: input.image ? (p.visionModel ?? p.model) : p.model,
-      messages: [{ role: "system", content: system }, { role: "user", content }],
-      response_format: { type: "json_object" },
-      max_completion_tokens: input.maxTokens,
-    }));
-    usage.input += r.usage.input;
-    usage.output += r.usage.output;
-    const obj = extractJson(r.text);
-    return { text: obj ? JSON.stringify(obj) : "", refused: r.blocked };
-  }
   if (p.name === "gemini") {
-    const r = readResponse(await geminiGenerate(p.key, p.model, {
-      systemInstruction: { parts: [{ text: input.system }] },
-      contents: [{
-        role: "user",
-        parts: [
-          ...(input.image ? [{ inlineData: { mimeType: input.image.media_type, data: input.image.data } }] : []),
-          { text: input.text },
+    const r = readInteraction(await geminiInteract(p.key, {
+      model: p.model,
+      system_instruction: input.system,
+      input: [{
+        type: "user_input",
+        content: [
+          ...(input.image ? [{ type: "image", data: input.image.data, mime_type: input.image.media_type }] : []),
+          { type: "text", text: input.text },
         ],
       }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: toGeminiSchema(input.schema),
-        maxOutputTokens: input.maxTokens,
-      },
+      response_format: { type: "text", mime_type: "application/json", schema: toGeminiSchema(input.schema) },
     }));
     addGeminiUsage(usage, r);
-    return { text: r.text, refused: r.blocked };
+    if (r.failed) throw new GeminiError(502, `interaction ${r.status}`);
+    return { text: r.text, refused: false };
   }
   const client = new Anthropic({ apiKey: p.key });
   // deno-lint-ignore no-explicit-any
@@ -630,8 +563,6 @@ Deno.serve(async (req) => {
       ];
       const r = provider.name === "gemini"
         ? await chatGemini(provider, db, turns, usage, toolsUsed)
-        : provider.name === "groq"
-        ? await chatGroq(provider, db, turns, usage, toolsUsed)
         : await chatAnthropic(provider, db, turns, usage, toolsUsed);
       if (r.refused) outcome = "refused";
       payload = { answer: r.answer, tools: [...toolsUsed] };
@@ -663,8 +594,8 @@ Deno.serve(async (req) => {
     errorMsg = apiErrorMessage(err);
   }
 
-  // Biaya dihitung untuk Claude; Gemini/Groq dicatat 0 (gratis; versi berbayar dipantau di konsol penyedia).
-  const cost = provider.name !== "anthropic" ? 0 : (usage.input * PRICE.input + usage.output * PRICE.output + usage.cacheRead * PRICE.cacheRead + usage.cacheWrite * PRICE.cacheWrite) / 1_000_000;
+  // Biaya dihitung untuk Claude; Gemini dicatat 0 (gratis; versi berbayar dipantau di Google AI Studio).
+  const cost = provider.name === "gemini" ? 0 : (usage.input * PRICE.input + usage.output * PRICE.output + usage.cacheRead * PRICE.cacheRead + usage.cacheWrite * PRICE.cacheWrite) / 1_000_000;
   if (clinicId) {
     const { error: logErr } = await admin.from("ai_usage").insert({
       clinic_id: clinicId, user_id: userData.user.id, feature, model: provider.model,

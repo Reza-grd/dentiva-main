@@ -1,8 +1,8 @@
 // deno test supabase/functions/ai-assistant/gemini.test.ts
 import { assert, assertEquals, assertRejects } from "jsr:@std/assert@1";
-import { GeminiError, geminiGenerate, readResponse, toGeminiSchema } from "./gemini.ts";
+import { GeminiError, geminiInteract, readInteraction, toGeminiSchema, userText } from "./gemini.ts";
 
-Deno.test("toGeminiSchema: tipe huruf besar, buang additionalProperties, pertahankan enum/required/items", () => {
+Deno.test("toGeminiSchema: buang additionalProperties di semua tingkat, pertahankan enum/required/items", () => {
   const out = toGeminiSchema({
     type: "object", additionalProperties: false, required: ["a", "b"],
     properties: {
@@ -11,56 +11,61 @@ Deno.test("toGeminiSchema: tipe huruf besar, buang additionalProperties, pertaha
     },
   });
   assertEquals(out, {
-    type: "OBJECT", required: ["a", "b"],
+    type: "object", required: ["a", "b"],
     properties: {
-      a: { type: "STRING", description: "pilih", enum: ["x", "y"] },
-      b: { type: "ARRAY", items: { type: "OBJECT", properties: { n: { type: "NUMBER" } }, required: ["n"] } },
+      a: { type: "string", enum: ["x", "y"], description: "pilih" },
+      b: { type: "array", items: { type: "object", properties: { n: { type: "number" } }, required: ["n"] } },
     },
   });
 });
 
-Deno.test("readResponse: teks tanpa bagian thought, panggilan fungsi, token", () => {
-  const r = readResponse({
-    candidates: [{
-      finishReason: "STOP",
-      content: { role: "model", parts: [
-        { text: "berpikir…", thought: true },
-        { functionCall: { name: "ringkasan_pendapatan", args: { dari: "2026-10-01", sampai: "2026-10-09" }, id: "c1" }, thoughtSignature: "sig" },
-        { text: "Jawaban" },
-      ] },
-    }],
-    usageMetadata: { promptTokenCount: 120, cachedContentTokenCount: 20, candidatesTokenCount: 30, thoughtsTokenCount: 10 },
+Deno.test("readInteraction: teks, panggilan fungsi, langkah model untuk dikirim balik, token", () => {
+  const r = readInteraction({
+    status: "requires_action",
+    steps: [
+      { type: "user_input", content: [{ type: "text", text: "tanya" }] },
+      { type: "thought", signature: "sig" },
+      { type: "function_call", id: "call_1", name: "ringkasan_pendapatan", arguments: { dari: "2026-10-01", sampai: "2026-10-09" } },
+    ],
+    usage: { total_input_tokens: 120, total_cached_tokens: 20, total_output_tokens: 30, total_thought_tokens: 10 },
   });
-  assertEquals(r.text, "Jawaban");
-  assertEquals(r.calls, [{ name: "ringkasan_pendapatan", args: { dari: "2026-10-01", sampai: "2026-10-09" }, id: "c1" }]);
-  assertEquals(r.parts.length, 3); // dikirim balik utuh, termasuk thoughtSignature
+  assertEquals(r.calls, [{ id: "call_1", name: "ringkasan_pendapatan", args: { dari: "2026-10-01", sampai: "2026-10-09" } }]);
+  assertEquals(r.modelSteps.map((s) => s.type), ["thought", "function_call"]); // user_input tidak dikirim ulang
   assertEquals(r.usage, { input: 100, output: 40, cacheRead: 20 });
-  assert(!r.blocked && !r.truncated);
+  assert(!r.failed);
+
+  const done = readInteraction({
+    status: "completed",
+    steps: [{ type: "model_output", content: [{ type: "text", text: "Pendapatan " }, { type: "text", text: "naik." }] }],
+  });
+  assertEquals(done.text, "Pendapatan naik.");
+  assertEquals(done.calls, []);
+  assert(readInteraction({ status: "failed" }).failed);
+  assertEquals(readInteraction({}).text, "");
 });
 
-Deno.test("readResponse: diblokir dan terpotong", () => {
-  assert(readResponse({ promptFeedback: { blockReason: "SAFETY" } }).blocked);
-  assert(readResponse({ candidates: [{ finishReason: "PROHIBITED_CONTENT" }] }).blocked);
-  assert(readResponse({ candidates: [{ finishReason: "MAX_TOKENS", content: { parts: [{ text: "x" }] } }] }).truncated);
-  assertEquals(readResponse({}).text, "");
-});
-
-Deno.test("geminiGenerate: kunci di header (bukan URL) dan error HTTP jadi GeminiError", async () => {
+Deno.test("geminiInteract: endpoint Interactions, kunci & Api-Revision di header, store=false", async () => {
   const orig = globalThis.fetch;
   let seen: { url: string; init?: RequestInit } | null = null;
   globalThis.fetch = ((url: string, init?: RequestInit) => {
     seen = { url, init };
-    return Promise.resolve(new Response(JSON.stringify({ candidates: [] }), { status: 200 }));
+    return Promise.resolve(new Response(JSON.stringify({ status: "completed", steps: [] }), { status: 200 }));
   }) as typeof fetch;
   try {
-    await geminiGenerate("KUNCI", "gemini-flash-latest", { contents: [] });
-    assertEquals(seen!.url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent");
-    assertEquals((seen!.init!.headers as Record<string, string>)["x-goog-api-key"], "KUNCI");
+    await geminiInteract("AQ.KUNCI", { model: "gemini-flash-latest", input: [userText("halo")] });
+    assertEquals(seen!.url, "https://generativelanguage.googleapis.com/v1beta/interactions");
+    const h = seen!.init!.headers as Record<string, string>;
+    assertEquals(h["x-goog-api-key"], "AQ.KUNCI");
+    assertEquals(h["Api-Revision"], "2026-05-20");
+    const body = JSON.parse(String(seen!.init!.body));
+    assertEquals(body.store, false);
+    assertEquals(body.input, [{ type: "user_input", content: [{ type: "text", text: "halo" }] }]);
     assert(!seen!.url.includes("KUNCI"));
 
-    globalThis.fetch = (() => Promise.resolve(new Response(JSON.stringify({ error: { message: "Quota exceeded" } }), { status: 429 }))) as typeof fetch;
-    const err = await assertRejects(() => geminiGenerate("K", "m", {}), GeminiError);
+    globalThis.fetch = (() => Promise.resolve(new Response(JSON.stringify({ error: { code: "resource_exhausted", message: "Quota exceeded" } }), { status: 429 }))) as typeof fetch;
+    const err = await assertRejects(() => geminiInteract("K", {}), GeminiError);
     assertEquals((err as GeminiError).status, 429);
+    assertEquals((err as GeminiError).message, "Quota exceeded");
   } finally {
     globalThis.fetch = orig;
   }

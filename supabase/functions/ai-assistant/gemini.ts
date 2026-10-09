@@ -1,8 +1,11 @@
 /**
- * Adaptor minimal Gemini API (REST generateContent) untuk ai-assistant.
+ * Adaptor Gemini memakai Interactions API (POST /v1beta/interactions), antarmuka yang
+ * direkomendasikan Google dan mendukung kunci format baru "auth key" (AQ.…).
+ * Mode stateless (store=false): riwayat dikirim ulang setiap putaran, tidak disimpan Google.
  * Dipakai bila AI_PROVIDER=gemini (atau hanya GEMINI_API_KEY yang terpasang).
  */
-const BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
+const API_REVISION = "2026-05-20";
 
 export class GeminiError extends Error {
   constructor(public status: number, message: string) {
@@ -13,49 +16,61 @@ export class GeminiError extends Error {
 // deno-lint-ignore no-explicit-any
 type Json = any;
 
-/** JSON Schema (format alat Claude) → subset OpenAPI yang diterima Gemini. */
+/** JSON Schema (format alat Claude) → skema untuk Gemini: buang additionalProperties/strict. */
 export function toGeminiSchema(s: Json): Json {
+  if (Array.isArray(s)) return s.map(toGeminiSchema);
   if (!s || typeof s !== "object") return s;
   const out: Json = {};
-  if (s.type) out.type = String(s.type).toUpperCase();
-  if (s.description) out.description = s.description;
-  if (Array.isArray(s.enum)) out.enum = s.enum;
-  if (s.properties) {
-    out.properties = Object.fromEntries(Object.entries(s.properties).map(([k, v]) => [k, toGeminiSchema(v)]));
+  for (const [k, v] of Object.entries(s)) {
+    if (k === "additionalProperties" || k === "strict") continue;
+    out[k] = k === "properties"
+      ? Object.fromEntries(Object.entries(v as Json).map(([pk, pv]) => [pk, toGeminiSchema(pv)]))
+      : (typeof v === "object" ? toGeminiSchema(v) : v);
   }
-  if (Array.isArray(s.required) && s.required.length) out.required = s.required;
-  if (s.items) out.items = toGeminiSchema(s.items);
   return out;
 }
 
-export async function geminiGenerate(apiKey: string, model: string, body: Json): Promise<Json> {
-  const res = await fetch(`${BASE}/${encodeURIComponent(model)}:generateContent`, {
+export async function geminiInteract(apiKey: string, body: Json): Promise<Json> {
+  const res = await fetch(ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey, "Api-Revision": API_REVISION },
+    body: JSON.stringify({ store: false, ...body }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new GeminiError(res.status, data?.error?.message ?? `HTTP ${res.status}`);
   return data;
 }
 
-const BLOCKED = new Set(["SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII", "RECITATION", "IMAGE_SAFETY"]);
+export const userText = (text: string) => ({ type: "user_input", content: [{ type: "text", text }] });
 
-/** Ringkas respons: teks (tanpa bagian "thought"), panggilan fungsi, status blokir, token. */
-export function readResponse(data: Json) {
-  const cand = data?.candidates?.[0];
-  const parts: Json[] = cand?.content?.parts ?? [];
-  const u = data?.usageMetadata ?? {};
+/** Ringkas respons interaction: teks keluaran, panggilan fungsi, langkah model (dikirim balik utuh), token. */
+export function readInteraction(data: Json) {
+  const steps: Json[] = Array.isArray(data?.steps) ? data.steps : [];
+  // Langkah dari model (thought, function_call, model_output) — bukan user_input/function_result kiriman kita.
+  const modelSteps = steps.filter((s) => s?.type !== "user_input" && s?.type !== "function_result");
+  const text = modelSteps
+    .filter((s) => s.type === "model_output")
+    .flatMap((s) => (Array.isArray(s.content) ? s.content : []))
+    .filter((c: Json) => c?.type === "text" && typeof c.text === "string")
+    .map((c: Json) => c.text)
+    .join("")
+    .trim();
+  const calls = modelSteps
+    .filter((s) => s.type === "function_call" && typeof s.name === "string")
+    .map((s) => ({ id: s.id as string | undefined, name: s.name as string, args: (s.arguments ?? {}) as Json }));
+  const u = data?.usage ?? {};
+  const input = u.total_input_tokens ?? u.prompt_tokens ?? 0;
+  const cached = u.total_cached_tokens ?? 0;
   return {
-    parts,
-    text: parts.filter((p) => typeof p.text === "string" && !p.thought).map((p) => p.text).join("").trim(),
-    calls: parts.filter((p) => p.functionCall).map((p) => p.functionCall as { name: string; args?: Json; id?: string }),
-    blocked: Boolean(data?.promptFeedback?.blockReason) || BLOCKED.has(cand?.finishReason),
-    truncated: cand?.finishReason === "MAX_TOKENS",
+    status: String(data?.status ?? ""),
+    modelSteps,
+    text,
+    calls,
+    failed: data?.status === "failed" || data?.status === "cancelled",
     usage: {
-      input: (u.promptTokenCount ?? 0) - (u.cachedContentTokenCount ?? 0),
-      output: (u.candidatesTokenCount ?? 0) + (u.thoughtsTokenCount ?? 0),
-      cacheRead: u.cachedContentTokenCount ?? 0,
+      input: Math.max(0, input - cached),
+      output: (u.total_output_tokens ?? u.completion_tokens ?? 0) + (u.total_thought_tokens ?? 0),
+      cacheRead: cached,
     },
   };
 }
