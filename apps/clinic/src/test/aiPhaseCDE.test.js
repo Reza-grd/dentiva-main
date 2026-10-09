@@ -73,3 +73,9 @@ describe('teks persetujuan sesuai penyedia AI', () => {
     expect(providerNotice(null)).toContain('di luar Indonesia');
   });
 });
+
+describe('teks persetujuan Groq', () => {
+  it('Groq gratis disebut sebagai uji coba', () => {
+    expect(providerNotice({ configured: true, provider: 'groq', free_tier: true })).toContain('Groq versi gratis');
+  });
+});
