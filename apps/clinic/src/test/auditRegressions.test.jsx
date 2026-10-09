@@ -82,9 +82,9 @@ describe('Layar antrean TV (#4 data minimal)', () => {
     );
     // Pasien yang dipanggil: nomor besar + inisial; antrean berikutnya: nomor + inisial
     expect(await screen.findByText('B. S.')).toBeInTheDocument();
-    expect(screen.getByText('01')).toBeInTheDocument();
+    expect(document.querySelector('.qd-hero__no')).toHaveTextContent('01');
     expect(screen.getByText('R.')).toBeInTheDocument();
-    expect(screen.getByText('02')).toBeInTheDocument();
+    expect(document.querySelector('.qd-next__no')).toHaveTextContent('02');
     expect(screen.getAllByText('Klinik Senyum').length).toBeGreaterThan(0);
     expect(rpc).toHaveBeenCalledWith('get_queue_display', { p_token: 'tok' });
   });
