@@ -58,3 +58,18 @@ describe('pesan recall', () => {
     expect(monthsSince('', today)).toBeNull();
   });
 });
+
+import { providerNotice } from '../utils/aiProvider';
+
+describe('teks persetujuan sesuai penyedia AI', () => {
+  it('Gemini gratis wajib menyebut data dapat dipakai Google', () => {
+    const t = providerNotice({ configured: true, provider: 'gemini', free_tier: true });
+    expect(t).toContain('Gemini versi gratis');
+    expect(t).toContain('meningkatkan layanannya');
+  });
+  it('Gemini berbayar dan Claude menyebut data tidak dipakai melatih model', () => {
+    expect(providerNotice({ configured: true, provider: 'gemini', free_tier: false })).toContain('tidak dipakai');
+    expect(providerNotice({ configured: true, provider: 'anthropic' })).toContain('Anthropic Claude');
+    expect(providerNotice(null)).toContain('di luar Indonesia');
+  });
+});

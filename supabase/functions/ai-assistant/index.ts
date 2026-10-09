@@ -12,10 +12,17 @@
  * klinik di database tetap berlaku. Tidak ada data rekam medis atau identitas pasien yang
  * dikirim ke model.
  *
- * Secret: ANTHROPIC_API_KEY (Supabase secrets). Tanpa secret → 503.
+ * Penyedia AI dipilih lewat Supabase secrets (tanpa ubah kode):
+ *   AI_PROVIDER        "anthropic" | "gemini" (opsional; bila kosong: Anthropic bila kuncinya ada, lalu Gemini)
+ *   ANTHROPIC_API_KEY  kunci Claude
+ *   GEMINI_API_KEY     kunci Google AI Studio
+ *   GEMINI_MODEL       opsional, bawaan "gemini-flash-latest"
+ *   GEMINI_PAID        "true" bila proyek Google sudah berbayar (data tidak dipakai Google untuk pelatihan)
+ * Tanpa kunci untuk penyedia terpilih → 503. Mode "info" memberi tahu penyedia aktif ke aplikasi.
  */
 import Anthropic from "npm:@anthropic-ai/sdk@^0.110.0";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { GeminiError, geminiGenerate, readResponse, toGeminiSchema } from "./gemini.ts";
 
 const MODEL = "claude-opus-5-5";
 // USD per 1 juta token (Claude Opus 5.5): masuk, keluar, baca cache, tulis cache (5 menit = 1,25× masuk)
@@ -247,9 +254,11 @@ const textOf = (response: any): string =>
   response.content.filter((b: any) => b.type === "text").map((b: any) => b.text).join("\n").trim();
 
 function apiErrorMessage(err: unknown): string {
-  console.error("ai-assistant error:", err instanceof Anthropic.APIError ? `${err.status} ${err.message}` : err);
-  return err instanceof Anthropic.RateLimitError
-    ? "Asisten AI sedang sibuk. Coba lagi sebentar lagi."
+  const isApi = err instanceof Anthropic.APIError || err instanceof GeminiError;
+  console.error("ai-assistant error:", isApi ? `${(err as { status?: number }).status} ${(err as Error).message}` : err);
+  const busy = err instanceof Anthropic.RateLimitError || (err instanceof GeminiError && err.status === 429);
+  return busy
+    ? "Asisten AI sedang sibuk atau batas pemakaian penyedia AI tercapai. Coba lagi sebentar lagi."
     : "Asisten AI sedang tidak dapat dihubungi. Coba lagi nanti.";
 }
 
@@ -289,12 +298,180 @@ function sanitizeReceipt(raw: any, today: string) {
   };
 }
 
+// ---------------- penyedia AI ----------------
+type Provider = { name: "anthropic" | "gemini"; label: string; model: string; key: string; freeTier: boolean };
+
+function resolveProvider(): Provider | null {
+  const pref = (Deno.env.get("AI_PROVIDER") ?? "").trim().toLowerCase();
+  const ak = Deno.env.get("ANTHROPIC_API_KEY");
+  const gk = Deno.env.get("GEMINI_API_KEY");
+  const anthropic = (): Provider | null =>
+    ak ? { name: "anthropic", label: "Anthropic Claude", model: MODEL, key: ak, freeTier: false } : null;
+  const gemini = (): Provider | null => {
+    if (!gk) return null;
+    const free = (Deno.env.get("GEMINI_PAID") ?? "").trim().toLowerCase() !== "true";
+    return {
+      name: "gemini", label: free ? "Google Gemini (versi gratis)" : "Google Gemini",
+      model: Deno.env.get("GEMINI_MODEL")?.trim() || "gemini-flash-latest", key: gk, freeTier: free,
+    };
+  };
+  if (pref === "gemini" || pref === "google") return gemini();
+  if (pref === "anthropic" || pref === "claude") return anthropic();
+  return anthropic() ?? gemini();
+}
+
+type ChatTurn = { role: "user" | "assistant"; content: string };
+type ChatResult = { answer: string; refused: boolean };
+const TRUNCATED = "\n\n_(Jawaban terpotong. Coba persempit pertanyaan.)_";
+const TOO_MANY_STEPS = "Maaf, pertanyaan ini membutuhkan terlalu banyak langkah. Coba pecah menjadi pertanyaan yang lebih spesifik.";
+const REFUSED_CHAT = "Maaf, pertanyaan ini tidak dapat dijawab oleh Asisten AI.";
+const anthropicCommon = {
+  model: MODEL,
+  betas: ["server-side-fallback-2026-07-01"],
+  // Bila model utama menolak karena klasifikasi keamanan, server mengalihkan ke model cadangan.
+  fallbacks: "default",
+};
+
+async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>): Promise<ChatResult> {
+  const client = new Anthropic({ apiKey: p.key });
+  const messages: Anthropic.Beta.BetaMessageParam[] = turns.map((t) => ({ role: t.role, content: t.content }));
+  for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+    // deno-lint-ignore no-explicit-any
+    const response: any = await client.beta.messages.create({
+      ...anthropicCommon,
+      max_tokens: 16000,
+      output_config: { effort: "medium" },
+      system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
+      tools: TOOLS,
+      messages,
+    // deno-lint-ignore no-explicit-any
+    } as any);
+    addUsage(usage, response);
+    if (response.stop_reason === "refusal") return { answer: REFUSED_CHAT, refused: true };
+    if (response.stop_reason === "pause_turn") {
+      messages.push({ role: "assistant", content: response.content });
+      continue;
+    }
+    // deno-lint-ignore no-explicit-any
+    const toolUses = response.content.filter((b: any) => b.type === "tool_use");
+    if (response.stop_reason !== "tool_use" || toolUses.length === 0) {
+      return { answer: textOf(response) + (response.stop_reason === "max_tokens" ? TRUNCATED : ""), refused: false };
+    }
+    if (round === MAX_TOOL_ROUNDS) break;
+    messages.push({ role: "assistant", content: response.content });
+    const results = await Promise.all(toolUses.map(async (t: { id: string; name: string; input: unknown }) => {
+      toolsUsed.add(t.name);
+      const r = await runTool(db, t.name, t.input);
+      return { type: "tool_result" as const, tool_use_id: t.id, content: r.content, is_error: r.isError };
+    }));
+    messages.push({ role: "user", content: results });
+  }
+  return { answer: TOO_MANY_STEPS, refused: false };
+}
+
+const GEMINI_TOOLS = [{
+  functionDeclarations: TOOLS.map((t) => {
+    const schema = t.input_schema as { properties?: Record<string, unknown> };
+    const hasArgs = Object.keys(schema.properties ?? {}).length > 0;
+    return { name: t.name, description: t.description, ...(hasArgs ? { parameters: toGeminiSchema(schema) } : {}) };
+  }),
+}];
+
+function addGeminiUsage(u: Usage, r: ReturnType<typeof readResponse>) {
+  u.input += r.usage.input;
+  u.output += r.usage.output;
+  u.cacheRead += r.usage.cacheRead;
+}
+
+async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>): Promise<ChatResult> {
+  // deno-lint-ignore no-explicit-any
+  const contents: any[] = turns.map((t) => ({ role: t.role === "assistant" ? "model" : "user", parts: [{ text: t.content }] }));
+  for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+    const r = readResponse(await geminiGenerate(p.key, p.model, {
+      systemInstruction: { parts: [{ text: SYSTEM }] },
+      contents,
+      tools: GEMINI_TOOLS,
+      generationConfig: { maxOutputTokens: 16000 },
+    }));
+    addGeminiUsage(usage, r);
+    if (r.blocked) return { answer: REFUSED_CHAT, refused: true };
+    if (r.calls.length === 0) {
+      const answer = r.text || "Maaf, Asisten AI tidak memberi jawaban. Coba ulangi pertanyaan.";
+      return { answer: answer + (r.truncated ? TRUNCATED : ""), refused: false };
+    }
+    if (round === MAX_TOOL_ROUNDS) break;
+    // Bagian dari model dikirim balik apa adanya (termasuk thoughtSignature) sesuai aturan Gemini.
+    contents.push({ role: "model", parts: r.parts });
+    const responses = await Promise.all(r.calls.map(async (c) => {
+      toolsUsed.add(c.name);
+      const res = await runTool(db, c.name, c.args ?? {});
+      let response: unknown;
+      if (res.isError) response = { error: res.content };
+      else {
+        try { response = { result: JSON.parse(res.content) }; } catch { response = { result: res.content }; }
+      }
+      return { functionResponse: { name: c.name, ...(c.id ? { id: c.id } : {}), response } };
+    }));
+    contents.push({ role: "user", parts: responses });
+  }
+  return { answer: TOO_MANY_STEPS, refused: false };
+}
+
+type StructuredInput = {
+  system: string; text: string; schema: object; maxTokens: number; effort: "low" | "medium";
+  image?: { data: string; media_type: string };
+};
+
+/** Satu panggilan dengan keluaran JSON terstruktur; mengembalikan teks JSON mentah. */
+async function structured(p: Provider, input: StructuredInput, usage: Usage): Promise<{ text: string; refused: boolean }> {
+  if (p.name === "gemini") {
+    const r = readResponse(await geminiGenerate(p.key, p.model, {
+      systemInstruction: { parts: [{ text: input.system }] },
+      contents: [{
+        role: "user",
+        parts: [
+          ...(input.image ? [{ inlineData: { mimeType: input.image.media_type, data: input.image.data } }] : []),
+          { text: input.text },
+        ],
+      }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: toGeminiSchema(input.schema),
+        maxOutputTokens: input.maxTokens,
+      },
+    }));
+    addGeminiUsage(usage, r);
+    return { text: r.text, refused: r.blocked };
+  }
+  const client = new Anthropic({ apiKey: p.key });
+  // deno-lint-ignore no-explicit-any
+  const response: any = await client.beta.messages.create({
+    ...anthropicCommon,
+    max_tokens: input.maxTokens,
+    output_config: { effort: input.effort, format: { type: "json_schema", schema: input.schema } },
+    system: [{ type: "text", text: input.system, cache_control: { type: "ephemeral" } }],
+    messages: [{
+      role: "user",
+      content: [
+        ...(input.image ? [{ type: "image", source: { type: "base64", media_type: input.image.media_type, data: input.image.data } }] : []),
+        { type: "text", text: input.text },
+      ],
+    }],
+  // deno-lint-ignore no-explicit-any
+  } as any);
+  addUsage(usage, response);
+  return { text: textOf(response), refused: response.stop_reason === "refusal" };
+}
+
+const parseJson = (t: string): unknown => {
+  try { return JSON.parse(t); } catch { return null; }
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
   if (req.method !== "POST") return json(req, 405, { error: "Metode tidak didukung" });
 
-  const apiKey = Deno.env.get("ANTHROPIC_API_KEY");
-  if (!apiKey) return json(req, 503, { error: "Asisten AI belum dikonfigurasi oleh pengelola Dentiva." });
+  const provider = resolveProvider();
 
   const authHeader = req.headers.get("Authorization") ?? "";
   if (!authHeader.startsWith("Bearer ")) return json(req, 401, { error: "Silakan masuk kembali." });
@@ -313,7 +490,15 @@ Deno.serve(async (req) => {
   let body: any;
   try { body = await req.json(); } catch { return json(req, 400, { error: "Permintaan tidak valid" }); }
   const mode = body?.mode ?? "chat";
-  if (!["chat", "receipt", "recall_template"].includes(mode)) return json(req, 400, { error: "Mode tidak dikenal" });
+  if (!["chat", "receipt", "recall_template", "info"].includes(mode)) return json(req, 400, { error: "Mode tidak dikenal" });
+
+  // Info penyedia untuk teks persetujuan di aplikasi (tidak memakai kuota)
+  if (mode === "info") {
+    return json(req, 200, provider
+      ? { configured: true, provider: provider.name, label: provider.label, model: provider.model, free_tier: provider.freeTier }
+      : { configured: false });
+  }
+  if (!provider) return json(req, 503, { error: "Asisten AI belum dikonfigurasi oleh pengelola Dentiva." });
 
   // Validasi masukan sebelum memakai kuota
   let question = "";
@@ -345,7 +530,6 @@ Deno.serve(async (req) => {
   const { data: clinicId } = await db.rpc("get_user_clinic_id");
 
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
-  const client = new Anthropic({ apiKey });
   const usage: Usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
   const toolsUsed = new Set<string>();
   let outcome: Outcome = "ok";
@@ -354,13 +538,6 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   let payload: any = {};
   let errorMsg = "";
-
-  const common = {
-    model: MODEL,
-    betas: ["server-side-fallback-2026-07-01"],
-    // Bila model utama menolak karena klasifikasi keamanan, server mengalihkan ke model cadangan.
-    fallbacks: "default",
-  };
 
   try {
     if (mode === "chat") {
@@ -379,101 +556,35 @@ Deno.serve(async (req) => {
         else clean.push(t);
       }
       if (clean.length && clean[clean.length - 1].role === "user") clean.pop();
-
-      const messages: Anthropic.Beta.BetaMessageParam[] = [
-        ...clean.map((t) => ({ role: t.role, content: t.content })),
+      const turns: ChatTurn[] = [
+        ...clean,
         { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).\n\nPertanyaan: ${question}` },
       ];
-      let answer = "";
-      for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-        // deno-lint-ignore no-explicit-any
-        const response: any = await client.beta.messages.create({
-          ...common,
-          max_tokens: 16000,
-          output_config: { effort: "medium" },
-          system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
-          tools: TOOLS,
-          messages,
-        // deno-lint-ignore no-explicit-any
-        } as any);
-        addUsage(usage, response);
-
-        if (response.stop_reason === "refusal") {
-          outcome = "refused";
-          answer = "Maaf, pertanyaan ini tidak dapat dijawab oleh Asisten AI.";
-          break;
-        }
-        if (response.stop_reason === "pause_turn") {
-          messages.push({ role: "assistant", content: response.content });
-          continue;
-        }
-        // deno-lint-ignore no-explicit-any
-        const toolUses = response.content.filter((b: any) => b.type === "tool_use");
-        if (response.stop_reason !== "tool_use" || toolUses.length === 0) {
-          answer = textOf(response);
-          if (response.stop_reason === "max_tokens") answer += "\n\n_(Jawaban terpotong. Coba persempit pertanyaan.)_";
-          break;
-        }
-        if (round === MAX_TOOL_ROUNDS) {
-          answer = "Maaf, pertanyaan ini membutuhkan terlalu banyak langkah. Coba pecah menjadi pertanyaan yang lebih spesifik.";
-          break;
-        }
-        messages.push({ role: "assistant", content: response.content });
-        const results = await Promise.all(toolUses.map(async (t: { id: string; name: string; input: unknown }) => {
-          toolsUsed.add(t.name);
-          const r = await runTool(db, t.name, t.input);
-          return { type: "tool_result" as const, tool_use_id: t.id, content: r.content, is_error: r.isError };
-        }));
-        messages.push({ role: "user", content: results });
-      }
-      payload = { answer, tools: [...toolsUsed] };
+      const r = provider.name === "gemini"
+        ? await chatGemini(provider, db, turns, usage, toolsUsed)
+        : await chatAnthropic(provider, db, turns, usage, toolsUsed);
+      if (r.refused) outcome = "refused";
+      payload = { answer: r.answer, tools: [...toolsUsed] };
     } else if (mode === "receipt") {
       feature = "receipt_scan";
       logQuestion = "Pindai nota";
-      // deno-lint-ignore no-explicit-any
-      const response: any = await client.beta.messages.create({
-        ...common,
-        max_tokens: 8000,
-        output_config: { effort: "medium", format: { type: "json_schema", schema: RECEIPT_SCHEMA } },
-        system: [{ type: "text", text: RECEIPT_SYSTEM, cache_control: { type: "ephemeral" } }],
-        messages: [{
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: image!.media_type, data: image!.data } },
-            { type: "text", text: `Tanggal hari ini: ${today}. Daftar kategori: ${EXPENSE_CATEGORIES.join("; ")}. Isi draf pengeluaran dari nota ini.` },
-          ],
-        }],
-      // deno-lint-ignore no-explicit-any
-      } as any);
-      addUsage(usage, response);
-      if (response.stop_reason === "refusal") {
-        outcome = "refused";
-        errorMsg = "Foto ini tidak dapat diproses. Pastikan yang difoto adalah nota pembelian.";
-      } else {
-        let parsed: unknown = null;
-        try { parsed = JSON.parse(textOf(response)); } catch { /* ditangani di bawah */ }
-        if (!parsed) { outcome = "error"; errorMsg = "Nota tidak berhasil dibaca. Coba foto ulang dengan lebih jelas."; }
-        else payload = { draft: sanitizeReceipt(parsed, today) };
-      }
+      const r = await structured(provider, {
+        system: RECEIPT_SYSTEM, schema: RECEIPT_SCHEMA, maxTokens: 8000, effort: "medium", image: image!,
+        text: `Tanggal hari ini: ${today}. Daftar kategori: ${EXPENSE_CATEGORIES.join("; ")}. Isi draf pengeluaran dari nota ini.`,
+      }, usage);
+      const parsed = r.refused ? null : parseJson(r.text);
+      if (r.refused) { outcome = "refused"; errorMsg = "Foto ini tidak dapat diproses. Pastikan yang difoto adalah nota pembelian."; }
+      else if (!parsed) { outcome = "error"; errorMsg = "Nota tidak berhasil dibaca. Coba foto ulang dengan lebih jelas."; }
+      else payload = { draft: sanitizeReceipt(parsed, today) };
     } else {
       feature = "recall_template";
       logQuestion = style ? `Template recall: ${style}` : "Template recall";
-      // deno-lint-ignore no-explicit-any
-      const response: any = await client.beta.messages.create({
-        ...common,
-        max_tokens: 4000,
-        output_config: { effort: "low", format: { type: "json_schema", schema: RECALL_SCHEMA } },
-        system: [{ type: "text", text: RECALL_SYSTEM, cache_control: { type: "ephemeral" } }],
-        messages: [{
-          role: "user",
-          content: `Buat satu template pesan recall.${style ? `\nPreferensi gaya: ${style}` : ""}`,
-        }],
-      // deno-lint-ignore no-explicit-any
-      } as any);
-      addUsage(usage, response);
-      let template = "";
-      try { template = clip(JSON.parse(textOf(response))?.template, 600); } catch { /* ditangani di bawah */ }
-      if (response.stop_reason === "refusal") { outcome = "refused"; errorMsg = "Permintaan template tidak dapat diproses."; }
+      const r = await structured(provider, {
+        system: RECALL_SYSTEM, schema: RECALL_SCHEMA, maxTokens: 4000, effort: "low",
+        text: `Buat satu template pesan recall.${style ? `\nPreferensi gaya: ${style}` : ""}`,
+      }, usage);
+      const template = clip((parseJson(r.text) as { template?: unknown } | null)?.template, 600);
+      if (r.refused) { outcome = "refused"; errorMsg = "Permintaan template tidak dapat diproses."; }
       else if (!template.includes("{nama}")) { outcome = "error"; errorMsg = "Template tidak berhasil dibuat. Coba lagi."; }
       else payload = { template };
     }
@@ -482,10 +593,11 @@ Deno.serve(async (req) => {
     errorMsg = apiErrorMessage(err);
   }
 
-  const cost = (usage.input * PRICE.input + usage.output * PRICE.output + usage.cacheRead * PRICE.cacheRead + usage.cacheWrite * PRICE.cacheWrite) / 1_000_000;
+  // Biaya dihitung untuk Claude; Gemini dicatat 0 (gratis; versi berbayar dipantau di Google AI Studio).
+  const cost = provider.name === "gemini" ? 0 : (usage.input * PRICE.input + usage.output * PRICE.output + usage.cacheRead * PRICE.cacheRead + usage.cacheWrite * PRICE.cacheWrite) / 1_000_000;
   if (clinicId) {
     const { error: logErr } = await admin.from("ai_usage").insert({
-      clinic_id: clinicId, user_id: userData.user.id, feature, model: MODEL,
+      clinic_id: clinicId, user_id: userData.user.id, feature, model: provider.model,
       question: logQuestion.slice(0, 500), tools_used: [...toolsUsed],
       input_tokens: usage.input, output_tokens: usage.output,
       cache_read_tokens: usage.cacheRead, cache_write_tokens: usage.cacheWrite,

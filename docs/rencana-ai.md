@@ -140,3 +140,25 @@ Catatan desain:
 - BEP memakai overhead bulanan (menu Biaya & Modal); bila kosong, rata-rata pengeluaran. Rasio biaya bahan dari snapshot HPP bila ada.
 - Skor kesehatan klinik di Console sengaja **tanpa model AI** (aturan tetap, bisa dijelaskan) dan hanya memakai angka agregat.
 - Pemakaian pindai nota & draf template dihitung ke kuota AI bulanan yang sama (`ai_usage.feature` = `receipt_scan` / `recall_template`).
+
+## 10. Memilih penyedia AI (Claude atau Gemini) — tanpa ubah kode
+
+Diatur lewat Supabase → Edge Functions → Secrets (atau `npx supabase secrets set ... --project-ref ggwratzhpukgsiduqely`):
+
+| Secret | Isi | Keterangan |
+|---|---|---|
+| `AI_PROVIDER` | `gemini` atau `anthropic` | Opsional. Bila kosong: pakai Claude bila `ANTHROPIC_API_KEY` ada, selain itu Gemini. |
+| `GEMINI_API_KEY` | kunci dari aistudio.google.com → Get API key | Wajib bila memakai Gemini. |
+| `GEMINI_MODEL` | mis. `gemini-flash-latest` | Opsional; bawaan `gemini-flash-latest` (Flash versi stabil terbaru). |
+| `GEMINI_PAID` | `true` | Isi hanya bila proyek Google sudah berbayar. Mengubah teks persetujuan di aplikasi. |
+| `ANTHROPIC_API_KEY` | kunci dari console.anthropic.com | Wajib bila memakai Claude. |
+
+Perubahan secret langsung berlaku (tanpa deploy ulang). Aplikasi menampilkan penyedia aktif di halaman
+Asisten AI, dan teks persetujuan otomatis menyesuaikan.
+
+Penting — **Gemini versi gratis**: menurut ketentuan Google, data yang dikirim lewat kuota gratis dapat dipakai
+Google untuk meningkatkan produknya dan dapat dibaca peninjau manusia. Yang dikirim Dentiva hanya angka ringkasan
+keuangan dan foto nota pembelian (tanpa identitas/rekam medis pasien), tetapi gunakan versi gratis hanya untuk
+uji coba. Untuk klinik pelanggan, pakai Gemini berbayar (`GEMINI_PAID=true`) atau Claude.
+Biaya Gemini dicatat 0 di `ai_usage` (token tetap dicatat); tagihan Gemini berbayar dipantau di Google AI Studio.
+Batas kuota gratis Gemini bisa berubah; bila tercapai, aplikasi menampilkan "batas pemakaian penyedia AI tercapai".

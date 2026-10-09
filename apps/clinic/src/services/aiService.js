@@ -17,6 +17,13 @@ export const aiService = {
     return { success: true, data };
   },
 
+  /** Penyedia AI yang aktif: { configured, provider, label, model, free_tier }. Tidak memakai kuota. */
+  async getProvider() {
+    const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { mode: 'info' } });
+    if (error) return { success: false, error: (await invokeError(error)).message };
+    return { success: true, data };
+  },
+
   /** Aktifkan/nonaktifkan untuk klinik (hanya admin; persetujuan dicatat). */
   async setEnabled(enabled) {
     const { data, error } = await supabase.rpc('ai_set_enabled', { p_enabled: enabled });

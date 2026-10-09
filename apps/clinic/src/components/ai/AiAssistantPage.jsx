@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import DOMPurify from 'dompurify';
-import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power } from 'lucide-react';
+import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
 import { aiService } from '../../services/aiService';
 import { miniMarkdown } from '../../utils/miniMarkdown';
+import { providerNotice } from '../../utils/aiProvider';
 import { useToast } from '../common/ToastNotification';
 import './ai-assistant.css';
 
@@ -65,6 +66,7 @@ export default function AiAssistantPage() {
   const [busy, setBusy] = useState(false);
   const [agree, setAgree] = useState(false);
   const [toggling, setToggling] = useState(false);
+  const [provider, setProvider] = useState(null);
   const endRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -75,6 +77,7 @@ export default function AiAssistantPage() {
   }, []);
 
   useEffect(() => { refreshStatus(); }, [refreshStatus]);
+  useEffect(() => { aiService.getProvider().then((r) => r.success && setProvider(r.data)); }, []);
   useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy]);
 
   const ask = async (q) => {
@@ -176,11 +179,16 @@ export default function AiAssistantPage() {
             <li className="flex gap-3"><Lock size={18} className="shrink-0 text-[var(--color-accent)] mt-0.5" />
               <span><strong>Tidak ada</strong> nama, NIK, kontak, atau isi rekam medis pasien yang dikirim.</span></li>
             <li className="flex gap-3"><ShieldCheck size={18} className="shrink-0 text-[var(--color-accent)] mt-0.5" />
-              Data diproses oleh penyedia AI (Anthropic, di luar Indonesia). Setiap pertanyaan tercatat, dan fitur ini bisa dinonaktifkan kapan saja.</li>
+              <span>{providerNotice(provider)} Setiap pertanyaan tercatat, dan fitur ini bisa dinonaktifkan kapan saja.</span></li>
           </ul>
+          {provider && !provider.configured && (
+            <p className="text-sm rounded-lg p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 flex gap-2">
+              <AlertTriangle size={16} className="shrink-0 mt-0.5" /> Penyedia AI belum dipasang oleh pengelola Dentiva. Fitur bisa diaktifkan, tetapi belum dapat menjawab.
+            </p>
+          )}
           <label className="flex items-start gap-3 text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
             <input id="ai-agree" type="checkbox" className="mt-1" checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-            Saya admin klinik ini dan menyetujui pemrosesan data ringkasan keuangan klinik oleh Asisten AI.
+            Saya admin klinik ini dan menyetujui pemrosesan data ringkasan keuangan klinik (dan foto nota yang saya pindai) oleh Asisten AI{provider?.configured ? ` (${provider.label})` : ''}.
           </label>
           <Button disabled={!agree || toggling} onClick={() => toggle(true)} className="gap-2">
             <Sparkles size={16} /> {toggling ? 'Menyimpan…' : 'Aktifkan Asisten Keuangan'}
@@ -280,7 +288,11 @@ export default function AiAssistantPage() {
       </Card>
 
       <div className="flex items-center justify-between text-xs text-gray-400 gap-3 flex-wrap">
-        <span>Hanya angka ringkasan yang dikirim ke AI. Tidak ada data identitas atau rekam medis pasien.</span>
+        <span>
+          Hanya angka ringkasan (dan foto nota yang Anda pindai) yang dikirim ke AI. Tidak ada data identitas atau rekam medis pasien.
+          {provider?.configured && <> Penyedia: {provider.label}.</>}
+          {provider?.free_tier && <> Versi gratis: data dapat dipakai Google untuk meningkatkan layanannya.</>}
+        </span>
         <button type="button" disabled={toggling} onClick={() => toggle(false)} className="inline-flex items-center gap-1 hover:text-red-500">
           <Power size={12} /> Nonaktifkan Asisten AI
         </button>
