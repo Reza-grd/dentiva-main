@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle } from 'lucide-react';
+import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle, BookCheck, Zap } from 'lucide-react';
+import AnswerFeedback from './AnswerFeedback';
+import KnowledgePanel from './KnowledgePanel';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
 import { aiService } from '../../services/aiService';
 import { miniMarkdown } from '../../utils/miniMarkdown';
@@ -73,6 +75,8 @@ export default function AiAssistantPage() {
   const [agree, setAgree] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [provider, setProvider] = useState(null);
+  const [showKnowledge, setShowKnowledge] = useState(false);
+  const [knowledgeKey, setKnowledgeKey] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
   const pendingAsk = useRef(location.state?.ask || '');
@@ -89,6 +93,11 @@ export default function AiAssistantPage() {
   useEffect(() => { aiService.getProvider().then((r) => r.success && setProvider(r.data)); }, []);
   useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy]);
 
+  const toAssistant = (data, question, extra = {}) => ({
+    role: 'assistant', content: data.answer, tools: data.tools || [], question,
+    usageId: data.usage_id || null, cached: Boolean(data.cached), references: data.references || 0, ...extra,
+  });
+
   const ask = async (q) => {
     const question = (q ?? input).trim();
     if (!question || busy) return;
@@ -99,12 +108,43 @@ export default function AiAssistantPage() {
     const res = await aiService.ask(question, history);
     setBusy(false);
     if (res.success) {
-      setMessages((m) => [...m, { role: 'assistant', content: res.data.answer, tools: res.data.tools || [] }]);
+      setMessages((m) => [...m, toAssistant(res.data, question)]);
       if (res.data.status) setStatus(res.data.status);
     } else {
       setMessages((m) => [...m, { role: 'assistant', content: res.error, error: true }]);
     }
     inputRef.current?.focus();
+  };
+
+  const setFeedback = (idx, value) => setMessages((list) => list.map((m, i) => (i === idx ? { ...m, feedback: value } : m)));
+
+  // 👍 Tepat → simpan sebagai jawaban terverifikasi
+  const markCorrect = async (idx) => {
+    const msg = messages[idx];
+    const res = await aiService.feedback(msg.usageId, true);
+    if (!res.success) return toast.error('Gagal menyimpan penilaian: ' + res.error);
+    setFeedback(idx, 'up');
+    setKnowledgeKey((k) => k + 1);
+  };
+
+  // 👎 Kurang tepat → catat, lalu minta AI menjawab ulang dengan catatan tersebut
+  const retry = async (idx, note) => {
+    const msg = messages[idx];
+    if (busy || !msg?.question) return;
+    await aiService.feedback(msg.usageId, false, note);
+    setFeedback(idx, 'down');
+    // Riwayat sampai sebelum pertanyaan yang dijawab kurang tepat
+    const qIdx = messages.slice(0, idx).map((m) => m.role).lastIndexOf('user');
+    const history = messages.slice(0, Math.max(qIdx, 0)).filter((m) => !m.error).map(({ role, content }) => ({ role, content }));
+    setBusy(true);
+    const res = await aiService.ask(msg.question, history, { retry: true, note });
+    setBusy(false);
+    if (res.success) {
+      setMessages((m) => [...m, toAssistant(res.data, msg.question, { revised: true })]);
+      if (res.data.status) setStatus(res.data.status);
+    } else {
+      setMessages((m) => [...m, { role: 'assistant', content: res.error, error: true }]);
+    }
   };
 
   // Pertanyaan dari kolom tanya di Dashboard: kirim sekali setelah status AI siap.
@@ -143,6 +183,9 @@ export default function AiAssistantPage() {
           <span className="text-sm text-gray-500 tabular-nums">
             {status.terpakai_bulan_ini} / {status.kuota_bulanan} pertanyaan bulan ini
           </span>
+          <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowKnowledge((v) => !v)}>
+            <BookCheck size={14} /> Jawaban terverifikasi
+          </Button>
           {messages.length > 0 && (
             <Button size="sm" variant="outline" className="gap-1" onClick={() => setMessages([])}>
               <RotateCcw size={14} /> Percakapan baru
@@ -223,6 +266,8 @@ export default function AiAssistantPage() {
     <div className="space-y-5 max-w-4xl mx-auto">
       {header}
 
+      {showKnowledge && <KnowledgePanel onClose={() => setShowKnowledge(false)} refreshKey={knowledgeKey} />}
+
       <Card>
         <CardContent className="p-0">
           <div className="min-h-[420px] max-h-[calc(100vh-330px)] overflow-y-auto p-5 space-y-5">
@@ -263,12 +308,26 @@ export default function AiAssistantPage() {
                   <Sparkles size={16} className="text-[var(--color-accent)]" />
                 </div>
                 <div className={`min-w-0 flex-1 rounded-2xl rounded-tl-md px-4 py-3 border ${m.error ? 'border-red-200 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 text-sm' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'}`}>
+                  {m.revised && !m.error && (
+                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-accent)]">Jawaban diperbaiki</p>
+                  )}
                   {m.error ? m.content : <Answer text={m.content} />}
                   {!m.error && (
-                    <p className="mt-3 text-xs text-gray-400">
-                      Dibuat AI, periksa kembali angka penting
-                      {m.tools?.length ? ` · data: ${m.tools.map((t) => TOOL_LABEL[t] || t).join(', ')}` : ''}
+                    <p className="mt-3 text-xs text-gray-400 flex items-center gap-1 flex-wrap">
+                      {m.cached ? (
+                        <><Zap size={12} className="text-amber-500" /> Jawaban terverifikasi · instan</>
+                      ) : (
+                        <>
+                          Dibuat AI, periksa kembali angka penting
+                          {m.tools?.length ? ` · data: ${m.tools.map((t) => TOOL_LABEL[t] || t).join(', ')}` : ''}
+                          {m.references ? ` · mengacu ${m.references} jawaban terverifikasi` : ''}
+                        </>
+                      )}
                     </p>
+                  )}
+                  {!m.error && m.usageId && (
+                    <AnswerFeedback feedback={m.feedback} busy={busy}
+                      onCorrect={() => markCorrect(i)} onRetry={(note) => retry(i, note)} />
                   )}
                 </div>
               </div>

@@ -37,6 +37,7 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 import { GeminiError, geminiInteract, readInteraction, toGeminiSchema, userText } from "./gemini.ts";
 import { GroqError, groqChat, readCompletion, toGroqTools } from "./groq.ts";
 import { DENTIVA_GUIDE } from "./guide.ts";
+import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.ts";
 
 const MODEL = "claude-opus-5-5";
 // USD per 1 juta token (Claude Opus 5.5): masuk, keluar, baca cache, tulis cache (5 menit = 1,25× masuk)
@@ -342,7 +343,7 @@ const RECALL_SCHEMA = {
 
 type HistoryTurn = { role: "user" | "assistant"; content: string };
 type Usage = { input: number; output: number; cacheRead: number; cacheWrite: number };
-type Outcome = "ok" | "error" | "refused";
+type Outcome = "ok" | "error" | "refused" | "cached";
 
 // deno-lint-ignore no-explicit-any
 function addUsage(u: Usage, response: any) {
@@ -828,6 +829,9 @@ Deno.serve(async (req) => {
   // deno-lint-ignore no-explicit-any
   let payload: any = {};
   let errorMsg = "";
+  let answerText: string | null = null;
+  let questionNorm: string | null = null;
+  let fingerprint: string | null = null;
 
   try {
     if (mode === "chat") {
@@ -848,16 +852,45 @@ Deno.serve(async (req) => {
       if (clean.length && clean[clean.length - 1].role === "user") clean.pop();
       // Ringkasan data siap pakai → pertanyaan umum terjawab tanpa memanggil alat (lebih cepat).
       const { data: snapshot } = await db.rpc("ai_snapshot");
-      const snapText = snapshot ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snapshot)}` : "";
-      const turns: ChatTurn[] = [
-        ...clean,
-        { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).${snapText}\n\nPertanyaan: ${question}` },
-      ];
-      const r = provider.name === "gemini" ? await chatGemini(provider, db, turns, usage, toolsUsed)
-        : provider.name === "groq" ? await chatGroq(provider, db, turns, usage, toolsUsed)
-        : await chatAnthropic(provider, db, turns, usage, toolsUsed);
-      if (r.refused) outcome = "refused";
-      payload = { answer: r.answer, tools: [...toolsUsed] };
+      questionNorm = normalizeQuestion(question);
+      fingerprint = await dataFingerprint(snapshot);
+      const isRetry = body.retry === true;
+
+      // Basis pengetahuan: jawaban yang dinilai tepat oleh admin.
+      // deno-lint-ignore no-explicit-any
+      let matches: any[] = [];
+      if (questionNorm) {
+        const { data: m } = await db.rpc("ai_knowledge_match", { p_norm: questionNorm, p_limit: 3 });
+        matches = Array.isArray(m) ? m : [];
+      }
+      const exact = matches.find((k) => k.question_norm === questionNorm);
+      // Sama persis → berikan lagi jawaban terverifikasi (instan, tanpa AI, tanpa kuota):
+      // panduan selalu; jawaban berangka hanya bila data klinik belum berubah dan bukan pertanyaan lanjutan.
+      if (!isRetry && exact && (exact.kind === "panduan" || (clean.length === 0 && exact.data_fingerprint === fingerprint))) {
+        outcome = "cached";
+        answerText = exact.answer;
+        payload = { answer: exact.answer, tools: [], cached: true };
+        await admin.rpc("ai_knowledge_hit", { p_id: exact.id });
+      } else {
+        const refs = matches.slice(0, 2).map((k) => ({
+          question: k.question, answer: k.answer, kind: k.kind, same_data: k.data_fingerprint === fingerprint,
+        }));
+        const note = typeof body.retry_note === "string" ? body.retry_note.trim().slice(0, 500) : "";
+        const retryNote = isRetry
+          ? `\n\nPERHATIAN: jawaban Anda sebelumnya untuk pertanyaan ini dinilai KURANG TEPAT oleh admin${note ? ` dengan catatan: "${note}"` : ""}. Periksa ulang dengan teliti (panggil alat data bila perlu), perbaiki kesalahannya, dan jangan mengulang jawaban yang sama.`
+          : "";
+        const snapText = snapshot ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snapshot)}` : "";
+        const turns: ChatTurn[] = [
+          ...clean,
+          { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).${snapText}${referenceText(refs)}${retryNote}\n\nPertanyaan: ${question}` },
+        ];
+        const r = provider.name === "gemini" ? await chatGemini(provider, db, turns, usage, toolsUsed)
+          : provider.name === "groq" ? await chatGroq(provider, db, turns, usage, toolsUsed)
+          : await chatAnthropic(provider, db, turns, usage, toolsUsed);
+        if (r.refused) outcome = "refused";
+        answerText = r.answer;
+        payload = { answer: r.answer, tools: [...toolsUsed], references: refs.length };
+      }
     } else if (mode === "receipt") {
       feature = "receipt_scan";
       logQuestion = "Pindai nota";
@@ -908,15 +941,17 @@ Deno.serve(async (req) => {
   // Biaya dihitung untuk Claude; Gemini dicatat 0 (gratis; versi berbayar dipantau di Google AI Studio).
   const cost = provider.name !== "anthropic" ? 0 : (usage.input * PRICE.input + usage.output * PRICE.output + usage.cacheRead * PRICE.cacheRead + usage.cacheWrite * PRICE.cacheWrite) / 1_000_000;
   if (clinicId) {
-    const { error: logErr } = await admin.from("ai_usage").insert({
+    const { data: logRow, error: logErr } = await admin.from("ai_usage").insert({
       clinic_id: clinicId, user_id: userData.user.id, feature,
-      model: mode === "receipt" && provider.visionModel ? provider.visionModel : provider.model,
-      question: logQuestion.slice(0, 500), tools_used: [...toolsUsed],
+      model: outcome === "cached" ? "basis-pengetahuan" : mode === "receipt" && provider.visionModel ? provider.visionModel : provider.model,
+      question: logQuestion.slice(0, 1000), tools_used: [...toolsUsed],
       input_tokens: usage.input, output_tokens: usage.output,
       cache_read_tokens: usage.cacheRead, cache_write_tokens: usage.cacheWrite,
       cost_usd: Number(cost.toFixed(5)), status: outcome,
-    });
+      ...(mode === "chat" ? { answer: answerText?.slice(0, 12000) ?? null, question_norm: questionNorm, data_fingerprint: fingerprint } : {}),
+    }).select("id").single();
     if (logErr) console.error("ai_usage insert:", logErr.message);
+    if (mode === "chat" && logRow?.id) payload.usage_id = logRow.id; // untuk penilaian 👍/👎
   }
 
   const counted = outcome === "ok" && !isBrief;

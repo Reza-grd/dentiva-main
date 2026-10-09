@@ -34,14 +34,38 @@ export const aiService = {
   /**
    * Tanya Asisten Keuangan.
    * history: [{ role: 'user'|'assistant', content: string }] — percakapan sebelumnya (teks saja).
+   * opts.retry + opts.note: minta jawaban ulang karena jawaban sebelumnya dinilai kurang tepat.
+   * Hasil: { answer, tools, usage_id, cached?, references?, status }.
    */
-  async ask(question, history = []) {
-    const { data, error } = await supabase.functions.invoke('ai-assistant', { body: { question, history } });
+  async ask(question, history = [], opts = {}) {
+    const body = { question, history, ...(opts.retry ? { retry: true, retry_note: opts.note || '' } : {}) };
+    const { data, error } = await supabase.functions.invoke('ai-assistant', { body });
     if (error) {
       const e = await invokeError(error);
       return { success: false, error: e.message, status: e.status };
     }
     return { success: true, data };
+  },
+
+  /** Nilai jawaban: tepat → disimpan sebagai jawaban terverifikasi; kurang tepat → tidak dipakai ulang. */
+  async feedback(usageId, correct, note = '') {
+    const { data, error } = await supabase.rpc('ai_answer_feedback', { p_usage_id: usageId, p_correct: correct, p_note: note || null });
+    if (error) return { success: false, error: error.message };
+    return { success: true, data };
+  },
+
+  /** Daftar jawaban terverifikasi klinik (admin). */
+  async listKnowledge() {
+    const { data, error } = await supabase.from('ai_knowledge')
+      .select('id, question, answer, kind, hit_count, updated_at, last_used_at')
+      .order('updated_at', { ascending: false }).limit(200);
+    if (error) return { success: false, error: error.message };
+    return { success: true, data: data || [] };
+  },
+
+  async deleteKnowledge(id) {
+    const { error } = await supabase.from('ai_knowledge').delete().eq('id', id);
+    return error ? { success: false, error: error.message } : { success: true };
   },
 
   /** Foto nota (JPEG base64) → { draft, status }. Tidak menyimpan apa pun. */
