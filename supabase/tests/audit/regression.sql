@@ -83,7 +83,11 @@ insert into public.ai_usage(id,clinic_id,user_id,feature,model,question,question
  ('ee500000-0000-4000-8000-000000000001','eeaaaaaa-0000-4000-8000-000000000001','ee000000-0000-4000-8000-00000000000a','finance_chat','synthetic-model','Bagaimana pendapatan bulan ini?','bagaimana pendapatan bulan ini','Synthetic numeric answer','cached');
 select pg_temp.login_as('ee000000-0000-4000-8000-00000000000a','eeaaaaaa-0000-4000-8000-000000000001');
 select pg_temp.assert_ok(public.ai_answer_feedback('ee500000-0000-4000-8000-000000000001',true,null)->>'kind'='data','numeric answer is not classified as static guide');
-select pg_temp.expect_error($q$select public.ai_reserve_usage('eeaaaaaa-0000-4000-8000-000000000001','ee000000-0000-4000-8000-00000000000a','finance_chat','synthetic')$q$,'42501');
+-- Check effective ACL directly. The local Supabase Postgres image crashes when
+-- this denied EXECUTE is caught inside a dynamic PL/pgSQL exception handler.
+select pg_temp.assert_ok(not has_function_privilege('authenticated','public.ai_reserve_usage(uuid,uuid,text,text)','execute')
+ and not has_function_privilege('anon','public.ai_reserve_usage(uuid,uuid,text,text)','execute')
+ and has_function_privilege('service_role','public.ai_reserve_usage(uuid,uuid,text,text)','execute'),'reservation RPC is service-only');
 reset role;
 select set_config('request.jwt.claims','',true),set_config('request.jwt.claim.sub','',true);
 insert into public.clinic_settings(clinic_id,key,value) values('eeaaaaaa-0000-4000-8000-000000000001','ai_assistant_enabled','true');
