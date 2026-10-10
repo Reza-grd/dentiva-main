@@ -28,10 +28,16 @@ Kolom nama pasien dan kode ICD diperlebar agar envelope terenkripsi baru muat. R
 - Unit test npm: 121 lulus; Deno: 19 lulus; pemeriksaan tipe tujuh Edge Functions lulus.
 - Smoke migrasi: 147 lulus.
 - Seluruh migrasi dan uji `supabase/tests/audit/regression.sql` lulus pada PostgreSQL terkait dengan pgcrypto asli dalam **transaksi ROLLBACK**. Cakupan: prefix palsu, tenant ciphertext, FK lintas klinik, radiologi admin, SOAP terkunci, kasir partial/lunas/nol, ID detail, quantity biaya/stok, snapshot idempoten, provenance cache, reservasi slot kuota terakhir, dan brief bersamaan.
-- Docker tidak tersedia di komputer ini. Suite pgTAP penuh disiapkan untuk CI dengan database kosong; tes owner terakhir membutuhkan lingkungan tersebut dan tidak dapat memakai jumlah operator yang sudah ada di produksi.
+- Docker tidak tersedia di komputer ini. Suite pgTAP penuh dijalankan di CI dengan database kosong dan lulus (47 pemeriksaan); seluruh regresi pgcrypto dan job web/Edge Functions juga lulus. Probe ACL efektif menggantikan dua pemanggilan fungsi terlarang di dalam exception handler yang memicu segmentation fault pada image PostgreSQL lokal. Izin fungsi tetap ditolak untuk pengguna klinik.
 
 Reproduksi historis `supabase/tests/audit/audit-2026-10-10.mjs` dibatasi pada migrasi sebelum perbaikan. Gunakan `regression.sql` untuk memeriksa perilaku setelah perbaikan.
 
 ## Deployment
 
-Status deployment dan commit akhir ditambahkan setelah pengiriman dan verifikasi selesai.
+- Kode dikirim ke GitHub branch `console`; commit perbaikan terakhir `4d5b13e`.
+- [Seluruh CI lulus](https://github.com/Reza-grd/dentiva-main/actions/runs/38052331385): web, Edge Functions, dan database/pgTAP.
+- Lima migrasi diterapkan ke proyek Supabase `ggwratzhpukgsiduqely`; metadata migrasi dan policy/ACL diverifikasi kembali.
+- Tujuh Edge Functions aktif setelah deployment: `ai-assistant`, `midtrans-webhook`, `satusehat-sync`, `satusehat-sync-visit`, `satusehat-outbox-processor`, `satusehat-healthcheck`, dan `send-whatsapp`. Worker manual tetap memakai klinik pemanggil aktif; worker service dapat memproses queue global.
+- Tipe TypeScript database disinkronkan dan typecheck lulus.
+- Regresi PostgreSQL setelah deployment lulus. Seluruh data sintetis di-ROLLBACK; pemeriksaan akhir memastikan tidak ada klinik fixture tertinggal.
+- Perubahan frontend tersedia di `console`; penggabungan ke `main` dan publikasi frontend tidak dilakukan dalam tugas ini. Backend/database sudah diperbarui.
