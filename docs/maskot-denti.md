@@ -73,11 +73,22 @@ sequence([['wake'], ['wave', 3000]]); // pagi: bangun → menyapa → idle
 <DentiMascot state={state} kid={kategoriUsia === 'anak'} size={260} />
 ```
 
-## Rencana integrasi layar antrean (tahap berikut)
+## Integrasi layar antrean (aktif)
 
-1. Denti `idle` di layar antrean; pengumuman pasien dipanggil → `call`.
-2. Kategori usia pasien dipanggil (anak/remaja/dewasa/lansia) dari `get_queue_display` — **tanpa** nama
-   atau tanggal lahir → `kid` untuk anak; gaya sapaan/tips menyesuaikan.
-3. Antrean kosong → `talk` bergantian dengan tips kesehatan gigi; di luar jam praktik → `sleep`;
-   pembukaan pagi → `wake`.
-4. `prefers-reduced-motion` mematikan semua animasi CSS.
+`apps/clinic/src/components/queue/QueueDisplay.jsx` + aturan murni `apps/clinic/src/utils/dentiQueue.js`.
+
+| Situasi | Denti | Teks bar bawah |
+|---|---|---|
+| Di luar jam praktik & antrean kosong | `sleep` | "Klinik sedang di luar jam praktik…" |
+| Klinik baru buka | `wake` → `wave` | — |
+| Belum ada yang diperiksa | tips bergilir tiap 9 dtk: `brush`, `tooth`, `talk`, `dance` | tips kesehatan gigi |
+| Pasien berikutnya terlambat ≥ 30 mnt dari jam janji | `sorry` | "Mohon maaf atas waktu tunggunya…" |
+| Pasien dipanggil | kartu pengumuman: `point` (mode anak bila `kid`) | — |
+| Pasien selesai | `thanks` | — |
+| Ada yang diperiksa | Denti kecil di kiri bar bawah, `idle` (+ mode anak) | pesan klinik |
+
+- Jam praktik = jadwal dokter aktif hari ini (`doctor_schedules`), buka 30 mnt lebih awal & tutup 30 mnt
+  sesudahnya; tanpa jadwal dianggap tutup 22.00–06.00.
+- `get_queue_display` (migrasi `20261010110158_queue_display_mascot`) menambah `hours` dan `kid` (boolean,
+  usia < 12 th). **Tanggal lahir tidak pernah dikirim** ke layar.
+- `prefers-reduced-motion` mematikan semua animasi CSS.

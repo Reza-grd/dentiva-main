@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../services/supabase';
 import { Stethoscope, Clock, MonitorOff } from 'lucide-react';
+import DentiMascot, { useDentiDirector } from '../mascot/DentiMascot';
+import { dentiScene, isClosed } from '../../utils/dentiQueue';
 import './queue-display.css';
 
 // ─────────────────────────────────────────────
@@ -11,6 +13,9 @@ import './queue-display.css';
 //  nama dokter, jam, dan status — tidak ada nama lengkap/No. RM/kontak.
 //  Palet berdiri sendiri (tidak bergantung tema aplikasi) agar selalu
 //  tampil gelap & kontras di TV.
+//  Maskot Denti: tips bergilir saat senggang, menunjuk saat pasien dipanggil,
+//  berterima kasih saat pasien selesai, minta maaf bila antrean molor, tidur di
+//  luar jam praktik dan bangun saat klinik buka. Mode anak memakai penanda `kid`.
 // ─────────────────────────────────────────────
 
 const REFRESH_INTERVAL_MS = 10000;
@@ -59,7 +64,10 @@ const QueueDisplay = () => {
   const [loading, setLoading] = useState(true);
   const [announce, setAnnounce] = useState(null);
   const [messageIdx, setMessageIdx] = useState(0);
+  const [hours, setHours] = useState(null);
   const seenOngoing = useRef(null);
+  const seenCompleted = useRef(null);
+  const wasClosed = useRef(null);
 
   // ─── Ambil antrean hari ini (data minimal) ───
   const fetchQueue = async () => {
@@ -73,6 +81,7 @@ const QueueDisplay = () => {
       }
       setUnavailable(null);
       setClinicName(data.clinic_name || '');
+      setHours(data.hours || null);
       setVisits(data.visits || []);
     } catch (err) {
       // Gangguan jaringan: pertahankan tampilan terakhir, coba lagi di interval berikutnya.
@@ -107,6 +116,26 @@ const QueueDisplay = () => {
     const t = setTimeout(() => setAnnounce(null), ANNOUNCE_MS);
     return () => clearTimeout(t);
   }, [ongoing]);
+
+  // ─── Denti ───
+  const scene = dentiScene({ hours, now, primary: ongoing[0], waiting, tick: messageIdx });
+  const denti = useDentiDirector(scene.state);
+  const { play, sequence } = denti;
+
+  // Pasien selesai → terima kasih (bukan saat layar pertama dibuka)
+  useEffect(() => {
+    const prev = seenCompleted.current;
+    seenCompleted.current = completed.length;
+    if (prev != null && completed.length > prev) play('thanks');
+  }, [completed.length, play]);
+
+  // Klinik baru buka → bangun lalu menyapa
+  const closedNow = isClosed(hours, now);
+  useEffect(() => {
+    const prev = wasClosed.current;
+    wasClosed.current = closedNow;
+    if (prev === true && !closedNow) sequence([['wake'], ['wave', 3000]]);
+  }, [closedNow, sequence]);
 
   const messages = useMemo(() => [
     `Selamat datang di ${clinicName || 'klinik kami'}. Nomor Anda akan segera dipanggil.`,
@@ -192,6 +221,7 @@ const QueueDisplay = () => {
           {!primary ? (
             <div className="qd-empty">
               <span className="qd-empty__halo" aria-hidden="true" />
+              <DentiMascot className="qd-denti qd-denti--stage" state={denti.state} kid={scene.kid} size={300} />
               <p className="qd-empty__title">Belum ada pasien yang dipanggil</p>
               <p className="qd-empty__sub">Silakan menunggu dengan nyaman. Nomor Anda akan tampil di sini.</p>
             </div>
@@ -271,8 +301,9 @@ const QueueDisplay = () => {
       </main>
 
       {/* ── Pesan bawah ──────────────────────── */}
-      <footer className="qd-glass qd-footer">
-        <p key={messageIdx % messages.length} className="qd-message">{messages[messageIdx % messages.length]}</p>
+      <footer className={`qd-glass qd-footer ${primary ? 'qd-footer--host' : ''}`}>
+        {primary && <DentiMascot className="qd-denti qd-denti--host" state={denti.state} kid={scene.kid} size={120} />}
+        <p key={messageIdx} className="qd-message">{scene.text || messages[messageIdx % messages.length]}</p>
         <span className="qd-powered">Dentiva</span>
       </footer>
 
@@ -286,6 +317,8 @@ const QueueDisplay = () => {
             <p className="qd-announce__no">{pad(announce.no)}</p>
             <p className="qd-announce__initials">{announce.initials}</p>
             <p className="qd-announce__doctor">Silakan menuju ruang periksa · {announce.doctor || 'Dokter'}</p>
+            <DentiMascot className="qd-denti qd-denti--announce" state="point" kid={Boolean(announce.kid)} size={220}
+              title="Denti mempersilakan pasien menuju ruang periksa" />
             <span className="qd-announce__timer" style={{ animationDuration: `${ANNOUNCE_MS}ms` }} />
           </div>
         </div>

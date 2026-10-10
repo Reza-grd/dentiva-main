@@ -189,6 +189,15 @@
 @keyframes qd-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes qd-fade-out { to { opacity: 0; visibility: hidden; } }
 
+/* ── Denti (maskot) ── */
+.qd-denti { display: block; pointer-events: none; filter: drop-shadow(0 2vh 3vh rgb(0 0 0 / 0.45)); }
+.qd-denti--stage { position: relative; width: 26vh; height: auto; margin-bottom: 1vh; animation: qd-rise 1s .2s cubic-bezier(.2,.8,.2,1) both; }
+.qd-footer--host { position: relative; padding-left: 13vh; }
+.qd-denti--host { position: absolute; left: 1.6vw; bottom: 0.4vh; width: 10.5vh; height: auto; }
+.qd-announce__card:has(.qd-denti--announce) { padding-right: calc(7vw + 18vh); }
+.qd-denti--announce { position: absolute; right: 3vw; bottom: 4vh; width: 20vh; height: auto; animation: qd-rise .8s .6s both; }
+@keyframes qd-rise { from { opacity: 0; transform: translateY(2vh); } to { opacity: 1; transform: none; } }
+
 /* ── Umum ── */
 @keyframes qd-in { from { opacity: 0; transform: translateY(2vh); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
 @keyframes qd-slide { from { opacity: 0; transform: translateX(2vw); } to { opacity: 1; transform: none; } }
