@@ -29,7 +29,6 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({ error: 'Supabase environment variables not configured in Edge Function' }), {
@@ -40,47 +39,10 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Item 6 Fix: Strict Role-Based Access Control (RBAC) & Service Role check
-    let callingUserId: string | null = null;
-    let callingUserRole: string | null = null;
-    let isServiceRole = false;
-
-    if (authHeader === `Bearer ${supabaseServiceKey}`) {
-      isServiceRole = true;
-    } else {
-      const userClient = createClient(supabaseUrl, supabaseAnonKey || supabaseServiceKey, {
-        global: { headers: { Authorization: authHeader } }
-      });
-      const { data: { user }, error: authError } = await userClient.auth.getUser();
-      if (authError || !user) {
-        return new Response(JSON.stringify({ error: 'Unauthorized: Invalid credentials' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      callingUserId = user.id;
-
-      const { data: profile } = await supabaseAdmin
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      callingUserRole = profile?.role || null;
+    const callingUserId: string | null = null;
+    if (authHeader !== `Bearer ${supabaseServiceKey}`) {
+      return new Response(JSON.stringify({error:'Forbidden: outbox processor is service-only'}), {status:403,headers:{...corsHeaders,'Content-Type':'application/json'}});
     }
-
-    // Role check: Only admin, dokter, or automated service role can process outbox queue
-    const ALLOWED_ROLES = ['admin', 'dokter'];
-    if (!isServiceRole && (!callingUserRole || !ALLOWED_ROLES.includes(callingUserRole))) {
-      return new Response(
-        JSON.stringify({ error: 'Forbidden: Insufficient role privileges to execute outbox processing queue.' }),
-        {
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
     const nowIso = new Date().toISOString();
 
     // Query pending or ready-to-retry outbox items

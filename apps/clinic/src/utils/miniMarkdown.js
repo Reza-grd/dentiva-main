@@ -26,6 +26,14 @@ export function miniMarkdown(src = '') {
     const line = lines[i];
     if (!line.trim()) { i++; continue; }
 
+    // A truncated/model-generated table without a divider is plain text.
+    // Always consume it so the outer loop cannot stall on a pipe row.
+    if (isTableRow(line) && !(i + 1 < lines.length && isDivider(lines[i + 1]))) {
+      out.push(`<p>${inline(line)}</p>`);
+      i++;
+      continue;
+    }
+
     if (isTableRow(line) && i + 1 < lines.length && isDivider(lines[i + 1])) {
       const head = cells(line);
       i += 2;

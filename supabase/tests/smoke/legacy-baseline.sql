@@ -75,7 +75,8 @@ create table public.clinic_settings (
   id uuid primary key default gen_random_uuid(), key text unique not null, value text,
   clinic_id uuid not null references public.clinics(id), updated_at timestamptz default now()
 );
-create table public.payments (id uuid primary key default gen_random_uuid(), clinic_id uuid not null references public.clinics(id), amount numeric);
+create table public.payments (id uuid primary key default gen_random_uuid(), clinic_id uuid not null references public.clinics(id), amount numeric,
+  status_pembayaran text default 'pending',total_bayar numeric default 0,jumlah_bayar numeric default 0);
 create table public.audit_logs (
   id uuid primary key default gen_random_uuid(), timestamp timestamptz not null default now(),
   clinic_id uuid not null references public.clinics(id), user_id uuid references public.users(id),

@@ -445,13 +445,14 @@ export const visitService = {
   },
 
   // Lock/Unlock visit (Phase 4 Finalization)
-  async toggleLockVisit(visitId, lockStatus) {
+  async toggleLockVisit(visitId, lockStatus, reason = '') {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       const { error } = await supabase
         .from('visits')
         .update({
           is_locked: lockStatus,
+          lock_change_reason: reason,
           locked_at: lockStatus ? new Date().toISOString() : null,
           locked_by: lockStatus ? user?.id : null
         })

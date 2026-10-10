@@ -287,6 +287,7 @@ const GUIDES: Guide[] = [
  */
 export function fastAnswer(q: string, snapshot: Snap): FastResult | null {
   if (!q || q.length > 160) return null;
+  if (/\b(analisis|analisa|tren|trend|prediksi|proyeksi|bandingkan|perbandingan|kenapa|mengapa|naik|turun|kemarin|tahun lalu)\b/.test(q)) return null;
   if (HOWTO.test(q)) {
     const g = GUIDES.find((x) => x.match(q));
     return g ? { answer: g.answer, intent: `panduan:${g.id}`, kind: "panduan" } : null;

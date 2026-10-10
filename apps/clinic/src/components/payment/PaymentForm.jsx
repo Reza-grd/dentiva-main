@@ -57,6 +57,7 @@ const PaymentForm = () => {
       setVisit(visitResult.data);
       if (visitResult.data.treatments && visitResult.data.treatments.length > 0) {
         setSelectedTreatments(visitResult.data.treatments.map(vt => ({
+          id: vt.id,
           treatment_id: vt.treatment.id,
           nama_treatment: vt.treatment.nama_treatment,
           tooth_number: vt.tooth_number,
@@ -99,7 +100,9 @@ const PaymentForm = () => {
 
     if (!existingObatErr && existingObatData && existingObatData.length > 0) {
       setSelectedObat(existingObatData.map(vo => ({
-        obat_id: vo.obat_id,
+        id: vo.id,
+        master_bahan_id: vo.master_bahan_id,
+        obat_id: vo.obat_id || vo.master_bahan_id,
         nama_obat: vo.nama_obat,
         qty: vo.qty,
         harga_satuan: vo.harga_satuan,
@@ -229,6 +232,10 @@ const PaymentForm = () => {
       errors.total = 'Total bayar tidak boleh negatif. Periksa diskon.';
     }
 
+    const paid = Number(paymentData.jumlah_bayar ?? 0);
+    if (!Number.isFinite(paid) || paid < 0) errors.jumlah_bayar = 'Jumlah bayar tidak valid';
+    if (paymentData.status_pembayaran === 'paid' && paid < totals.totalBayar) errors.jumlah_bayar = 'Pembayaran lunas harus mencukupi total tagihan';
+    if (paymentData.status_pembayaran === 'partial' && (paid <= 0 || paid >= totals.totalBayar)) errors.jumlah_bayar = 'Pembayaran sebagian harus lebih dari nol dan kurang dari total tagihan';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -241,72 +248,8 @@ const PaymentForm = () => {
 
     setSaving(true);
     try {
-      const totals = calculateTotals();
-
-      // 1. Save treatments
-      const replaceResult = await visitService.replaceVisitTreatments(visitId, selectedTreatments);
-      if (!replaceResult.success) throw new Error(replaceResult.error);
-
-      // 2. Save visit obat (delete existing and insert new)
-      const { error: delObatError } = await supabase
-        .from('visit_obat')
-        .delete()
-        .eq('visit_id', visitId);
-
-      if (delObatError) throw delObatError;
-
-      if (selectedObat.length > 0) {
-        const obatRows = selectedObat.map(o => ({
-          visit_id: visitId,
-          obat_id: o.obat_id,
-          nama_obat: o.nama_obat,
-          qty: o.qty,
-          harga_satuan: o.harga_satuan,
-          dosis: o.dosis,
-          frekuensi: o.frekuensi
-        }));
-
-        const { error: insObatError } = await supabase
-          .from('visit_obat')
-          .insert(obatRows);
-
-        if (insObatError) throw insObatError;
-      }
-
-      // 3. Prepare payment info
-      const today = new Date().toISOString().split('T')[0];
-      const jumlahBayar = parseFloat(paymentData.jumlah_bayar) || totals.totalBayar;
-      const kembalian = paymentData.metode_pembayaran === 'cash'
-        ? Math.max(0, jumlahBayar - totals.totalBayar)
-        : 0;
-        
-      const paymentPayload = {
-        visit_id: visitId,
-        patient_id: visit.patient_id,
-        total_treatment: totals.totalTreatment,
-        biaya_tambahan: totals.biayaTambahan,
-        keterangan_tambahan: paymentData.keterangan_tambahan,
-        diskon: totals.diskon,
-        total_bayar: totals.totalBayar,
-        jumlah_bayar: jumlahBayar,
-        kembalian: kembalian,
-        metode_pembayaran: paymentData.metode_pembayaran,
-        status_pembayaran: paymentData.status_pembayaran,
-        tanggal_pembayaran: today,
-      };
-
-      let result;
-      if (existingPayment) {
-        result = await paymentService.updatePayment(existingPayment.id, paymentPayload);
-      } else {
-        result = await paymentService.createPayment(paymentPayload);
-      }
-
+      const result = await paymentService.saveVisitPayment(visitId, selectedTreatments, selectedObat, paymentData);
       if (result.success) {
-        if (paymentData.status_pembayaran === 'paid') {
-          await visitService.updateVisit(visitId, { status: 'completed' });
-        }
-        
         // 4. Trigger WhatsApp Edge Function securely
         if (paymentData.status_pembayaran === 'paid') {
           try {
@@ -641,7 +584,7 @@ const PaymentForm = () => {
     `).join('');
 
     const { totalTreatment, totalObat, biayaTambahan, diskon, totalBayar } = calculateTotals();
-    const jumlahBayarPrint = parseFloat(paymentData.jumlah_bayar) || totalBayar;
+    const jumlahBayarPrint = Number(paymentData.jumlah_bayar ?? 0);
     const kembalianPrint = paymentData.metode_pembayaran === 'cash' ? Math.max(0, jumlahBayarPrint - totalBayar) : 0;
 
     const html = `<!DOCTYPE html>

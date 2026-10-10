@@ -446,14 +446,17 @@ const MedicalRecordForm = () => {
   };
 
   const handleToggleLock = async (visitId, currentLockStatus) => {
+    let reason = '';
     if (!currentLockStatus) {
       if (!window.confirm('Apakah Anda yakin ingin mengunci catatan ini? Catatan yang dikunci akan menjadi read-only.')) return;
     } else {
-      if (!window.confirm('Buka kunci catatan ini untuk mengedit?')) return;
+      reason = window.prompt('Alasan membuka kunci rekam medis (minimal 5 karakter):')?.trim();
+      if (!reason) return;
+      if (reason.length < 5) { toast.error('Alasan minimal 5 karakter'); return; }
     }
     
     setSaving(true);
-    const { success, error } = await visitService.toggleLockVisit(visitId, !currentLockStatus);
+    const { success, error } = await visitService.toggleLockVisit(visitId, !currentLockStatus, reason);
     setSaving(false);
     
     if (success) {

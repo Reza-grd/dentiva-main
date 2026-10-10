@@ -1,3 +1,4 @@
+import { requireActiveAccount } from "../_shared/activeAccount.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { getCorsHeaders } from "../_shared/corsHelper.ts";
@@ -56,14 +57,11 @@ serve(async (req) => {
       }
       callingUserId = user.id;
 
-      const { data: profile } = await supabaseAdmin
-        .from('users')
-        .select('role, clinic_id')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      callingUserRole = profile?.role || null;
-      callingUserClinicId = profile?.clinic_id || null;
+      let profile;
+      try { profile = await requireActiveAccount(userClient, ['admin','dokter','resepsionis']); }
+      catch { return new Response(JSON.stringify({error:'Forbidden: akun atau klinik tidak aktif'}), {status:403,headers:{...corsHeaders,'Content-Type':'application/json'}}); }
+      callingUserRole = profile.role;
+      callingUserClinicId = profile.clinic_id;
     }
 
     // Parse request body

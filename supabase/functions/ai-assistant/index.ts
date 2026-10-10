@@ -692,6 +692,8 @@ async function runScheduledBriefs(p: Provider, admin: any) {
     const { data: snap, error: snapErr } = await admin.rpc("ai_service_snapshots", { p_clinic: clinicId });
     if (snapErr || !snap?.admin_user) { console.error("ai_service_snapshots:", clinicId, snapErr?.message ?? "tanpa admin"); continue; }
     for (const kind of ["daily_brief", "staff_brief"] as BriefKind[]) {
+      const {data: reservationId, error: reserveErr} = await admin.rpc('ai_reserve_usage', {p_clinic:clinicId,p_user:snap.admin_user,p_feature:kind,p_model:p.model});
+      if (reserveErr || !reservationId) continue;
       const usage: Usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
       let status: Outcome = "ok";
       try {
@@ -708,13 +710,13 @@ async function runScheduledBriefs(p: Provider, admin: any) {
         status = "error";
         console.error("cron brief:", clinicId, kind, err instanceof Error ? err.message : err);
       }
-      await admin.from("ai_usage").insert({
+      await admin.from("ai_usage").update({
         clinic_id: clinicId, user_id: snap.admin_user, feature: kind, model: p.model,
         question: "Pembaruan terjadwal", tools_used: [],
         input_tokens: usage.input, output_tokens: usage.output,
         cache_read_tokens: usage.cacheRead, cache_write_tokens: usage.cacheWrite,
         cost_usd: 0, status,
-      });
+      }).eq("id", reservationId).eq("status", "reserved");
       await sleep(1500); // beri jeda agar tidak membebani kuota penyedia AI
     }
   }
@@ -821,6 +823,11 @@ Deno.serve(async (req) => {
     }
   }
 
+  const reservedFeature = mode === 'receipt' ? 'receipt_scan' : mode === 'recall_template' ? 'recall_template' : isBrief ? briefKind : 'finance_chat';
+  const { data: reservationId, error: reserveErr } = await admin.rpc('ai_reserve_usage', {
+    p_clinic: clinicId, p_user: userData.user.id, p_feature: reservedFeature, p_model: provider.model,
+  });
+  if (reserveErr || !reservationId) return json(req, reserveErr?.code === '42501' ? 403 : 429, {error: reserveErr?.message ?? 'Pemakaian AI tidak dapat dicatat', status});
   const today = todayJakarta();
   const usage: Usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
   const toolsUsed = new Set<string>();
@@ -868,7 +875,7 @@ Deno.serve(async (req) => {
       const exact = matches.find((k) => k.question_norm === questionNorm);
       // Sama persis → berikan lagi jawaban terverifikasi (instan, tanpa AI, tanpa kuota):
       // panduan selalu; jawaban berangka hanya bila data klinik belum berubah dan bukan pertanyaan lanjutan.
-      if (!isRetry && exact && (exact.kind === "panduan" || (clean.length === 0 && exact.data_fingerprint === fingerprint))) {
+      if (!isRetry && exact && (exact.kind === "panduan")) {
         outcome = "cached";
         answerText = exact.answer;
         payload = { answer: exact.answer, tools: [], cached: true };
@@ -948,7 +955,7 @@ Deno.serve(async (req) => {
   // Biaya dihitung untuk Claude; Gemini dicatat 0 (gratis; versi berbayar dipantau di Google AI Studio).
   const cost = provider.name !== "anthropic" ? 0 : (usage.input * PRICE.input + usage.output * PRICE.output + usage.cacheRead * PRICE.cacheRead + usage.cacheWrite * PRICE.cacheWrite) / 1_000_000;
   if (clinicId) {
-    const { data: logRow, error: logErr } = await admin.from("ai_usage").insert({
+    const { data: logRow, error: logErr } = await admin.from("ai_usage").update({
       clinic_id: clinicId, user_id: userData.user.id, feature,
       model: fast ? `jawaban-cepat:${fast.intent}` : outcome === "cached" ? "basis-pengetahuan" : mode === "receipt" && provider.visionModel ? provider.visionModel : provider.model,
       question: logQuestion.slice(0, 1000), tools_used: [...toolsUsed],
@@ -956,8 +963,8 @@ Deno.serve(async (req) => {
       cache_read_tokens: usage.cacheRead, cache_write_tokens: usage.cacheWrite,
       cost_usd: Number(cost.toFixed(5)), status: outcome,
       ...(mode === "chat" ? { answer: answerText?.slice(0, 12000) ?? null, question_norm: questionNorm, data_fingerprint: fingerprint } : {}),
-    }).select("id").single();
-    if (logErr) console.error("ai_usage insert:", logErr.message);
+    }).eq("id", reservationId).eq("status", "reserved").select("id").single();
+    if (logErr) { console.error("ai_usage finalize:", logErr.message); return json(req, 503, {error:"Pemakaian AI gagal dicatat. Coba sebentar lagi."}); }
     if (mode === "chat" && logRow?.id) payload.usage_id = logRow.id; // untuk penilaian 👍/👎
   }
 

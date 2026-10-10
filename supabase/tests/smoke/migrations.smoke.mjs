@@ -319,18 +319,18 @@ await db.exec(`insert into storage.objects (bucket_id, name) values
   ('radiologi', '${A}/p1/xray.png'), ('radiologi', '${B}/p9/xray.png'), ('klinik', 'legacy-patient/foto.jpg')`);
 await loginAs(uA);
 const objsA = (await q(`select name from storage.objects order by name`)).map((r) => r.name);
-ok(objsA.length === 2 && objsA.includes(`${A}/p1/xray.png`) && objsA.includes("legacy-patient/foto.jpg"),
-  "klinik A melihat filenya + file warisan, bukan file klinik B", objsA);
+ok(objsA.length === 1 && objsA.includes("legacy-patient/foto.jpg"),
+  "admin hanya melihat file administratif; radiologi hanya dokter", objsA);
 await expectError(`insert into storage.objects (bucket_id, name) values ('radiologi', '${B}/p9/sisip.png')`, /row-level security|42501/, "tidak bisa mengunggah ke folder klinik B");
-await db.exec(`insert into storage.objects (bucket_id, name) values ('radiologi', '${A}/p1/baru.png')`);
-ok(true, "bisa mengunggah ke folder klinik sendiri");
+await expectError(`insert into storage.objects (bucket_id, name) values ('radiologi', '${A}/p1/baru.png')`, /row-level security|42501/, 'admin tidak bisa mengunggah radiologi');
+
 await expectError(`insert into storage.objects (bucket_id, name) values ('avatars', '${uB}/foto.png')`, /row-level security|42501/, "avatar tidak bisa ditulis ke folder user lain");
 await db.exec(`insert into storage.objects (bucket_id, name) values ('avatars', '${uA}/foto.png')`);
 ok(true, "avatar bisa ditulis ke folder sendiri");
 await logout();
 await loginAs(uB);
 const objsB = (await q(`select name from storage.objects where bucket_id in ('radiologi', 'klinik') order by name`)).map((r) => r.name);
-ok(objsB.length === 1 && objsB[0] === `${B}/p9/xray.png`, "klinik B hanya melihat filenya (bukan file warisan)", objsB);
+ok(objsB.length === 0, "admin B tidak melihat radiologi maupun file warisan", objsB);
 await logout();
 
 // Nomor RM per klinik

@@ -2,6 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { miniMarkdown } from '../utils/miniMarkdown';
 
 describe('miniMarkdown (jawaban Asisten AI)', () => {
+  it('mengonsumsi baris pipe tanpa divider tabel', () => {
+    expect(miniMarkdown('| orphan |')).toBe('<p>| orphan |</p>');
+    expect(miniMarkdown('Awal\n| <script> |\nAkhir')).toContain('&lt;script&gt;');
+    expect(miniMarkdown('| A |\n| invalid divider |')).toContain('<p>| invalid divider |</p>');
+  });
   it('meng-escape HTML dari model', () => {
     const html = miniMarkdown('<img src=x onerror=alert(1)> **aman**');
     expect(html).not.toContain('<img');

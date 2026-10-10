@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { crypto } from "https://deno.land/std@0.168.0/crypto/mod.ts";
+import { verifiedStatus } from "./verifiedStatus.ts";
 import { getCorsHeaders } from "../_shared/corsHelper.ts";
 
 /**
@@ -66,8 +67,6 @@ serve(async (req) => {
       status_code,
       gross_amount,
       signature_key,
-      transaction_status,
-      fraud_status,
       custom_field1: clinic_id,
       custom_field2: plan_id,
       custom_field3: billing_cycle,
@@ -99,6 +98,8 @@ serve(async (req) => {
       );
     }
 
+    const verified = await verifiedStatus(order_id, gross_amount, serverKey, Deno.env.get('MIDTRANS_ENVIRONMENT') === 'production');
+    const { transaction_status, fraud_status } = verified;
     console.log(`Processing Midtrans Webhook: order=${order_id}, status=${transaction_status}`);
 
     // Keputusan HANYA berdasarkan order yang tercatat di server (platform.payments).
@@ -116,7 +117,7 @@ serve(async (req) => {
       p_order_id: order_id,
       p_outcome: outcome,
       p_gross_amount: Math.round(Number(gross_amount)),
-      p_raw: notification,
+      p_raw: verified,
     });
 
     if (settleErr) {

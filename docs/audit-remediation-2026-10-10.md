@@ -1,0 +1,37 @@
+# Perbaikan audit Dentiva — 10 Oktober 2026
+
+Rujukan: [audit awal](audit-2026-10-10.md). Perubahan kode dan empat migrasi baru menangani F01–F12 serta C01–C03.
+
+| Temuan | Perbaikan |
+|---|---|
+| F01 | Klinik dan klasifikasi medis berada di dalam payload pgcrypto yang diautentikasi. Mengganti prefix ditolak; ciphertext klinik lain ditolak. Ciphertext lama dikonversi di dalam database, termasuk JSON versi/audit. |
+| F02 | Policy Storage restrictive dokter untuk bucket radiologi. |
+| F03 | Semua FK yang menunjuk tabel ber-klinik divalidasi pada INSERT dan UPDATE, termasuk clinic_id eksplisit dan ID obat warisan. |
+| F04 | Processor outbox global hanya menerima service role. |
+| F05 | Edge SATUSEHAT dan WhatsApp memeriksa status akun, status klinik, peran, serta kecocokan klaim tenant. |
+| F06 | Baris Markdown berpipa tanpa divider dikonsumsi sebagai paragraf, sehingga renderer tidak berputar tanpa akhir. |
+| F07 | Hanya jawaban panduan statis dengan provenance deterministik dikategorikan panduan. Jawaban data selalu dihitung ulang; panduan lama tanpa provenance ditandai data. |
+| F08 | RPC kasir atomik meliputi detail, pembayaran, status selesai dan snapshot biaya. Detail yang sama mempertahankan ID dan catatan klinis; tindakan selesai tidak boleh diganti. |
+| F09 | Nol tidak menjadi default total; pembayaran lunas dan sebagian divalidasi pada UI/RPC/trigger database. |
+| F10 | Reservasi sebelum panggilan model menggunakan advisory lock per klinik, menghitung slot berlangsung, membatasi permintaan, dan menahan pembuatan brief bersamaan. Pencatatan gagal tidak menghasilkan respons sukses. |
+| F11 | Baseline skema lengkap tanpa data, job pgTAP wajib, serta unit test Deno di CI. |
+| F12 | Trigger menolak perubahan SOAP/detail terkunci. Membuka kunci wajib dokter dan alasan; metadata kunci ditentukan server. |
+| C01 | Dua constraint pembayaran disatukan untuk mendukung partial. |
+| C02 | Webhook memverifikasi status langsung melalui GET Midtrans sebelum settlement; status notifikasi tidak dipercaya. |
+| C03 | Costing memakai tier/overhead/BOM klinik sendiri, menghitung quantity, mengunci stok, dan idempoten. Pembelian mengunci material sebelum menghitung stok/rata-rata biaya. |
+
+Kolom nama pasien dan kode ICD diperlebar agar envelope terenkripsi baru muat. RPC layar antrean tetap menggunakan token untuk mengakses inisial terenkripsi, termasuk pembaruan maskot yang dikerjakan terpisah.
+
+## Validasi sebelum deployment
+
+- Lint, typecheck, build clinic dan console lulus.
+- Unit test npm: 121 lulus; Deno: 17 lulus; pemeriksaan tipe tujuh Edge Functions lulus.
+- Smoke migrasi: 147 lulus.
+- Seluruh migrasi dan uji `supabase/tests/audit/regression.sql` lulus pada PostgreSQL terkait dengan pgcrypto asli dalam **transaksi ROLLBACK**. Cakupan: prefix palsu, tenant ciphertext, FK lintas klinik, radiologi admin, SOAP terkunci, kasir partial/lunas/nol, ID detail, quantity biaya/stok, snapshot idempoten, provenance cache, reservasi slot kuota terakhir, dan brief bersamaan.
+- Docker tidak tersedia di komputer ini. Suite pgTAP penuh disiapkan untuk CI dengan database kosong; tes owner terakhir membutuhkan lingkungan tersebut dan tidak dapat memakai jumlah operator yang sudah ada di produksi.
+
+Reproduksi historis `supabase/tests/audit/audit-2026-10-10.mjs` dibatasi pada migrasi sebelum perbaikan. Gunakan `regression.sql` untuk memeriksa perilaku setelah perbaikan.
+
+## Deployment
+
+Status deployment dan commit akhir ditambahkan setelah pengiriman dan verifikasi selesai.

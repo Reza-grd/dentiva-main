@@ -32,8 +32,8 @@ select is(
   (select count(*)::int from storage.objects where bucket_id = 'radiologi' and name like 'bbbbbbbb%'), 0,
   'klinik A tidak melihat radiologi klinik B');
 select is(
-  (select count(*)::int from storage.objects where bucket_id = 'radiologi' and name like 'aaaaaaaa%'), 1,
-  'klinik A melihat radiologinya sendiri');
+  (select count(*)::int from storage.objects where bucket_id = 'radiologi' and name like 'aaaaaaaa%'), 0,
+  'admin A tidak melihat radiologi meski dari klinik sendiri');
 select throws_ok(
   $$ insert into storage.objects (bucket_id, name) values ('radiologi', 'bbbbbbbb-0000-4000-8000-000000000002/p/x.png') $$,
   '42501', null, 'tidak bisa mengunggah ke folder klinik B');

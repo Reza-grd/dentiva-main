@@ -3,6 +3,12 @@ import { getLocalDateRange, getTodayLocal } from '../utils/dateUtils.js';
 import { sanitizeSearchTerm } from '../utils/stringUtils.js';
 
 export const paymentService = {
+  async saveVisitPayment(visitId, treatments, medications, payment) {
+    const { data, error } = await supabase.rpc('save_visit_payment', {
+      p_visit_id: visitId, p_treatments: treatments, p_medications: medications, p_payment: payment,
+    });
+    return error ? { success: false, error: error.message } : { success: true, data };
+  },
   // Get all payments
   async getAllPayments({ page = 1, limit = 20, searchTerm = '', statusFilter = 'all', dateFilter = 'all' } = {}) {
     try {

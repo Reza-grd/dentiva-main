@@ -1,3 +1,4 @@
+import { requireActiveAccount } from "../_shared/activeAccount.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
@@ -77,6 +78,8 @@ serve(async (req) => {
       })
       const { data: { user }, error: authError } = await userClient.auth.getUser()
       if (!authError && user) {
+        try { await requireActiveAccount(userClient, ['admin','dokter','resepsionis']); }
+        catch { return new Response(JSON.stringify({error:'Forbidden: akun atau klinik tidak aktif'}), {status:403,headers:{...corsHeaders,'Content-Type':'application/json'}}); }
         isAuthorized = true
       }
     }
@@ -260,7 +263,7 @@ serve(async (req) => {
     if (isTest) msgType = 'test';
     if (!msgType) msgType = 'manual';
 
-    console.log(`[WHAPI] Sending to ${jidPhone}`);
+    console.log(`[WHAPI] Sending message type ${msgType}`);
 
     let response;
     let responseText = '';
