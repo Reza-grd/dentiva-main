@@ -12,10 +12,18 @@
  *   .d-fin-l / .d-fin-r · .d-ear-l / .d-ear-r · .d-visor + .d-brackets
  *   .d-eyes: .d-eye-open | .d-eye-happy | .d-eye-sleep | .d-eye-wow
  *   .d-mouth: .d-mouth-smile | .d-mouth-talk | .d-mouth-o · .d-cheeks
- *   .d-fx: .d-bubble · .d-waves · .d-stars · .d-hearts · .d-zzz · .d-sparks
+ *   .d-fx: .d-bubble · .d-waves · .d-stars · .d-hearts · .d-zzz · .d-sparks · .d-notes · .d-exclaim
+ *          · .d-haha · .d-sweat · .d-arrows
+ *   Properti: .d-brush + .d-foam (sikat gigi) · .d-tooth (gigi berkilau) · .d-chest-heart · .d-scan (visor)
+ *   Ekspresi tambahan: .d-eye-heart · .d-lids (mata sedih) · .d-mouth-sad
+ * Lengan digambar SETELAH kepala agar tangan bisa tampil di depan wajah (dagu, headphone, malu).
  * Koordinat viewBox 0 0 400 480. Partikel orbit memakai SMIL <animateMotion>.
  */
-export const DENTI_STATES = ['idle', 'happy', 'wave', 'talk', 'think', 'call', 'celebrate', 'sleep', 'wake'];
+export const DENTI_STATES = [
+  'idle', 'happy', 'wave', 'talk', 'think', 'call', 'celebrate', 'sleep', 'wake',
+  // aksi tambahan
+  'brush', 'tooth', 'dance', 'spin', 'laugh', 'love', 'shy', 'surprise', 'sorry', 'scan', 'point', 'thanks',
+];
 
 const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z';
 const ARM_CAP = 'M-27 0 A27 27 0 0 1 27 0 L27 10 C16 17 -16 17 -27 10 Z';
@@ -24,10 +32,15 @@ const HEAD = 'M200 56 C282 56 330 84 330 152 L330 176 C330 236 290 262 200 262 C
 const VISOR = 'M200 88 C270 88 304 106 304 160 L304 176 C304 222 274 240 200 240 C126 240 96 222 96 176 L96 160 C96 106 130 88 200 88 Z';
 const HEART = 'M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z';
 const STAR = 'M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z';
+const TOOTH = 'M-24 -26 C-32 -18 -32 0 -26 12 C-22 22 -20 34 -14 34 C-8 34 -6 18 0 18 C6 18 8 34 14 34 C20 34 22 22 26 12 C32 0 32 -18 24 -26 C16 -33 8 -30 0 -26 C-8 -30 -16 -33 -24 -26 Z';
+const NOTE = 'M-7 0 A7 5.5 -20 1 0 7 0 A7 5.5 -20 1 0 -7 0 Z M5 -1 V-30 L17 -26 V-20 L7.5 -23.5 V-1 Z';
+const DROP = 'M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z';
 
 export function dentiSvg(uid = 'd') {
   const g = (n) => `${uid}-${n}`;
   const url = (n) => `url(#${g(n)})`;
+  // posisi diletakkan di <g> pembungkus agar transform animasi CSS tidak menimpanya
+  const at = (x, y, sc, inner) => `<g transform="translate(${x} ${y})${sc ? ` scale(${sc})` : ''}">${inner}</g>`;
   const arm = (side, x) => `
     <g class="d-arm-${side}"><g transform="translate(${x} 322) rotate(${side === 'l' ? 22 : -22})">
       <path d="${ARM}" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="1.5"/>
@@ -76,6 +89,10 @@ export function dentiSvg(uid = 'd') {
     <stop offset="0" stop-color="#5fbaff" stop-opacity=".7"/><stop offset="1" stop-color="#5fbaff" stop-opacity="0"/>
   </radialGradient>
   <clipPath id="${g('bodyClip')}"><path d="${BODY}"/></clipPath>
+  <clipPath id="${g('visorClip')}"><path d="${VISOR}"/></clipPath>
+  <linearGradient id="${g('scan')}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#5fbaff" stop-opacity="0"/><stop offset="1" stop-color="#5fbaff" stop-opacity=".35"/>
+  </linearGradient>
   <filter id="${g('glow')}" x="-60%" y="-60%" width="220%" height="220%">
     <feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
@@ -118,11 +135,9 @@ export function dentiSvg(uid = 'd') {
         <circle cx="200" cy="336" r="29" fill="none" stroke="${url('gold')}" stroke-width="5"/>
         <circle class="d-chest-core" cx="200" cy="336" r="20" fill="${url('core')}" filter="url(#${g('bigglow')})"/>
         <ellipse cx="193" cy="328" rx="6" ry="4" fill="#fff" opacity=".85"/>
+        <g class="d-chest-heart">${at(200, 323, 1.15, `<path d="${HEART}" fill="#ff8fb8" filter="url(#${g('glow')})"/>`)}</g>
       </g>
     </g>
-
-    ${arm('l', 90)}
-    ${arm('r', 310)}
 
     <!-- leher -->
     <ellipse cx="200" cy="266" rx="54" ry="12" fill="#0d1628"/>
@@ -145,6 +160,10 @@ export function dentiSvg(uid = 'd') {
           <path d="M120 134 v-10 q0 -8 8 -8 h10"/><path d="M280 134 v-10 q0 -8 -8 -8 h-10"/>
           <path d="M120 194 v10 q0 8 8 8 h10"/><path d="M280 194 v10 q0 8 -8 8 h-10"/>
         </g>
+        <g clip-path="url(#${g('visorClip')})"><g class="d-scan">
+          <rect x="96" y="66" width="208" height="28" fill="${url('scan')}"/>
+          <rect x="96" y="93" width="208" height="3" fill="#8fe8ff"/>
+        </g></g>
       </g>
 
       <g class="d-eyes" filter="url(#${g('glow')})">
@@ -161,18 +180,46 @@ export function dentiSvg(uid = 'd') {
         <g class="d-eye-wow" fill="none" stroke="${url('eye')}" stroke-width="7">
           <circle cx="162" cy="160" r="18"/><circle cx="238" cy="160" r="18"/>
         </g>
+        <g class="d-eye-heart" fill="#ff8fb8">
+          ${at(162, 143, 1.75, `<path class="d-eyeheart" d="${HEART}"/>`)}
+          ${at(238, 143, 1.75, `<path class="d-eyeheart" d="${HEART}"/>`)}
+        </g>
+      </g>
+      <g class="d-lids" fill="#070b16">
+        <path d="M136 128 L190 128 L190 146 L136 166 Z"/><path d="M264 128 L210 128 L210 146 L264 166 Z"/>
       </g>
 
       <g class="d-mouth" filter="url(#${g('glow')})">
         <path class="d-mouth-smile" d="M184 196 Q200 210 216 196" fill="none" stroke="#9ee6ff" stroke-width="5" stroke-linecap="round"/>
         <ellipse class="d-mouth-talk" cx="200" cy="200" rx="11" ry="7" fill="#9ee6ff"/>
         <ellipse class="d-mouth-o" cx="200" cy="202" rx="7" ry="8" fill="none" stroke="#9ee6ff" stroke-width="4"/>
+        <path class="d-mouth-sad" d="M186 208 Q200 196 214 208" fill="none" stroke="#9ee6ff" stroke-width="5" stroke-linecap="round"/>
       </g>
 
       <g class="d-cheeks">
         <ellipse cx="134" cy="196" rx="15" ry="8" fill="#ff9cc0" opacity=".5"/>
         <ellipse cx="266" cy="196" rx="15" ry="8" fill="#ff9cc0" opacity=".5"/>
       </g>
+    </g>
+
+    ${arm('l', 90)}
+    ${arm('r', 310)}
+
+    <!-- properti -->
+    <g class="d-brush"><g transform="translate(234 238) rotate(38) scale(1.15)">
+      <rect x="-30" y="-4.5" width="62" height="9" rx="4.5" fill="${url('blue')}" stroke="#fff" stroke-opacity=".6"/>
+      <rect x="-52" y="-6.5" width="24" height="13" rx="5" fill="${url('shell')}" stroke="${url('edge')}"/>
+      <g stroke="#bfeeff" stroke-width="3.4" stroke-linecap="round"><path d="M-47 -8 v-9"/><path d="M-40 -8 v-9"/><path d="M-33 -8 v-9"/></g>
+    </g></g>
+    <g class="d-foam" fill="#fff">
+      <circle class="d-bub d-bub-1" cx="180" cy="214" r="6"/><circle class="d-bub d-bub-2" cx="214" cy="190" r="5"/>
+      <circle class="d-bub d-bub-3" cx="190" cy="230" r="4"/><circle class="d-bub d-bub-4" cx="172" cy="196" r="3.5"/>
+    </g>
+    <g class="d-tooth">${at(200, 6, 0, `
+      <circle r="50" fill="${url('halo')}"/>
+      <path d="${TOOTH}" fill="${url('shell')}" stroke="#7cc4ff" stroke-width="2.5"/>
+      <path d="M-15 -18 C-19 -10 -19 -2 -16 6" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <g fill="#fff4de" filter="url(#${g('glow')})">${at(32, -26, .6, `<path class="d-tooth-star" d="${STAR}"/>`)}${at(-34, 20, .45, `<path class="d-tooth-star d-tooth-star-2" d="${STAR}"/>`)}</g>`)}
     </g>
   </g>
 </g>
@@ -196,20 +243,41 @@ export function dentiSvg(uid = 'd') {
     <path class="d-wave d-wave-3" d="M396 114 q34 52 0 104" stroke-width="3.5"/>
   </g>
   <g class="d-stars" fill="#fff4de" filter="url(#${g('glow')})">
-    <path class="d-star d-star-1" transform="translate(40 92)" d="${STAR}"/>
-    <path class="d-star d-star-2" transform="translate(368 64) scale(.8)" d="${STAR}"/>
-    <path class="d-star d-star-3" transform="translate(384 318) scale(.65)" d="${STAR}"/>
-    <path class="d-star d-star-4" transform="translate(24 352) scale(.7)" d="${STAR}"/>
-    <path class="d-star d-star-5" transform="translate(200 18) scale(.6)" d="${STAR}"/>
+    ${at(40, 92, 0, `<path class="d-star d-star-1" d="${STAR}"/>`)}
+    ${at(368, 64, .8, `<path class="d-star d-star-2" d="${STAR}"/>`)}
+    ${at(384, 318, .65, `<path class="d-star d-star-3" d="${STAR}"/>`)}
+    ${at(24, 352, .7, `<path class="d-star d-star-4" d="${STAR}"/>`)}
+    ${at(200, 18, .6, `<path class="d-star d-star-5" d="${STAR}"/>`)}
   </g>
   <g class="d-hearts" fill="#ff8fb8" filter="url(#${g('glow')})">
-    <path class="d-heart d-heart-1" transform="translate(52 60) scale(.9)" d="${HEART}"/>
-    <path class="d-heart d-heart-2" transform="translate(352 40) scale(.7)" d="${HEART}"/>
+    ${at(52, 60, .9, `<path class="d-heart d-heart-1" d="${HEART}"/>`)}
+    ${at(352, 40, .7, `<path class="d-heart d-heart-2" d="${HEART}"/>`)}
+    ${at(70, 240, .6, `<path class="d-heart d-heart-3" d="${HEART}"/>`)}
+    ${at(336, 226, .8, `<path class="d-heart d-heart-4" d="${HEART}"/>`)}
   </g>
   <g class="d-zzz" fill="#bfeeff" font-family="Inter, system-ui, sans-serif" font-weight="600">
     <text class="d-z d-z-1" x="300" y="78" font-size="24">z</text>
     <text class="d-z d-z-2" x="324" y="52" font-size="30">z</text>
     <text class="d-z d-z-3" x="352" y="22" font-size="38">Z</text>
+  </g>
+  <g class="d-notes">
+    ${at(54, 150, 0, `<path class="d-note d-note-1" d="${NOTE}" fill="#ecca97"/>`)}
+    ${at(352, 112, 1.2, `<path class="d-note d-note-2" d="${NOTE}" fill="#a9e4ff"/>`)}
+    ${at(344, 276, .9, `<path class="d-note d-note-3" d="${NOTE}" fill="#ecca97"/>`)}
+  </g>
+  <g class="d-exclaim" fill="${url('gold')}" filter="url(#${g('glow')})">
+    <rect x="193" y="-36" width="14" height="40" rx="7"/><circle cx="200" cy="18" r="7.5"/>
+  </g>
+  <g class="d-haha" fill="#ecca97" font-family="Inter, system-ui, sans-serif" font-weight="700">
+    <text class="d-ha d-ha-1" x="300" y="70" font-size="30">ha</text>
+    <text class="d-ha d-ha-2" x="30" y="96" font-size="26">ha</text>
+    <text class="d-ha d-ha-3" x="326" y="26" font-size="22">ha!</text>
+  </g>
+  <g class="d-sweat">${at(318, 96, 0, `<path d="${DROP}" fill="#a9e4ff"/>`)}</g>
+  <g class="d-arrows" fill="none" stroke="${url('gold')}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path class="d-arrow d-arrow-1" d="M64 232 l-13 13 l13 13"/>
+    <path class="d-arrow d-arrow-2" d="M44 232 l-13 13 l13 13"/>
+    <path class="d-arrow d-arrow-3" d="M24 232 l-13 13 l13 13"/>
   </g>
 </g>`;
 }

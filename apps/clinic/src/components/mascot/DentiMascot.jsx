@@ -3,11 +3,11 @@ import { dentiSvg, DENTI_STATES } from './dentiSvg';
 import './denti.css';
 
 /** Durasi satu putaran rangkaian (ms) — dipakai sutradara sebagai bawaan. */
-export const DENTI_DURATIONS = { call: 6000, wake: 6000, celebrate: 2400 };
+export const DENTI_DURATIONS = { call: 6000, wake: 6000, celebrate: 2400, spin: 2000, surprise: 2000, thanks: 3200 };
 
 /**
  * Denti — maskot AI Dentiva.
- *   <DentiMascot state="idle|happy|wave|talk|think|call|celebrate|sleep|wake" kid={false} size={220} />
+ *   <DentiMascot state="idle|happy|wave|…|thanks" (lihat DENTI_STATES) kid={false} size={220} />
  * Markup SVG berasal dari konstanta internal (bukan input pengguna), jadi aman disisipkan.
  */
 export default function DentiMascot({ state = 'idle', kid = false, size = 220, className = '', title = 'Denti, asisten AI Dentiva' }) {

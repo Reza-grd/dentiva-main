@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import DentiMascot, { useDentiDirector } from '../components/mascot/DentiMascot';
+import { DENTI_STATES } from '../components/mascot/dentiSvg';
 
 describe('Maskot Denti', () => {
   it('merender rig lengkap dengan state & mode anak', () => {
@@ -21,6 +22,32 @@ describe('Maskot Denti', () => {
     expect(svgs[0]).toHaveAttribute('data-state', 'idle');
     const ids = [...container.querySelectorAll('linearGradient')].map((g) => g.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('aksi tambahan dikenal dan propertinya tersedia', () => {
+    for (const s of ['brush', 'tooth', 'dance', 'spin', 'laugh', 'love', 'shy', 'surprise', 'sorry', 'scan', 'point', 'thanks']) {
+      expect(DENTI_STATES).toContain(s);
+    }
+    const { container } = render(<DentiMascot state="brush" />);
+    expect(screen.getByRole('img', { name: /Denti/ })).toHaveAttribute('data-state', 'brush');
+    for (const part of ['.d-brush', '.d-foam', '.d-tooth', '.d-eye-heart', '.d-lids', '.d-mouth-sad', '.d-scan', '.d-notes', '.d-exclaim', '.d-haha', '.d-sweat', '.d-arrows', '.d-chest-heart']) {
+      expect(container.querySelector(part)).not.toBeNull();
+    }
+  });
+
+  it('posisi bintang & hati ada di pembungkus, bukan di elemen yang dianimasikan', () => {
+    const { container } = render(<DentiMascot />);
+    for (const el of container.querySelectorAll('.d-star, .d-heart, .d-note')) {
+      expect(el.getAttribute('transform')).toBeNull();
+      expect(el.parentNode.getAttribute('transform')).toMatch(/translate/);
+    }
+  });
+
+  it('lengan digambar setelah kepala (tangan bisa di depan wajah)', () => {
+    const { container } = render(<DentiMascot />);
+    const head = container.querySelector('.d-head');
+    const arm = container.querySelector('.d-arm-r');
+    expect(head.compareDocumentPosition(arm) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it('tidak ada antena atas kepala', () => {

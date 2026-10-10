@@ -15,7 +15,7 @@ Palet: porselen `#F7FAFF`, biru navy `#0A1E3A`, biru es `#7DD3FF`, emas lembut `
 | `apps/clinic/src/components/mascot/dentiSvg.js` | SVG Denti dipecah per bagian (rig) + `DENTI_STATES`. |
 | `apps/clinic/src/components/mascot/denti.css` | Animasi tingkat 1–3 + mode anak. |
 | `apps/clinic/src/components/mascot/DentiMascot.jsx` | `<DentiMascot state kid size />`, `useDentiDirector` (play/sequence), `DENTI_DURATIONS`. |
-| `D:\dentiva\dentiva-launch\tools\build-denti-scene.mjs` | Adegan pratinjau dari sumber yang sama → `scenes/11-denti-rig.html`; rekam `node record.mjs 11-denti-rig`. |
+| `D:\dentiva\dentiva-launch\tools\build-denti-scene.mjs` | Adegan pratinjau dari sumber yang sama → `scenes/11-denti-rig.html`; rekam `node record.mjs 11-denti-rig`; aksi tambahan → `scenes/11b-denti-aksi.html`. |
 
 ## Bagian (sendi dalam viewBox 400×480)
 
@@ -23,7 +23,9 @@ Palet: porselen `#F7FAFF`, biru navy `#0A1E3A`, biru es `#7DD3FF`, emas lembut `
 `.d-arm-l` (bahu 90,322) · `.d-arm-r` (bahu 310,322) · `.d-body` + `.d-chest` / `.d-chest-core` ·
 `.d-head` (leher 200,262) · `.d-fin-l/r` · `.d-ear-l/r` · `.d-visor` + `.d-visor-rim` + `.d-brackets` ·
 mata `.d-eye-open | .d-eye-happy | .d-eye-sleep | .d-eye-wow` · mulut `.d-mouth-smile | .d-mouth-talk | .d-mouth-o` ·
-`.d-cheeks` · efek `.d-bubble`, `.d-waves`, `.d-stars`, `.d-hearts`, `.d-zzz`, `.d-sparks`.
+`.d-cheeks` · efek `.d-bubble`, `.d-waves`, `.d-stars`, `.d-hearts`, `.d-zzz`, `.d-sparks`, `.d-notes`, `.d-exclaim`,
+`.d-haha`, `.d-sweat`, `.d-arrows` · properti `.d-brush` + `.d-foam`, `.d-tooth`, `.d-chest-heart`, `.d-scan` ·
+ekspresi `.d-eye-heart`, `.d-lids`, `.d-mouth-sad`.
 
 ## Animasi bertingkat
 
@@ -39,6 +41,26 @@ mata `.d-eye-open | .d-eye-happy | .d-eye-sleep | .d-eye-wow` · mulut `.d-mouth
 | | `celebrate` (2,4 dtk) | momen spesial | melompat, dua tangan ke atas, bintang meledak |
 | | `wake` (6 dtk) | pembukaan pagi | tidur → terkejut → meregang → melambai |
 | pengubah | `data-kid="true"` | antrean anak | memantul, pipi merona, hati & bintang, tangan bergoyang |
+
+### Aksi tambahan
+
+| `data-state` | Kapan | Gerak |
+|---|---|---|
+| `brush` | tips kebersihan gigi | sikat gigi di depan mulut, busa meletup |
+| `tooth` | tips / "gigi sehat!" | gigi berkilau melayang di atas kepala, tangan ta-da |
+| `scan` | AI menganalisis data | garis pindai menyapu visor, mata menyipit, tangan di headphone |
+| `point` | arahkan pasien ("silakan ke ruang periksa") | tangan kiri menunjuk, mata melirik, panah emas |
+| `sorry` | antrean tertunda / gangguan | mata sedih, mulut cemberut, keringat, sirip turun |
+| `dance` | hiburan saat antrean santai | bergoyang kiri-kanan, tangan bergantian, not musik |
+| `laugh` | candaan / momen lucu | tertawa terguncang, pegang perut, "ha ha" |
+| `love` | ucapan sayang / anak | mata hati, hati berdebar di dada, memeluk |
+| `shy` | dipuji | tangan menutup mulut, pipi merona, sirip turun |
+| `surprise` (2 dtk) | kejutan / pengumuman | melonjak, mata membulat, tanda seru, tangan terbuka |
+| `spin` (2 dtk) | perayaan kecil | jongkok → salto 360° → mendarat, bintang |
+| `thanks` (3,2 dtk) | pasien selesai / terima kasih | melambai lalu membungkuk dengan tangan di dada, hati |
+
+Catatan rig: lengan digambar **setelah** kepala agar tangan bisa tampil di depan wajah; posisi
+bintang/hati/not ada di `<g>` pembungkus supaya tidak tertimpa transform animasi.
 
 ## Pemakaian
 
