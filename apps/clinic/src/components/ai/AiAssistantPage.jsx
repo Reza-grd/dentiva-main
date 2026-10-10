@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle, BookCheck, Zap, ArrowRight } from 'lucide-react';
+import {
+  Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle, BookCheck, Zap, ArrowRight, Volume2, Square, Copy, Mic, MicOff,
+} from 'lucide-react';
 import AnswerFeedback from './AnswerFeedback';
 import KnowledgePanel from './KnowledgePanel';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
@@ -13,6 +15,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getGreeting } from '../../utils/dateUtils';
 import { useDentiDirector, DENTI_DURATIONS } from '../mascot/DentiMascot';
 import DentiCompanion from './DentiCompanion';
+import { useSpeech, useDictation } from './useDentiVoice';
+import { useTheme } from '../../contexts/ThemeContext';
 import { smallTalk, topicOf, moodForAnswer, POKE_REACTIONS, greetLine, followUps, lineForQuestion } from '../../utils/dentiMood';
 import './ai-assistant.css';
 
@@ -55,6 +59,16 @@ const TOOL_LABEL = {
   beban_jadwal_dokter: 'Jadwal dokter',
   statistik_recall: 'Recall',
 };
+/** Bank saran saat mengetik (dicocokkan per kata). */
+const SUGGEST_BANK = [
+  ...SUGGESTION_GROUPS.flatMap((g) => g.items),
+  'Hitung diskon 10% dari 500rb', '6 bulan lagi tanggal berapa?', 'Buka jadwal dokter', 'Terbilang 1.250.000',
+  'Harga 350rb modal 120rb, untung berapa?', 'Dari 10 juta jadi 12 juta naik berapa persen?', 'Berapa hari lagi akhir bulan?',
+  'Biaya tetap 30 juta margin 150rb, BEP berapa pasien?', 'Kasih tips gigi', 'Bacakan jawabannya', 'Ganti mode gelap',
+  'Buka layar antrean', 'Kamu bisa apa saja?',
+];
+/** Gerakan kecil saat Denti dibiarkan (agar terasa hidup). */
+const IDLE_MOVES = [['think', 1800], ['happy', 1600], ['nod', 1800], ['wave', 1600]];
 const MAX_LEN = 1000;
 /** Tanpa aktivitas selama ini → Denti tertidur (bangun lagi saat pengguna mengetik/bertanya). */
 const DOZE_AFTER_MS = 2 * 60 * 1000;
@@ -125,7 +139,18 @@ export default function AiAssistantPage() {
   const dentiBase = busy ? 'scan' : dozing ? 'sleep' : input.trim() ? 'happy' : 'idle';
   const denti = useDentiDirector(dentiBase);
   const { play, settle } = denti;
-  const react = useCallback((state, line, ms) => { play(state, ms); if (line) setDentiLine(line); }, [play]);
+  const [burst, setBurst] = useState(0);
+  const react = useCallback((state, line, ms) => {
+    play(state, ms);
+    if (line) setDentiLine(line);
+    if (state === 'celebrate' || state === 'clap') setBurst((b) => b + 1);
+  }, [play]);
+  const theme = useTheme();
+  const busyRef = useRef(false);
+  busyRef.current = busy;
+  const stateRef = useRef('idle');
+  stateRef.current = denti.state;
+  const [inputFocus, setInputFocus] = useState(false);
 
   /** Tandai ada aktivitas; bangunkan Denti bila sedang tidur. */
   const dozingRef = useRef(false);
@@ -147,6 +172,46 @@ export default function AiAssistantPage() {
     return () => clearInterval(t);
   }, []);
 
+  // Sesekali bergerak sendiri saat dibiarkan (berpikir, mengangguk, melambai)
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (busyRef.current || dozingRef.current || stateRef.current !== 'idle') return;
+      if (Date.now() - lastActive.current < 12000 || Math.random() < 0.45) return;
+      const [move, ms] = IDLE_MOVES[Math.floor(Math.random() * IDLE_MOVES.length)];
+      play(move, ms);
+    }, 9000);
+    return () => clearInterval(t);
+  }, [play]);
+
+  // Kursor mendekat → menyapa singkat (paling sering sekali per 45 detik, lihat DentiCompanion)
+  const hoverHello = () => {
+    if (busyRef.current || dozingRef.current || stateRef.current !== 'idle') return;
+    react('wave', name ? `Hai, ${name}! 👋` : 'Hai! 👋 Ada yang bisa saya bantu?', 1600);
+  };
+
+  // Suara: bacakan jawaban (mulut Denti bergerak) & bertanya lewat suara
+  const speech = useSpeech();
+  const speakMsg = (text) => speech.speak(text, {
+    onStart: () => { play('talk', 120000); setDentiLine('Saya bacakan, ya… 🔊'); },
+    onEnd: () => settle(),
+  });
+  const dictation = useDictation({
+    onInterim: (text) => setInput(text),
+    onFinal: (text) => { setInput(''); settle(); ask(text); },
+  });
+  const toggleMic = () => {
+    if (dictation.listening) { dictation.stop(); return; }
+    touch();
+    play('happy', 60000);
+    setDentiLine('Saya mendengarkan… 🎤 Silakan bicara.');
+    dictation.start();
+  };
+  const copyText = (text) => {
+    navigator.clipboard?.writeText(String(text || '').replace(/\*\*/g, ''))
+      .then(() => toast.success('Jawaban disalin.'))
+      .catch(() => toast.error('Gagal menyalin.'));
+  };
+
   const poke = () => {
     touch();
     const r = POKE_REACTIONS[pokes.current % POKE_REACTIONS.length];
@@ -163,13 +228,33 @@ export default function AiAssistantPage() {
   useEffect(() => { refreshStatus(); }, [refreshStatus]);
   // Sapaan pembuka begitu asisten siap
   const greeted = useRef(false);
+  const [insight, setInsight] = useState(null);
   useEffect(() => {
     if (!status?.aktif || greeted.current) return;
     greeted.current = true;
     react('wave', greetLine(getGreeting(), name), 3000);
+    // Catatan hari ini dari cache Dashboard (cached_only → tidak memicu AI / kuota)
+    aiService.getBrief?.(false, 'admin')?.then((r) => {
+      const point = r?.success && r.data?.brief?.poin?.[0];
+      if (!point) return;
+      setInsight(point);
+      later(() => {
+        if (busyRef.current || stateRef.current !== 'idle') return;
+        react(point.tingkat === 'penting' ? 'think' : point.tingkat === 'baik' ? 'happy' : 'talk',
+          `Catatan hari ini: ${point.judul}. Mau saya jelaskan?`, 3200);
+      }, 3300);
+    }).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status?.aktif, name, react]);
   useEffect(() => { aiService.getProvider().then((r) => r.success && setProvider(r.data)); }, []);
   useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy, typing]);
+
+  const typeahead = React.useMemo(() => {
+    const q = input.toLowerCase().trim();
+    if (q.length < 2 || busy) return [];
+    const words = q.split(/\s+/);
+    return SUGGEST_BANK.filter((x) => { const n = x.toLowerCase(); return n !== q && words.every((w) => n.includes(w)); }).slice(0, 3);
+  }, [input, busy]);
 
   const toAssistant = (data, question, extra = {}) => ({
     role: 'assistant', content: data.answer, tools: data.tools || [], question, topic: topicOf(question), fresh: true,
@@ -208,6 +293,11 @@ export default function AiAssistantPage() {
         react(chat.state, bubble(chat.reply), ms);
         if (action?.type === 'setName') { saveNick(action.name); setNick(action.name); }
         if (action?.type === 'navigate') later(() => navigate(action.to), 900);
+        if (action?.type === 'theme') theme?.setThemeMode?.(action.mode);
+        if (action?.type === 'speak') {
+          const lastAi = replies.find((m) => !m.local && !m.error);
+          if (lastAi) later(() => speakMsg(lastAi.content), 300);
+        }
       }, Math.min(550, 200 + chat.reply.length * 1.2));
       inputRef.current?.focus();
       return;
@@ -224,7 +314,11 @@ export default function AiAssistantPage() {
       setMessages((m) => [...m, toAssistant(res.data, question)]);
       if (res.data.status) setStatus(res.data.status);
       const mood = moodForAnswer(res.data.answer);
-      react(mood.state, mood.line, mood.state === 'celebrate' ? 2400 : 3500);
+      const blocks = (String(res.data.answer).match(/\n\s*\n|\n\s*[-*\d|]/g) || []).length + 1;
+      const talkMs = Math.min(1400, 450 + blocks * 90);
+      setDentiLine(mood.line);
+      denti.sequence([['talk', talkMs], [mood.state, mood.state === 'celebrate' ? 2400 : 3500]]);
+      if (mood.state === 'celebrate') later(() => setBurst((b) => b + 1), talkMs);
     } else {
       setMessages((m) => [...m, { role: 'assistant', content: res.error, error: true }]);
       const mood = moodForAnswer('', { error: true });
@@ -391,7 +485,8 @@ export default function AiAssistantPage() {
 
       {showKnowledge && <KnowledgePanel onClose={() => setShowKnowledge(false)} refreshKey={knowledgeKey} />}
 
-      <DentiCompanion state={denti.state} line={dentiLine} onPoke={poke} />
+      <DentiCompanion state={denti.state} line={dentiLine} onPoke={poke} onHover={hoverHello} track burst={burst}
+        look={inputFocus && input.trim() ? { x: 0.15, y: 1 } : null} />
 
       <Card>
         <CardContent className="p-0">
@@ -402,6 +497,11 @@ export default function AiAssistantPage() {
                   <p className="font-semibold text-gray-900 dark:text-white">Mau tahu apa tentang klinik hari ini?</p>
                   <p className="text-sm text-gray-500">Pilih contoh di bawah atau ketik pertanyaan Anda sendiri.</p>
                 </div>
+                {insight && (
+                  <button type="button" className="ai-chip ai-chip--action mx-auto" onClick={() => ask('Ringkas kondisi klinik hari ini')}>
+                    <Sparkles size={14} /> Jelaskan catatan hari ini: {insight.judul}
+                  </button>
+                )}
                 <div className="space-y-4 text-left">
                   {SUGGESTION_GROUPS.map((g) => (
                     <div key={g.label}>
@@ -455,6 +555,16 @@ export default function AiAssistantPage() {
                       )}
                     </p>
                   )}
+                  {!m.error && (
+                    <div className="ai-msg-tools">
+                      {speech.supported && (
+                        <button type="button" onClick={() => (speech.speaking ? speech.stop() : speakMsg(m.content))} aria-label={speech.speaking ? 'Berhenti membacakan' : 'Bacakan jawaban'}>
+                          {speech.speaking ? <Square size={13} /> : <Volume2 size={13} />} {speech.speaking ? 'Berhenti' : 'Bacakan'}
+                        </button>
+                      )}
+                      <button type="button" onClick={() => copyText(m.content)} aria-label="Salin jawaban"><Copy size={13} /> Salin</button>
+                    </div>
+                  )}
                   {!m.error && m.usageId && (
                     <AnswerFeedback feedback={m.feedback} busy={busy}
                       onCorrect={() => markCorrect(i)} onRetry={(note) => retry(i, note)} />
@@ -496,6 +606,14 @@ export default function AiAssistantPage() {
             <div ref={endRef} />
           </div>
 
+          {typeahead.length > 0 && (
+            <div className="ai-typeahead" aria-label="Saran saat mengetik">
+              <span className="ai-typeahead__label">Mungkin maksud Anda</span>
+              {typeahead.map((x, k) => (
+                <button key={x} type="button" className="ai-chip" onClick={() => ask(x)}>{x}{k === 0 && <kbd>Tab</kbd>}</button>
+              ))}
+            </div>
+          )}
           <form className="border-t border-gray-200 dark:border-gray-700 p-3 flex gap-2 items-end"
             onSubmit={(e) => { e.preventDefault(); ask(); }}>
             <textarea
@@ -506,10 +624,21 @@ export default function AiAssistantPage() {
               value={input}
               disabled={busy || left === 0}
               onChange={(e) => { setInput(e.target.value); touch(); }}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } }}
+              onFocus={() => setInputFocus(true)}
+              onBlur={() => setInputFocus(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); }
+                if (e.key === 'Tab' && typeahead[0]) { e.preventDefault(); setInput(typeahead[0]); }
+              }}
               placeholder={left === 0 ? 'Kuota bulan ini sudah habis.' : 'Tulis pertanyaan… (Enter untuk kirim, Shift+Enter baris baru)'}
               className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
             />
+            {dictation.supported && (
+              <Button type="button" variant="outline" className={`h-11 ${dictation.listening ? 'ai-mic--on' : ''}`} disabled={busy || left === 0}
+                onClick={toggleMic} aria-label={dictation.listening ? 'Berhenti mendengarkan' : 'Tanya dengan suara'}>
+                {dictation.listening ? <MicOff size={16} /> : <Mic size={16} />}
+              </Button>
+            )}
             <Button type="submit" disabled={busy || !input.trim() || left === 0} className="gap-1 h-11">
               <Send size={16} /> Kirim
             </Button>

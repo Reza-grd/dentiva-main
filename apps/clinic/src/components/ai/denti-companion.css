@@ -25,3 +25,20 @@
 .denti-companion--compact .denti-companion__bubble { font-size: 0.82rem; padding: 0.5rem 0.75rem; }
 @keyframes denti-bubble-in { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .denti-companion__bubble, .denti-companion__avatar { animation: none; transition: none; } }
+
+/* Kursor ketik di gelembung */
+.denti-companion__caret { display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.15em;
+  background: var(--color-accent); animation: denti-caret .6s steps(1) infinite; }
+@keyframes denti-caret { 50% { opacity: 0; } }
+
+/* Konfeti untuk kabar gembira */
+.denti-companion__avatar { position: relative; }
+.denti-confetti { position: absolute; left: 50%; top: 40%; pointer-events: none; }
+.denti-confetti i { position: absolute; left: 0; top: 0; border-radius: 2px; opacity: 0;
+  animation: denti-confetti 1.25s cubic-bezier(.15,.7,.3,1) forwards; }
+@keyframes denti-confetti {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(.6); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 40px)) rotate(var(--rot)) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .denti-confetti, .denti-companion__caret { display: none; } }

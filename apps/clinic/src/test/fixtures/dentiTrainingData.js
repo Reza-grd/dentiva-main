@@ -513,4 +513,126 @@ export const CYCLES = [
     ai: ['pagi denti, ringkas kondisi klinik dong', 'makasih, lanjut: berapa laba bulan lalu?', 'wah kenapa pengeluaran naik?',
       'tolong buka laporan bulan lalu', 'berapa total tagihan 3 bulan lagi?', 'tips menaikkan kunjungan pasien'],
   },
+  {
+    name: 'Siklus 31 · persen perubahan',
+    intents: {
+      pctchange: ['dari 10 juta jadi 12 juta naik berapa persen', '10jt ke 12jt berapa persen', 'kenaikan dari 80 ke 100 berapa persen',
+        'dari 2 juta turun ke 1,5 juta berapa persen', 'berapa persen dari 50rb ke 75rb', 'perubahan 120 ke 90 berapa persen'],
+    },
+    replies: [
+      ['dari 10 juta jadi 12 juta naik berapa persen', 'naik 20%'], ['dari 2 juta turun ke 1,5 juta berapa persen', 'turun 25%'],
+      ['kenaikan dari 80 ke 100 berapa persen', 'naik 25%'], ['perubahan 120 ke 90 berapa persen', 'turun 25%'], ['10jt ke 12jt berapa persen', 'Rp 2.000.000'],
+    ],
+    ai: ['pendapatan dari bulan lalu ke bulan ini naik berapa persen', 'kunjungan naik berapa persen', 'berapa persen pasien baru'],
+  },
+  {
+    name: 'Siklus 32 · margin & untung',
+    intents: {
+      margin: ['harga 350rb modal 120rb', 'jual 350rb modal 120rb untung berapa', 'margin kalau harga 350rb hpp 120rb', 'modal 120rb dijual 350rb',
+        'tarif 500rb biaya 200rb margin berapa', 'harga jual 1,2 juta modal 700rb'],
+    },
+    replies: [
+      ['harga 350rb modal 120rb', 'Rp 230.000'], ['harga 350rb modal 120rb', '65,7%'], ['modal 120rb dijual 350rb', 'Rp 230.000'],
+      ['tarif 500rb biaya 200rb margin berapa', '60%'], ['harga 100rb modal 150rb', 'rugi'],
+    ],
+    ai: ['margin tindakan scaling berapa', 'hpp tambal komposit berapa', 'harga scaling naik 10% untungnya berapa'],
+  },
+  {
+    name: 'Siklus 33 · BEP cepat & cicilan',
+    intents: {
+      bepcalc: ['biaya tetap 30 juta margin per pasien 150rb bep berapa pasien', 'bep kalau biaya tetap 20jt untung per tindakan 250rb',
+        'titik impas biaya tetap 45 juta kontribusi 300rb per pasien', 'balik modal biaya tetap 30 juta margin 150rb 26 hari kerja'],
+      installment: ['1,2 juta dicicil 6 bulan', 'cicilan 3 juta 12 kali', '5 juta dicicil 10x', 'cicil 900rb 3 bulan'],
+    },
+    replies: [
+      ['biaya tetap 30 juta margin per pasien 150rb bep berapa pasien', '200 pasien'], ['bep kalau biaya tetap 20jt untung per tindakan 250rb', '80'],
+      ['balik modal biaya tetap 30 juta margin 150rb 26 hari kerja', '8 pasien per hari'], ['1,2 juta dicicil 6 bulan', 'Rp 200.000'],
+      ['cicilan 3 juta 12 kali', 'Rp 250.000'], ['5 juta dicicil 10x', 'Rp 500.000'],
+    ],
+    ai: ['bep klinik berapa', 'cicilan pasien yang belum lunas', 'berapa pasien yang cicil'],
+  },
+  {
+    name: 'Siklus 34 · terbilang (kuitansi)',
+    intents: {
+      terbilang: ['terbilang 1.250.000', '1.250.000 terbilangnya', 'tulis 350rb dalam huruf', 'terbilang rp 2.500.000', '15.750 terbilang',
+        'terbilang 1 juta', 'terbilang 100'],
+    },
+    replies: [
+      ['terbilang 1.250.000', 'satu juta dua ratus lima puluh ribu rupiah'], ['tulis 350rb dalam huruf', 'tiga ratus lima puluh ribu rupiah'],
+      ['15.750 terbilang', 'lima belas ribu tujuh ratus lima puluh'], ['terbilang 1 juta', 'satu juta rupiah'], ['terbilang 100', 'seratus'],
+      ['terbilang 11', 'sebelas'], ['terbilang 1.001.000', 'satu juta seribu'], ['terbilang 2.000.000.000', 'dua miliar'],
+    ],
+    ai: ['terbilang pendapatan bulan ini', 'tulis laporan dalam huruf besar'],
+  },
+  {
+    name: 'Siklus 35 · selisih tanggal, tema & bacakan',
+    intents: {
+      datediff: ['berapa hari dari 1 oktober sampai 25 desember', 'selisih hari 1 januari dan 17 agustus',
+        'dari tanggal 10 oktober sampai 31 desember berapa hari', 'antara 1 maret 2026 dan 1 maret 2027 berapa hari'],
+      theme: ['ganti mode gelap', 'mode terang', 'dark mode', 'pakai tema gelap', 'ubah tampilan ke mode malam', 'light mode'],
+      speak: ['bacakan', 'bacakan jawabannya', 'tolong bacakan', 'baca jawaban tadi', 'bacakan dong'],
+    },
+    replies: [
+      ['berapa hari dari 1 oktober sampai 25 desember', '85 hari'], ['selisih hari 1 januari dan 17 agustus', '228 hari'],
+      ['antara 1 maret 2026 dan 1 maret 2027 berapa hari', '365 hari'], ['bacakan', 'Belum ada jawaban', { afterAnswer: false }],
+    ],
+    actions: [['ganti mode gelap', 'theme', 'dark'], ['mode terang', 'theme', 'light'], ['dark mode', 'theme', 'dark'],
+      ['ubah tampilan ke mode malam', 'theme', 'dark'], ['bacakan', 'speak']],
+    ai: ['baca laporan bulan lalu', 'bacakan daftar pasien', 'mode pembayaran apa saja', 'ganti harga scaling'],
+  },
+  {
+    name: 'Siklus 36 · variasi kalimat (tidak monoton)',
+    distinct: [
+      ['halo', 7], ['makasih', 7], ['hebat', 7], ['capek', 6], ['oke', 6], ['salah', 6], ['maaf', 6], ['dadah', 6], ['apa kabar', 6],
+      ['kamu siapa', 5], ['haha', 5], ['joget dong', 5], ['semangat', 6], ['wow', 5], ['bingung', 5], ['tidak usah', 5], ['tips gigi', 6],
+      ['ceritakan lelucon', 6], ['jam berapa', 5], ['tanggal berapa', 5], ['bangun', 5], ['sayang kamu', 5], ['siapa yang membuat kamu', 4],
+      ['kamu bisa apa', 4], ['data pasien aman?', 4], ['kamu robot?', 4],
+    ],
+  },
+  {
+    name: 'Siklus 37 · gelembung Denti menyebut angka penting',
+    moodLines: [
+      ['Pendapatan bulan ini **Rp 12.400.000** — naik 8,2% dari bulan lalu.', '8,2%'], ['Kunjungan turun 12% minggu ini.', '12%'],
+      ['Ada 3 bahan kadaluarsa minggu depan.', '3 bahan'], ['Semua tagihan sudah lunas.', 'lunas'], ['Laba bersih minus Rp 1.200.000.', 'minus'],
+      ['Pendapatan naik 32% — tertinggi tahun ini!', '32%'], ['Ada 5 tagihan belum dibayar senilai Rp 2.300.000.', '5 tagihan'],
+    ],
+  },
+  {
+    name: 'Siklus 39 · jebakan untuk hitungan bisnis',
+    ai: [
+      'naik berapa persen pendapatan dari bulan lalu', 'margin rata-rata tindakan klinik', 'harga 350rb itu kemahalan?', 'modal klinik berapa',
+      'bep kalau harga naik 10%', 'cicilan alat ke supplier berapa sisa', 'terbilang total pendapatan', 'mode pembayaran pasien', 'ganti tema laporan',
+      'bacakan rekam medis pasien', 'selisih pendapatan bulan ini dan bulan lalu', 'berapa hari pasien terakhir tidak datang',
+      'dari 10 pasien berapa persen yang kembali', 'denti, berapa pendapatan bulan ini? 😊', 'DENTI, TAMPILKAN STOK',
+      'harga scaling 350rb modalnya berapa?', 'jual alat 2 juta', 'harga scaling naik 10% untungnya berapa',
+    ],
+  },
+  {
+    name: 'Siklus 40 · ujian akhir 3 (kalimat natural)',
+    intents: {
+      margin: ['denti, kalau tarif scaling 300rb dan modal 90rb untungnya berapa?'],
+      pctchange: ['omzet dari 15 juta jadi 18 juta itu naik berapa persen?'],
+      installment: ['tolong hitung cicilan 2,4 juta selama 12 bulan'],
+      terbilang: ['bantu terbilang untuk 875.000 dong'],
+      bepcalc: ['kalau biaya tetap 25 juta dan margin per pasien 125rb, butuh berapa pasien untuk bep?'],
+      calc: ['3 kali 175 ribu berapa ya'],
+      datecalc: ['kalau 3 bulan lagi itu tanggal berapa?'],
+      theme: ['tolong nyalakan mode gelap dong'],
+      speak: ['bisa bacakan jawabannya?'],
+      nav: ['bisa bukakan halaman pengeluaran?'],
+      setName: ['mulai sekarang panggil aku Kak Dewi ya'],
+    },
+    replies: [
+      ['denti, kalau tarif scaling 300rb dan modal 90rb untungnya berapa?', 'Rp 210.000'], ['omzet dari 15 juta jadi 18 juta itu naik berapa persen?', 'naik 20%'],
+      ['tolong hitung cicilan 2,4 juta selama 12 bulan', 'Rp 200.000'], ['bantu terbilang untuk 875.000 dong', 'delapan ratus tujuh puluh lima ribu'],
+      ['kalau biaya tetap 25 juta dan margin per pasien 125rb, butuh berapa pasien untuk bep?', '200 pasien'], ['3 kali 175 ribu berapa ya', 'Rp 525.000'],
+      ['kalau 3 bulan lagi itu tanggal berapa?', '10 Januari 2027'],
+    ],
+    actions: [
+      ['tolong nyalakan mode gelap dong', 'theme', 'dark'], ['bisa bacakan jawabannya?', 'speak'],
+      ['bisa bukakan halaman pengeluaran?', 'navigate', '/admin/pengeluaran'], ['mulai sekarang panggil aku Kak Dewi ya', 'setName', 'Kak Dewi'],
+    ],
+    ai: ['kalau tarif scaling naik, untungnya berapa?', 'omzet bulan ini naik berapa persen?', 'cicilan pasien yang macet', 'bacakan laporan keuangan',
+      'buka data rekam medis pasien budi'],
+  },
 ];

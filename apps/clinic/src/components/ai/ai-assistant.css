@@ -32,3 +32,19 @@
 .ai-chip:hover { background: color-mix(in srgb, var(--color-accent) 14%, transparent); transform: translateY(-1px); }
 .ai-chip--action { font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .ai-md--stream > *, .ai-chips { animation: none; } }
+
+/* Tombol bacakan & salin di bawah jawaban */
+.ai-msg-tools { display: flex; gap: .4rem; margin-top: .55rem; }
+.ai-msg-tools button { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .55rem; border-radius: 999px; font-size: .72rem;
+  color: var(--color-text-muted, #6b7280); border: 1px solid var(--color-border, #e5e7eb); background: transparent; transition: color .2s, border-color .2s; }
+.ai-msg-tools button:hover { color: var(--color-accent); border-color: color-mix(in srgb, var(--color-accent) 40%, transparent); }
+
+/* Saran saat mengetik */
+.ai-typeahead { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; padding: .55rem .75rem 0; animation: ai-line-in .25s both; }
+.ai-typeahead__label { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-muted, #9ca3af); }
+.ai-typeahead kbd { margin-left: .35rem; padding: 0 .3rem; border-radius: .3rem; font-size: .65rem; border: 1px solid currentColor; opacity: .6; }
+
+/* Mikrofon aktif */
+.ai-mic--on { color: #ef4444 !important; border-color: #ef4444 !important; animation: ai-mic-pulse 1.2s ease-in-out infinite; }
+@keyframes ai-mic-pulse { 50% { box-shadow: 0 0 0 6px rgb(239 68 68 / .15); } }
+@media (prefers-reduced-motion: reduce) { .ai-typeahead, .ai-mic--on { animation: none; } }

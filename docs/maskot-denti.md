@@ -148,9 +148,37 @@ Data latihan per siklus ada di `apps/clinic/src/test/fixtures/dentiTrainingData.
 | 28 | jebakan untuk kemampuan baru (tetap ke AI) | 19 | 100% | 100% |
 | 29 | bahasa gaul Gen-Z (gaskeun, mager, cabut dulu, wkwk land) | 39 | 28% | 100% |
 | 30 | ujian akhir 2 (kalimat baru campuran) | 28 | 79% | 100% |
-| | **Total** | **1.005** | | **100%** |
+| 31 | persen perubahan ("dari 10 juta jadi 12 juta naik berapa persen") | 14 | 21% | 100% |
+| 32 | margin & untung (harga vs modal, markup) | 14 | 21% | 100% |
+| 33 | BEP cepat (± per hari kerja) & cicilan | 17 | 18% | 100% |
+| 34 | terbilang untuk kuitansi (sampai triliun) | 17 | 12% | 100% |
+| 35 | selisih tanggal, ganti tema gelap/terang, "bacakan" | 28 | 14% | 100% |
+| 36 | variasi kalimat (≥ 4–7 balasan berbeda per intent) | 26 | 4% | 100% |
+| 37 | gelembung Denti menyebut angka penting ("naik 8,2%", "3 bahan") | 7 | 0% | 100% |
+| 38 | **ketahanan otomatis**: tiap kalimat × "denti, …", "… ya", "…!!", KAPITAL, emoji | 3.729 | 98% | 100% |
+| 39 | jebakan untuk hitungan bisnis (tetap ke AI) | 18 | 100% | 100% |
+| 40 | ujian akhir 3 (kalimat natural) | 27 | 33% | 100% |
+| | **Total** | **4.902** | | **100%** |
 
-Kecepatan otak lokal: rata-rata **0,2 ms** per kalimat (terlama ±2 ms).
+Kecepatan otak lokal: rata-rata **±0,2 ms** per kalimat (terlama ±2 ms).
+
+### Kartu skor "4× lebih baik" (sebelum → sesudah siklus 31–40)
+| Aspek | Sebelum | Sesudah | Kelipatan |
+|---|---|---|---|
+| Pengecekan latihan (semua 100%) | 1.005 | 4.902 | 4,9× |
+| Rata-rata variasi balasan (26 intent obrolan) | 1,92 | 8,00 | 4,2× |
+| Perilaku "hidup" Denti | 3 | 15 | 5× |
+| Kategori keterampilan instan | 7 | 19 | 2,7× |
+| Gerakan/keadaan animasi | 21 | 23 | — |
+| Kecepatan otak lokal | 0,14 ms | ±0,2 ms | tetap < 1 ms |
+
+Perilaku hidup: reaksi isi jawaban, dicolek, tidur saat diam, **mata mengikuti kursor**, **badan condong**, **kedip acak/dua kali**,
+**gerak kecil saat dibiarkan**, **menyapa saat kursor mendekat**, **melihat ke kolom ketik**, **berbicara selama jawaban muncul**,
+**gelembung mengetik**, **konfeti kabar gembira**, **mulut bergerak saat membacakan**, **mendengarkan saat dikte**, **mengangguk & bertepuk tangan**.
+
+Keterampilan baru: persen perubahan, margin & untung, BEP cepat, cicilan, terbilang, selisih tanggal, ganti tema, **bacakan jawaban (suara
+browser, gratis)**, **tanya lewat suara**, salin jawaban, **saran saat mengetik (Tab)**, **catatan hari ini proaktif** (dari cache Dashboard,
+tanpa memanggil AI).
 
 ### Keterampilan instan (`utils/dentiSkills.js`)
 - **Kalkulator**: angka gaya Indonesia (2jt, 350rb, 25k, 1,5 juta, Rp 150.000), × ÷ didahulukan, persen, diskon, naik/turun %.
@@ -165,7 +193,8 @@ Kecepatan otak lokal: rata-rata **0,2 ms** per kalimat (terlama ±2 ms).
 
 ### Pelajaran untuk model AI (edge function `ai-assistant`)
 Bagian **GAYA DENTI** di system prompt: hangat & natural, kalimat pertama langsung angka kunci, beri makna angka,
-≤ 120 kata, 1–2 saran konkret, paham pertanyaan lanjutan pendek — lebih ringkas sehingga juga lebih cepat.
+≤ 120 kata, 1–2 saran konkret, paham pertanyaan lanjutan pendek, urutkan temuan dari yang paling berdampak — plus
+**contoh nada** (kaku ✗ vs Denti ✓) agar model meniru gayanya. Lebih ringkas sehingga juga lebih cepat.
 
 Bila Denti salah paham, tambahkan kalimatnya sebagai siklus baru, perbaiki pola di `utils/dentiMood.js`,
 lalu jalankan tes sampai semua siklus kembali 100%.

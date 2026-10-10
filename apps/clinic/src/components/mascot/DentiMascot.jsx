@@ -3,19 +3,54 @@ import { dentiSvg, DENTI_STATES } from './dentiSvg';
 import './denti.css';
 
 /** Durasi satu putaran rangkaian (ms) — dipakai sutradara sebagai bawaan. */
-export const DENTI_DURATIONS = { call: 6000, wake: 6000, celebrate: 2400, spin: 2000, surprise: 2000, thanks: 3200 };
+export const DENTI_DURATIONS = { call: 6000, wake: 6000, celebrate: 2400, spin: 2000, surprise: 2000, thanks: 3200, nod: 1800, clap: 2000 };
+
+const clamp = (v) => Math.max(-1, Math.min(1, v));
+const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 /**
  * Denti — maskot AI Dentiva.
  *   <DentiMascot state="idle|happy|wave|…|thanks" (lihat DENTI_STATES) kid={false} size={220} />
  * Markup SVG berasal dari konstanta internal (bukan input pengguna), jadi aman disisipkan.
  */
-export default function DentiMascot({ state = 'idle', kid = false, size = 220, className = '', title = 'Denti, asisten AI Dentiva' }) {
+export default function DentiMascot({
+  state = 'idle', kid = false, size = 220, className = '', title = 'Denti, asisten AI Dentiva', track = false, look = null,
+}) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const markup = useMemo(() => dentiSvg(`denti${uid}`), [uid]);
   const safeState = DENTI_STATES.includes(state) ? state : 'idle';
+  const ref = useRef(null);
+  // Kedip alami: tempo & jeda acak per Denti, kadang kedip dua kali
+  const life = useMemo(() => ({
+    style: { '--blink': `${(4.2 + Math.random() * 2.8).toFixed(2)}s`, '--blink-delay': `${(-Math.random() * 4).toFixed(2)}s` },
+    blink: Math.random() < 0.3 ? '2' : '1',
+  }), []);
+
+  // Arah pandang: `look` ({x, y} −1…1) diutamakan; selain itu mengikuti kursor bila `track`
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || reducedMotion()) return undefined;
+    const set = (x, y) => { el.style.setProperty('--look-x', clamp(x).toFixed(3)); el.style.setProperty('--look-y', clamp(y).toFixed(3)); };
+    if (look) { set(look.x, look.y); return undefined; }
+    if (!track) { set(0, 0); return undefined; }
+    let raf = 0;
+    let last = null;
+    const apply = () => {
+      raf = 0;
+      if (!last) return;
+      const r = el.getBoundingClientRect();
+      set((last.clientX - (r.left + r.width / 2)) / (window.innerWidth / 2), (last.clientY - (r.top + r.height * 0.35)) / (window.innerHeight / 2));
+    };
+    const onMove = (e) => { last = e; if (!raf) raf = requestAnimationFrame(apply); };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => { window.removeEventListener('pointermove', onMove); cancelAnimationFrame(raf); };
+  }, [track, look?.x, look?.y]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <svg
+      ref={ref}
+      style={life.style}
+      data-blink={life.blink}
       className={`denti ${className}`}
       viewBox="0 0 400 480"
       width={size}

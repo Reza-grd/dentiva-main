@@ -16,6 +16,7 @@
  *          · .d-haha · .d-sweat · .d-arrows
  *   Properti: .d-brush + .d-foam (sikat gigi) · .d-tooth (gigi berkilau) · .d-chest-heart · .d-scan (visor)
  *   Ekspresi tambahan: .d-eye-heart · .d-lids (mata sedih) · .d-mouth-sad
+ *   Hidup: .d-lean (condong ke arah kursor) · .d-gaze / .d-gaze-soft (mata & mulut mengikuti kursor) — lewat --look-x/--look-y
  * Lengan digambar SETELAH kepala agar tangan bisa tampil di depan wajah (dagu, headphone, malu).
  * Koordinat viewBox 0 0 400 480. Partikel orbit memakai SMIL <animateMotion>.
  */
@@ -23,6 +24,7 @@ export const DENTI_STATES = [
   'idle', 'happy', 'wave', 'talk', 'think', 'call', 'celebrate', 'sleep', 'wake',
   // aksi tambahan
   'brush', 'tooth', 'dance', 'spin', 'laugh', 'love', 'shy', 'surprise', 'sorry', 'scan', 'point', 'thanks',
+  'nod', 'clap',
 ];
 
 const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z';
@@ -119,7 +121,7 @@ export function dentiSvg(uid = 'd') {
   <ellipse class="d-ring-3" cx="200" cy="464" rx="54" ry="7" fill="none" stroke="#a9e4ff" stroke-width="1.6" opacity=".6"/>
 </g>
 
-<g class="d-root">
+<g class="d-lean"><g class="d-root">
   <g filter="url(#${g('shadow')})">
     <!-- tubuh -->
     <g class="d-body">
@@ -166,6 +168,7 @@ export function dentiSvg(uid = 'd') {
         </g></g>
       </g>
 
+      <g class="d-gaze">
       <g class="d-eyes" filter="url(#${g('glow')})">
         <g class="d-eye-open">
           <ellipse class="d-eye d-eye-l" cx="162" cy="160" rx="17" ry="21" fill="${url('eye')}"/>
@@ -188,13 +191,14 @@ export function dentiSvg(uid = 'd') {
       <g class="d-lids" fill="#070b16">
         <path d="M136 128 L190 128 L190 146 L136 166 Z"/><path d="M264 128 L210 128 L210 146 L264 166 Z"/>
       </g>
+      </g>
 
-      <g class="d-mouth" filter="url(#${g('glow')})">
+      <g class="d-gaze-soft"><g class="d-mouth" filter="url(#${g('glow')})">
         <path class="d-mouth-smile" d="M184 196 Q200 210 216 196" fill="none" stroke="#9ee6ff" stroke-width="5" stroke-linecap="round"/>
         <ellipse class="d-mouth-talk" cx="200" cy="200" rx="11" ry="7" fill="#9ee6ff"/>
         <ellipse class="d-mouth-o" cx="200" cy="202" rx="7" ry="8" fill="none" stroke="#9ee6ff" stroke-width="4"/>
         <path class="d-mouth-sad" d="M186 208 Q200 196 214 208" fill="none" stroke="#9ee6ff" stroke-width="5" stroke-linecap="round"/>
-      </g>
+      </g></g>
 
       <g class="d-cheeks">
         <ellipse cx="134" cy="196" rx="15" ry="8" fill="#ff9cc0" opacity=".5"/>
@@ -222,7 +226,7 @@ export function dentiSvg(uid = 'd') {
       <g fill="#fff4de" filter="url(#${g('glow')})">${at(32, -26, .6, `<path class="d-tooth-star" d="${STAR}"/>`)}${at(-34, 20, .45, `<path class="d-tooth-star d-tooth-star-2" d="${STAR}"/>`)}</g>`)}
     </g>
   </g>
-</g>
+</g></g>
 
 <g class="d-fx">
   <g class="d-sparks" fill="#fff1d6">

@@ -5,7 +5,7 @@
    Tingkat 1 · dasar (selalu): melayang, kedip, lampu dada, sirip, partikel orbit (SMIL)
    Tingkat 2 · ekspresi     : idle, happy, wave, talk, think, sleep
    Tingkat 3 · rangkaian    : call (6 dtk), celebrate (2,4 dtk), wake (6 dtk)
-   Aksi tambahan            : brush, tooth, dance, laugh, love, shy, sorry, scan, point,
+   Aksi tambahan            : brush, tooth, dance, laugh, love, shy, sorry, scan, point, nod, clap,
                               spin (2 dtk), surprise (2 dtk), thanks (3,2 dtk)
    Pengubah                 : data-kid="true" (mode anak)
    Sendi memakai koordinat viewBox (transform-box: view-box).
@@ -45,8 +45,9 @@
 /* ═════ TINGKAT 1 · gerak dasar ═════ */
 .denti .d-root       { animation: d-float 4s ease-in-out infinite; }
 .denti .d-shadow     { animation: d-shadow 4s ease-in-out infinite; }
-.denti .d-eye        { animation: d-blink 5.4s ease-in-out infinite; }
-.denti .d-eye-r      { animation-delay: .05s; }
+.denti .d-eye        { animation: d-blink var(--blink, 5.4s) ease-in-out var(--blink-delay, 0s) infinite; }
+.denti .d-eye-r      { animation-delay: calc(var(--blink-delay, 0s) + .05s); }
+.denti[data-blink="2"] .d-eye { animation-name: d-blink2; }
 .denti .d-chest-core { animation: d-pulse 3s ease-in-out infinite; }
 .denti .d-brackets   { animation: d-pulse 4.5s ease-in-out infinite; }
 .denti .d-fin-l      { animation: d-fin-l 3.6s ease-in-out infinite; }
@@ -62,6 +63,14 @@
 @keyframes d-float      { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
 @keyframes d-shadow     { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.9); opacity: .7; } }
 @keyframes d-blink      { 0%, 91%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.08); } 97% { transform: scaleY(1); } }
+@keyframes d-blink2     { 0%, 86%, 100% { transform: scaleY(1); } 88% { transform: scaleY(.08); } 90% { transform: scaleY(1); } 93% { transform: scaleY(.08); } 96% { transform: scaleY(1); } }
+
+/* ═════ HIDUP · mengikuti kursor (diisi DentiMascot track/look) ═════ */
+.denti .d-gaze      { transform: translate(calc(var(--look-x, 0) * 9px), calc(var(--look-y, 0) * 6px)); transition: transform .25s ease-out; }
+.denti .d-gaze-soft { transform: translate(calc(var(--look-x, 0) * 4px), calc(var(--look-y, 0) * 3px)); transition: transform .3s ease-out; }
+.denti .d-lean      { transform-origin: 200px 440px; transform: rotate(calc(var(--look-x, 0) * 2.5deg)); transition: transform .6s ease-out; }
+.denti[data-state="sleep"] .d-gaze, .denti[data-state="sleep"] .d-gaze-soft, .denti[data-state="sleep"] .d-lean,
+.denti[data-state="spin"] .d-lean { transform: none; }
 @keyframes d-pulse      { 0%, 100% { opacity: 1; } 50% { opacity: .62; } }
 @keyframes d-fin-l      { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-7deg); } }
 @keyframes d-fin-r      { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(7deg); } }
@@ -415,6 +424,28 @@
 @keyframes d-thx-root  { 0%, 44%, 94%, 100% { transform: none; } 56%, 82% { transform: translateY(10px) scale(1, .97); } }
 @keyframes d-thx-head  { 0% { transform: none; } 8%, 36% { transform: rotate(4deg); } 44% { transform: none; } 56%, 82% { transform: translateY(16px) scale(.98, .9); } 94%, 100% { transform: none; } }
 @keyframes d-thx-glow  { 0%, 50% { opacity: 0; } 58%, 86% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+/* NOD — mengangguk (setuju / "siap!") */
+.denti[data-state="nod"] .d-eye-open { opacity: 0; }
+.denti[data-state="nod"] .d-eye-happy { opacity: 1; }
+.denti[data-state="nod"] .d-head { animation: d-nod-yes .9s ease-in-out infinite; }
+.denti[data-state="nod"] .d-root { animation: d-float 1.8s ease-in-out infinite; }
+@keyframes d-nod-yes { 0%, 100% { transform: none; } 30% { transform: translateY(8px) rotate(1deg); } 60% { transform: translateY(-2px); } }
+
+/* CLAP — bertepuk tangan (ucapan selamat / pujian) */
+.denti[data-state="clap"] .d-eye-open { opacity: 0; }
+.denti[data-state="clap"] .d-eye-happy { opacity: 1; }
+.denti[data-state="clap"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="clap"] .d-mouth-talk { opacity: 1; transform: scaleY(1.1); }
+.denti[data-state="clap"] .d-arm-l { animation: d-clap-l .3s ease-in-out infinite alternate; }
+.denti[data-state="clap"] .d-arm-r { animation: d-clap-r .3s ease-in-out infinite alternate; }
+.denti[data-state="clap"] .d-root { animation: d-bob 1.2s ease-in-out infinite; }
+.denti[data-state="clap"] .d-stars { opacity: 1; }
+.denti[data-state="clap"] .d-star { animation: d-twinkle .9s ease-in-out infinite; }
+.denti[data-state="clap"] .d-star-2 { animation-delay: .3s; }
+.denti[data-state="clap"] .d-star-3 { animation-delay: .6s; }
+@keyframes d-clap-l { from { transform: rotate(-78deg); } to { transform: rotate(-101deg); } }
+@keyframes d-clap-r { from { transform: rotate(78deg); } to { transform: rotate(101deg); } }
 
 /* ═════ PENGUBAH · mode anak ═════ */
 .denti[data-kid="true"] .d-cheeks { opacity: 1; }

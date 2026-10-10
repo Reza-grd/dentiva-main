@@ -10,6 +10,13 @@ const NUMBER_WORDS = {
   'dua belas': 12, se: 1,
 };
 
+/** Buang emoji & sapaan ke Denti di depan ("denti, 2 juta dibagi 30 😊" → "2 juta dibagi 30"). */
+export const cleanRaw = (raw) => String(raw || '')
+  .replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, ' ')
+  .replace(/^\s*(?:(?:hai|halo|hi)\s+)?denti\s*[,:]?\s+/i, '')
+  .replace(/\s+/g, ' ')
+  .trim();
+
 export const timeOf = (now) => now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
 export const dateOf = (d) => d.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 const weekdayOf = (d) => d.toLocaleDateString('id-ID', { weekday: 'long' });
@@ -39,7 +46,7 @@ const COUNT_WORDS = new Set(['orang', 'pasien', 'buah', 'pcs', 'unit', 'item', '
 
 /** Pecah kalimat hitungan menjadi token angka/operator/kata. null bila ada kata lain (bukan hitungan murni). */
 function tokenize(raw) {
-  let s = raw.toLowerCase().replace(/[?!]+/g, ' ').replace(/\s+/g, ' ').trim();
+  let s = cleanRaw(raw).toLowerCase().replace(/[?!]+/g, ' ').replace(/\s+/g, ' ').trim();
   for (let i = 0; i < 3; i += 1) {
     s = s.replace(/^(=\s*|tolong |coba |bantu |hitung(kan)? |berapa |hasil( dari)? |jadi berapa )/, '').trim();
     s = s.replace(/(\s*=|\s+berapa|\s+jadi berapa|\s+hasilnya( berapa)?|\s+ya)$/, '').trim();
@@ -130,7 +137,7 @@ function addMonths(d, n) {
 const NUMW = '(\\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua belas)';
 const UNITW = '(hari|minggu|pekan|bulan|tahun)';
 const ASK = '(?:tanggal berapa|hari apa|kapan|jatuh (?:tanggal|hari) apa|tanggal)';
-const REL = new RegExp(`^(?:${ASK} )?(?:${NUMW} ${UNITW}|se(hari|minggu|pekan|bulan|tahun))( lagi| ke ?depan| dari sekarang| kemudian| yang lalu| lalu| sebelumnya)(?: ${ASK})?$`);
+const REL = new RegExp(`^(?:kalau |jika )?(?:${ASK} )?(?:${NUMW} ${UNITW}|se(hari|minggu|pekan|bulan|tahun))( lagi| ke ?depan| dari sekarang| kemudian| yang lalu| lalu| sebelumnya)(?: itu)?(?: ${ASK})?$`);
 const MONTHW = `(${MONTHS.join('|')})`;
 const WEEKDAY_Q = new RegExp(`^(?:hari apa (?:tanggal )?)?(?:tanggal )?(\\d{1,2}) ${MONTHW}(?: (\\d{4}))?(?: itu)?(?: hari apa)?$`);
 const EVENTS = { 'tahun baru': [0, 1, '🎆'], natal: [11, 25, '🎄'], '17 agustus': [7, 17, '🇮🇩'], 'hari kemerdekaan': [7, 17, '🇮🇩'], valentine: [1, 14, '💝'] };
@@ -180,12 +187,12 @@ export function dateCalc(t, now) {
 }
 
 // ── Nama panggilan ─────────────────────────────────────────────────────────
-const NAME_RE = /^(?:perkenalkan,?\s+)?(?:panggil\s+(?:aku|saya)|nama\s+(?:saya|aku|ku)(?:\s+adalah)?|namaku(?:\s+adalah)?|call\s+me)\s+(.+)$/i;
+const NAME_RE = /^(?:(?:mulai (?:sekarang|hari ini|saat ini)|tolong|oke|ok),?\s+)*(?:perkenalkan,?\s+)?(?:panggil\s+(?:aku|saya)|nama\s+(?:saya|aku|ku)(?:\s+adalah)?|namaku(?:\s+adalah)?|call\s+me)\s+(.+)$/i;
 const TITLES = /^(drg|dr|drh)\.?$/i;
 
 /** "panggil aku Bu Rina" → "Bu Rina" (null bila bukan nama yang wajar). `isWordy` menolak kata data/umum. */
 export function extractName(raw, isWordy) {
-  const m = (raw || '').trim().match(NAME_RE);
+  const m = cleanRaw(raw).match(NAME_RE);
   if (!m) return null;
   let name = m[1].replace(/[\p{Extended_Pictographic}️!?,…]+/gu, ' ').replace(/\s+/g, ' ').trim();
   name = name.replace(/\s+(ya|yah|dong|aja|saja|deh|ok|oke)$/i, '').replace(/\.$/, '').trim();
@@ -222,7 +229,7 @@ const PAGES = [
   [['satusehat', 'satu sehat'], '/admin/pengaturan?tab=satusehat', 'Pengaturan › SATUSEHAT'],
   [['profil', 'profil saya', 'profile'], '/profil', 'Profil Saya'],
 ];
-const NAV_RE = /^(?:tolong |coba )?(?:buka|bukakan|ke|pergi ke|pindah ke|tampilkan|lihat|arahkan( saya| aku)? ke|antar( saya| aku)? ke|menuju|go to|open|show)( halaman| menu| page| tab)? (.+?)(nya)?$/;
+const NAV_RE = /^(?:(?:tolong|coba|bisa|boleh) )*(?:buka|bukakan|ke|pergi ke|pindah ke|tampilkan|lihat|arahkan( saya| aku)? ke|antar( saya| aku)? ke|menuju|go to|open|show)( halaman| menu| page| tab)? (.+?)(nya)?$/;
 
 /** "buka jadwal dokter" → { to, label }. Hanya bila sisa kalimat persis nama halaman. */
 export function navigateTo(t) {
@@ -235,3 +242,151 @@ export function navigateTo(t) {
 
 /** "hapus percakapan", "mulai baru" → bersihkan obrolan. */
 export const isClearCommand = (t) => /^(hapus|bersihkan|reset|kosongkan|clear)( semua)? (percakapan|obrolan|chat|riwayat( chat| obrolan| percakapan)?)( ini)?$|^mulai (baru|dari awal|percakapan baru|obrolan baru)$|^(new chat|clear chat)$/.test(t);
+
+// ── Hitungan bisnis cepat (angka diketik pengguna; tidak membaca data klinik) ─────────────
+const AMT = '(?:rp\\.?\\s*)?\\d[\\d.,]*\\s*(?:juta|jt|ribu|rb|k|miliar|milyar)?';
+/** "10 juta" | "350rb" | "Rp 2.500.000" | "1,5 juta" → { value, money } */
+function parseAmount(str) {
+  const m = String(str).trim().match(/^(rp\.?\s*)?(\d[\d.,]*?)\s*(juta|jt|ribu|rb|k|miliar|milyar)?$/);
+  if (!m) return null;
+  const base = parseNum(m[2].replace(/[.,]$/, ''));
+  if (Number.isNaN(base)) return null;
+  return { value: base * (UNIT[m[3]] || 1), money: Boolean(m[1] || m[3]) };
+}
+const fmtPct = (n) => n.toLocaleString('id-ID', { maximumFractionDigits: 1 });
+/** Rapikan kalimat hitungan: huruf kecil, tanpa ?!, koma pemisah kata jadi spasi, tanpa sapaan/partikel di ujung. */
+function prepRaw(raw) {
+  let s = cleanRaw(raw).toLowerCase().replace(/[?!]+/g, ' ').replace(/\s+/g, ' ').trim();
+  s = s.replace(/,(?!\d)|(?<!\d),/g, ' ');
+  s = s.replace(/^(denti\s+|tolong\s+|coba\s+|bantu(in)?\s+|hitung(kan)?\s+)+/, '');
+  for (let i = 0; i < 2; i += 1) s = s.replace(/\s+(ya|dong|deh|nih|sih)$/, '').trim();
+  return s.replace(/\s+/g, ' ').trim();
+}
+/** Semua kata tersisa (selain bagian yang sudah dicocokkan) harus kata yang diizinkan. */
+const onlyWords = (s, parts, allowed) => {
+  let rest = s;
+  parts.filter(Boolean).forEach((p) => { rest = rest.replace(p, ' '); });
+  return rest.split(/\s+/).filter(Boolean).every((w) => allowed.has(w));
+};
+
+const PCT_RE = new RegExp(`^(?:[a-z]+ ){0,2}?(?:berapa persen )?(?:kenaikan |penurunan |perubahan |naik |turun )?(?:dari )?(${AMT}) (?:jadi|ke|menjadi|turun ke|naik ke|turun jadi|naik jadi) (${AMT})(?: (?:naik|turun))?(?: (?:itu )?(?:naik |turun )?berapa (?:persen|%))?$`);
+/** "dari 10 juta jadi 12 juta naik berapa persen" → naik 20%. */
+export function pctChange(raw) {
+  const s = prepRaw(raw);
+  if (!/(persen|%)/.test(s)) return null;
+  const m = s.match(PCT_RE);
+  if (!m) return null;
+  const a = parseAmount(m[1]); const b = parseAmount(m[2]);
+  if (!a || !b) return null;
+  const money = a.money || b.money;
+  const out = (v) => (money ? fmtRp(v) : fmtNum(v));
+  if (a.value === 0) return 'Perubahan persen tidak bisa dihitung dari angka nol. 😅';
+  const diff = b.value - a.value;
+  const pct = (diff / a.value) * 100;
+  return `Dari ${out(a.value)} ke ${out(b.value)} = **${pct >= 0 ? 'naik' : 'turun'} ${fmtPct(Math.abs(pct))}%** (selisih ${out(Math.abs(diff))}). ${pct >= 0 ? '📈' : '📉'}`;
+}
+
+const MARGIN_WORDS = new Set(['margin', 'untung', 'untungnya', 'keuntungan', 'laba', 'berapa', 'kalau', 'jika', 'dan', 'per', 'tindakan',
+  'nya', 'marginnya', 'itu', 'jadi']);
+/** "harga 350rb modal 120rb" → untung, margin, markup. */
+export function marginCalc(raw) {
+  const s = prepRaw(raw);
+  const price = s.match(new RegExp(`(?:harga jual|harga|jual|dijual|tarif)(?:\\s+[a-z]+){0,2}?\\s+(${AMT})`));
+  const cost = s.match(new RegExp(`(?:modal|hpp|biaya|modalnya|harga pokok)\\s+(${AMT})`));
+  if (!price || !cost || !onlyWords(s, [price[0], cost[0]], MARGIN_WORDS)) return null;
+  const p = parseAmount(price[1]); const c = parseAmount(cost[1]);
+  if (!p || !c || p.value <= 0) return null;
+  const profit = p.value - c.value;
+  if (profit < 0) return `Harga ${fmtRp(p.value)} di bawah modal ${fmtRp(c.value)} — **rugi ${fmtRp(-profit)}** per tindakan. 😟 Pertimbangkan menaikkan tarif atau menekan biaya bahan.`;
+  const margin = (profit / p.value) * 100;
+  const markup = c.value ? `, markup ${fmtPct((profit / c.value) * 100)}% dari modal` : '';
+  return `Untung **${fmtRp(profit)}** per tindakan — margin **${fmtPct(margin)}%** dari harga jual${markup}. 💰`;
+}
+
+const BEP_WORDS = new Set(['bep', 'titik', 'impas', 'balik', 'modal', 'berapa', 'pasien', 'tindakan', 'kalau', 'jika', 'per', 'dan', 'butuh', 'untuk',
+  'perlu', 'break', 'even', 'bulan', 'sebulan', 'biar', 'agar', 'supaya', 'harus']);
+/** "biaya tetap 30 juta margin per pasien 150rb bep berapa pasien" → 200 pasien. */
+export function bepCalc(raw) {
+  const s = prepRaw(raw);
+  if (!/(bep|titik impas|balik modal|break even)/.test(s)) return null;
+  const fixed = s.match(new RegExp(`(?:biaya tetap|fixed cost|biaya operasional|overhead)\\s+(${AMT})`));
+  const unit = s.match(new RegExp(`(?:margin|untung|kontribusi|laba)(?: per (?:pasien|tindakan))?\\s+(${AMT})(?: per (?:pasien|tindakan))?`));
+  const days = s.match(/(\d+) hari (?:kerja|praktik|praktek)/);
+  if (!fixed || !unit || !onlyWords(s, [fixed[0], unit[0], days && days[0]], BEP_WORDS)) return null;
+  const f = parseAmount(fixed[1]); const u = parseAmount(unit[1]);
+  if (!f || !u || u.value <= 0) return null;
+  const n = Math.ceil(f.value / u.value);
+  const perDay = days ? ` Dengan ${days[1]} hari kerja ≈ **${Math.ceil(n / Number(days[1]))} pasien per hari**.` : '';
+  return `Perlu **${n.toLocaleString('id-ID')} pasien** per bulan untuk balik modal (${fmtRp(f.value)} ÷ ${fmtRp(u.value)}).${perDay} 🎯`;
+}
+
+const CICIL_RE = new RegExp(`^(?:cicilan |cicil )?(${AMT}) (?:dicicil |cicil |cicilan |dibagi )?(?:selama |sebanyak )?(\\d+) ?(x|kali|bulan|bln)(?: berapa)?$|^(?:cicilan|cicil) (${AMT}) (?:selama |sebanyak )?(\\d+) ?(x|kali|bulan|bln)(?: berapa)?$`);
+/** "1,2 juta dicicil 6 bulan" → Rp 200.000 per bulan. */
+export function installment(raw) {
+  const s = prepRaw(raw);
+  if (!/cicil/.test(s)) return null;
+  const m = s.match(CICIL_RE);
+  if (!m) return null;
+  const total = parseAmount(m[1] || m[4]);
+  const n = Number(m[2] || m[5]);
+  if (!total || !n) return null;
+  const per = /bulan|bln/.test(m[3] || m[6]) ? 'bulan' : 'cicilan';
+  return `${fmtRp(total.value)} dicicil ${n}× = **${fmtRp(total.value / n)} per ${per}**. 🧾`;
+}
+
+const SATUAN = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
+function words(n) {
+  if (n < 12) return SATUAN[n];
+  if (n < 20) return `${words(n - 10)} belas`;
+  const part = (big, name, solo) => {
+    const head = Math.floor(n / big); const rest = n % big;
+    return `${head === 1 && solo ? solo : `${words(head)} ${name}`}${rest ? ` ${words(rest)}` : ''}`;
+  };
+  if (n < 100) return part(10, 'puluh');
+  if (n < 1000) return part(100, 'ratus', 'seratus');
+  if (n < 1e6) return part(1000, 'ribu', 'seribu');
+  if (n < 1e9) return part(1e6, 'juta');
+  if (n < 1e12) return part(1e9, 'miliar');
+  return part(1e12, 'triliun');
+}
+/** Angka → kata Bahasa Indonesia ("1250000" → "satu juta dua ratus lima puluh ribu"). */
+export const terbilangOf = (n) => (n === 0 ? 'nol' : words(Math.round(n)));
+const TERBILANG_RE = new RegExp(`^(?:terbilang|eja|ejaan|tulis(?:kan)?)\\s+(?:untuk\\s+|dari\\s+|angka\\s+)?(${AMT})(?:\\s+(?:dalam huruf|jadi huruf|terbilang(?:nya)?))?$|^(${AMT})\\s+(?:terbilang(?:nya)?|dalam huruf|jadi huruf|dibaca apa)$`);
+/** "terbilang 1.250.000" → satu juta dua ratus lima puluh ribu rupiah. */
+export function terbilang(raw) {
+  const s = prepRaw(raw);
+  if (!/(terbilang|dalam huruf|jadi huruf|\beja)/.test(s)) return null;
+  const m = s.match(TERBILANG_RE);
+  if (!m) return null;
+  const a = parseAmount(m[1] || m[2]);
+  if (!a || a.value >= 1e15) return null;
+  const w = `${terbilangOf(a.value)} rupiah`;
+  const title = w.split(' ').map((x) => x[0].toUpperCase() + x.slice(1)).join(' ');
+  return `Terbilang: **${w}**.\nUntuk kuitansi: *${title}*. 🧾`;
+}
+
+// ── Selisih hari antartanggal (teks ternormalisasi) ─────────────────────────
+const DIFF_RE = new RegExp(`^(?:berapa hari |selisih hari |selisih |jarak hari |jarak )?(?:dari |antara )?(?:tanggal )?(\\d{1,2}) ${MONTHW}(?: (\\d{4}))? (?:sampai dengan|sampai tanggal|sampai|hingga|ke|dan) (?:tanggal )?(\\d{1,2}) ${MONTHW}(?: (\\d{4}))?(?: (?:ada )?berapa hari)?$`);
+export function dateDiff(t, now) {
+  if (!/(berapa hari|selisih|jarak)/.test(t)) return null;
+  const m = t.match(DIFF_RE);
+  if (!m) return null;
+  const y1 = m[3] ? Number(m[3]) : now.getFullYear();
+  const a = new Date(y1, MONTHS.indexOf(m[2]), Number(m[1]));
+  let b = new Date(m[6] ? Number(m[6]) : y1, MONTHS.indexOf(m[5]), Number(m[4]));
+  if (!m[6] && daysBetween(a, b) < 0) b = new Date(y1 + 1, b.getMonth(), b.getDate());
+  const n = Math.abs(daysBetween(a, b));
+  const wk = n >= 7 ? ` (${Math.floor(n / 7)} minggu${n % 7 ? ` ${n % 7} hari` : ''})` : '';
+  return `Dari ${dateOf(a)} sampai ${dateOf(b)} ada **${n} hari**${wk}. 📅`;
+}
+
+// ── Perintah tampilan & suara (teks ternormalisasi) ─────────────────────────
+const THEME_RE = /^(?:tolong )?(?:ganti|ubah|pakai|aktifkan|nyalakan|set|jadikan)?(?: ke)? ?(?:mode|tema|tampilan)(?: ke)? (?:mode )?(gelap|terang|dark|light|malam|siang)$|^(dark|light) mode$/;
+/** "ganti mode gelap" → 'dark' | 'light' | null */
+export function themeCommand(t) {
+  const m = t.match(THEME_RE);
+  if (!m) return null;
+  return /(gelap|dark|malam)/.test(m[1] || m[2]) ? 'dark' : 'light';
+}
+/** "bacakan", "baca jawaban tadi" → true */
+export const isSpeakCommand = (t) => /^(?:(?:tolong|coba|bisa|boleh) )*(?:bacakan|bacain|baca(?:kan)? jawaban(?:nya| tadi| terakhir)?|read (?:it|aloud))$/.test(t);

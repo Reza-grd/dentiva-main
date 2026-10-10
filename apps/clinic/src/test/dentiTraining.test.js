@@ -6,6 +6,7 @@
 import { describe, it, expect } from 'vitest';
 import { smallTalk, normalizeChat, moodForAnswer, topicOf, followUps, lineForQuestion } from '../utils/dentiMood';
 import { CYCLES } from './fixtures/dentiTrainingData';
+import { augmentedCases } from './fixtures/dentiAugment';
 
 const NOW = new Date(2026, 9, 10, 9, 5);
 const asCase = (c) => (Array.isArray(c) ? c : [c, {}]);
@@ -13,7 +14,7 @@ const talk = (text, ctx = {}) => smallTalk(text, { now: NOW, afterAnswer: true, 
 const intentOf = (text, ctx = {}) => talk(text, ctx)?.intent ?? null;
 
 describe.each(CYCLES)('$name', (c) => {
-  const { intents = {}, ai = [], moods = [], topics = [], replies = [], actions = [], followups = [], lines = [], distinct = [] } = c;
+  const { intents = {}, ai = [], moods = [], topics = [], replies = [], actions = [], followups = [], lines = [], distinct = [], moodLines = [] } = c;
   for (const [intent, phrases] of Object.entries(intents)) {
     it(`mengenali "${intent}" (${phrases.length} kalimat)`, () => {
       const wrong = phrases.map(asCase).map(([p, ctx]) => [p, intentOf(p, ctx)]).filter(([, got]) => got !== intent);
@@ -49,8 +50,14 @@ describe.each(CYCLES)('$name', (c) => {
     it(`${actions.length} aksi (buka halaman, ingat nama, hapus obrolan)`, () => {
       const wrong = actions.filter(([t, type, value, ctx]) => {
         const a = talk(t, ctx)?.action;
-        return !(a?.type === type && (value == null || a.to === value || a.name === value));
+        return !(a?.type === type && (value == null || a.to === value || a.name === value || a.mode === value));
       }).map(([t, type, value, ctx]) => [t, type, value, talk(t, ctx)?.action ?? null]);
+      expect(wrong).toEqual([]);
+    });
+  }
+  if (moodLines.length) {
+    it(`${moodLines.length} gelembung Denti menyebut angka penting`, () => {
+      const wrong = moodLines.filter(([t, want]) => !moodForAnswer(t).line.includes(want)).map(([t, want]) => [t, want, moodForAnswer(t).line]);
       expect(wrong).toEqual([]);
     });
   }
@@ -75,6 +82,15 @@ describe.each(CYCLES)('$name', (c) => {
       }
     });
   }
+});
+
+describe('Siklus 38 · ketahanan otomatis (augmentasi)', () => {
+  const cases = augmentedCases(CYCLES);
+  it(`${cases.length} variasi kalimat ("denti, …", "… ya", "…!!", KAPITAL, emoji) tetap dipahami sama`, () => {
+    const wrong = cases.filter((k) => intentOf(k.text) !== k.expect).map((k) => [k.how, k.text, intentOf(k.text), k.expect]);
+    expect(wrong).toEqual([]);
+    expect(cases.length).toBeGreaterThanOrEqual(3000);
+  });
 });
 
 describe('Latihan Denti — balasan', () => {
@@ -107,7 +123,7 @@ describe('Latihan Denti — balasan', () => {
   it('total data latihan', () => {
     const n = CYCLES.reduce((s, c) => s + Object.values(c.intents || {}).flat().length + (c.ai || []).length
       + (c.moods || []).length + (c.topics || []).length + (c.replies || []).length + (c.actions || []).length
-      + (c.followups || []).length + (c.lines || []).length + (c.distinct || []).length, 0);
+      + (c.followups || []).length + (c.lines || []).length + (c.distinct || []).length + (c.moodLines || []).length, 0);
     expect(n).toBeGreaterThanOrEqual(540);
   });
 });
