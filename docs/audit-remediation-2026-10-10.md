@@ -1,6 +1,6 @@
 # Perbaikan audit Dentiva — 10 Oktober 2026
 
-Rujukan: [audit awal](audit-2026-10-10.md). Perubahan kode dan empat migrasi baru menangani F01–F12 serta C01–C03.
+Rujukan: [audit awal](audit-2026-10-10.md). Perubahan kode dan lima migrasi baru menangani F01–F12 serta C01–C03.
 
 | Temuan | Perbaikan |
 |---|---|
@@ -15,7 +15,7 @@ Rujukan: [audit awal](audit-2026-10-10.md). Perubahan kode dan empat migrasi bar
 | F09 | Nol tidak menjadi default total; pembayaran lunas dan sebagian divalidasi pada UI/RPC/trigger database. |
 | F10 | Reservasi sebelum panggilan model menggunakan advisory lock per klinik, menghitung slot berlangsung, membatasi permintaan, dan menahan pembuatan brief bersamaan. Pencatatan gagal tidak menghasilkan respons sukses. |
 | F11 | Baseline skema lengkap tanpa data, job pgTAP wajib, serta unit test Deno di CI. |
-| F12 | Trigger menolak perubahan SOAP/detail terkunci. Membuka kunci wajib dokter dan alasan; metadata kunci ditentukan server. |
+| F12 | Trigger menolak perubahan SOAP/detail terkunci, tanggal/dokter, serta penghapusan langsung maupun soft-delete. Membuka kunci wajib dokter dan alasan; metadata kunci ditentukan server. |
 | C01 | Dua constraint pembayaran disatukan untuk mendukung partial. |
 | C02 | Webhook memverifikasi status langsung melalui GET Midtrans sebelum settlement; status notifikasi tidak dipercaya. |
 | C03 | Costing memakai tier/overhead/BOM klinik sendiri, menghitung quantity, mengunci stok, dan idempoten. Pembelian mengunci material sebelum menghitung stok/rata-rata biaya. |

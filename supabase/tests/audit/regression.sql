@@ -33,6 +33,11 @@ select pg_temp.login_as('ee000000-0000-4000-8000-00000000000d','eeaaaaaa-0000-40
 select pg_temp.assert_ok((select public.decrypt_field(diagnosa)='Synthetic clinical diagnosis' and public.decrypt_field(kode_icd10)='K02' from public.visits where id='ee200000-0000-4000-8000-000000000001'),'doctor decrypts real pgcrypto envelope');
 update public.visits set is_locked=true where id='ee200000-0000-4000-8000-000000000001';
 select pg_temp.expect_error($q$update public.visits set diagnosa='Changed' where id='ee200000-0000-4000-8000-000000000001'$q$,'42501');
+reset role;
+-- Privileged SQL exercises the trigger even when role policies deny DELETE first.
+select pg_temp.expect_error($q$delete from public.visits where id='ee200000-0000-4000-8000-000000000001'$q$,'42501');
+select pg_temp.login_as('ee000000-0000-4000-8000-00000000000d','eeaaaaaa-0000-4000-8000-000000000001');
+select pg_temp.expect_error($q$update public.visits set tanggal_kunjungan=current_date+1 where id='ee200000-0000-4000-8000-000000000001'$q$,'42501');
 select pg_temp.expect_error($q$update public.visits set is_locked=false where id='ee200000-0000-4000-8000-000000000001'$q$,'22023');
 update public.visits set is_locked=false,lock_change_reason='Synthetic correction' where id='ee200000-0000-4000-8000-000000000001';
 reset role;
