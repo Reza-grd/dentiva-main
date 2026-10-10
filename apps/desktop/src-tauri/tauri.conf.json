@@ -88,5 +88,16 @@
         }
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "GANTI_DENGAN_KUNCI_PUBLIK_UPDATER",
+      "endpoints": [
+        "https://github.com/Reza-grd/dentiva-desktop-releases/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

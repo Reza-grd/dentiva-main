@@ -10,11 +10,12 @@ apps/desktop/
    ├─ tauri.conf.json        nama, identifier id.co.dentiva.app, jendela, CSP, bundle
    ├─ capabilities/          izin minimum (core + membuka tautan di browser)
    ├─ icons/                 dibuat dari apps/clinic/public/dentiva-logo.png (npm run icon)
-   └─ src/lib.rs             single-instance + opener
+   ├─ tauri.release.conf.json  dipakai saat rilis: createUpdaterArtifacts (installer .sig)
+   └─ src/lib.rs             single-instance + opener + updater + process
 ```
 
 Perbedaan build desktop (`vite --mode desktop`):
-- tanpa service worker PWA (pembaruan lewat installer/updater);
+- tanpa service worker PWA (pembaruan lewat updater — lihat bagian Pembaruan otomatis);
 - tautan untuk pasien (booking, layar antrean) & redirect email memakai
   `VITE_PUBLIC_APP_URL` (bawaan `https://dentiva-main.vercel.app`), bukan alamat internal aplikasi;
 - tautan eksternal (wa.me, mailto, dsb.) dibuka di browser sistem.
@@ -39,12 +40,46 @@ npm run dev -w @dentiva/desktop      # jendela Dentiva + hot reload
 npm run build -w @dentiva/desktop    # installer di apps/desktop/src-tauri/target/release/bundle/
 ```
 
+## Pembaruan otomatis (updater)
+
+Aplikasi yang terpasang mengecek `latest.json` 8 detik setelah dibuka lalu tiap 6 jam
+(`apps/clinic/src/components/common/DesktopUpdater.jsx`). Bila ada versi baru, muncul kartu
+"Dentiva x.y.z tersedia" → **Perbarui sekarang** (unduh, pasang, mulai ulang) atau **Nanti**.
+Pembaruan ditandatangani; aplikasi menolak file yang tanda tangannya tidak cocok dengan kunci publik
+di `tauri.conf.json` → `plugins.updater.pubkey`.
+
+Repo kode privat, jadi file rilis diterbitkan ke repo **publik** `Reza-grd/dentiva-desktop-releases`
+(hanya installer, `.sig`, dan `latest.json` — tanpa kode). Endpoint:
+`https://github.com/Reza-grd/dentiva-desktop-releases/releases/latest/download/latest.json`.
+
+### Persiapan sekali (oleh pemilik)
+1. Buat repo publik **dentiva-desktop-releases** di akun Reza-grd, centang *Add a README* (perlu 1 commit).
+2. Buat kunci penanda tangan di laptop (tanpa Rust):
+   `npx @tauri-apps/cli signer generate -w "%USERPROFILE%\.tauri\dentiva-updater.key"` — isi kata sandi.
+   Simpan file `.key` + kata sandinya baik-baik (hilang = aplikasi lama tidak bisa diperbarui lagi).
+3. GitHub repo **dentiva-main** → Settings → Secrets and variables → Actions → **Secrets**:
+   - `TAURI_SIGNING_PRIVATE_KEY` = isi file `dentiva-updater.key`
+   - `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` = kata sandinya
+   - `RELEASES_TOKEN` = fine-grained personal access token, *Repository access: Only select repositories →
+     dentiva-desktop-releases*, *Permissions → Contents: Read and write*.
+4. Isi kunci **publik** (`dentiva-updater.key.pub`) ke `plugins.updater.pubkey`.
+
+### Merilis versi baru
+1. Naikkan `version` di `apps/desktop/package.json` (dan `src-tauri/Cargo.toml`), commit & push.
+2. Push tag yang sama: `git tag desktop-v1.11.0 && git push origin desktop-v1.11.0`.
+3. Workflow memeriksa versi/kunci/secrets → membuat draft rilis `v1.11.0` di repo publik → build Windows &
+   macOS bertanda tangan → menerbitkan rilis. Aplikasi klinik menawarkan pembaruan dalam ≤ 6 jam
+   (atau saat dibuka ulang).
+
+Catatan: pembaruan pertama baru bisa diterima oleh installer yang **sudah** memuat updater — pasang
+installer rilis pertama (dari repo publik) sekali secara manual di tiap komputer.
+
 ## Tahap berikutnya
 | Tahap | Pekerjaan | Butuh dari pemilik |
 |---|---|---|
 | 1 (sekarang) | Installer uji tanpa tanda tangan | Variables repository |
 | 2 | Cetak kwitansi/resep ke printer thermal, jendela layar antrean di monitor kedua, auto-start | Model printer klinik |
-| 3 | Tanda tangan kode + auto-update (`latest.json` bertanda tangan) | Apple Developer (USD 99/th), sertifikat Windows / Azure Trusted Signing, kunci updater (dibuat pemilik, disimpan di GitHub Secrets) |
+| 3 | Tanda tangan kode (auto-update **sudah** — lihat di atas) | Apple Developer (USD 99/th), sertifikat Windows / Azure Trusted Signing, kunci updater (dibuat pemilik, disimpan di GitHub Secrets) |
 | 4 | Uji 3–5 komputer klinik, halaman unduh | Domain unduhan |
 
 Catatan uji: jendela cetak kwitansi (`PaymentForm` → `window.open`) perlu diganti

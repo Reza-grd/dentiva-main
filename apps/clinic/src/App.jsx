@@ -13,7 +13,7 @@ import ErrorBoundary from './components/common/ErrorBoundary';
 import { AlertTriangle } from 'lucide-react';
 import { Card, CardContent } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
-import { DOWNLOAD_URL } from './utils/platform';
+import { DOWNLOAD_URL, isDesktop } from './utils/platform';
 
 function ExternalRedirect({ to }) {
   React.useEffect(() => { window.location.replace(to); }, [to]);
@@ -49,6 +49,8 @@ const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
 const BookingRequests = lazy(() => import('./components/schedule/BookingRequests'));
+// Pembaruan otomatis hanya untuk aplikasi desktop (Tauri)
+const DesktopUpdater = isDesktop ? lazy(() => import('./components/common/DesktopUpdater')) : null;
 
 function App() {
   const { loading, user, userProfile, accountStatus, signOut } = useAuth();
@@ -135,6 +137,7 @@ function App() {
 
   return (
     <ErrorBoundary>
+      {DesktopUpdater && <Suspense fallback={null}><DesktopUpdater /></Suspense>}
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>

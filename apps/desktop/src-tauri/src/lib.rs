@@ -13,6 +13,9 @@ pub fn run() {
         }))
         // Tautan eksternal (WhatsApp, booking, email) dibuka di browser sistem
         .plugin(tauri_plugin_opener::init())
+        // Pembaruan otomatis: cek latest.json bertanda tangan, unduh, pasang, mulai ulang
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .run(tauri::generate_context!())
         .expect("gagal menjalankan Dentiva");
 }

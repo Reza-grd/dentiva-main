@@ -1,0 +1,37 @@
+/* Kartu pembaruan aplikasi desktop — kaca gelap, aksen emas Dentiva. */
+.dt-update {
+  position: fixed; right: 20px; bottom: 20px; z-index: 10000;
+  display: flex; gap: 12px; align-items: flex-start;
+  width: 340px; padding: 16px 16px 16px 14px; border-radius: 16px;
+  color: #f2f5fa; font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  background: linear-gradient(155deg, rgb(22 32 56 / 0.94), rgb(10 16 32 / 0.96));
+  border: 1px solid rgb(227 196 141 / 0.35);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1), 0 18px 48px -12px rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  animation: dt-update-in .5s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes dt-update-in { from { opacity: 0; transform: translateY(14px) scale(.98); } to { opacity: 1; transform: none; } }
+.dt-update__icon {
+  flex: none; width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center;
+  color: #fff1d6; background: radial-gradient(circle at 30% 25%, rgb(227 196 141 / 0.4), rgb(227 196 141 / 0.08) 70%);
+  border: 1px solid rgb(227 196 141 / 0.45);
+}
+.dt-update__body { flex: 1; min-width: 0; }
+.dt-update__title { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.dt-update__text { margin-top: 4px; font-size: 12.5px; line-height: 1.5; color: #a8b3c7; }
+.dt-update__text--error { color: #ffb4b4; }
+.dt-update__bar { margin-top: 10px; height: 4px; border-radius: 999px; background: rgb(255 255 255 / 0.08); overflow: hidden; }
+.dt-update__bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #b88f4f, #e3c48d, #fff1d6); transition: width .3s ease; }
+.dt-update__actions { display: flex; gap: 8px; margin-top: 12px; }
+.dt-update__btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 500; color: #d3dbe8; cursor: pointer;
+  background: rgb(255 255 255 / 0.06); border: 1px solid rgb(255 255 255 / 0.12);
+  transition: background .2s ease, transform .2s ease;
+}
+.dt-update__btn:hover { background: rgb(255 255 255 / 0.12); }
+.dt-update__btn--primary { color: #1a1407; border-color: transparent; background: linear-gradient(120deg, #e3c48d, #fff1d6); }
+.dt-update__btn--primary:hover { background: linear-gradient(120deg, #ecd2a3, #fff6e6); transform: translateY(-1px); }
+.dt-update__close { flex: none; padding: 2px; color: #93a0b6; background: none; border: 0; cursor: pointer; }
+.dt-update__close:hover { color: #f2f5fa; }
+@media (prefers-reduced-motion: reduce) { .dt-update, .dt-update__bar span { animation: none; transition: none; } }
