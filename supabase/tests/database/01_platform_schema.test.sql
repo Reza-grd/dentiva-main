@@ -19,7 +19,9 @@ select throws_ok($$ select * from platform.usage_daily $$, '42501', null,
   'user klinik tidak bisa membaca platform.usage_daily');
 select throws_ok($$ select platform.dashboard_summary() $$, '42501', null,
   'user klinik tidak bisa memanggil fungsi platform');
-select throws_ok($$ select * from public.billing_settle_midtrans_order('x', 'success', 1, '{}') $$, '42501', null,
+-- Effective function ACL avoids a local Postgres image crash on denied EXECUTE
+-- inside a dynamic exception handler (the permission remains denied).
+select ok(not has_function_privilege('authenticated','public.billing_settle_midtrans_order(text,text,bigint,jsonb)','execute'),
   'user klinik tidak bisa memanggil wrapper billing');
 select pg_temp.logout();
 

@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { getCorsHeaders } from "../_shared/corsHelper.ts";
+import { requireActiveAccount } from "../_shared/activeAccount.ts";
+import { scopedOutbox, checkOutboxTarget } from "../_shared/outboxScope.ts";
 import { syncOrganization } from "../_shared/resources/organization.ts";
 import { syncLocation } from "../_shared/resources/location.ts";
 import { syncPractitioner } from "../_shared/resources/practitioner.ts";
@@ -39,19 +41,31 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-    const callingUserId: string | null = null;
-    if (authHeader !== `Bearer ${supabaseServiceKey}`) {
-      return new Response(JSON.stringify({error:'Forbidden: outbox processor is service-only'}), {status:403,headers:{...corsHeaders,'Content-Type':'application/json'}});
+    let callingUserId: string | null = null;
+    let callingClinicId: string | null = null;
+    const serviceRequest = authHeader === `Bearer ${supabaseServiceKey}`;
+    if (!serviceRequest) {
+      const userClient = createClient(supabaseUrl,Deno.env.get('SUPABASE_ANON_KEY')!,{global:{headers:{Authorization:authHeader}}});
+      const {data,error}=await userClient.auth.getUser(authHeader.replace('Bearer ',''));
+      if (error || !data.user) return new Response(JSON.stringify({error:'Unauthorized'}),{status:401,headers:{...corsHeaders,'Content-Type':'application/json'}});
+      try {
+        const account=await requireActiveAccount(userClient,['admin','dokter']);
+        callingUserId=data.user.id;
+        callingClinicId=account.clinic_id;
+      } catch {
+        return new Response(JSON.stringify({error:'Forbidden: akun atau klinik tidak aktif'}),{status:403,headers:{...corsHeaders,'Content-Type':'application/json'}});
+      }
     }
     const nowIso = new Date().toISOString();
 
     // Query pending or ready-to-retry outbox items
-    const { data: queue, error: queueErr } = await supabaseAdmin
+    const queueQuery = supabaseAdmin
       .from('satusehat_outbox')
       .select('*')
       .or(`status.eq.pending,and(status.eq.failed_retryable,next_retry_at.lte.${nowIso})`)
       .order('created_at', { ascending: true })
       .limit(20);
+    const {data:queue,error:queueErr}=await scopedOutbox(queueQuery,callingClinicId,serviceRequest);
 
     if (queueErr) {
       throw new Error('Failed to query outbox queue: ' + queueErr.message);
@@ -64,6 +78,11 @@ serve(async (req) => {
 
     for (const item of (queue || [])) {
       try {
+        try { await checkOutboxTarget(supabaseAdmin,item); }
+        catch (error) {
+          await supabaseAdmin.from('satusehat_outbox').update({status:'failed_permanent',last_error:'Invalid clinic target'}).eq('id',item.id).eq('clinic_id',item.clinic_id);
+          throw error;
+        }
         switch (item.resource_type) {
           case 'Organization':
             await syncOrganization(supabaseAdmin, item.clinic_id, item.id, callingUserId);

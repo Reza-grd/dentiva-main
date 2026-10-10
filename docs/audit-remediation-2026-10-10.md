@@ -7,7 +7,7 @@ Rujukan: [audit awal](audit-2026-10-10.md). Perubahan kode dan lima migrasi baru
 | F01 | Klinik dan klasifikasi medis berada di dalam payload pgcrypto yang diautentikasi. Mengganti prefix ditolak; ciphertext klinik lain ditolak. Ciphertext lama dikonversi di dalam database, termasuk JSON versi/audit. |
 | F02 | Policy Storage restrictive dokter untuk bucket radiologi. |
 | F03 | Semua FK yang menunjuk tabel ber-klinik divalidasi pada INSERT dan UPDATE, termasuk clinic_id eksplisit dan ID obat warisan. |
-| F04 | Processor outbox global hanya menerima service role. |
+| F04 | Queue global hanya untuk service role. Tombol manual admin/dokter aktif tetap bekerja pada kliniknya sendiri; ID target dalam payload juga diverifikasi terhadap klinik baris antrean. |
 | F05 | Edge SATUSEHAT dan WhatsApp memeriksa status akun, status klinik, peran, serta kecocokan klaim tenant. |
 | F06 | Baris Markdown berpipa tanpa divider dikonsumsi sebagai paragraf, sehingga renderer tidak berputar tanpa akhir. |
 | F07 | Hanya jawaban panduan statis dengan provenance deterministik dikategorikan panduan. Jawaban data selalu dihitung ulang; panduan lama tanpa provenance ditandai data. |
@@ -25,7 +25,7 @@ Kolom nama pasien dan kode ICD diperlebar agar envelope terenkripsi baru muat. R
 ## Validasi sebelum deployment
 
 - Lint, typecheck, build clinic dan console lulus.
-- Unit test npm: 121 lulus; Deno: 17 lulus; pemeriksaan tipe tujuh Edge Functions lulus.
+- Unit test npm: 121 lulus; Deno: 19 lulus; pemeriksaan tipe tujuh Edge Functions lulus.
 - Smoke migrasi: 147 lulus.
 - Seluruh migrasi dan uji `supabase/tests/audit/regression.sql` lulus pada PostgreSQL terkait dengan pgcrypto asli dalam **transaksi ROLLBACK**. Cakupan: prefix palsu, tenant ciphertext, FK lintas klinik, radiologi admin, SOAP terkunci, kasir partial/lunas/nol, ID detail, quantity biaya/stok, snapshot idempoten, provenance cache, reservasi slot kuota terakhir, dan brief bersamaan.
 - Docker tidak tersedia di komputer ini. Suite pgTAP penuh disiapkan untuk CI dengan database kosong; tes owner terakhir membutuhkan lingkungan tersebut dan tidak dapat memakai jumlah operator yang sudah ada di produksi.
