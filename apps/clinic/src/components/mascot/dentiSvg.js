@@ -3,7 +3,7 @@
  *
  * Bentuk: kepala lebar membulat dengan visor hitam besar + aksen sudut biru, headphone di kedua
  * sisi (muka biru, cincin emas) dengan "antena sisi" berupa sirip cahaya, tubuh telur porselen
- * dengan panel biru bawah dan lampu dada bercincin emas, lengan terpisah meruncing (ujung biru,
+ * dengan panel biru bawah dan lampu dada bercincin emas, lengan terpisah berbentuk kapsul membulat (ujung biru,
  * gelang emas), cincin orbit berpartikel, dan cincin cahaya tempat melayang. Tanpa antena atas.
  *
  * SVG dipecah menjadi BAGIAN (rig) yang digerakkan denti.css lewat data-state / data-kid:
@@ -17,7 +17,7 @@
  */
 export const DENTI_STATES = ['idle', 'happy', 'wave', 'talk', 'think', 'call', 'celebrate', 'sleep', 'wake'];
 
-const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 42 14 86 4 108 C2 113 -2 113 -4 108 C-14 86 -27 42 -27 0 Z';
+const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z';
 const ARM_CAP = 'M-27 0 A27 27 0 0 1 27 0 L27 10 C16 17 -16 17 -27 10 Z';
 const BODY = 'M200 270 C258 270 290 306 290 354 C290 410 252 444 200 444 C148 444 110 410 110 354 C110 306 142 270 200 270 Z';
 const HEAD = 'M200 56 C282 56 330 84 330 152 L330 176 C330 236 290 262 200 262 C110 262 70 236 70 176 L70 152 C70 84 118 56 200 56 Z';
@@ -33,7 +33,7 @@ export function dentiSvg(uid = 'd') {
       <path d="${ARM}" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="1.5"/>
       <path d="${ARM_CAP}" fill="${url('blue')}"/>
       <path d="M-26 20 C-12 28 12 28 26 20" stroke="${url('gold')}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-      <path d="M-14 34 C-14 60 -8 82 -2 96" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
+      <path d="M-15 32 C-15 52 -14 70 -12 82" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
     </g></g>`;
   const ear = (side, cx, face) => `
     <g class="d-ear-${side}">
