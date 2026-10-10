@@ -13,7 +13,6 @@
 .denti .d-arm-r     { transform-origin: 272px 300px; }
 .denti .d-petal-l   { transform-origin: 78px 154px; }
 .denti .d-petal-r   { transform-origin: 322px 154px; }
-.denti .d-antenna   { transform-origin: 200px 88px; }
 .denti .d-shadow    { transform-origin: 200px 456px; }
 .denti .d-eye       { transform-box: fill-box; transform-origin: center; }
 .denti .d-chest     { transform-origin: 200px 334px; }
@@ -27,7 +26,6 @@
 .denti .d-shadow        { animation: d-shadow 4s ease-in-out infinite; }
 .denti .d-eye           { animation: d-blink 5.2s ease-in-out infinite; }
 .denti .d-eye-r         { animation-delay: .04s; }
-.denti .d-antenna-light { animation: d-glow 2.4s ease-in-out infinite; }
 .denti .d-chest-glyph   { animation: d-glow 3.2s ease-in-out infinite; }
 .denti .d-petal-l       { animation: d-petal-l 3.6s ease-in-out infinite; }
 .denti .d-petal-r       { animation: d-petal-r 3.6s ease-in-out infinite; }
@@ -53,16 +51,15 @@
 @keyframes d-wave { 0%, 100% { transform: rotate(-95deg); } 50% { transform: rotate(-122deg); } }
 @keyframes d-tilt-r { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(7deg); } }
 
-/* ── CALL: memanggil pasien (menunjuk, gelombang suara antena) ── */
+/* ── CALL: memanggil pasien (menunjuk, gelombang suara dari pod telinga) ── */
 .denti[data-state="call"] .d-eye-open { opacity: 0; }
 .denti[data-state="call"] .d-eye-happy { opacity: 1; }
 .denti[data-state="call"] .d-waves { opacity: 1; }
-.denti[data-state="call"] .d-wave { animation: d-wave-out 1.4s ease-out infinite; transform-origin: 210px 40px; }
+.denti[data-state="call"] .d-wave { animation: d-wave-out 1.4s ease-out infinite; transform-origin: 330px 170px; }
 .denti[data-state="call"] .d-wave-2 { animation-delay: .2s; }
 .denti[data-state="call"] .d-wave-3 { animation-delay: .4s; }
 .denti[data-state="call"] .d-arm-r { animation: d-point 1.6s ease-in-out infinite; }
 .denti[data-state="call"] .d-head { animation: d-nod 1.6s ease-in-out infinite; }
-.denti[data-state="call"] .d-antenna-light { animation-duration: .8s; }
 @keyframes d-wave-out { 0% { opacity: 0; transform: scale(.7); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.15); } }
 @keyframes d-point { 0%, 100% { transform: rotate(-78deg); } 50% { transform: rotate(-86deg); } }
 @keyframes d-nod { 0%, 100% { transform: rotate(0) translateY(0); } 50% { transform: rotate(2deg) translateY(3px); } }
@@ -115,7 +112,6 @@
 .denti[data-state="sleep"] .d-root { animation-duration: 7s; }
 .denti[data-state="sleep"] .d-shadow { animation-duration: 7s; }
 .denti[data-state="sleep"] .d-head { animation: d-doze 7s ease-in-out infinite; }
-.denti[data-state="sleep"] .d-antenna-light { opacity: .35; animation: none; }
 .denti[data-state="sleep"] .d-chest-glyph { opacity: .4; animation: none; }
 @keyframes d-zzz { 0% { opacity: 0; transform: translate(0, 8px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -14px); } }
 @keyframes d-doze { 0%, 100% { transform: rotate(4deg) translateY(4px); } 50% { transform: rotate(6deg) translateY(6px); } }

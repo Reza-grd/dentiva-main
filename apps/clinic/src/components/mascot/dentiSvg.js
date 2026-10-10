@@ -10,15 +10,14 @@
  *     .d-body   tubuh telur + .d-chest (cincin cahaya bergambar "D")
  *     .d-head   kepala (sendi di leher)
  *       .d-petal-l / .d-petal-r   kelopak cahaya di pod telinga
- *       .d-antenna / .d-antenna-light
  *       .d-visor  kaca wajah + .d-visor-rim
  *       .d-eyes   .d-eye-open | .d-eye-happy | .d-eye-sleep  (dipilih menurut state)
  *       .d-mouth  .d-mouth-smile | .d-mouth-talk
  *       .d-cheeks pipi merona (mode anak)
- *   .d-fx       .d-waves (memanggil) .d-stars (rayakan / anak) .d-dots (berpikir) .d-zzz (tidur)
+ *   .d-fx       .d-waves (memanggil, dari pod telinga kanan) .d-stars (rayakan / anak) .d-dots (berpikir) .d-zzz (tidur)
  *
- * Ciri khas Denti: kepala squircle dengan dua lekukan mahkota (isyarat gigi), satu antena
- * bercahaya emas, pod telinga bercincin emas dengan kelopak cahaya, cincin dada berhuruf "D".
+ * Ciri khas Denti: kepala squircle dengan dua lekukan mahkota (isyarat gigi), tanpa antena,
+ * pod telinga bercincin emas dengan kelopak cahaya, cincin dada berhuruf "D".
  * Semua koordinat dalam viewBox 0 0 400 480.
  */
 export const DENTI_STATES = ['idle', 'wave', 'call', 'think', 'talk', 'celebrate', 'sleep'];
@@ -96,11 +95,6 @@ export function dentiSvg(uid = 'd') {
 
     <!-- kepala (sendi leher 200,258) -->
     <g class="d-head">
-      <g class="d-antenna">
-        <path d="M200 86 C200 70 202 58 204 48" stroke="#cdd8ea" stroke-width="6" fill="none" stroke-linecap="round"/>
-        <circle class="d-antenna-light" cx="205" cy="40" r="11" fill="url(#${g('gold')})" filter="url(#${g('glow')})"/>
-      </g>
-
       <g class="d-petal-l"><path d="M72 152 C54 132 56 104 70 92 C84 108 88 134 78 154 Z" fill="url(#${g('petal')})" stroke="#ffffff" stroke-opacity=".7" stroke-width="1.2"/></g>
       <g class="d-petal-r"><path d="M328 152 C346 132 344 104 330 92 C316 108 312 134 322 154 Z" fill="url(#${g('petal')})" stroke="#ffffff" stroke-opacity=".7" stroke-width="1.2"/></g>
 
@@ -150,9 +144,9 @@ export function dentiSvg(uid = 'd') {
 
 <g class="d-fx">
   <g class="d-waves" fill="none" stroke="#e6c698" stroke-linecap="round">
-    <path class="d-wave d-wave-1" d="M226 26 q12 12 0 26" stroke-width="4"/>
-    <path class="d-wave d-wave-2" d="M240 16 q20 22 0 46" stroke-width="3.5"/>
-    <path class="d-wave d-wave-3" d="M254 6 q28 32 0 66" stroke-width="3"/>
+    <path class="d-wave d-wave-1" d="M346 156 q10 14 0 28" stroke-width="4"/>
+    <path class="d-wave d-wave-2" d="M360 144 q18 26 0 52" stroke-width="3.5"/>
+    <path class="d-wave d-wave-3" d="M374 132 q26 38 0 76" stroke-width="3"/>
   </g>
   <g class="d-stars" fill="#fff3dc" filter="url(#${g('glow')})">
     <path class="d-star d-star-1" transform="translate(52 96)" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z"/>
