@@ -69,7 +69,8 @@ create table public.patients (
 );
 create table public.visits (
   id uuid primary key default gen_random_uuid(), patient_id uuid references public.patients(id) on delete cascade,
-  clinic_id uuid not null references public.clinics(id), tanggal_kunjungan date not null default current_date, dokter_id uuid
+  clinic_id uuid not null references public.clinics(id), tanggal_kunjungan date not null default current_date, dokter_id uuid,
+  status text default 'scheduled'
 );
 create table public.clinic_settings (
   id uuid primary key default gen_random_uuid(), key text unique not null, value text,
