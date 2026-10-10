@@ -11,7 +11,7 @@ import { providerNotice } from '../../utils/aiProvider';
 import { useToast } from '../common/ToastNotification';
 import { useAuth } from '../../contexts/AuthContext';
 import { getGreeting } from '../../utils/dateUtils';
-import { useDentiDirector } from '../mascot/DentiMascot';
+import { useDentiDirector, DENTI_DURATIONS } from '../mascot/DentiMascot';
 import DentiCompanion from './DentiCompanion';
 import { smallTalk, topicOf, moodForAnswer, POKE_REACTIONS, greetLine } from '../../utils/dentiMood';
 import './ai-assistant.css';
@@ -164,11 +164,12 @@ export default function AiAssistantPage() {
     const chat = smallTalk(question, {
       name, greeting: getGreeting(), seed: messages.length, now: new Date(),
       afterAnswer: messages.some((m) => m.role === 'assistant' && !m.local && !m.error),
+      lastIntent: [...messages].reverse().find((m) => m.role === 'assistant')?.intent || null,
     });
     if (chat) {
-      setMessages((m) => [...m, { role: 'user', content: question, local: true }, { role: 'assistant', content: chat.reply, local: true }]);
+      setMessages((m) => [...m, { role: 'user', content: question, local: true }, { role: 'assistant', content: chat.reply, local: true, intent: chat.intent }]);
       setInput('');
-      react(chat.state, chat.reply.replace(/\*\*/g, ''), chat.state === 'thanks' ? undefined : 3200);
+      react(chat.state, chat.reply.replace(/\*\*/g, ''), DENTI_DURATIONS[chat.state] ? undefined : 3200);
       inputRef.current?.focus();
       return;
     }

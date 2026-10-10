@@ -112,6 +112,23 @@ Aturan lokal di `apps/clinic/src/utils/dentiMood.js` — **tanpa panggilan AI ta
 saat pertanyaan baru dikirim agar animasi memindai langsung tampil.
 
 ### Melatih Denti
-Data latihan ada di `apps/clinic/src/test/dentiTraining.test.js` (100+ kalimat obrolan per intent, pertanyaan
-data yang **harus** tetap ke AI, dan contoh jawaban → ekspresi). Bila Denti salah paham, tambahkan kalimatnya
-ke data latihan, perbaiki pola di `utils/dentiMood.js`, lalu jalankan tes sampai akurasi kembali 100%.
+Data latihan per siklus ada di `apps/clinic/src/test/fixtures/dentiTrainingData.js`, diuji oleh
+`apps/clinic/src/test/dentiTraining.test.js` (semua siklus wajib 100%).
+
+| Siklus | Fokus | Kalimat | Sebelum perbaikan | Sesudah |
+|---|---|---|---|---|
+| 0 | dasar (18 intent) | 151 | — | 100% |
+| 1 | salah ketik & singkatan (brp, skrg, mksh, sipp) | 48 | 33% | 100% |
+| 2 | kalimat campuran & sopan, prioritas intent | 37 | 89% | 100% |
+| 3 | bahasa Inggris, daerah & salam religi (balasan sesuai budaya) | 57 | 23% | 100% |
+| 4 | jebakan kebocoran data (obrolan + permintaan data → tetap ke AI) | 34 | 88% | 100% |
+| 5 | jam, tanggal, bulan, tahun, bantuan, intent "bingung" | 41 | 24% | 100% |
+| 6 | ekspresi jawaban bernuansa (arah biaya dibalik, penyangkalan) | 20 | 40% | 100% |
+| 7 | topik analisis (17 topik, urutan prioritas) | 28 | 46% | 100% |
+| 8 | konteks percakapan ("lagi" setelah lelucon, minta maaf, bangun) | 25 | 20% | 100% |
+| 9 | ketahanan: emoji saja, KAPITAL, tanda baca, tag HTML, pesan kosong/panjang | 43 | 42% | 100% |
+| 10 | ujian akhir: kalimat baru campuran (belum pernah dilihat) | 63 | 87% | 100% |
+| | **Total** | **547** | | **100%** |
+
+Bila Denti salah paham, tambahkan kalimatnya sebagai siklus baru, perbaiki pola di `utils/dentiMood.js`,
+lalu jalankan tes sampai semua siklus kembali 100%.

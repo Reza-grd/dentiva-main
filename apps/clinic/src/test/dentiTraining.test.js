@@ -1,75 +1,54 @@
 /**
- * Data latihan Denti — kalimat nyata (baku, gaul, singkatan, huruf berulang) beserta intent yang
- * diharapkan. Tambahkan kalimat baru di sini setiap kali Denti salah paham, lalu perbaiki aturannya
- * di utils/dentiMood.js sampai semua lulus.
+ * Latihan Denti — semua siklus di fixtures/dentiTrainingData.js harus lulus 100%.
+ * Bila Denti salah paham, tambahkan kalimatnya ke siklus baru, perbaiki pola di utils/dentiMood.js,
+ * lalu jalankan tes ini sampai lulus.
  */
 import { describe, it, expect } from 'vitest';
 import { smallTalk, normalizeChat, moodForAnswer, topicOf } from '../utils/dentiMood';
+import { CYCLES } from './fixtures/dentiTrainingData';
 
-const INTENT_CASES = {
-  greet: ['halo', 'Halo Denti!', 'haloooo', 'hai kak', 'hi', 'hey denti', 'selamat pagi', 'Pagi!', 'siang dok', 'Selamat malam',
-    'assalamualaikum', 'Assalamu alaikum', 'permisi', 'p', 'tes', 'testing'],
-  thanks: ['terima kasih', 'Terimakasih ya', 'makasih', 'makasihhh denti', 'mksh', 'trims', 'thanks!', 'thank you', 'thx', 'tq',
-    'tengkyu', 'nuhun', 'matur nuwun', 'oke makasih ya', 'Terima kasih banyak 🙏'],
-  praise: ['kamu pintar', 'pinter banget', 'hebat!', 'keren', 'mantap', 'mantul', 'bagus sekali', 'luar biasa', 'good job', 'cakep',
-    'jago juga kamu', 'the best', 'nice'],
-  complaint: ['salah', 'jawabanmu salah', 'kok keliru', 'ngaco', 'tidak tepat', 'gak bener', 'bukan itu', 'kurang bagus',
-    'tidak membantu', 'lemot', 'jelek'],
-  love: ['sayang kamu', 'love you denti', 'gemes', 'imut'],
-  who: ['kamu siapa?', 'siapa kamu', 'siapa namamu', 'nama kamu siapa', 'kenalan dong'],
-  maker: ['siapa yang membuat kamu', 'kamu dibuat siapa?', 'siapa yang bikin kamu'],
-  joke: ['ceritakan lelucon', 'ada jokes?', 'bercanda dong', 'hibur aku'],
-  laugh: ['haha', 'hahaha', 'wkwkwk', 'hehe', 'lol'],
-  dance: ['joget dong', 'menari!', 'nyanyi', 'goyang denti'],
-  tired: ['capek', 'aku lelah', 'pusing banget', 'stres', 'ngantuk', 'bosan'],
-  cheer: ['semangat!', 'yeay', 'hore', 'alhamdulillah'],
-  bye: ['dadah', 'sampai jumpa', 'bye', 'pamit dulu', 'see you'],
-  how: ['apa kabar?', 'gimana kabarnya', 'kabarmu gimana'],
-  ack: ['ok', 'oke', 'sip', 'siap', 'baik', 'noted', 'paham', 'iya', 'lanjut'],
-  time: ['jam berapa?', 'jam berapa sekarang', 'sekarang jam berapa', 'pukul berapa'],
-  date: ['tanggal berapa?', 'hari ini tanggal berapa', 'hari apa sekarang', 'hari apa'],
-  help: ['kamu bisa apa', 'bisa apa saja?', 'bisa bantu apa', 'apa yang bisa kamu bantu', 'help', 'bantuan', 'tolong', 'bisa ngapain aja'],
-};
+const NOW = new Date(2026, 9, 10, 9, 5);
+const asCase = (c) => (Array.isArray(c) ? c : [c, {}]);
+const intentOf = (text, ctx = {}) => smallTalk(text, { now: NOW, afterAnswer: true, ...ctx })?.intent ?? null;
 
-/** Pertanyaan data/panduan — HARUS diteruskan ke AI (bukan obrolan ringan). */
-const AI_QUESTIONS = [
-  'Berapa pendapatan bulan ini?', 'halo, berapa pendapatan bulan ini?', 'terima kasih, sekarang cek stok bahan',
-  'Ringkas kondisi klinik hari ini', 'jadwal dokter minggu depan', 'pasien yang perlu recall', 'tagihan belum dibayar',
-  'bagaimana cara membuat tautan antrean', 'simulasi harga scaling naik 10%', 'BEP klinik', 'proyeksi arus kas',
-  'tindakan paling menguntungkan', 'stop', 'hapus semua', 'buatkan laporan', 'tolong hitung laba bulan lalu',
-  'jam berapa klinik paling ramai?', 'hari apa pasien paling banyak?', 'kenapa pendapatan turun?',
-];
-
-describe('Latihan Denti — pengenalan obrolan ringan', () => {
-  for (const [intent, phrases] of Object.entries(INTENT_CASES)) {
+describe.each(CYCLES)('$name', ({ intents = {}, ai = [], moods = [], topics = [], replies = [] }) => {
+  for (const [intent, phrases] of Object.entries(intents)) {
     it(`mengenali "${intent}" (${phrases.length} kalimat)`, () => {
-      const wrong = phrases
-        .map((p) => [p, smallTalk(p, { now: new Date(2026, 9, 10, 9, 5), afterAnswer: true })?.intent ?? null])
-        .filter(([, got]) => got !== intent);
+      const wrong = phrases.map(asCase).map(([p, ctx]) => [p, intentOf(p, ctx)]).filter(([, got]) => got !== intent);
       expect(wrong).toEqual([]);
     });
   }
-
-  it('pertanyaan data & panduan tetap diteruskan ke AI', () => {
-    const leaked = AI_QUESTIONS.filter((q) => smallTalk(q) !== null);
-    expect(leaked).toEqual([]);
-  });
-
-  it('akurasi keseluruhan 100% pada data latihan', () => {
-    const all = Object.entries(INTENT_CASES).flatMap(([intent, ps]) => ps.map((p) => [p, intent]));
-    const right = all.filter(([p, intent]) => smallTalk(p)?.intent === intent).length
-      + AI_QUESTIONS.filter((q) => smallTalk(q) === null).length;
-    expect(right / (all.length + AI_QUESTIONS.length)).toBe(1);
-    expect(all.length).toBeGreaterThanOrEqual(100);
-  });
+  if (ai.length) {
+    it(`${ai.length} pertanyaan data tetap diteruskan ke AI`, () => {
+      const leaked = ai.map(asCase).filter(([q, ctx]) => intentOf(q, ctx) !== null).map(([q]) => [q, intentOf(q)]);
+      expect(leaked).toEqual([]);
+    });
+  }
+  if (moods.length) {
+    it(`${moods.length} ekspresi jawaban`, () => {
+      const wrong = moods.filter(([t, s]) => moodForAnswer(t).state !== s).map(([t, s]) => [t, s, moodForAnswer(t).state]);
+      expect(wrong).toEqual([]);
+    });
+  }
+  if (replies.length) {
+    it(`${replies.length} isi balasan`, () => {
+      const reply = (t) => smallTalk(t, { now: NOW, afterAnswer: true })?.reply || '';
+      const wrong = replies.filter(([t, want]) => !reply(t).includes(want)).map(([t, want]) => [t, want, reply(t)]);
+      expect(wrong).toEqual([]);
+    });
+  }
+  if (topics.length) {
+    it(`${topics.length} topik analisis`, () => {
+      const wrong = topics.filter(([q, tp]) => topicOf(q) !== tp).map(([q, tp]) => [q, tp, topicOf(q)]);
+      expect(wrong).toEqual([]);
+    });
+  }
 });
 
 describe('Latihan Denti — balasan', () => {
-  const now = new Date(2026, 9, 10, 9, 5);
-
   it('jam & tanggal dijawab dari perangkat', () => {
-    expect(smallTalk('jam berapa?', { now }).reply).toContain('09.05');
-    expect(smallTalk('hari ini tanggal berapa', { now }).reply).toMatch(/Sabtu, 10 Oktober 2026/);
+    expect(smallTalk('jam berapa?', { now: NOW }).reply).toContain('09.05');
+    expect(smallTalk('hari ini tanggal berapa', { now: NOW }).reply).toMatch(/Sabtu, 10 Oktober 2026/);
   });
 
   it('balasan bervariasi & menyebut nama', () => {
@@ -92,24 +71,10 @@ describe('Latihan Denti — balasan', () => {
     expect(normalizeChat('Makasihhh Denti!! 😍')).toBe('makasih');
     expect(normalizeChat('halo kak denti dong ya')).toBe('halo');
   });
-});
 
-describe('Latihan Denti — ekspresi dari isi jawaban', () => {
-  const CASES = [
-    ['Pendapatan naik 12% dan tertinggi tahun ini.', 'celebrate'],
-    ['Tidak ada bahan yang kadaluarsa; semua stok aman.', 'celebrate'],
-    ['Belum ada tagihan yang belum dibayar.', 'happy'],
-    ['Ada 3 bahan kadaluarsa dan 2 stok menipis.', 'surprise'],
-    ['Ada 10 tagihan belum dibayar dan kunjungan menurun.', 'think'],
-    ['Klinik defisit Rp 2 juta bulan ini.', 'surprise'],
-    ['Buka menu Pengaturan, lalu klik Layar Antrean TV.', 'point'],
-    ['Jumlah pasien hari ini: 14.', 'happy'],
-  ];
-  it.each(CASES)('%s → %s', (text, state) => {
-    expect(moodForAnswer(text).state).toBe(state);
-  });
-
-  it('topik ringkasan hari ini', () => {
-    expect(topicOf('Ringkas kondisi klinik hari ini')).toBe('kondisi klinik hari ini');
+  it('total data latihan', () => {
+    const n = CYCLES.reduce((s, c) => s + Object.values(c.intents || {}).flat().length + (c.ai || []).length
+      + (c.moods || []).length + (c.topics || []).length + (c.replies || []).length, 0);
+    expect(n).toBeGreaterThanOrEqual(540);
   });
 });
