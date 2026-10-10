@@ -40,4 +40,4 @@ Reproduksi historis `supabase/tests/audit/audit-2026-10-10.mjs` dibatasi pada mi
 - Tujuh Edge Functions aktif setelah deployment: `ai-assistant`, `midtrans-webhook`, `satusehat-sync`, `satusehat-sync-visit`, `satusehat-outbox-processor`, `satusehat-healthcheck`, dan `send-whatsapp`. Worker manual tetap memakai klinik pemanggil aktif; worker service dapat memproses queue global.
 - Tipe TypeScript database disinkronkan dan typecheck lulus.
 - Regresi PostgreSQL setelah deployment lulus. Seluruh data sintetis di-ROLLBACK; pemeriksaan akhir memastikan tidak ada klinik fixture tertinggal.
-- Perubahan frontend tersedia di `console`; penggabungan ke `main` dan publikasi frontend tidak dilakukan dalam tugas ini. Backend/database sudah diperbarui.
+- Commit `19d08cd` sudah digabung fast-forward ke `main`; CI commit tersebut lulus (run `38056353648`). Backend/database sudah diperbarui. Publikasi production frontend sedang diverifikasi. Preview clinic berhasil, sedangkan preview Console gagal di Vercel; CLI Vercel meminta autentikasi ulang sehingga log deployment belum dapat diperiksa.
