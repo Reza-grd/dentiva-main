@@ -9,6 +9,11 @@ import { aiService } from '../../services/aiService';
 import { miniMarkdown } from '../../utils/miniMarkdown';
 import { providerNotice } from '../../utils/aiProvider';
 import { useToast } from '../common/ToastNotification';
+import { useAuth } from '../../contexts/AuthContext';
+import { getGreeting } from '../../utils/dateUtils';
+import { useDentiDirector } from '../mascot/DentiMascot';
+import DentiCompanion from './DentiCompanion';
+import { smallTalk, topicOf, moodForAnswer, POKE_REACTIONS, greetLine } from '../../utils/dentiMood';
 import './ai-assistant.css';
 
 const SUGGESTION_GROUPS = [
@@ -51,6 +56,8 @@ const TOOL_LABEL = {
   statistik_recall: 'Recall',
 };
 const MAX_LEN = 1000;
+/** Tanpa aktivitas selama ini → Denti tertidur (bangun lagi saat pengguna mengetik/bertanya). */
+const DOZE_AFTER_MS = 2 * 60 * 1000;
 const STORE_KEY = 'dentiva-ai-chat';
 
 const loadChat = () => {
@@ -65,8 +72,15 @@ function Answer({ text }) {
   return <div className="ai-md" dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+const firstName = (profile) => {
+  const n = (profile?.full_name || '').trim().split(/\s+/)[0] || '';
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
+};
+
 export default function AiAssistantPage() {
   const toast = useToast();
+  const { userProfile } = useAuth();
+  const name = firstName(userProfile);
   const [status, setStatus] = useState(null);
   const [statusError, setStatusError] = useState('');
   const [messages, setMessages] = useState(loadChat);
@@ -83,6 +97,43 @@ export default function AiAssistantPage() {
   const endRef = useRef(null);
   const inputRef = useRef(null);
 
+  // ─── Denti: pendamping yang bereaksi (aturan lokal, tanpa kuota AI) ───
+  const [dentiLine, setDentiLine] = useState('');
+  const [dozing, setDozing] = useState(false);
+  const lastActive = useRef(Date.now());
+  const pokes = useRef(0);
+  const dentiBase = busy ? 'scan' : dozing ? 'sleep' : input.trim() ? 'happy' : 'idle';
+  const denti = useDentiDirector(dentiBase);
+  const { play, settle } = denti;
+  const react = useCallback((state, line, ms) => { play(state, ms); if (line) setDentiLine(line); }, [play]);
+
+  /** Tandai ada aktivitas; bangunkan Denti bila sedang tidur. */
+  const dozingRef = useRef(false);
+  const touch = useCallback(() => {
+    lastActive.current = Date.now();
+    if (!dozingRef.current) return;
+    dozingRef.current = false;
+    setDozing(false);
+    react('wave', 'Oh, saya di sini! Ada yang bisa dibantu?', 2500);
+  }, [react]);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (dozingRef.current || Date.now() - lastActive.current < DOZE_AFTER_MS) return;
+      dozingRef.current = true;
+      setDozing(true);
+      setDentiLine('Zzz… ketik apa saja untuk membangunkan saya.');
+    }, 15000);
+    return () => clearInterval(t);
+  }, []);
+
+  const poke = () => {
+    touch();
+    const r = POKE_REACTIONS[pokes.current % POKE_REACTIONS.length];
+    pokes.current += 1;
+    react(r.state, r.line, r.state === 'spin' ? undefined : 2400);
+  };
+
   const refreshStatus = useCallback(async () => {
     const res = await aiService.getStatus();
     if (res.success) setStatus(res.data);
@@ -90,6 +141,13 @@ export default function AiAssistantPage() {
   }, []);
 
   useEffect(() => { refreshStatus(); }, [refreshStatus]);
+  // Sapaan pembuka begitu asisten siap
+  const greeted = useRef(false);
+  useEffect(() => {
+    if (!status?.aktif || greeted.current) return;
+    greeted.current = true;
+    react('wave', greetLine(getGreeting(), name), 3000);
+  }, [status?.aktif, name, react]);
   useEffect(() => { aiService.getProvider().then((r) => r.success && setProvider(r.data)); }, []);
   useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy]);
 
@@ -101,17 +159,33 @@ export default function AiAssistantPage() {
   const ask = async (q) => {
     const question = (q ?? input).trim();
     if (!question || busy) return;
-    const history = messages.filter((m) => !m.error).map(({ role, content }) => ({ role, content }));
+    touch();
+    // Obrolan ringan dijawab Denti langsung — tidak memakai kuota AI
+    const chat = smallTalk(question, { name, greeting: getGreeting(), seed: messages.length });
+    if (chat) {
+      setMessages((m) => [...m, { role: 'user', content: question, local: true }, { role: 'assistant', content: chat.reply, local: true }]);
+      setInput('');
+      react(chat.state, chat.reply.replace(/\*\*/g, ''), chat.state === 'thanks' ? undefined : 3200);
+      inputRef.current?.focus();
+      return;
+    }
+    const history = messages.filter((m) => !m.error && !m.local).map(({ role, content }) => ({ role, content }));
     setMessages((m) => [...m, { role: 'user', content: question }]);
     setInput('');
+    setDentiLine(`Menganalisis ${topicOf(question)}…`);
+    settle();
     setBusy(true);
     const res = await aiService.ask(question, history);
     setBusy(false);
     if (res.success) {
       setMessages((m) => [...m, toAssistant(res.data, question)]);
       if (res.data.status) setStatus(res.data.status);
+      const mood = moodForAnswer(res.data.answer);
+      react(mood.state, mood.line, mood.state === 'celebrate' ? 2400 : 3500);
     } else {
       setMessages((m) => [...m, { role: 'assistant', content: res.error, error: true }]);
+      const mood = moodForAnswer('', { error: true });
+      react(mood.state, mood.line, 3500);
     }
     inputRef.current?.focus();
   };
@@ -125,25 +199,31 @@ export default function AiAssistantPage() {
     if (!res.success) return toast.error('Gagal menyimpan penilaian: ' + res.error);
     setFeedback(idx, 'up');
     setKnowledgeKey((k) => k + 1);
+    react('love', 'Terima kasih! Jawaban ini saya simpan untuk pertanyaan serupa.', 3000);
   };
 
   // 👎 Kurang tepat → catat, lalu minta AI menjawab ulang dengan catatan tersebut
   const retry = async (idx, note) => {
     const msg = messages[idx];
     if (busy || !msg?.question) return;
+    touch();
     await aiService.feedback(msg.usageId, false, note);
     setFeedback(idx, 'down');
+    setDentiLine('Maaf, saya periksa ulang datanya…');
+    settle();
     // Riwayat sampai sebelum pertanyaan yang dijawab kurang tepat
     const qIdx = messages.slice(0, idx).map((m) => m.role).lastIndexOf('user');
-    const history = messages.slice(0, Math.max(qIdx, 0)).filter((m) => !m.error).map(({ role, content }) => ({ role, content }));
+    const history = messages.slice(0, Math.max(qIdx, 0)).filter((m) => !m.error && !m.local).map(({ role, content }) => ({ role, content }));
     setBusy(true);
     const res = await aiService.ask(msg.question, history, { retry: true, note });
     setBusy(false);
     if (res.success) {
       setMessages((m) => [...m, toAssistant(res.data, msg.question, { revised: true })]);
       if (res.data.status) setStatus(res.data.status);
+      react('happy', 'Sudah saya perbaiki. Semoga kali ini tepat!', 3000);
     } else {
       setMessages((m) => [...m, { role: 'assistant', content: res.error, error: true }]);
+      react('sorry', 'Maaf, ada kendala. Coba sebentar lagi, ya.', 3500);
     }
   };
 
@@ -173,7 +253,7 @@ export default function AiAssistantPage() {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Sparkles className="text-[var(--color-accent)]" /> Asisten AI
+          <Sparkles className="text-[var(--color-accent)]" /> Denti · Asisten AI
           <Badge variant="warning">Beta</Badge>
         </h1>
         <p className="text-sm text-gray-500">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
@@ -187,7 +267,7 @@ export default function AiAssistantPage() {
             <BookCheck size={14} /> Jawaban terverifikasi
           </Button>
           {messages.length > 0 && (
-            <Button size="sm" variant="outline" className="gap-1" onClick={() => setMessages([])}>
+            <Button size="sm" variant="outline" className="gap-1" onClick={() => { setMessages([]); react('wave', 'Siap, kita mulai dari awal!', 2500); }}>
               <RotateCcw size={14} /> Percakapan baru
             </Button>
           )}
@@ -268,14 +348,13 @@ export default function AiAssistantPage() {
 
       {showKnowledge && <KnowledgePanel onClose={() => setShowKnowledge(false)} refreshKey={knowledgeKey} />}
 
+      <DentiCompanion state={denti.state} line={dentiLine} onPoke={poke} />
+
       <Card>
         <CardContent className="p-0">
           <div className="min-h-[420px] max-h-[calc(100vh-330px)] overflow-y-auto p-5 space-y-5">
             {messages.length === 0 && (
               <div className="py-6 text-center space-y-5">
-                <div className="mx-auto w-14 h-14 rounded-2xl grid place-items-center bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)]">
-                  <Sparkles className="text-[var(--color-accent)]" />
-                </div>
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">Mau tahu apa tentang klinik hari ini?</p>
                   <p className="text-sm text-gray-500">Pilih contoh di bawah atau ketik pertanyaan Anda sendiri.</p>
@@ -312,7 +391,10 @@ export default function AiAssistantPage() {
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-accent)]">Jawaban diperbaiki</p>
                   )}
                   {m.error ? m.content : <Answer text={m.content} />}
-                  {!m.error && (
+                  {!m.error && m.local && (
+                    <p className="mt-3 text-xs text-gray-400">Dijawab langsung oleh Denti · tidak memakai kuota</p>
+                  )}
+                  {!m.error && !m.local && (
                     <p className="mt-3 text-xs text-gray-400 flex items-center gap-1 flex-wrap">
                       {m.cached ? (
                         <><Zap size={12} className="text-amber-500" /> {m.fast ? 'Jawaban cepat dari data terbaru klinik' : 'Jawaban terverifikasi · instan'}</>
@@ -353,7 +435,7 @@ export default function AiAssistantPage() {
               maxLength={MAX_LEN}
               value={input}
               disabled={busy || left === 0}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => { setInput(e.target.value); touch(); }}
               onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(); } }}
               placeholder={left === 0 ? 'Kuota bulan ini sudah habis.' : 'Tulis pertanyaan… (Enter untuk kirim, Shift+Enter baris baru)'}
               className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"

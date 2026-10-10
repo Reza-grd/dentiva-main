@@ -92,3 +92,21 @@ sequence([['wake'], ['wave', 3000]]); // pagi: bangun → menyapa → idle
 - `get_queue_display` (migrasi `20261010110158_queue_display_mascot`) menambah `hours` dan `kid` (boolean,
   usia < 12 th). **Tanggal lahir tidak pernah dikirim** ke layar.
 - `prefers-reduced-motion` mematikan semua animasi CSS.
+
+## Denti di Asisten AI & Dashboard (interaksi pintar)
+
+Aturan lokal di `apps/clinic/src/utils/dentiMood.js` — **tanpa panggilan AI tambahan & tanpa kuota**.
+
+| Interaksi | Reaksi Denti |
+|---|---|
+| Halaman dibuka | `wave` + sapaan sesuai waktu & nama pengguna |
+| Obrolan ringan (halo, terima kasih, pujian, "kamu siapa", lelucon, joget, pamit) | dijawab **langsung** oleh Denti (`wave`/`love`/`shy`/`laugh`/`dance`/`thanks`), tidak memakai kuota & tidak masuk riwayat AI |
+| Pertanyaan data | `scan` + "Menganalisis {topik}…" (topik ditebak dari pertanyaan) |
+| Jawaban AI | dari isi jawaban: kabar baik → `celebrate`, peringatan keras (kadaluarsa/rugi) → `surprise`, perlu dipantau → `think`, panduan langkah → `point`, lainnya → `happy`; gagal → `sorry` |
+| 👍 / 👎 | `love` "jawaban disimpan" / `sorry` → `scan` saat memeriksa ulang |
+| Mengetik | `happy`; 2 menit tanpa aktivitas → `sleep`, bangun saat mengetik |
+| Denti dicolek (klik) | bergiliran `laugh`, `surprise`, `spin`, `dance`, `love` |
+| Kartu catatan Dashboard | `scan` saat menyusun, lalu dari tingkat poin: ada "penting" → `think`, banyak "baik" → `happy`, lainnya → `talk`; gagal → `sorry` |
+
+`useDentiDirector` tidak memotong reaksi yang sedang diputar bila keadaan dasar berubah; `settle()` dipakai
+saat pertanyaan baru dikirim agar animasi memindai langsung tampil.

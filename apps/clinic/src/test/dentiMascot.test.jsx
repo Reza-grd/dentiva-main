@@ -67,6 +67,19 @@ describe('Maskot Denti', () => {
     vi.useRealTimers();
   });
 
+  it('useDentiDirector: perubahan dasar saat rangkaian berjalan tidak memotong, lalu dipakai setelahnya', () => {
+    vi.useFakeTimers();
+    const { result, rerender } = renderHook(({ base }) => useDentiDirector(base), { initialProps: { base: 'scan' } });
+    act(() => result.current.play('celebrate', 3000));
+    rerender({ base: 'idle' });
+    expect(result.current.state).toBe('celebrate');
+    act(() => { vi.advanceTimersByTime(3000); });
+    expect(result.current.state).toBe('idle');
+    rerender({ base: 'sleep' });
+    expect(result.current.state).toBe('sleep');
+    vi.useRealTimers();
+  });
+
   it('useDentiDirector memainkan state sementara lalu kembali', () => {
     vi.useFakeTimers();
     const { result } = renderHook(() => useDentiDirector('idle'));

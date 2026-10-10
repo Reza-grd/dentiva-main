@@ -35,16 +35,25 @@ export default function DentiMascot({ state = 'idle', kid = false, size = 220, c
  *   play('call');                                   // 1 putaran (6 dtk) lalu 'idle'
  *   play('talk', 8000);                              // 8 dtk lalu 'idle'
  *   sequence([['wake'], ['wave', 3000]]);            // bangun → menyapa → 'idle'
+ *   settle();                                        // potong rangkaian, kembali ke dasar
+ * Bila keadaan dasar berubah saat rangkaian berjalan, rangkaian tidak terpotong; dasar baru dipakai sesudahnya.
  */
 export function useDentiDirector(base = 'idle') {
   const [state, setState] = useState(base);
   const timers = useRef([]);
+  const playing = useRef(false); // rangkaian sementara sedang diputar
+  const baseRef = useRef(base);
   const clear = () => { timers.current.forEach(clearTimeout); timers.current = []; };
-  useEffect(() => { setState(base); }, [base]);
+  // Keadaan dasar berubah: langsung dipakai, kecuali sedang memutar rangkaian (dipakai setelah selesai).
+  useEffect(() => {
+    baseRef.current = base;
+    if (!playing.current) setState(base);
+  }, [base]);
   useEffect(() => clear, []);
 
   const sequence = useCallback((steps) => {
     clear();
+    playing.current = true;
     let at = 0;
     steps.forEach(([s, ms]) => {
       const dur = ms ?? DENTI_DURATIONS[s] ?? 4000;
@@ -52,9 +61,11 @@ export function useDentiDirector(base = 'idle') {
       else timers.current.push(setTimeout(() => setState(s), at));
       at += dur;
     });
-    timers.current.push(setTimeout(() => setState(base), at));
-  }, [base]);
+    timers.current.push(setTimeout(() => { playing.current = false; setState(baseRef.current); }, at));
+  }, []);
 
   const play = useCallback((next, ms) => sequence([[next, ms]]), [sequence]);
-  return { state, play, sequence };
+  /** Hentikan rangkaian yang sedang berjalan dan kembali ke keadaan dasar sekarang juga. */
+  const settle = useCallback(() => { clear(); playing.current = false; setState(baseRef.current); }, []);
+  return { state, play, sequence, settle };
 }

@@ -4,6 +4,8 @@ import { Sparkles, RefreshCw, ArrowRight, Lightbulb, ChevronRight } from 'lucide
 import { useAuth } from '../../contexts/AuthContext';
 import { aiService } from '../../services/aiService';
 import { getGreeting, getRelativeTime } from '../../utils/dateUtils';
+import DentiMascot, { useDentiDirector } from '../mascot/DentiMascot';
+import { moodForBrief, POKE_REACTIONS } from '../../utils/dentiMood';
 import './ai-brief.css';
 
 const TONE = {
@@ -41,6 +43,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
   const [refreshing, setRefreshing] = useState(false);
   const [question, setQuestion] = useState('');
   const mounted = useRef(true);
+  const pokes = useRef(0);
 
   const load = useCallback(async (refresh = false) => {
     if (refresh) setRefreshing(true);
@@ -74,6 +77,17 @@ export default function AiBriefCard({ variant = 'admin' }) {
     navigate('/admin/asisten-ai', { state: { ask: q } });
   };
 
+  // Ekspresi Denti mengikuti isi catatan; dicolek → reaksi lucu
+  const dentiBase = refreshing || state.phase === 'loading' ? 'scan'
+    : state.phase === 'ready' ? moodForBrief(state.brief)
+      : state.phase === 'error' ? 'sorry' : 'wave';
+  const denti = useDentiDirector(dentiBase);
+  const poke = () => {
+    const r = POKE_REACTIONS[pokes.current % POKE_REACTIONS.length];
+    pokes.current += 1;
+    denti.play(r.state, r.state === 'spin' ? undefined : 2400);
+  };
+
   if (state.phase === 'hidden') return null;
 
   const name = firstName(userProfile);
@@ -84,11 +98,16 @@ export default function AiBriefCard({ variant = 'admin' }) {
       <div className="ai-brief__glow" aria-hidden="true" />
       <div className="relative z-10 space-y-5">
         <header className="flex items-start justify-between gap-4">
-          <div className="space-y-1.5">
+          <div className="flex items-center gap-4 min-w-0">
+          <button type="button" onClick={poke} className="ai-brief__denti" aria-label="Colek Denti" title="Colek Denti">
+            <DentiMascot state={denti.state} size={68} title="Denti, asisten AI Dentiva" />
+          </button>
+          <div className="space-y-1.5 min-w-0">
             <p className="ai-brief__eyebrow flex items-center gap-2">
-              <Sparkles size={13} /> Asisten AI · {isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini'}
+              <Sparkles size={13} /> Denti · Asisten AI · {isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini'}
             </p>
             <h2 id="ai-brief-title" className="ai-brief__greeting">{greeting}</h2>
+          </div>
           </div>
           {state.phase === 'ready' && (
             <button type="button" onClick={() => load(true)} disabled={refreshing}
