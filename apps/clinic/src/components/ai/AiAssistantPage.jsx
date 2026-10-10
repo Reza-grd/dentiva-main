@@ -95,7 +95,7 @@ export default function AiAssistantPage() {
 
   const toAssistant = (data, question, extra = {}) => ({
     role: 'assistant', content: data.answer, tools: data.tools || [], question,
-    usageId: data.usage_id || null, cached: Boolean(data.cached), references: data.references || 0, ...extra,
+    usageId: data.usage_id || null, cached: Boolean(data.cached), fast: Boolean(data.fast), references: data.references || 0, ...extra,
   });
 
   const ask = async (q) => {
@@ -315,7 +315,7 @@ export default function AiAssistantPage() {
                   {!m.error && (
                     <p className="mt-3 text-xs text-gray-400 flex items-center gap-1 flex-wrap">
                       {m.cached ? (
-                        <><Zap size={12} className="text-amber-500" /> Jawaban terverifikasi · instan</>
+                        <><Zap size={12} className="text-amber-500" /> {m.fast ? 'Jawaban cepat dari data terbaru klinik' : 'Jawaban terverifikasi · instan'}</>
                       ) : (
                         <>
                           Dibuat AI, periksa kembali angka penting

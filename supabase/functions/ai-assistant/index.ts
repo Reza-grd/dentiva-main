@@ -38,6 +38,7 @@ import { GeminiError, geminiInteract, readInteraction, toGeminiSchema, userText 
 import { GroqError, groqChat, readCompletion, toGroqTools } from "./groq.ts";
 import { DENTIVA_GUIDE } from "./guide.ts";
 import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.ts";
+import { fastAnswer } from "./fast.ts";
 
 const MODEL = "claude-opus-5-5";
 // USD per 1 juta token (Claude Opus 5.5): masuk, keluar, baca cache, tulis cache (5 menit = 1,25× masuk)
@@ -832,6 +833,7 @@ Deno.serve(async (req) => {
   let answerText: string | null = null;
   let questionNorm: string | null = null;
   let fingerprint: string | null = null;
+  let fast: ReturnType<typeof fastAnswer> = null;
 
   try {
     if (mode === "chat") {
@@ -871,6 +873,11 @@ Deno.serve(async (req) => {
         answerText = exact.answer;
         payload = { answer: exact.answer, tools: [], cached: true };
         await admin.rpc("ai_knowledge_hit", { p_id: exact.id });
+      } else if (!isRetry && clean.length === 0 && (fast = fastAnswer(questionNorm, snapshot))) {
+        // Jalur cepat: pertanyaan umum dijawab dari data terbaru / pelajaran panduan, tanpa model AI.
+        outcome = "cached";
+        answerText = fast.answer;
+        payload = { answer: fast.answer, tools: [], cached: true, fast: true };
       } else {
         const refs = matches.slice(0, 2).map((k) => ({
           question: k.question, answer: k.answer, kind: k.kind, same_data: k.data_fingerprint === fingerprint,
@@ -943,7 +950,7 @@ Deno.serve(async (req) => {
   if (clinicId) {
     const { data: logRow, error: logErr } = await admin.from("ai_usage").insert({
       clinic_id: clinicId, user_id: userData.user.id, feature,
-      model: outcome === "cached" ? "basis-pengetahuan" : mode === "receipt" && provider.visionModel ? provider.visionModel : provider.model,
+      model: fast ? `jawaban-cepat:${fast.intent}` : outcome === "cached" ? "basis-pengetahuan" : mode === "receipt" && provider.visionModel ? provider.visionModel : provider.model,
       question: logQuestion.slice(0, 1000), tools_used: [...toolsUsed],
       input_tokens: usage.input, output_tokens: usage.output,
       cache_read_tokens: usage.cacheRead, cache_write_tokens: usage.cacheWrite,
