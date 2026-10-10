@@ -2,9 +2,12 @@ import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 
 import { dentiSvg, DENTI_STATES } from './dentiSvg';
 import './denti.css';
 
+/** Durasi satu putaran rangkaian (ms) — dipakai sutradara sebagai bawaan. */
+export const DENTI_DURATIONS = { call: 6000, wake: 6000, celebrate: 2400 };
+
 /**
  * Denti — maskot AI Dentiva.
- *   <DentiMascot state="idle|wave|call|think|talk|celebrate|sleep" kid={false} size={220} />
+ *   <DentiMascot state="idle|happy|wave|talk|think|call|celebrate|sleep|wake" kid={false} size={220} />
  * Markup SVG berasal dari konstanta internal (bukan input pengguna), jadi aman disisipkan.
  */
 export default function DentiMascot({ state = 'idle', kid = false, size = 220, className = '', title = 'Denti, asisten AI Dentiva' }) {
@@ -27,19 +30,31 @@ export default function DentiMascot({ state = 'idle', kid = false, size = 220, c
 }
 
 /**
- * Sutradara sederhana: mainkan keadaan sementara lalu kembali ke keadaan dasar.
- *   const { state, play } = useDentiDirector('idle');
- *   play('call', 6000);   // memanggil pasien 6 detik, lalu kembali 'idle'
+ * Sutradara: mainkan keadaan sementara atau rangkaian, lalu kembali ke keadaan dasar.
+ *   const { state, play, sequence } = useDentiDirector('idle');
+ *   play('call');                                   // 1 putaran (6 dtk) lalu 'idle'
+ *   play('talk', 8000);                              // 8 dtk lalu 'idle'
+ *   sequence([['wake'], ['wave', 3000]]);            // bangun → menyapa → 'idle'
  */
 export function useDentiDirector(base = 'idle') {
   const [state, setState] = useState(base);
-  const timer = useRef(null);
+  const timers = useRef([]);
+  const clear = () => { timers.current.forEach(clearTimeout); timers.current = []; };
   useEffect(() => { setState(base); }, [base]);
-  useEffect(() => () => clearTimeout(timer.current), []);
-  const play = useCallback((next, ms = 5000) => {
-    clearTimeout(timer.current);
-    setState(next);
-    if (ms > 0) timer.current = setTimeout(() => setState(base), ms);
+  useEffect(() => clear, []);
+
+  const sequence = useCallback((steps) => {
+    clear();
+    let at = 0;
+    steps.forEach(([s, ms]) => {
+      const dur = ms ?? DENTI_DURATIONS[s] ?? 4000;
+      if (at === 0) setState(s); // langkah pertama langsung aktif
+      else timers.current.push(setTimeout(() => setState(s), at));
+      at += dur;
+    });
+    timers.current.push(setTimeout(() => setState(base), at));
   }, [base]);
-  return { state, play };
+
+  const play = useCallback((next, ms) => sequence([[next, ms]]), [sequence]);
+  return { state, play, sequence };
 }
