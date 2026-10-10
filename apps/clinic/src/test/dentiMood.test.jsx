@@ -33,7 +33,7 @@ describe('Aturan Denti', () => {
     expect(topicOf('Berapa pendapatan bulan ini?')).toBe('data pendapatan');
     expect(topicOf('Bahan apa yang hampir kadaluarsa?')).toBe('stok bahan');
     expect(topicOf('Bagaimana cara membuat tautan layar antrean?')).toBe('panduan Dentiva');
-    expect(topicOf('Tolong ringkas')).toBe('data klinik');
+    expect(topicOf('Tolong jelaskan')).toBe('data klinik');
   });
 
   it('ekspresi mengikuti isi jawaban', () => {

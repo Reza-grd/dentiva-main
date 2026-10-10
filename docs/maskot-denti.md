@@ -100,9 +100,9 @@ Aturan lokal di `apps/clinic/src/utils/dentiMood.js` — **tanpa panggilan AI ta
 | Interaksi | Reaksi Denti |
 |---|---|
 | Halaman dibuka | `wave` + sapaan sesuai waktu & nama pengguna |
-| Obrolan ringan (halo, terima kasih, pujian, "kamu siapa", lelucon, joget, pamit) | dijawab **langsung** oleh Denti (`wave`/`love`/`shy`/`laugh`/`dance`/`thanks`), tidak memakai kuota & tidak masuk riwayat AI |
+| Obrolan ringan — 18 intent: sapaan, terima kasih, pujian, keluhan, sayang, siapa kamu, pembuat, lelucon, tertawa, joget, lelah, semangat, pamit, apa kabar, oke, **jam**, **tanggal**, **kamu bisa apa** | dijawab **langsung** oleh Denti dengan balasan bervariasi; tidak memakai kuota & tidak masuk riwayat AI. Paham bahasa gaul, singkatan (mksh, tq, thx), huruf berulang ("makasihhh"). Keluhan setelah jawaban AI → diarahkan ke 👎 |
 | Pertanyaan data | `scan` + "Menganalisis {topik}…" (topik ditebak dari pertanyaan) |
-| Jawaban AI | dari isi jawaban: kabar baik → `celebrate`, peringatan keras (kadaluarsa/rugi) → `surprise`, perlu dipantau → `think`, panduan langkah → `point`, lainnya → `happy`; gagal → `sorry` |
+| Jawaban AI | dari isi jawaban (paham penyangkalan: "tidak ada bahan kadaluarsa" = kabar baik): kabar baik → `celebrate`, peringatan keras (kadaluarsa/rugi) → `surprise`, perlu dipantau → `think`, panduan langkah → `point`, lainnya → `happy`; gagal → `sorry` |
 | 👍 / 👎 | `love` "jawaban disimpan" / `sorry` → `scan` saat memeriksa ulang |
 | Mengetik | `happy`; 2 menit tanpa aktivitas → `sleep`, bangun saat mengetik |
 | Denti dicolek (klik) | bergiliran `laugh`, `surprise`, `spin`, `dance`, `love` |
@@ -110,3 +110,8 @@ Aturan lokal di `apps/clinic/src/utils/dentiMood.js` — **tanpa panggilan AI ta
 
 `useDentiDirector` tidak memotong reaksi yang sedang diputar bila keadaan dasar berubah; `settle()` dipakai
 saat pertanyaan baru dikirim agar animasi memindai langsung tampil.
+
+### Melatih Denti
+Data latihan ada di `apps/clinic/src/test/dentiTraining.test.js` (100+ kalimat obrolan per intent, pertanyaan
+data yang **harus** tetap ke AI, dan contoh jawaban → ekspresi). Bila Denti salah paham, tambahkan kalimatnya
+ke data latihan, perbaiki pola di `utils/dentiMood.js`, lalu jalankan tes sampai akurasi kembali 100%.

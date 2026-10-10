@@ -161,7 +161,10 @@ export default function AiAssistantPage() {
     if (!question || busy) return;
     touch();
     // Obrolan ringan dijawab Denti langsung — tidak memakai kuota AI
-    const chat = smallTalk(question, { name, greeting: getGreeting(), seed: messages.length });
+    const chat = smallTalk(question, {
+      name, greeting: getGreeting(), seed: messages.length, now: new Date(),
+      afterAnswer: messages.some((m) => m.role === 'assistant' && !m.local && !m.error),
+    });
     if (chat) {
       setMessages((m) => [...m, { role: 'user', content: question, local: true }, { role: 'assistant', content: chat.reply, local: true }]);
       setInput('');
