@@ -20,6 +20,19 @@ elektronik (SOAP, odontogram, ICD-10/ICD-9-CM, resep, radiologi, informed consen
 pembayaran (tunai/debit/transfer/QRIS), HPP/biaya bahan/stok, pengeluaran, laporan keuangan,
 pengingat WhatsApp, layar antrean TV, recall pasien, dan **Asisten AI** (keuangan & manajemen).
 
+## 1a. Peta sistem — di mana semuanya berada
+
+| Bagian | Repo GitHub | Folder | Alamat / hosting |
+|---|---|---|---|
+| Aplikasi klinik (web) | `Reza-grd/dentiva-main` | `apps/clinic` | https://dentiva-main.vercel.app (Vercel, auto-deploy dari `main`) |
+| Dentiva Console (operator platform) | `Reza-grd/dentiva-main` | `apps/console` | https://dentiva-main-console.vercel.app (Vercel) |
+| Aplikasi desktop Windows/macOS | `Reza-grd/dentiva-main` | `apps/desktop` (Tauri 2) | Installer dibangun GitHub Actions `desktop.yml`, diunggah ke Supabase Storage bucket `downloads`, diunduh dari https://dentiva.id/unduh |
+| Backend (DB, Auth, Storage, Edge Functions, cron) | `Reza-grd/dentiva-main` | `supabase/` | Supabase (satu proyek produksi) |
+| Website resmi | `Reza-grd/dentiva_website` | root (HTML statis: `index.html`, `unduh.html`, `vercel.json`) | https://dentiva.id (Vercel; DNS domain di Hostinger) |
+
+Auditor yang hanya membaca GitHub tidak melihat database secara langsung — struktur database ada di
+`supabase/migrations/`, `supabase/archive/dentiva_schema_backup.sql`, dan `packages/supabase/src/database.types.ts`.
+
 ## 2. Peta repo
 
 | Path | Isi |
