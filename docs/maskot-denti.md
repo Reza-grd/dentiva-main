@@ -128,7 +128,44 @@ Data latihan per siklus ada di `apps/clinic/src/test/fixtures/dentiTrainingData.
 | 8 | konteks percakapan ("lagi" setelah lelucon, minta maaf, bangun) | 25 | 20% | 100% |
 | 9 | ketahanan: emoji saja, KAPITAL, tanda baca, tag HTML, pesan kosong/panjang | 43 | 42% | 100% |
 | 10 | ujian akhir: kalimat baru campuran (belum pernah dilihat) | 63 | 87% | 100% |
-| | **Total** | **547** | | **100%** |
+| 11 | kebal salah ketik (jarak edit Damerau, huruf awal diutamakan, kata umum dilindungi) | 34 | 27% | 100% |
+| 12 | kalimat negatif ("tidak lucu", "gak usah joget", "tidak capek") | 28 | 18% | 100% |
+| 13 | kepribadian Denti (robot? umur? AI apa?) | 28 | 11% | 100% |
+| 14 | keamanan & privasi data (jawaban jujur) | 15 | 20% | 100% |
+| 15 | hari raya & momen spesial (Lebaran, Natal, Imlek, ulang tahun, 17-an) | 30 | 10% | 100% |
+| 16 | sadar waktu & hari ("selamat malam" di pagi hari → koreksi jenaka) | 23 | 26% | 100% |
+| 17 | ingat nama panggilan ("panggil aku Bu Rina", "siapa namaku") | 23 | 17% | 100% |
+| 18 | terima kasih yang nyambung dengan topik jawaban terakhir | 10 | 40% | 100% |
+| 19 | kalkulator & diskon (2jt, 350rb, 25k, %, diskon, naik %) | 33 | 18% | 100% |
+| 20 | hitung tanggal (n hari/minggu/bulan lagi, akhir bulan, hari apa, menuju Natal) | 28 | 14% | 100% |
+| 21 | buka halaman lewat perintah (24 halaman/tab) | 39 | 15% | 100% |
+| 22 | perintah obrolan ("mulai baru", "hapus percakapan") | 15 | 20% | 100% |
+| 23 | beberapa maksud sekaligus ("halo, makasih ya" → "Halo! Sama-sama!") | 15 | 67% | 100% |
+| 24 | saran pertanyaan lanjutan per topik/intent | 16 | 0% | 100% |
+| 25 | Denti berempati saat memproses ("kok turun?" → "Tenang, saya cek dulu…") | 11 | 18% | 100% |
+| 26 | tips & fakta gigi | 16 | 31% | 100% |
+| 27 | tidak mengulang balasan yang sama | 8 | 0% | 100% |
+| 28 | jebakan untuk kemampuan baru (tetap ke AI) | 19 | 100% | 100% |
+| 29 | bahasa gaul Gen-Z (gaskeun, mager, cabut dulu, wkwk land) | 39 | 28% | 100% |
+| 30 | ujian akhir 2 (kalimat baru campuran) | 28 | 79% | 100% |
+| | **Total** | **1.005** | | **100%** |
+
+Kecepatan otak lokal: rata-rata **0,2 ms** per kalimat (terlama ±2 ms).
+
+### Keterampilan instan (`utils/dentiSkills.js`)
+- **Kalkulator**: angka gaya Indonesia (2jt, 350rb, 25k, 1,5 juta, Rp 150.000), × ÷ didahulukan, persen, diskon, naik/turun %.
+- **Hitung tanggal**: "6 bulan lagi" (+ saran kontrol rutin), "2 minggu yang lalu", sisa hari bulan ini, "17 Agustus 2027 hari apa", hari menuju Natal/tahun baru.
+- **Buka halaman**: "buka jadwal dokter", "ke layar antrean", "go to settings" → pindah halaman (+ tombol).
+- **Nama panggilan**: disimpan di perangkat (`localStorage`), dipakai di sapaan & balasan.
+
+### Interaksi natural di halaman Asisten AI
+- Indikator "Denti sedang mengetik" 0,2–0,55 dtk untuk balasan lokal; jawaban muncul bertahap per baris (≤ 0,7 dtk).
+- Tombol saran pertanyaan lanjutan di bawah jawaban terakhir; tombol aksi "Buka …".
+- Gelembung Denti menyesuaikan nada pertanyaan selama AI memproses.
+
+### Pelajaran untuk model AI (edge function `ai-assistant`)
+Bagian **GAYA DENTI** di system prompt: hangat & natural, kalimat pertama langsung angka kunci, beri makna angka,
+≤ 120 kata, 1–2 saran konkret, paham pertanyaan lanjutan pendek — lebih ringkas sehingga juga lebih cepat.
 
 Bila Denti salah paham, tambahkan kalimatnya sebagai siklus baru, perbaiki pola di `utils/dentiMood.js`,
 lalu jalankan tes sampai semua siklus kembali 100%.

@@ -2,7 +2,7 @@
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { smallTalk, topicOf, moodForAnswer, moodForBrief } from '../utils/dentiMood';
 
 const { ai } = vi.hoisted(() => ({
@@ -98,5 +98,79 @@ describe('Denti di halaman Asisten AI', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Colek Denti' }));
     expect(await screen.findByText('Hihi, geli!')).toBeInTheDocument();
     expect(document.querySelector('svg.denti')).toHaveAttribute('data-state', 'laugh');
+  });
+});
+
+describe('Denti pintar — keterampilan di halaman', () => {
+  const status = { paket: 'Pro', tersedia_di_paket: true, aktif: true, kuota_bulanan: 300, terpakai_bulan_ini: 1 };
+  const Where = () => {
+    const loc = useLocation();
+    return <span data-testid="where">{loc.pathname}{loc.search}</span>;
+  };
+  const wrap = () => render(
+    <MemoryRouter initialEntries={['/admin/asisten-ai']}>
+      <ToastProvider>
+        <Routes>
+          <Route path="/admin/asisten-ai" element={<AiAssistantPage />} />
+          <Route path="*" element={<Where />} />
+        </Routes>
+      </ToastProvider>
+    </MemoryRouter>,
+  );
+  const send = async (text) => {
+    const box = await screen.findByPlaceholderText(/Tulis pertanyaan/);
+    fireEvent.change(box, { target: { value: text } });
+    fireEvent.click(screen.getByRole('button', { name: /Kirim/ }));
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    Element.prototype.scrollIntoView = vi.fn();
+    sessionStorage.clear();
+    localStorage.clear();
+    ai.getStatus.mockResolvedValue({ success: true, data: status });
+    ai.getProvider.mockResolvedValue({ success: true, data: { configured: true, provider: 'gemini', label: 'Google Gemini' } });
+  });
+
+  it('kalkulator dijawab instan dengan indikator mengetik, tanpa AI', async () => {
+    wrap();
+    await send('diskon 20% dari 350rb');
+    expect(await screen.findByText('Denti sedang mengetik')).toBeInTheDocument();
+    expect((await screen.findAllByText(/harga setelah diskon/)).length).toBeGreaterThan(0);
+    expect(ai.ask).not.toHaveBeenCalled();
+  });
+
+  it('"buka jadwal dokter" membuka halaman Jadwal Dokter', async () => {
+    wrap();
+    await send('buka jadwal dokter');
+    expect((await screen.findAllByText(/Siap, saya buka/)).length).toBeGreaterThan(0);
+    await waitFor(() => expect(screen.getByTestId('where')).toHaveTextContent('/admin/jadwal-dokter'), { timeout: 2500 });
+  });
+
+  it('mengingat nama panggilan di perangkat', async () => {
+    wrap();
+    await send('panggil aku Bu Rina');
+    expect((await screen.findAllByText(/Senang berkenalan, Bu Rina/)).length).toBeGreaterThan(0);
+    expect(localStorage.getItem('dentiva-denti-nickname')).toBe('Bu Rina');
+    await send('siapa namaku');
+    expect((await screen.findAllByText(/Tentu ingat/)).length).toBeGreaterThan(0);
+  });
+
+  it('saran pertanyaan lanjutan muncul dan bisa diklik', async () => {
+    ai.ask.mockResolvedValue({ success: true, data: { answer: 'Pendapatan bulan ini Rp 12.000.000.', tools: [], usage_id: 'u9' } });
+    wrap();
+    await send('Berapa pendapatan bulan ini?');
+    const chip = await screen.findByRole('button', { name: 'Bandingkan dengan bulan lalu' });
+    fireEvent.click(chip);
+    await waitFor(() => expect(ai.ask).toHaveBeenLastCalledWith('Bandingkan dengan bulan lalu', expect.any(Array)));
+  });
+
+  it('"mulai baru" membersihkan percakapan', async () => {
+    wrap();
+    await send('halo');
+    await screen.findByText('Dijawab langsung oleh Denti · tidak memakai kuota');
+    await send('mulai baru');
+    expect(await screen.findByText(/Percakapan dibersihkan/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText('Dijawab langsung oleh Denti · tidak memakai kuota')).not.toBeInTheDocument());
   });
 });

@@ -5,6 +5,8 @@
 //  Kalimat latihan & hasil yang diharapkan: src/test/dentiTraining.test.js.
 // ─────────────────────────────────────────────
 
+import { calculate, dateCalc, extractName, navigateTo, isClearCommand, timeOf, dateOf } from './dentiSkills.js';
+
 const norm = (t) => (t || '').toLowerCase().replace(/\s+/g, ' ').trim();
 const any = (t, words) => words.some((w) => t.includes(w));
 const escape = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -12,6 +14,14 @@ const escape = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // Kata data boleh berakhiran -nya/-an/-kan/-mu ("pendapatannya", "laporanmu"), tetapi tidak menyambung ke kata lain.
 const anyWord = (t, words) => words.some((w) => new RegExp(`(^|[^a-z])${escape(w)}(nya|an|kan|mu|ku)?($|[^a-z])`).test(t));
 const pick = (list, seed) => list[Math.abs(seed) % list.length];
+/** Pilih variasi yang belum dipakai baru-baru ini (agar Denti tidak mengulang kalimat yang sama). */
+const pickFresh = (list, seed, recent = []) => {
+  for (let k = 0; k < list.length; k += 1) {
+    const cand = list[(Math.abs(seed) + k) % list.length];
+    if (!recent.includes(cand)) return cand;
+  }
+  return pick(list, seed);
+};
 
 /** Kamus singkatan & salah ketik umum → bentuk baku (per kata). */
 const SLANG = {
@@ -23,8 +33,94 @@ const SLANG = {
   terimakasi: 'terimakasih', trimakasih: 'terimakasih', trima: 'terima', tysm: 'thanks', tks: 'thanks', thank: 'thanks',
   mantab: 'mantap', mantep: 'mantap', mantaap: 'mantap', bgus: 'bagus', bgs: 'bagus',
   hlo: 'halo', hallo: 'halo', helo: 'halo', slmt: 'selamat', met: 'selamat', pgi: 'pagi', mlm: 'malam', siank: 'siang',
+  sampe: 'sampai', smpai: 'sampai', sampek: 'sampai', gimana: 'gimana', gmn: 'gimana', bgmn: 'bagaimana',
   okk: 'ok', oce: 'ok', okeh: 'oke', okey: 'oke', okay: 'oke', y: 'ya', yoi: 'ya', yup: 'ya', iy: 'iya', siaap: 'siap',
 };
+
+/** Kata yang menandakan pertanyaan data/panduan — jangan dijawab sebagai obrolan ringan. */
+const DATA_WORDS = [
+  'berapa', 'pendapatan', 'omzet', 'omset', 'pemasukan', 'pengeluaran', 'biaya', 'laba', 'untung', 'rugi', 'margin', 'hpp',
+  'stok', 'bahan', 'dokter', 'jadwal', 'pasien', 'kunjungan', 'recall', 'bayar', 'pembayaran', 'tagihan', 'harga', 'diskon',
+  'promo', 'transaksi', 'nota', 'kwitansi', 'invoice', 'input', 'koreksi', 'target', 'staf', 'karyawan', 'kursi', 'grafik',
+  'bep', 'impas', 'kas', 'laporan', 'bulan', 'minggu', 'cara', 'bagaimana', 'menu', 'fitur',
+  'tindakan', 'obat', 'resep', 'antrean', 'booking', 'ringkas', 'cek', 'tampilkan', 'hitung', 'proyeksi',
+  // bahasa Inggris
+  'revenue', 'income', 'expense', 'expenses', 'profit', 'stock', 'schedule', 'report', 'show', 'patient', 'patients', 'chart',
+];
+
+/** Kosakata yang dikenali Denti — dipakai untuk mengoreksi salah ketik (jarak edit kecil). */
+const VOCAB = [
+  'terima', 'kasih', 'terimakasih', 'makasih', 'thanks', 'semangat', 'pintar', 'hebat', 'keren', 'mantap', 'bagus', 'biasa',
+  'selamat', 'pagi', 'siang', 'sore', 'malam', 'halo', 'assalamualaikum', 'waalaikumsalam', 'bercanda', 'lelucon', 'capek',
+  'lelah', 'pusing', 'ngantuk', 'bingung', 'maksudnya', 'sampai', 'jumpa', 'dadah', 'kabar', 'joget', 'menari', 'tolong',
+  'bantuan', 'sayang', 'lucu', 'hore', 'alhamdulillah', 'paham', 'mengerti', 'sekarang', 'tanggal', 'berapa',
+];
+/** Kata umum yang TIDAK boleh dikoreksi (agar "lagi" tidak menjadi "pagi", "bagi" tidak menjadi "pagi", dst.). */
+const KNOWN = new Set([
+  'kamu', 'anda', 'aku', 'saya', 'kami', 'kita', 'dia', 'mereka', 'yang', 'ini', 'itu', 'apa', 'ada', 'untuk', 'dengan', 'dari',
+  'pada', 'dalam', 'atau', 'dan', 'tapi', 'tetapi', 'juga', 'sudah', 'belum', 'tidak', 'bukan', 'bisa', 'mau', 'akan', 'harus',
+  'boleh', 'hari', 'lagi', 'bagi', 'dibagi', 'kali', 'tadi', 'nanti', 'besok', 'kemarin', 'jam', 'mana', 'siapa', 'kapan',
+  'kenapa', 'mengapa', 'gimana', 'bagaimana', 'sini', 'situ', 'sana', 'semua', 'saja', 'aja', 'sama', 'banyak', 'sedikit',
+  'baru', 'lama', 'atas', 'bawah', 'depan', 'belakang', 'masih', 'pernah', 'sedang', 'lagi', 'buat', 'bikin', 'lihat', 'buka',
+  'kirim', 'simpan', 'baca', 'tahu', 'punya', 'pakai', 'pake', 'makan', 'minum', 'tidur', 'kerja', 'klinik', 'gigi', 'data',
+  'umur', 'usia', 'warna', 'hobi', 'pacar', 'rumah', 'tinggal', 'manusia', 'robot', 'model', 'chat', 'percakapan', 'aman',
+  'jadi', 'usah', 'perlu', 'jangan', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh',
+  'lalu', 'kedepan', 'depan', 'akhir', 'awal', 'tengah', 'hasil', 'total', 'persen', 'ribu', 'juta', 'miliar', 'ratus', 'kurang',
+  'tambah', 'plus', 'minus', 'kurangi', 'naik', 'turun', 'good', 'great', 'nice', 'what', 'time', 'date', 'today', 'thank',
+  'happy', 'merry', 'night', 'morning', 'bulanan', 'halaman', 'menu', 'jadwal', 'mulai', 'hapus', 'reset', 'ulang', 'ulangi',
+  'pamit', 'dulu', 'kok', 'dong', 'deh', 'sih', 'nih', 'kak', 'pak', 'bu', 'ibu', 'bapak', 'mas', 'mbak', 'bos', 'gan',
+  'tahun', 'sehari', 'seminggu', 'sebulan', 'setahun', 'pekan', 'sisa', 'natal', 'valentine', 'kemerdekaan', 'januari',
+  'februari', 'maret', 'april', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember', 'senin', 'selasa',
+  'rabu', 'kamis', 'jumat', 'sabtu', 'weekend', 'kemudian', 'sebelumnya', 'namaku', 'nama', 'panggil', 'ingat',
+  // nama halaman & perintah (jangan "dikoreksi": "profil" bukan "profit")
+  'dashboard', 'beranda', 'home', 'profil', 'profile', 'pengaturan', 'setting', 'settings', 'pengguna', 'user', 'users',
+  'keuangan', 'finance', 'kasir', 'costing', 'modal', 'audit', 'log', 'kalender', 'whatsapp', 'qris', 'langganan', 'billing',
+  'paket', 'tema', 'tampilan', 'satusehat', 'report', 'reports', 'open', 'go', 'page', 'tab', 'bukakan', 'pergi', 'pindah',
+  'menuju', 'arahkan', 'antar', 'treatment', 'treatments', 'pendaftaran', 'registrasi', 'obrolan', 'bersihkan', 'kosongkan',
+  'clear', 'riwayat', 'new', 'praktik', 'praktek', 'layar', 'payments',
+  'menarik', 'soal', 'tentang', 'unik', 'kesehatan', 'sehat', 'merawat', 'menjaga', 'fakta', 'tips', 'orang', 'gas', 'ayo',
+  'yuk', 'senyum', 'gusi', 'sikat', 'mager', 'santuy', 'cabut', 'balik', 'pulang', 'otw', 'tengkiu', 'wow', 'buset', 'astaga',
+]);
+
+/** Calon nama memuat kata data atau kata umum di awal ("nama saya di laporan salah") → bukan nama. */
+const isWordy = (name) => {
+  const t = name.toLowerCase();
+  return anyWord(t, DATA_WORDS) || KNOWN.has(t.split(' ')[0]) && !['bu', 'pak', 'ibu', 'bapak', 'mas', 'mbak', 'kak'].includes(t.split(' ')[0]);
+};
+
+/** Jarak edit Damerau (OSA): hapus, sisip, ganti, tukar dua huruf bersebelahan. */
+function editDistance(a, b) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j += 1) d[0][j] = j;
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+    }
+  }
+  return d[a.length][b.length];
+}
+
+let fuzzyVocab = null;
+/** Koreksi satu kata yang salah ketik ke kosakata terdekat (≤1 huruf; ≤2 untuk kata ≥7 huruf). */
+function fuzzyWord(w) {
+  if (w.length < 4 || /\d/.test(w) || KNOWN.has(w)) return w;
+  fuzzyVocab = fuzzyVocab || [...new Set([...VOCAB, ...DATA_WORDS.filter((x) => !x.includes(' ') && x.length >= 4)])];
+  if (fuzzyVocab.includes(w)) return w;
+  const max = w.length >= 7 ? 2 : 1;
+  let best = w;
+  let bestD = max + 1;
+  for (const v of fuzzyVocab) {
+    if (Math.abs(v.length - w.length) > max) continue;
+    const dist = editDistance(w, v);
+    // jarak sama → utamakan huruf awal yang sama (salah ketik jarang di huruf pertama: "hbat" → "hebat", bukan "obat"),
+    // lalu panjang yang paling mirip ("mkasiih" → "makasih", bukan "kasih")
+    const rank = (x) => (x[0] === w[0] ? 0 : 10) + Math.abs(x.length - w.length);
+    if (dist < bestD || (dist === bestD && rank(v) < rank(best))) { bestD = dist; best = v; }
+  }
+  return bestD <= max ? best : w;
+}
 
 /** Pesan yang isinya hanya emoji/tanda tanya → kalimat yang setara maknanya. */
 const EMOJI = [
@@ -53,28 +149,33 @@ export function normalizeChat(text) {
     .trim();
   // huruf ganda di akhir kata ("kerenn", "sipp", "okk"); vokal ganda di tengah ("maaf") dibiarkan
   t = t.replace(/([b-df-hj-kmnp-tv-z])\1+(?=\s|$)/g, '$1'); // tanpa "l" (well, all, still)
-  t = t.split(' ').map((w) => SLANG[w] || w).join(' ');
+  t = t.split(' ').map((w) => SLANG[w] || w).map(fuzzyWord).join(' ');
   t = t.replace(/\b(denti|kak|kakak|min|mimin|bot)\b/g, ' ').replace(/\s+/g, ' ').trim();
   for (let i = 0; i < 3; i += 1) t = t.replace(/\s(ya|yah|yaa|ya|dong|deh|nih|sih|kok|lho|loh|banget|bgt|sekali|nya)$/, '').trim();
   return t;
 }
 
-/** Kata yang menandakan pertanyaan data/panduan — jangan dijawab sebagai obrolan ringan. */
-const DATA_WORDS = [
-  'berapa', 'pendapatan', 'omzet', 'omset', 'pemasukan', 'pengeluaran', 'biaya', 'laba', 'untung', 'rugi', 'margin', 'hpp',
-  'stok', 'bahan', 'dokter', 'jadwal', 'pasien', 'kunjungan', 'recall', 'bayar', 'pembayaran', 'tagihan', 'harga', 'diskon',
-  'promo', 'transaksi', 'nota', 'kwitansi', 'invoice', 'input', 'koreksi', 'target', 'staf', 'karyawan', 'kursi', 'grafik',
-  'bep', 'impas', 'kas', 'laporan', 'bulan', 'minggu', 'cara', 'bagaimana', 'menu', 'fitur',
-  'tindakan', 'obat', 'resep', 'antrean', 'booking', 'ringkas', 'cek', 'tampilkan', 'hitung', 'proyeksi',
-  // bahasa Inggris
-  'revenue', 'income', 'expense', 'expenses', 'profit', 'stock', 'schedule', 'report', 'show', 'patient', 'patients', 'chart',
-];
 
 const JOKES = [
   'Kenapa gigi tidak pernah merasa kesepian? Karena selalu ditemani gusi yang setia. 😄',
   'Dokter gigi favorit para hantu? Yang praktiknya di "gigi-l" malam. 👻🦷',
   'Sikat gigi itu sahabat sejati — setiap pagi dan malam selalu ada untuk kita. 🪥',
   'Apa makanan kesukaan dokter gigi? Yang pasti bukan permen — nanti pasiennya kebanyakan. 🍬😁',
+];
+
+const TIPS = [
+  'Sikat gigi dua kali sehari — pagi setelah sarapan dan malam sebelum tidur. 🪥',
+  'Ganti sikat gigi setiap 3 bulan, atau lebih cepat bila bulunya sudah mekar. 🪥',
+  'Bersihkan sela gigi dengan benang gigi — sikat saja tidak menjangkau semuanya. 🧵',
+  'Kurangi camilan dan minuman manis, terutama di antara jam makan. 🍬',
+  'Periksakan gigi ke dokter gigi setiap 6 bulan agar masalah kecil tidak menjadi besar. 🦷',
+  'Minum air putih setelah makan membantu membilas sisa makanan. 💧',
+];
+const FACTS = [
+  'Email gigi adalah jaringan paling keras di tubuh manusia. 💎',
+  'Pola gigi setiap orang unik — mirip sidik jari. 🦷',
+  'Manusia hanya punya dua set gigi seumur hidup: gigi susu dan gigi permanen.',
+  'Air liur membantu menetralkan asam dan melindungi gigi dari gigi berlubang. 💧',
 ];
 
 const CAPABILITIES = [
@@ -87,12 +188,104 @@ const CAPABILITIES = [
   'Contoh pertanyaan: *"Berapa pendapatan bulan ini?"*, *"Bahan apa yang hampir kadaluarsa?"*, *"Ringkas kondisi klinik hari ini."*',
 ].join('\n');
 
+const PERIODS = ['pagi', 'siang', 'sore', 'malam'];
+const periodOf = (now) => { const h = now.getHours(); return h >= 4 && h < 11 ? 'pagi' : h < 15 ? 'siang' : h < 18 ? 'sore' : 'malam'; };
+const DAYS = { senin: 1, selasa: 2, rabu: 3, kamis: 4, jumat: 5, sabtu: 6, minggu: 0, monday: 1, tuesday: 2, wednesday: 3,
+  thursday: 4, friday: 5, saturday: 6, sunday: 0 };
+const DAY_NAMES = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+/** Ucapan terima kasih yang nyambung dengan topik jawaban terakhir. */
+const WISHES = {
+  'data pendapatan': 'Semoga pendapatannya terus naik. 📈', 'data pengeluaran': 'Semoga pengeluarannya makin efisien. 💡',
+  'margin tindakan': 'Semoga marginnya makin tebal. 💰', 'stok bahan': 'Jangan lupa restock bahan yang menipis, ya. 📦',
+  tagihan: 'Semoga tagihannya cepat lunas. 💸', 'jadwal & kinerja dokter': 'Semoga jadwal praktiknya lancar. 🗓️',
+  'daftar recall': 'Semoga pasien recall-nya banyak yang kembali kontrol. 🦷', 'data kunjungan': 'Semoga kliniknya makin ramai. 😊',
+  'arus kas': 'Semoga kasnya selalu sehat. 💚', 'titik impas': 'Semoga cepat melewati titik impas. 🚀',
+  'simulasi harga': 'Semoga harga barunya pas di hati pasien. 😊', 'kondisi klinik hari ini': 'Semoga hari ini lancar. ☀️',
+};
+
 /** Sapaan mengikuti waktu yang diucapkan pengguna ("good morning" → "Selamat pagi"). */
 const greetingFrom = (t) => (/(pagi|morning)/.test(t) ? 'Selamat pagi' : /(siang|afternoon)/.test(t) ? 'Selamat siang'
   : /sore/.test(t) ? 'Selamat sore' : /(malam|evening)/.test(t) ? 'Selamat malam' : '');
 
-const timeOf = (now) => now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace(':', '.');
-const dateOf = (now) => now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+// ── Intent "awal": dicek sebelum saringan kata data, tetapi hanya bila kata data yang muncul ada di `allow`
+//    (mis. "umur kamu berapa" memuat "berapa"; "data pasien aman?" memuat "pasien").
+const PERSONA = [
+  [/(kamu|anda) (ini )?(manusia|robot|bot|ai|mesin)\b/, ['Saya robot asisten 🤖🦷 — bukan manusia, tapi saya berusaha seramah mungkin!']],
+  [/(umur|usia)(mu| kamu| anda)|(kamu|anda) (umur|usia) berapa|berapa (umur|usia)(mu| kamu| anda)/, ['Saya "lahir" tahun 2026 bersama Dentiva — jadi masih muda sekali! 🎂😄']],
+  [/(kamu|anda) (cowok|cewek|laki|perempuan|pria|wanita)|jenis kelamin(mu| kamu| anda)/, ['Denti tidak punya jenis kelamin — cukup panggil Denti saja. 😊']],
+  [/(kamu|anda) tinggal (di )?mana|rumah(mu| kamu| anda) (di )?mana/, ['Saya tinggal di dalam aplikasi Dentiva, tepatnya di menu Asisten AI. 🏠 Selalu siap kalau dipanggil!']],
+  [/makanan (favorit|kesukaan)(mu| kamu| anda)|(kamu|anda) (suka )?makan apa/, ['Makanan favorit saya? Data yang rapi! 📊 Yang pasti bukan permen — nanti gigi saya bolong. 🍬😁']],
+  [/hobi(mu| kamu| anda)/, ['Hobi saya merapikan angka dan menyemangati tim klinik! 💪']],
+  [/(kamu|anda) (punya )?(pacar|jodoh|pasangan)|pacar(mu| kamu)/, ['Pasangan saya sikat gigi — kami tidak terpisahkan sejak pagi sampai malam. 🪥💙']],
+  [/warna (favorit|kesukaan)(mu| kamu| anda)/, ['Warna favorit saya biru es, seperti cahaya di visor saya. 💙']],
+  [/cita ?cita(mu| kamu| anda)/, ['Cita-cita saya: semua klinik gigi di Indonesia sehat bisnisnya, dan semua pasien senyum lebar. 🦷✨']],
+  [/(kamu|anda) (punya|bisa) (perasaan|hati|emosi|sedih|senang|marah)/, ['Saya tidak punya perasaan seperti manusia, tapi saya diprogram untuk peduli pada kelancaran klinik Anda. 💙']],
+  [/(kamu|anda) (bisa )?tidur\b/, ['Saya bisa "tidur" kalau lama tidak diajak bicara — tapi cukup ketik apa saja, saya langsung bangun. 😴☀️']],
+];
+/** "denti umurnya berapa" → "umurmu berapa" (kata ganti -nya merujuk ke Denti bila Denti disebut). */
+const aboutDenti = (t, raw) => (/\bdenti\b/i.test(raw || '') ? t.replace(/\b(umur|usia|hobi|pacar|rumah|warna favorit|makanan favorit)nya\b/g, '$1mu') : t);
+const MODEL_Q = /((kamu|anda|otak(mu| kamu| anda)) (pakai|memakai|menggunakan|pake) (ai|model|apa)|(kamu|anda) (chatgpt|gpt|gemini|claude|groq|llama|openai)\b|pakai ai apa|model ai(mu| kamu)? apa)/;
+
+const EARLY_INTENTS = [
+  { id: 'tip', state: ({ t }) => (/fakta/.test(t) ? 'tooth' : 'brush'), allow: ['cara', 'bagaimana'],
+    test: (t) => /(tips?|fakta|cara (merawat|menjaga|membersihkan)|menjaga|merawat)\b.*\b(gigi|gusi|senyum|mulut)\b/.test(t),
+    reply: ({ t }) => (/fakta/.test(t) ? FACTS.map((f) => `Fakta gigi: ${f}`) : TIPS.map((x) => `Tips dari Denti: ${x}`)) },
+  { id: 'day', state: 'celebrate', allow: ['minggu'],
+    test: (t) => /^(selamat|happy|semangat|akhirnya)( hari)? (senin|selasa|rabu|kamis|jumat|sabtu|minggu|monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|akhir pekan)$|^selamat berakhir pekan$|^tgif$/.test(t),
+    reply: ({ t, now, sapa }) => {
+      const today = DAY_NAMES[now.getDay()];
+      const weekend = [0, 6].includes(now.getDay());
+      if (/(weekend|pekan)/.test(t)) return weekend ? `Selamat menikmati akhir pekan${sapa}! 🎉` : `Masih hari ${today}, tapi akhir pekan sudah dekat${sapa}! 😄`;
+      const key = /tgif/.test(t) ? 'jumat' : Object.keys(DAYS).find((d) => t.includes(d));
+      if (DAYS[key] === now.getDay()) return `Selamat hari ${today}${sapa}! 🎉 Semoga kliniknya lancar.`;
+      return `Hari ini ${today}, lho${sapa} 😄 Tapi semangatnya boleh dipakai sekarang! 💪`;
+    } },
+  { id: 'setName', state: 'love', allow: [],
+    test: (t, raw) => Boolean(extractName(raw, isWordy)),
+    reply: ({ raw }) => { const n = extractName(raw, isWordy); return `Senang berkenalan, ${n}! 😊 Mulai sekarang saya panggil **${n}**.`; },
+    action: ({ raw }) => ({ type: 'setName', name: extractName(raw, isWordy) }) },
+  { id: 'whoAmI', state: 'happy', allow: [],
+    test: (t) => /^(siapa nama(ku| saya| aku)|(kamu )?(tahu|ingat|masih ingat) nama(ku| saya| aku)|aku siapa|saya siapa)$/.test(t),
+    reply: ({ name }) => (name ? `Tentu ingat — Anda **${name}**! 😊` : 'Saya belum tahu nama Anda. Ketik *"panggil aku …"* supaya saya bisa menyapa dengan nama. 😊') },
+  { id: 'persona', state: 'happy', allow: ['berapa'],
+    test: (t, raw) => { const q = aboutDenti(t, raw); return MODEL_Q.test(q) || PERSONA.some(([re]) => re.test(q)); },
+    reply: ({ t: t0, raw, provider }) => {
+      const t = aboutDenti(t0, raw);
+      if (MODEL_Q.test(t)) {
+        return provider
+          ? `Otak saya saat ini memakai **${provider}**, dirangkai oleh tim Dentiva. Yang saya baca hanya angka ringkasan klinik — bukan data identitas pasien. 🧠🦷`
+          : 'Otak saya memakai model AI pilihan tim Dentiva. Yang saya baca hanya angka ringkasan klinik — bukan data identitas pasien. 🧠🦷';
+      }
+      return PERSONA.find(([re]) => re.test(t))[1];
+    } },
+  { id: 'privacy', state: 'point', allow: ['pasien', 'bagaimana'],
+    test: (t) => /\b(aman|privasi|rahasia|bocor|keamanan)\b/.test(t) && /\b(data|pasien|chat|percakapan|kamu|anda|pakai)\b/.test(t)
+      || /(kamu|anda) (bisa |dapat )?(lihat|baca|tahu|akses|simpan|menyimpan)( \w+){0,2} (rekam medis|nama pasien|nik|data pasien|percakapan|chat|identitas|obrolan)/.test(t)
+      || /(data|percakapan|chat|obrolan)( \w+)? (dikirim|disimpan|dibaca) (ke )?(mana|siapa)/.test(t)
+      || /siapa (yang )?(bisa )?(lihat|baca) (chat|percakapan|obrolan)/.test(t),
+    reply: ({ t }) => (/(percakapan|chat|obrolan|simpan|menyimpan)/.test(t)
+      ? 'Percakapan ini hanya tersimpan di **tab browser** Anda dan hilang saat tab ditutup. 🔒 Pertanyaan tercatat di server untuk kuota & audit, dan yang dikirim ke AI hanya angka ringkasan — nama, NIK, kontak, dan rekam medis pasien **tidak pernah dikirim**.'
+      : 'Aman. 🔒 Yang saya kirim ke AI hanya **angka ringkasan** (total, jumlah, per tindakan/dokter). Nama, NIK, kontak, dan rekam medis pasien **tidak pernah dikirim**. Setiap pertanyaan tercatat untuk kuota & audit, dan fitur AI bisa dinonaktifkan kapan saja di bawah halaman ini.') },
+  { id: 'occasion', allow: ['dokter'],
+    state: ({ t }) => (/(lahir|fitri|lebaran|minal|adha|nyepi|waisak|guru)/.test(t) ? 'thanks' : 'celebrate'),
+    test: (t) => /(idul (fitri|adha)|lebaran|lahir (dan|&) batin|minal aidin|natal|christmas|tahun baru|new year|gong xi|imlek|nyepi|dirgahayu|merdeka|kemerdekaan|ulang ?tahun|birthday|ultah|hari dokter gigi|waisak|hari guru)/.test(t),
+    reply: ({ t, sapa }) => {
+      if (/(lahir|fitri|lebaran|minal)/.test(t)) return `Selamat Hari Raya Idul Fitri${sapa}! 🌙 Mohon maaf lahir dan batin juga, ya. 🙏`;
+      if (/adha/.test(t)) return `Selamat Idul Adha${sapa}! 🙏 Semoga penuh berkah.`;
+      if (/(natal|christmas)/.test(t)) return `Selamat Natal${sapa}! 🎄 Semoga damai dan sukacita menyertai.`;
+      if (/(tahun baru|new year)/.test(t)) return `Selamat tahun baru${sapa}! 🎆 Semoga klinik makin ramai dan makin sehat tahun ini.`;
+      if (/(gong xi|imlek)/.test(t)) return `Gong Xi Fa Cai${sapa}! 🧧 Semoga rezeki melimpah.`;
+      if (/nyepi/.test(t)) return `Selamat Hari Raya Nyepi${sapa}! 🙏 Semoga damai.`;
+      if (/waisak/.test(t)) return `Selamat Hari Waisak${sapa}! 🙏 Semoga semua makhluk berbahagia.`;
+      if (/(dirgahayu|merdeka|kemerdekaan)/.test(t)) return 'Merdeka! 🇮🇩 Dirgahayu Republik Indonesia!';
+      if (/dokter gigi/.test(t)) return 'Selamat Hari Dokter Gigi untuk seluruh tim klinik! 🦷✨ Terima kasih sudah menjaga senyum Indonesia.';
+      if (/guru/.test(t)) return 'Selamat Hari Guru! 🙏 Terima kasih untuk semua yang sudah mengajar dengan sabar.';
+      if (/(aku|saya|tahunku|ultahku|tahun ku)/.test(t)) return `Selamat ulang tahun${sapa}! 🎂🎉 Semoga sehat, bahagia, dan kliniknya makin berkembang!`;
+      return 'Terima kasih! 🎂 Denti jadi terharu… 💙';
+    } },
+];
 
 /**
  * Daftar intent obrolan. `whole` = harus seluruh kalimat (dicek sebelum saringan kata data),
@@ -115,6 +308,18 @@ const INTENTS = [
       : 'Tidak apa-apa! 😊 Coba tanyakan dengan kalimat sehari-hari, misalnya *"Berapa pendapatan bulan ini?"* — atau ketik *"kamu bisa apa"* untuk melihat contoh.') },
 
   // ── Obrolan ringan
+  { id: 'amazed', state: 'surprise', re: /^(wow|wah|waw|wih|buset|busyet|anjir|anjay|omg|astaga|astagfirullah|masyaallah|masya allah|ya ampun|gila)$/,
+    reply: () => ['Hehe, keren kan? 😄', 'Wah juga! 😄 Ada yang bisa saya bantu?'] },
+  // ── Kalimat negatif (sebelum intent positifnya)
+  { id: 'decline', state: 'happy', re: /^(tidak|jangan)( usah| perlu)? (joget|menari|nari|nyanyi|bercanda|lelucon|goyang)\b|^tidak (terima ?kasih|terimakasih|makasih|thanks)$|^tidak mau$|^tidak (perlu|jadi|usah)( (terima ?kasih|terimakasih|makasih|thanks))?$|^no thanks$|^nanti (saja|aja)$/,
+    reply: () => ['Oke, tidak masalah! 😊', 'Oke, siap. Kalau butuh sesuatu, panggil saja. 😊'] },
+  { id: 'complaint', state: 'sorry', re: /\b(tidak|kurang|bukan) (lucu|keren|pintar|pinter|hebat|mantap|bagus|membantu|jelas|nyambung|asik|seru)\b/,
+    reply: () => ['Maaf ya! 🙏 Saya akan berusaha lebih baik. Coba beri tahu bagian mana yang kurang pas.', 'Maaf, sepertinya saya kurang pas kali ini. 🙏'] },
+  { id: 'cheer', state: 'celebrate', re: /\b(tidak|bukan) (capek|cape|lelah|pusing|stres|ngantuk|bosan)\b/,
+    reply: () => ['Syukurlah! 💪 Semoga tetap segar sampai jam praktik selesai.', 'Syukurlah, ikut senang! 💪'] },
+  { id: 'ack', state: 'happy', re: /^(tidak bingung|sudah (paham|jelas|mengerti|ngerti)|jelas|clear)$/,
+    reply: () => ['Siap! Kalau ada yang ingin dicek lagi, tinggal tanya. 👍', 'Oke! 👍'] },
+
   { id: 'greet', state: 'wave', re: /^(assalamu ?alaikum|assalamualaikum|salamualaikum|ass wr wb|waalaikum ?salam|wassalamu ?alaikum|om swastiastu|sampurasun|punten|horas|shalom|salam sejahtera|namo buddhaya|salam kebajikan)\b/,
     reply: ({ t, sapa }) => {
       if (/^wassalam/.test(t)) return `Wa'alaikumussalam${sapa}, sampai jumpa! 🙏`;
@@ -128,17 +333,19 @@ const INTENTS = [
       if (/^salam kebajikan/.test(t)) return `Salam kebajikan${sapa}! 🙏 Ada yang bisa saya bantu?`;
       return `Shalom, salam sejahtera${sapa}! 🙏 Ada yang bisa saya bantu?`;
     } },
-  { id: 'bye', state: 'thanks', re: /\b(dadah|(dah|sudah|sudahan|udahan) dulu|sampai (jumpa|besok|nanti|ketemu)|bye|goodbye|good night|selamat (tinggal|tidur|istirahat)|pamit|see you)\b/,
+  { id: 'bye', state: 'thanks', re: /\b(dadah|(dah|sudah|sudahan|udahan) dulu|sampai (jumpa|besok|nanti|ketemu)|(cabut|balik|pulang) dulu|otw pulang|bye|goodbye|good night|selamat (tinggal|tidur|istirahat)|pamit|see you)\b/,
     reply: ({ t, sapa }) => (/(night|tidur|istirahat)/.test(t) ? `Selamat istirahat${sapa}! 🌙 Sampai jumpa besok.` : [`Sampai jumpa${sapa}! Semoga klinik lancar hari ini. 👋`, `Sampai nanti${sapa}! 👋`]) },
-  { id: 'thanks', state: 'love', re: /\b(terima ?kasih|terimakasih|trimakasih|makasih|makasi|mksh|maksih|trims|thanks|thank you|thx|tq|ty|tengkyu|nuhun|hatur nuhun|matur ?nuwun|suwun|kamsia|xie ?xie|arigato|gracias|merci|danke)\b/,
-    reply: ({ sapa }) => [`Sama-sama${sapa}! Senang bisa membantu. 😊`, `Dengan senang hati${sapa}! 🦷`, `Sama-sama${sapa}, kapan saja saya siap.`] },
+  { id: 'thanks', state: 'love', re: /\b(terima ?kasih|terimakasih|trimakasih|makasih|makasi|mksh|maksih|trims|thanks|thank you|thx|tq|ty|tengkyu|nuhun|hatur nuhun|matur ?nuwun|suwun|tengkiu|kamsia|xie ?xie|arigato|gracias|merci|danke)\b/,
+    reply: ({ sapa, lastTopic }) => (WISHES[lastTopic]
+      ? [`Sama-sama${sapa}! ${WISHES[lastTopic]}`, `Dengan senang hati${sapa}! ${WISHES[lastTopic]}`]
+      : [`Sama-sama${sapa}! Senang bisa membantu. 😊`, `Dengan senang hati${sapa}! 🦷`, `Sama-sama${sapa}, kapan saja saya siap.`]) },
   { id: 'apologize', state: 'happy', re: /^(maaf|mohon maaf|maafkan( aku| saya)?|sorry|sori|sory|maap)\b/,
     reply: ({ sapa }) => [`Tidak apa-apa${sapa}! 😊 Silakan lanjut.`, `Tidak apa-apa, santai saja${sapa}. 😊`] },
   { id: 'complaint', state: 'sorry', re: /\b(salah|keliru|ngaco|ngawur|tidak (tepat|benar|bener|akurat)|nggak (tepat|bener)|gak (tepat|bener)|(tidak|nggak|gak|kurang) (bagus|pintar|membantu|jelas|nyambung)|bukan itu|bodoh|goblok|bego|lemot|payah|jelek)\b/,
     reply: ({ afterAnswer }) => (afterAnswer
       ? 'Maaf ya! 🙏 Tekan **👎 Kurang tepat** di bawah jawaban tadi dan tulis bagian yang salah — saya akan menjawab ulang dengan lebih teliti.'
       : 'Maaf kalau ada yang kurang pas. 🙏 Coba ceritakan apa yang ingin dicek, saya bantu sebaik mungkin.') },
-  { id: 'praise', state: 'shy', re: /\b(pintar|pinter|hebat|keren|mantap|mantul|bagus|luar biasa|good job|cakep|jago|top|the best|terbaik|amazing|nice|awesome|great|perfect|well done|brilliant|smart|jos|gokil|markotop|joss|keren abis)\b/,
+  { id: 'praise', state: 'shy', re: /\b(pintar|pinter|hebat|keren|mantap|mantul|bagus|luar biasa|good job|cakep|jago|top|the best|terbaik|amazing|nice|awesome|great|perfect|well done|brilliant|smart|jos|gokil|goks|markotop|joss|keren abis)\b/,
     reply: () => ['Aduh, jadi malu… Terima kasih! ☺️', 'Ah, bisa saja. Terima kasih, saya jadi makin semangat belajar! ☺️', 'Hehe, terima kasih! Semua berkat data klinik Anda yang rapi. ☺️'] },
   { id: 'love', state: 'love', re: /\b(sayang (kamu|denti)|love you|i love|lucu banget|gemes|gemas|imut)\b/,
     reply: () => ['Aww, terima kasih! 💙', 'Denti juga senang bekerja bersama Anda! 💙'] },
@@ -147,20 +354,28 @@ const INTENTS = [
   { id: 'maker', state: 'wave', re: /(siapa (yang )?(membuat|bikin|buat|menciptakan) (kamu|anda|mu)|kamu (dibuat|buatan) (siapa|oleh)|pembuat(mu| kamu))/,
     reply: () => 'Saya dibuat oleh tim **Dentiva** khusus untuk membantu klinik gigi. Otak saya memakai model AI, tetapi yang saya baca hanya angka ringkasan klinik Anda. 🦷' },
   { id: 'joke', state: 'laugh', re: /\b(lelucon|jokes?|lawak|lawakan|bercanda|candaan|lucu lucuan|hibur|hiburan|terhibur|tebak tebakan)\b/,
-    reply: ({ seed }) => pick(JOKES, seed) },
-  { id: 'laugh', state: 'laugh', re: /^((ha ?ha|haha\w*|hehe\w*|hihi\w*|wkwk\w*|xixi\w*|lol|lucu|ngakak)( |$))+$/,
+    reply: () => JOKES },
+  { id: 'laugh', state: 'laugh', re: /^((ha ?ha|haha\w*|hehe\w*|hihi\w*|wkwk\w*|xixi\w*|lol|lucu|ngakak|land|parah|anjir|anjay|sumpah|asli)( |$))+$/,
     reply: () => ['Hehe 😄', 'Hihi, senang Anda terhibur! 😄'] },
   { id: 'dance', state: 'dance', re: /\b(joget|menari|nari|dansa|nyanyi|goyang)\b/,
     reply: () => ['Siap! Sedikit gerakan biar semangat kerja hari ini. 🎵', 'Musik, mulai! 🎶'] },
-  { id: 'tired', state: 'love', re: /\b(capek|cape|capai|lelah|melelahkan|kelelahan|pusing|stres|stress|ngantuk|sibuk banget|penat|bosan|bete|letih)\b/,
+  { id: 'tired', state: 'love', re: /\b(capek|cape|capai|lelah|melelahkan|kelelahan|pusing|stres|stress|ngantuk|sibuk banget|penat|bosan|bete|letih|lesu|mager)\b/,
     reply: () => ['Semangat! 💙 Jangan lupa minum air dan istirahat sebentar. Mau saya ringkas kondisi klinik hari ini supaya pekerjaan terasa lebih ringan?', 'Pelan-pelan saja, ya. 💙 Kalau perlu, saya bisa merangkum hal terpenting hari ini dalam satu pesan.'] },
   { id: 'greet', state: 'wave', re: /^(halo|hallo|helo|hai|hay|hi|hey|hello|pagi|siang|sore|malam|selamat (pagi|siang|sore|malam)|good (morning|afternoon|evening|day)|morning|permisi|p|ping|tes|test|testing)\b/,
-    reply: ({ t, sapa, greeting }) => { const g = greetingFrom(t) || greeting; return [`${g}${sapa}! Saya Denti. Mau cek apa hari ini — pendapatan, jadwal dokter, atau stok bahan?`, `${g}${sapa}! Ada yang bisa saya bantu?`]; } },
+    reply: ({ t, sapa, greeting, now }) => {
+      const g = greetingFrom(t) || greeting;
+      const said = PERIODS.find((x) => g.toLowerCase().includes(x));
+      const actual = periodOf(now);
+      if (said && Math.abs(PERIODS.indexOf(said) - PERIODS.indexOf(actual)) >= 2) {
+        return `${g} juga… eh, di sini ${['pagi', 'siang'].includes(actual) ? 'masih' : 'sudah'} ${actual} lho${sapa} 😄 Ada yang bisa saya bantu?`;
+      }
+      return [`${g}${sapa}! Saya Denti. Mau cek apa hari ini — pendapatan, jadwal dokter, atau stok bahan?`, `${g}${sapa}! Ada yang bisa saya bantu?`];
+    } },
   { id: 'cheer', state: 'celebrate', re: /\b(semangat|yeay|yey|hore|horee|asik|asyik|berhasil|alhamdulillah)\b/,
     reply: () => ['Semangat juga! 🎉', 'Hore! 🎉 Ikut senang!'] },
   { id: 'how', state: 'happy', re: /^(apa kabar(mu|nya)?|gimana kabar(nya|mu)?|kabar(mu| kamu)?( gimana| bagaimana)?|how are you|kumaha (damang|kabar)|piye kabare?|baik baik saja|sehat)$/,
     reply: ({ sapa }) => `Kabar baik, siap membantu${sapa}! 😊 Ada yang ingin dicek hari ini?` },
-  { id: 'ack', state: 'happy', re: /^((ok|oke|okee|sip|siap|baik|baiklah|noted|mengerti|paham|ngerti|iya|ya|betul|benar|setuju|lanjut|alright|yes|yap|got it|understood|roger)( |$))+$/,
+  { id: 'ack', state: 'happy', re: /^((ok|oke|okee|sip|siap|baik|baiklah|noted|mengerti|paham|ngerti|iya|ya|betul|benar|setuju|lanjut|alright|yes|yap|got it|understood|roger|gas|gaskeun|kuy|yuk|ayo|ashiap|santuy|santai|bos|gan|bro|sis)( |$))+$/,
     reply: () => ['Siap! Kalau ada yang ingin dicek lagi, tinggal tanya. 👍', 'Oke! 👍'] },
 ];
 
@@ -173,13 +388,27 @@ const INTENTS = [
 const REPEATABLE = { joke: 'joke', laugh: 'joke', dance: 'dance' };
 const AGAIN = /^(lagi|satu lagi|sekali lagi|yang lain|lainnya|another( one)?|more|terus|lanjutkan)$/;
 
-export function smallTalk(text, { name = '', greeting = 'Halo', seed = 0, now = new Date(), afterAnswer = false, lastIntent = null } = {}) {
+export function smallTalk(text, {
+  name = '', greeting = 'Halo', seed = 0, now = new Date(), afterAnswer = false, lastIntent = null, provider = '', lastTopic = null,
+  recent = [],
+} = {}) {
+  // Keterampilan instan dari kalimat asli: kalkulator
+  const calc = calculate(text);
+  if (calc) return { intent: 'calc', state: 'talk', reply: calc };
   const t = emojiOnly(text) || normalizeChat(text);
   if (!t || t.length > 70) return null;
-  const ctx = { t, name, greeting, seed, now, afterAnswer, sapa: name ? `, ${name}` : '' };
+  const date = dateCalc(t, now);
+  if (date) return { intent: 'datecalc', state: 'talk', reply: date };
+  const nav = navigateTo(t);
+  if (nav) return { intent: 'nav', state: 'point', reply: `Siap, saya buka **${nav.label}**. 👉`, action: { type: 'navigate', ...nav } };
+  if (isClearCommand(t)) return { intent: 'clear', state: 'wave', reply: 'Siap, percakapan dibersihkan. Kita mulai dari awal! ✨', action: { type: 'clear' } };
+  const ctx = { t, raw: text, name, greeting, seed, now, afterAnswer, provider, lastTopic, sapa: name ? `, ${name}` : '' };
   const answer = (it, sd = seed) => {
     const r = it.reply({ ...ctx, seed: sd });
-    return { intent: it.id, state: it.state, reply: Array.isArray(r) ? pick(r, sd) : r };
+    const state = typeof it.state === 'function' ? it.state(ctx) : it.state;
+    const out = { intent: it.id, state, reply: Array.isArray(r) ? pickFresh(r, sd, recent) : r };
+    if (it.action) out.action = it.action(ctx);
+    return out;
   };
 
   if (AGAIN.test(t) && REPEATABLE[lastIntent]) {
@@ -188,10 +417,34 @@ export function smallTalk(text, { name = '', greeting = 'Halo', seed = 0, now = 
   }
   const whole = INTENTS.find((it) => it.whole && it.whole.test(t));
   if (whole) return answer(whole);
+  const early = EARLY_INTENTS.find((it) => it.test(t, text) && !anyWord(t, DATA_WORDS.filter((w) => !it.allow.includes(w))));
+  if (early) return answer(early);
   if (anyWord(t, DATA_WORDS)) return null;
   const hit = INTENTS.find((it) => it.re && it.re.test(t));
-  return hit ? answer(hit) : null;
+  if (!hit) return null;
+  const res = answer(hit);
+  // Beberapa maksud sekaligus ("halo, makasih ya") → balasan gabungan yang natural
+  if (COMBO.some(([id]) => id === hit.id)) {
+    const parts = COMBO.filter(([id, re]) => (id === hit.id && id !== 'greet') || re().test(t));
+    if (parts.length >= 2) {
+      const text = parts.map(([, , say], i) => say(ctx, i === 0)).join(' ');
+      res.reply = parts.some(([id]) => id === 'bye') ? text : `${text} Ada lagi yang bisa saya bantu?`;
+    }
+  }
+  return res;
 }
+
+const reOf = (id) => () => INTENTS.find((it) => it.id === id && it.re && !String(it.re).startsWith('/^(tidak') && !String(it.re).includes('(tidak|kurang|bukan)')).re;
+/** Urutan alami potongan balasan gabungan. */
+const COMBO = [
+  ['greet', () => /^(halo|hai|hi|hello|hey|selamat (pagi|siang|sore|malam)|pagi|siang|sore|malam|good (morning|afternoon|evening))\b/,
+    (c, first) => `${greetingFrom(c.t) || 'Halo'}${first ? c.sapa : ''}!`],
+  ['apologize', () => /^(maaf|mohon maaf|sorry|sori)\b/, (c, first) => `Tidak apa-apa${first ? c.sapa : ''}!`],
+  ['how', () => /\b(apa kabar|gimana kabar|how are you)\b/, () => 'Kabar saya baik, terima kasih sudah bertanya. 😊'],
+  ['thanks', reOf('thanks'), (c, first) => `Sama-sama${first ? c.sapa : ''}!${WISHES[c.lastTopic] ? ` ${WISHES[c.lastTopic]}` : ''}`],
+  ['praise', reOf('praise'), () => 'Aduh, jadi malu… ☺️'],
+  ['bye', reOf('bye'), (c, first) => `Sampai jumpa${first ? c.sapa : ''}! 👋`],
+];
 
 // Urutan = prioritas: yang lebih spesifik di atas.
 const TOPICS = [
@@ -285,4 +538,49 @@ export const POKE_REACTIONS = [
 /** Sapaan pembuka sesuai waktu. */
 export function greetLine(greeting, name) {
   return `${greeting}${name ? `, ${name}` : ''}! Saya Denti — tanyakan apa saja tentang klinik.`;
+}
+
+const START = ['Ringkas kondisi klinik hari ini', 'Berapa pendapatan bulan ini?'];
+const EXAMPLES = ['Berapa pendapatan bulan ini?', 'Bahan apa yang hampir kadaluarsa?', 'Ringkas kondisi klinik hari ini'];
+/** Saran pertanyaan lanjutan — per topik jawaban AI atau per intent obrolan. Instan, tanpa AI. */
+const FOLLOW = {
+  'data pendapatan': ['Bandingkan dengan bulan lalu', 'Tindakan apa yang paling menguntungkan?', 'Proyeksikan arus kas 3 bulan ke depan'],
+  'data pengeluaran': ['Kategori pengeluaran terbesar apa?', 'Bandingkan pendapatan dan pengeluaran bulan ini'],
+  'margin tindakan': ['Berapa titik impas (BEP) klinik?', 'Kalau harga tindakan teratas naik 10%, dampaknya?'],
+  'titik impas': ['Proyeksikan arus kas 3 bulan ke depan', 'Tindakan apa yang paling menguntungkan?'],
+  'arus kas': ['Berapa titik impas (BEP) klinik?', 'Ada tagihan yang belum dibayar?'],
+  'simulasi harga': ['Berapa titik impas (BEP) klinik?', 'Tindakan apa yang paling menguntungkan?'],
+  'stok bahan': ['Bahan apa yang hampir kadaluarsa?', 'Berapa pengeluaran bahan bulan ini?'],
+  tagihan: ['Kunjungan mana yang belum dibayar?', 'Ringkas kondisi klinik hari ini'],
+  'jadwal & kinerja dokter': ['Beri saran jadwal dokter berdasarkan pola kunjungan', 'Dokter mana dengan pendapatan tertinggi?'],
+  'data kunjungan': ['Berapa pasien yang perlu di-recall?', 'Hari apa kunjungan paling ramai?'],
+  'daftar recall': ['Buka halaman recall', 'Berapa pasien yang perlu di-recall bulan ini?'],
+  'kondisi klinik hari ini': ['Bagaimana beban jadwal dokter hari ini?', 'Ada tagihan yang belum dibayar?'],
+  'panduan Dentiva': ['Kamu bisa apa saja?', 'Buka pengaturan'],
+  'booking online': ['Buka booking', 'Bagaimana cara mengaktifkan booking online?'],
+  'obat & resep': ['Ringkas kondisi klinik hari ini'], antrean: ['Buka layar antrean'],
+  'promo & diskon': ['Hitung diskon 10% dari 500rb'], 'staf & pengguna': ['Buka pengguna'],
+  'data klinik': START,
+  help: EXAMPLES, confused: EXAMPLES, greet: START, how: START, wake: START, day: START, occasion: START, setName: START,
+  whoAmI: START, tired: ['Ringkas kondisi klinik hari ini'], joke: ['Satu lagi dong 😄', 'Ringkas kondisi klinik hari ini'],
+  laugh: ['Satu lagi dong 😄'], dance: ['Lagi dong 🎵'], persona: ['Kamu bisa apa saja?'], privacy: ['Kamu bisa apa saja?'],
+  calc: ['Hitung diskon 10% dari 500rb', '6 bulan lagi tanggal berapa?'], datecalc: ['6 bulan lagi tanggal berapa?', 'Berapa hari lagi akhir bulan?'],
+  nav: [], clear: START,
+};
+export function followUps(key, exclude = '') {
+  const list = FOLLOW[key] || FOLLOW['data klinik'];
+  return list.filter((q) => norm(q) !== norm(exclude)).slice(0, 3);
+}
+
+/** Kalimat Denti saat AI memproses pertanyaan — menyesuaikan nada pertanyaan. */
+export function lineForQuestion(question) {
+  const q = norm(question);
+  const topic = topicOf(question);
+  if (/(cepat|segera|urgent|darurat|asap|buru)/.test(q)) return `Siap, saya cek ${topic} secepatnya!`;
+  if (/(\bkok\b|kenapa|mengapa|gawat|aduh|waduh|khawatir|bahaya|anjlok|sepi|rugi|habis)/.test(q)) return `Tenang, saya cek dulu ${topic}…`;
+  if (/^(wah|asik|asyik|yeay)\b|(naik|meningkat|ramai) ya\b/.test(q)) return `Wah, mari kita lihat ${topic}…`;
+  if (/(bandingkan|dibanding|banding|\bvs\b|versus|perbandingan|compare)/.test(q)) return `Membandingkan ${topic}…`;
+  if (/(proyeksi|simulasi|kalau|jika|hitung|\bbep\b|impas)/.test(q)) return `Menghitung ${topic}…`;
+  if (topic === 'panduan Dentiva') return 'Mencari panduan Dentiva…';
+  return `Menganalisis ${topic}…`;
 }

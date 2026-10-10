@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle, BookCheck, Zap } from 'lucide-react';
+import { Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle, BookCheck, Zap, ArrowRight } from 'lucide-react';
 import AnswerFeedback from './AnswerFeedback';
 import KnowledgePanel from './KnowledgePanel';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
@@ -13,7 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getGreeting } from '../../utils/dateUtils';
 import { useDentiDirector, DENTI_DURATIONS } from '../mascot/DentiMascot';
 import DentiCompanion from './DentiCompanion';
-import { smallTalk, topicOf, moodForAnswer, POKE_REACTIONS, greetLine } from '../../utils/dentiMood';
+import { smallTalk, topicOf, moodForAnswer, POKE_REACTIONS, greetLine, followUps, lineForQuestion } from '../../utils/dentiMood';
 import './ai-assistant.css';
 
 const SUGGESTION_GROUPS = [
@@ -64,12 +64,27 @@ const loadChat = () => {
   try { return JSON.parse(sessionStorage.getItem(STORE_KEY) || '[]'); } catch { return []; }
 };
 const saveChat = (msgs) => {
-  try { sessionStorage.setItem(STORE_KEY, JSON.stringify(msgs.slice(-40))); } catch { /* abaikan */ }
+  try { sessionStorage.setItem(STORE_KEY, JSON.stringify(msgs.slice(-40).map(({ fresh, ...m }) => m))); } catch { /* abaikan */ }
+};
+/** Nama panggilan pilihan pengguna ("panggil aku …") — kenyamanan per perangkat. */
+const NICK_KEY = 'dentiva-denti-nickname';
+const loadNick = () => { try { return localStorage.getItem(NICK_KEY) || ''; } catch { return ''; } };
+const saveNick = (n) => { try { localStorage.setItem(NICK_KEY, n); } catch { /* abaikan */ } };
+/** Kalimat pendek untuk gelembung Denti (baris pertama, tanpa format Markdown). */
+const bubble = (text) => {
+  const plain = String(text || '').replace(/[*_`]/g, '').split('\n').find((l) => l.trim()) || '';
+  return plain.length > 110 ? `${plain.slice(0, 107).trimEnd()}…` : plain;
 };
 
-function Answer({ text }) {
+/** Isi jawaban. `fresh` → baris muncul bertahap seperti sedang diketik (maks. ±0,7 detik). */
+function Answer({ text, fresh = false }) {
+  const ref = useRef(null);
   const html = DOMPurify.sanitize(miniMarkdown(text));
-  return <div className="ai-md" dangerouslySetInnerHTML={{ __html: html }} />;
+  useEffect(() => {
+    if (!fresh || !ref.current) return;
+    [...ref.current.children].forEach((el, i) => { el.style.animationDelay = `${Math.min(i * 70, 700)}ms`; });
+  }, [fresh, html]);
+  return <div ref={ref} className={`ai-md ${fresh ? 'ai-md--stream' : ''}`} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 const firstName = (profile) => {
@@ -80,7 +95,8 @@ const firstName = (profile) => {
 export default function AiAssistantPage() {
   const toast = useToast();
   const { userProfile } = useAuth();
-  const name = firstName(userProfile);
+  const [nick, setNick] = useState(loadNick);
+  const name = nick || firstName(userProfile);
   const [status, setStatus] = useState(null);
   const [statusError, setStatusError] = useState('');
   const [messages, setMessages] = useState(loadChat);
@@ -99,6 +115,10 @@ export default function AiAssistantPage() {
 
   // ─── Denti: pendamping yang bereaksi (aturan lokal, tanpa kuota AI) ───
   const [dentiLine, setDentiLine] = useState('');
+  const [typing, setTyping] = useState(false);
+  const timers = useRef([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const later = (fn, ms) => { timers.current.push(setTimeout(fn, ms)); };
   const [dozing, setDozing] = useState(false);
   const lastActive = useRef(Date.now());
   const pokes = useRef(0);
@@ -149,10 +169,10 @@ export default function AiAssistantPage() {
     react('wave', greetLine(getGreeting(), name), 3000);
   }, [status?.aktif, name, react]);
   useEffect(() => { aiService.getProvider().then((r) => r.success && setProvider(r.data)); }, []);
-  useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy]);
+  useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy, typing]);
 
   const toAssistant = (data, question, extra = {}) => ({
-    role: 'assistant', content: data.answer, tools: data.tools || [], question,
+    role: 'assistant', content: data.answer, tools: data.tools || [], question, topic: topicOf(question), fresh: true,
     usageId: data.usage_id || null, cached: Boolean(data.cached), fast: Boolean(data.fast), references: data.references || 0, ...extra,
   });
 
@@ -161,22 +181,41 @@ export default function AiAssistantPage() {
     if (!question || busy) return;
     touch();
     // Obrolan ringan dijawab Denti langsung — tidak memakai kuota AI
+    const replies = [...messages].reverse().filter((m) => m.role === 'assistant');
     const chat = smallTalk(question, {
       name, greeting: getGreeting(), seed: messages.length, now: new Date(),
-      afterAnswer: messages.some((m) => m.role === 'assistant' && !m.local && !m.error),
-      lastIntent: [...messages].reverse().find((m) => m.role === 'assistant')?.intent || null,
+      afterAnswer: replies.some((m) => !m.local && !m.error),
+      lastIntent: replies[0]?.intent || null,
+      lastTopic: replies.find((m) => !m.local && !m.error)?.topic || null,
+      recent: replies.filter((m) => m.local).slice(0, 6).map((m) => m.content),
+      provider: provider?.configured ? provider.label : '',
     });
     if (chat) {
-      setMessages((m) => [...m, { role: 'user', content: question, local: true }, { role: 'assistant', content: chat.reply, local: true, intent: chat.intent }]);
+      // Obrolan & keterampilan lokal: jeda "mengetik" singkat agar terasa natural (≤ 0,55 dtk), tanpa kuota AI
+      setMessages((m) => [...m, { role: 'user', content: question, local: true }]);
       setInput('');
-      react(chat.state, chat.reply.replace(/\*\*/g, ''), DENTI_DURATIONS[chat.state] ? undefined : 3200);
+      setTyping(true);
+      later(() => {
+        setTyping(false);
+        const action = chat.action || null;
+        const ms = DENTI_DURATIONS[chat.state] ? undefined : 3200;
+        if (action?.type === 'clear') {
+          setMessages([]);
+          react(chat.state, 'Percakapan dibersihkan. Kita mulai dari awal! ✨', ms);
+          return;
+        }
+        setMessages((m) => [...m, { role: 'assistant', content: chat.reply, local: true, intent: chat.intent, action, fresh: true }]);
+        react(chat.state, bubble(chat.reply), ms);
+        if (action?.type === 'setName') { saveNick(action.name); setNick(action.name); }
+        if (action?.type === 'navigate') later(() => navigate(action.to), 900);
+      }, Math.min(550, 200 + chat.reply.length * 1.2));
       inputRef.current?.focus();
       return;
     }
     const history = messages.filter((m) => !m.error && !m.local).map(({ role, content }) => ({ role, content }));
     setMessages((m) => [...m, { role: 'user', content: question }]);
     setInput('');
-    setDentiLine(`Menganalisis ${topicOf(question)}…`);
+    setDentiLine(lineForQuestion(question));
     settle();
     setBusy(true);
     const res = await aiService.ask(question, history);
@@ -394,7 +433,12 @@ export default function AiAssistantPage() {
                   {m.revised && !m.error && (
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-accent)]">Jawaban diperbaiki</p>
                   )}
-                  {m.error ? m.content : <Answer text={m.content} />}
+                  {m.error ? m.content : <Answer text={m.content} fresh={m.fresh} />}
+                  {m.action?.type === 'navigate' && (
+                    <button type="button" onClick={() => navigate(m.action.to)} className="ai-chip ai-chip--action mt-3">
+                      Buka {m.action.label} <ArrowRight size={14} />
+                    </button>
+                  )}
                   {!m.error && m.local && (
                     <p className="mt-3 text-xs text-gray-400">Dijawab langsung oleh Denti · tidak memakai kuota</p>
                   )}
@@ -418,6 +462,28 @@ export default function AiAssistantPage() {
                 </div>
               </div>
             )))}
+
+            {(() => {
+              const last = messages[messages.length - 1];
+              if (!last || last.role !== 'assistant' || last.error || busy || typing) return null;
+              const chips = followUps(last.local ? last.intent : (last.topic || topicOf(last.question || '')), last.question || '');
+              return chips.length ? (
+                <div className="ai-chips" aria-label="Saran pertanyaan lanjutan">
+                  {chips.map((c) => (
+                    <button key={c} type="button" className="ai-chip" onClick={() => ask(c)}>{c}</button>
+                  ))}
+                </div>
+              ) : null;
+            })()}
+
+            {typing && (
+              <div className="flex gap-3 items-center text-sm text-gray-500" aria-live="polite">
+                <div className="w-8 h-8 rounded-xl grid place-items-center bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)]">
+                  <Sparkles size={16} className="text-[var(--color-accent)]" />
+                </div>
+                Denti sedang mengetik <span className="ai-dots"><span /><span /><span /></span>
+              </div>
+            )}
 
             {busy && (
               <div className="flex gap-3 items-center text-sm text-gray-500">

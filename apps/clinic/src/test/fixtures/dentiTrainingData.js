@@ -259,4 +259,258 @@ export const CYCLES = [
       ['siapa resepsionis paling aktif', 'staf & pengguna'], ['diskon member bulan ini', 'promo & diskon'],
     ],
   },
+  {
+    name: 'Siklus 11 · kebal salah ketik (fuzzy)',
+    intents: {
+      thanks: ['terimkasih', 'trimaksih', 'terima kasi', 'tetima kasih', 'terima kaish', 'makasihh banyakk', 'mkasiih'],
+      praise: ['pinttar', 'hbat', 'mantsp', 'kreen', 'luar biasaa'],
+      greet: ['assalamualaikun', 'asalamualaikum', 'selamat pgai', 'selmat pagi', 'halooo denti'],
+      cheer: ['semangt', 'smangat', 'semanggat'],
+      tired: ['capk', 'pusng', 'cappek'],
+      confused: ['bingng', 'maksdnya'],
+      bye: ['sampai jmpa', 'sampe jumpa', 'dadahh'],
+    },
+    ai: ['pendapatn bulan ini', 'tagihn belum lunas', 'stok bahn', 'jadwl dokter', 'kenapa omset turun', 'pasein hari ini'],
+  },
+  {
+    name: 'Siklus 12 · kalimat negatif',
+    intents: {
+      complaint: ['tidak lucu', 'gak lucu', 'tidak keren', 'jawabanmu tidak pintar', 'kurang mantap'],
+      decline: ['gak usah joget', 'jangan joget', 'tidak usah bercanda', 'tidak terima kasih', 'nggak mau', 'tidak perlu',
+        'tidak jadi', 'gak jadi', 'no thanks', 'nanti saja'],
+      cheer: ['aku tidak capek kok', 'tidak lelah', 'gak pusing'],
+      ack: ['tidak bingung', 'sudah paham', 'sudah jelas'],
+    },
+    replies: [['tidak lucu', 'Maaf'], ['gak usah joget', 'Oke'], ['aku tidak capek kok', 'Syukurlah']],
+    ai: ['tidak ada tagihan?', 'kenapa tidak ada pasien hari ini', 'jangan tampilkan pengeluaran kemarin', 'tidak usah detail, berapa laba?'],
+  },
+  {
+    name: 'Siklus 13 · kepribadian Denti',
+    intents: {
+      persona: ['kamu manusia?', 'kamu robot ya?', 'umur kamu berapa', 'kamu umur berapa', 'kamu cowok atau cewek',
+        'kamu laki laki atau perempuan', 'kamu tinggal di mana', 'makanan favoritmu apa', 'kamu suka makan apa', 'hobimu apa',
+        'kamu punya pacar?', 'warna favorit kamu apa', 'cita citamu apa', 'kamu punya perasaan?', 'kamu pakai ai apa',
+        'kamu chatgpt ya?', 'kamu gemini?', 'otakmu pakai apa', 'kamu bisa tidur?'],
+    },
+    replies: [
+      ['kamu robot ya?', 'robot'], ['umur kamu berapa', '2026'], ['kamu pakai ai apa', 'Google Gemini', { provider: 'Google Gemini' }],
+      ['kamu pakai ai apa', 'model AI'], ['kamu punya pacar?', 'sikat gigi'], ['warna favorit kamu apa', 'biru'],
+    ],
+    ai: ['berapa umur rata-rata pasien?', 'dokter mana yang paling disukai pasien', 'pasien laki laki atau perempuan lebih banyak?'],
+  },
+  {
+    name: 'Siklus 14 · keamanan & privasi data',
+    intents: {
+      privacy: ['data pasien aman?', 'apakah data saya aman', 'kamu bisa lihat rekam medis?', 'data dikirim ke mana',
+        'kamu menyimpan percakapan?', 'siapa yang bisa lihat chat ini', 'apakah kamu baca nama pasien', 'aman gak pakai kamu',
+        'apakah kamu tahu nik pasien', 'privasi data bagaimana'],
+    },
+    replies: [['data pasien aman?', 'tidak pernah dikirim'], ['kamu menyimpan percakapan?', 'tab browser']],
+    ai: ['berapa pasien yang datanya belum lengkap?', 'pasien mana yang belum isi rekam medis', 'kirim pengingat ke pasien recall'],
+  },
+  {
+    name: 'Siklus 15 · hari raya & momen spesial',
+    intents: {
+      occasion: ['selamat idul fitri', 'mohon maaf lahir dan batin', 'selamat lebaran', 'minal aidin wal faizin', 'selamat natal',
+        'merry christmas', 'selamat tahun baru', 'happy new year', 'gong xi fa cai', 'selamat imlek', 'selamat hari raya nyepi',
+        'dirgahayu indonesia', 'merdeka!', 'selamat hari kemerdekaan', 'aku ulang tahun hari ini', 'hari ini ulang tahunku',
+        'happy birthday denti', 'selamat ulang tahun denti', 'selamat hari dokter gigi', 'selamat idul adha', 'selamat waisak'],
+    },
+    replies: [
+      ['mohon maaf lahir dan batin', 'lahir dan batin'], ['selamat natal', 'Natal'], ['aku ulang tahun hari ini', 'ulang tahun'],
+      ['happy birthday denti', 'Terima kasih'], ['gong xi fa cai', 'Gong Xi Fa Cai'], ['merdeka!', 'Merdeka'],
+    ],
+    ai: ['berapa pasien saat lebaran tahun lalu?', 'pendapatan bulan desember', 'jadwal dokter saat idul fitri'],
+  },
+  {
+    name: 'Siklus 16 · sadar waktu & hari',
+    intents: {
+      day: ['selamat hari sabtu', 'happy saturday', 'semangat hari senin', 'selamat hari jumat', 'akhirnya jumat', 'akhirnya weekend',
+        'selamat berakhir pekan', 'tgif', 'happy weekend', 'selamat hari minggu'],
+    },
+    replies: [
+      ['selamat malam', 'masih pagi'], ['selamat sore', 'masih pagi'], ['selamat pagi', 'Selamat pagi'],
+      ['selamat pagi', 'sudah malam', { now: new Date(2026, 9, 10, 21, 30) }], ['good morning', 'sudah malam', { now: new Date(2026, 9, 10, 22, 0) }],
+      ['selamat malam', 'Selamat malam', { now: new Date(2026, 9, 10, 20, 0) }],
+      ['selamat hari sabtu', 'Sabtu'], ['semangat hari senin', 'Sabtu'], ['akhirnya weekend', 'akhir pekan'],
+    ],
+    ai: ['jadwal dokter hari senin', 'pasien hari sabtu berapa', 'pendapatan akhir pekan', 'kunjungan hari minggu kemarin'],
+  },
+  {
+    name: 'Siklus 17 · ingat nama panggilan',
+    intents: {
+      setName: ['panggil aku Bu Rina', 'nama saya Reza', 'namaku Andi', 'call me Dok', 'panggil saya drg. Sinta',
+        'perkenalkan nama saya Budi Santoso'],
+      whoAmI: ['siapa namaku', 'kamu tahu namaku?', 'aku siapa?', 'masih ingat namaku?'],
+    },
+    actions: [
+      ['panggil aku Bu Rina', 'setName', 'Bu Rina'], ['nama saya Reza', 'setName', 'Reza'], ['namaku andi ya', 'setName', 'Andi'],
+      ['call me Dok', 'setName', 'Dok'], ['panggil saya drg. Sinta', 'setName', 'drg. Sinta'],
+      ['perkenalkan nama saya Budi Santoso', 'setName', 'Budi Santoso'],
+    ],
+    replies: [['siapa namaku', 'Bu Rina', { name: 'Bu Rina' }], ['siapa namaku', 'belum tahu'], ['panggil aku Bu Rina', 'Bu Rina']],
+    ai: ['nama pasien terakhir siapa', 'siapa nama dokter jaga hari ini', 'panggil pasien berikutnya', 'nama saya di laporan salah'],
+  },
+  {
+    name: 'Siklus 18 · terima kasih yang nyambung',
+    intents: {
+      thanks: [['makasih', { lastTopic: 'data pendapatan' }], ['terima kasih', { lastTopic: 'stok bahan' }], ['thanks', { lastTopic: 'tagihan' }]],
+    },
+    replies: [
+      ['makasih', 'pendapatan', { lastTopic: 'data pendapatan' }], ['terima kasih', 'restock', { lastTopic: 'stok bahan' }],
+      ['thanks', 'lunas', { lastTopic: 'tagihan' }], ['makasih ya', 'jadwal', { lastTopic: 'jadwal & kinerja dokter' }],
+      ['makasih', 'recall', { lastTopic: 'daftar recall' }], ['terima kasih', 'pengeluaran', { lastTopic: 'data pengeluaran' }],
+      ['oke makasih', 'Sama-sama', { lastTopic: 'panduan Dentiva' }],
+    ],
+  },
+  {
+    name: 'Siklus 19 · kalkulator & diskon',
+    intents: {
+      calc: ['2 juta dibagi 30', 'berapa 15% dari 2 juta', 'diskon 20% dari 350rb', '350000 x 12', '1.500.000 + 750.000', 'hitung 25k x 4',
+        'berapa 2jt - 450rb', '10 persen dari 5 juta', '1,5 juta : 3', 'harga 350rb diskon 10%', '12 * 8', '100/4', '= 45000 x 3',
+        'rp 150.000 kali 3', '2 juta naik 10%'],
+    },
+    replies: [
+      ['2 juta dibagi 30', 'Rp 66.667'], ['berapa 15% dari 2 juta', 'Rp 300.000'], ['diskon 20% dari 350rb', 'Rp 280.000'],
+      ['350000 x 12', '4.200.000'], ['1.500.000 + 750.000', '2.250.000'], ['12 * 8', '96'], ['100/4', '25'], ['1,5 juta : 3', 'Rp 500.000'],
+      ['10 dibagi 0', 'nol'], ['2 juta naik 10%', 'Rp 2.200.000'], ['berapa 2jt - 450rb', 'Rp 1.550.000'], ['7 / 2', '3,5'],
+    ],
+    ai: ['hitung laba bulan lalu', 'berapa 15% dari pendapatan bulan ini', 'diskon tindakan apa yang paling sering dipakai',
+      'berapa x pasien datang', 'pendapatan 2 juta itu bagus?', 'tindakan 350rb paling laris?'],
+  },
+  {
+    name: 'Siklus 20 · hitung tanggal',
+    intents: {
+      datecalc: ['6 bulan lagi tanggal berapa', 'tanggal berapa 2 minggu lagi', '3 hari lagi hari apa', 'berapa hari lagi akhir bulan',
+        'sisa hari bulan ini', '17 agustus 2027 hari apa', 'tanggal 25 desember hari apa', 'berapa hari lagi tahun baru',
+        '1 bulan dari sekarang', '100 hari lagi', 'seminggu lagi tanggal berapa', '2 minggu yang lalu tanggal berapa', 'berapa hari lagi natal'],
+    },
+    replies: [
+      ['6 bulan lagi tanggal berapa', '10 April 2027'], ['6 bulan lagi tanggal berapa', 'kontrol'], ['3 hari lagi hari apa', 'Selasa'],
+      ['tanggal berapa 2 minggu lagi', '24 Oktober 2026'], ['berapa hari lagi akhir bulan', '21 hari'], ['17 agustus 2027 hari apa', 'Selasa'],
+      ['tanggal 25 desember hari apa', 'Jumat'], ['berapa hari lagi tahun baru', '83 hari'], ['2 minggu yang lalu tanggal berapa', '26 September 2026'],
+      ['berapa hari lagi natal', '76 hari'], ['seminggu lagi tanggal berapa', '17 Oktober 2026'],
+    ],
+    ai: ['berapa pasien 6 bulan lalu', 'recall 6 bulan lagi berapa pasien', 'pendapatan 2 minggu lalu', 'jadwal dokter 3 hari lagi'],
+  },
+  {
+    name: 'Siklus 21 · buka halaman lewat perintah',
+    intents: {
+      nav: ['buka jadwal', 'ke halaman pasien', 'buka menu pengaturan', 'pergi ke laporan', 'tampilkan halaman recall', 'buka layar antrean',
+        'ke dashboard', 'buka pengeluaran', 'buka halaman pembayaran', 'buka pengguna', 'buka biaya dan modal', 'buka keuangan',
+        'buka jadwal dokter', 'buka pendaftaran pasien', 'buka booking', 'buka pengaturan whatsapp', 'buka profil', 'go to settings', 'open reports'],
+    },
+    actions: [
+      ['buka jadwal', 'navigate', '/admin/jadwal'], ['buka jadwal dokter', 'navigate', '/admin/jadwal-dokter'], ['ke halaman pasien', 'navigate', '/pasien'],
+      ['buka layar antrean', 'navigate', '/admin/pengaturan?tab=queue-display'], ['buka pengaturan whatsapp', 'navigate', '/admin/pengaturan?tab=whatsapp'],
+      ['ke dashboard', 'navigate', '/admin'], ['buka pendaftaran pasien', 'navigate', '/pasien/daftar'], ['go to settings', 'navigate', '/admin/pengaturan'],
+      ['open reports', 'navigate', '/admin/laporan'], ['buka biaya dan modal', 'navigate', '/admin/costing'], ['buka booking', 'navigate', '/booking-requests'],
+      ['tampilkan halaman recall', 'navigate', '/admin/recall'], ['buka profil', 'navigate', '/profil'],
+    ],
+    replies: [['buka jadwal', 'Jadwal']],
+    ai: ['lihat jadwal besok', 'buka laporan bulan lalu dan ringkas', 'tampilkan pengeluaran terbesar', 'buka data pasien yang belum bayar',
+      'ke mana uang bulan ini pergi?', 'buka toko obat'],
+  },
+  {
+    name: 'Siklus 22 · perintah obrolan',
+    intents: {
+      clear: ['hapus percakapan', 'bersihkan chat', 'reset obrolan', 'mulai baru', 'mulai dari awal', 'hapus riwayat chat', 'clear chat',
+        'new chat', 'kosongkan obrolan'],
+    },
+    actions: [['hapus percakapan', 'clear'], ['mulai baru', 'clear'], ['new chat', 'clear']],
+    ai: ['hapus data pasien lama', 'reset password staf', 'mulai jadwal baru dokter'],
+  },
+  {
+    name: 'Siklus 23 · beberapa maksud sekaligus',
+    intents: {
+      thanks: ['halo, makasih ya', 'makasih, kamu pintar', 'maaf ya, makasih'],
+      bye: ['oke makasih, sampai jumpa'],
+      greet: ['selamat pagi, apa kabar?'],
+    },
+    replies: [
+      ['halo, makasih ya', 'Halo'], ['halo, makasih ya', 'Sama-sama'], ['makasih, kamu pintar', 'Sama-sama'], ['makasih, kamu pintar', 'malu'],
+      ['oke makasih, sampai jumpa', 'Sama-sama'], ['oke makasih, sampai jumpa', 'Sampai jumpa'], ['selamat pagi, apa kabar?', 'Kabar saya baik'],
+      ['selamat pagi, apa kabar?', 'pagi'], ['haha makasih', 'Sama-sama'], ['maaf ya, makasih', 'Tidak apa-apa'],
+    ],
+  },
+  {
+    name: 'Siklus 24 · saran pertanyaan lanjutan',
+    followups: [
+      ['data pendapatan', 'bulan lalu'], ['data pengeluaran', 'pengeluaran'], ['margin tindakan', 'BEP'], ['stok bahan', 'kadaluarsa'],
+      ['tagihan', 'belum dibayar'], ['jadwal & kinerja dokter', 'jadwal dokter'], ['daftar recall', 'recall'], ['kondisi klinik hari ini', 'jadwal'],
+      ['help', 'pendapatan'], ['greet', 'Ringkas'], ['joke', 'lagi'], ['tired', 'Ringkas'], ['data klinik', 'Ringkas'], ['panduan Dentiva', 'bisa apa'],
+      ['calc', 'diskon'], ['datecalc', 'bulan lagi'],
+    ],
+  },
+  {
+    name: 'Siklus 25 · Denti berempati saat memproses',
+    lines: [
+      ['kok pendapatan turun ya?', 'Tenang'], ['kenapa pasien sepi banget', 'Tenang'], ['aduh gawat stok habis', 'Tenang'],
+      ['tolong cepat cek tagihan', 'secepatnya'], ['urgent: berapa kas hari ini', 'secepatnya'], ['berapa pendapatan bulan ini?', 'pendapatan'],
+      ['bandingkan pendapatan bulan ini dan bulan lalu', 'Membandingkan'], ['proyeksikan arus kas', 'Menghitung'], ['kalau harga naik 10%?', 'Menghitung'],
+      ['bagaimana cara membuat tautan antrean', 'panduan'], ['wah pendapatan naik ya?', 'Wah'],
+    ],
+  },
+  {
+    name: 'Siklus 26 · tips & fakta gigi',
+    intents: {
+      tip: ['tips gigi', 'kasih tips kesehatan gigi', 'fakta gigi', 'cara merawat gigi', 'gimana cara menjaga gigi sehat', 'tips sikat gigi',
+        'fakta unik tentang gigi', 'tips senyum sehat', 'tips merawat gusi'],
+    },
+    replies: [['fakta gigi', 'Fakta gigi'], ['tips gigi', 'Tips dari Denti']],
+    ai: ['berapa pasien scaling bulan ini', 'tindakan gigi paling laris', 'harga gigi palsu berapa', 'tips gigi untuk pasien diabetes',
+      'tips meningkatkan pendapatan klinik'],
+  },
+  {
+    name: 'Siklus 27 · tidak mengulang balasan',
+    distinct: [['makasih', 3], ['tips gigi', 4], ['ceritakan lelucon', 4], ['halo', 2], ['oke', 2], ['hebat', 3], ['capek', 2], ['fakta gigi', 3]],
+  },
+  {
+    name: 'Siklus 28 · jebakan untuk kemampuan baru',
+    ai: [
+      'buka', 'lihat pasien yang belum bayar', 'buka jadwal dokter alya minggu depan', '2 pasien x 350rb berapa total pendapatan?',
+      'berapa 10% dari omset', '6 bulan lagi berapa pasien recall', 'nama saya ada di laporan?', 'panggil aku kalau stok habis',
+      'hapus semua tagihan', 'mulai baru jadwal dokter', 'tanggal berapa pasien terakhir datang', 'kamu bisa hitung laba?',
+      'aman tidak kalau saya naikkan harga?', 'robot apa yang dipakai klinik?', 'selamat pagi, berapa pasien hari ini?',
+      'tips gigi untuk pasien diabetes', 'ke mana saja uang keluar bulan ini?', 'buka laporan dan jelaskan', 'kalau 6 bulan lagi harga naik 10%?',
+    ],
+  },
+  {
+    name: 'Siklus 29 · bahasa gaul Gen-Z',
+    intents: {
+      ack: ['gaskeun', 'gas', 'kuy', 'yuk', 'ayo', 'ashiap', 'siap bos', 'noted bos', 'oke gan', 'santuy'],
+      praise: ['anjay keren', 'goks', 'gokil abis', 'mantul gan'],
+      laugh: ['wkwk land', 'ngakak parah', 'wkwkwk anjir'],
+      amazed: ['wow', 'wah', 'waw', 'buset', 'anjir', 'omg', 'astaga', 'ya ampun', 'masyaallah'],
+      bye: ['cabut dulu', 'otw pulang', 'balik dulu ya'],
+      thanks: ['tengkiu', 'makasi bnyk', 'mksh y'],
+      tired: ['mager', 'lelah letih lesu', 'capek parah'],
+    },
+    ai: ['gas cek pendapatan', 'kuy lihat stok', 'wow pendapatan naik?', 'otw cek tagihan'],
+  },
+  {
+    name: 'Siklus 30 · ujian akhir 2 (kalimat baru campuran)',
+    intents: {
+      calc: ['tolong hitung 3 x 250rb', '450rb dibagi 3 orang'],
+      datecalc: ['tanggal berapa 3 bulan lagi?'],
+      nav: ['tolong buka halaman pengeluaran', 'antar aku ke recall'],
+      setName: ['panggil saya Pak Joko'],
+      thanks: ['makasih banyak denti, kamu keren', 'thank you so much'],
+      persona: ['kamu robot atau manusia sih?', 'denti umurnya berapa?'],
+      privacy: ['apakah data klinik saya aman pakai kamu?'],
+      occasion: ['selamat tahun baru 2027!'],
+      tip: ['kasih fakta menarik soal gigi dong'],
+      decline: ['nggak usah, makasih'],
+      complaint: ['jawabanmu kurang jelas'],
+      greet: ['pagi kak denti 👋'],
+      amazed: ['wah!'],
+      clear: ['bersihkan percakapan ini'],
+    },
+    replies: [
+      ['tolong hitung 3 x 250rb', 'Rp 750.000'], ['450rb dibagi 3 orang', 'Rp 150.000'], ['tanggal berapa 3 bulan lagi?', '10 Januari 2027'],
+      ['makasih banyak denti, kamu keren', 'malu'],
+    ],
+    ai: ['pagi denti, ringkas kondisi klinik dong', 'makasih, lanjut: berapa laba bulan lalu?', 'wah kenapa pengeluaran naik?',
+      'tolong buka laporan bulan lalu', 'berapa total tagihan 3 bulan lagi?', 'tips menaikkan kunjungan pasien'],
+  },
 ];
