@@ -29,7 +29,7 @@
         "style-src": "'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src": "'self' https://fonts.gstatic.com",
         "img-src": "'self' data: blob: https://api.dentiva.id https://ggwratzhpukgsiduqely.supabase.co",
-        "connect-src": "ipc: http://ipc.localhost 'self' https://api.dentiva.id https://ggwratzhpukgsiduqely.supabase.co wss://api.dentiva.id wss://ggwratzhpukgsiduqely.supabase.co blob: https://gate.whapi.cloud https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
+        "connect-src": "ipc: http://ipc.localhost 'self' https://api.dentiva.id https://ggwratzhpukgsiduqely.supabase.co wss://api.dentiva.id wss://ggwratzhpukgsiduqely.supabase.co blob: https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
         "frame-src": "'self' blob:",
         "object-src": "'self' blob:",
         "base-uri": "'self'"
