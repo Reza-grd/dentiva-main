@@ -32,7 +32,7 @@ Supabase Cloud (Seoul, `ap-northeast-2`) ke **Supabase self-host di VPS Indonesi
 | 0 · Persiapan | Claude | kunci SSH (`~/.ssh/dentiva_vps`), inventaris, dokumen ini | ✅ selesai |
 | 1 · Beli VPS | Pemilik | NEO Lite MM 8.4, Ubuntu 24.04, tempel kunci SSH publik; A record `api.dentiva.id` → IP VPS | ✅ VPS aktif `202.74.74.163`, DNS `api.dentiva.id` aktif (11 Okt) |
 | 2 · Siapkan server | Claude | firewall (22/80/443), fail2ban, update otomatis, swap, Docker, Supabase self-host, HTTPS | ✅ selesai — HTTPS Let's Encrypt aktif di `https://api.dentiva.id` (lihat `infra/vps/README.md`) |
-| 3 · Gladi migrasi | Claude + Pemilik | salin data dari Supabase Cloud (pemilik mengetik kata sandi DB di terminal), storage, edge function, rahasia, cron; uji 147 smoke test + 311 tes + uji alur utama dengan web staging | ± 1–2 hari |
+| 3 · Gladi migrasi | Claude + Pemilik | salin data dari Supabase Cloud (pemilik mengetik kata sandi DB di terminal), storage, edge function, rahasia, cron; uji 147 smoke test + 311 tes + uji alur utama dengan web staging | 🔄 berjalan — 11 Okt: salin + pulihkan DB lolos verifikasi (143 tabel / 1.563 baris, hak akses identik), 4 berkas storage, Vault; berikutnya: edge function, SMTP, web staging |
 | 4 · Backup & pantau | Claude | backup harian terenkripsi ke IDCloudHost, **uji pemulihan**, pemantau uptime | ± ½ hari |
 | 5 · Pindah resmi | Claude + Pemilik | malam hari, jeda ± 1–2 jam: dump final → pulihkan → cek jumlah baris → ganti env Vercel/GitHub/console → uji | 1 malam |
 | 6 · Masa transisi | Pemilik | Supabase lama disimpan 7–14 hari sebagai cadangan, lalu dihapus atas persetujuan pemilik | 2 minggu |
