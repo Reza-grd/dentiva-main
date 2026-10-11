@@ -1,0 +1,39 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "console",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "-w",
+        "@dentiva/console"
+      ],
+      "port": 5174
+    },
+    {
+      "name": "clinic",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "-w",
+        "@dentiva/clinic"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "website",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4000",
+        "--directory",
+        "D:/dentiva/dentiva_website"
+      ],
+      "port": 4000
+    }
+  ]
+}
