@@ -1,6 +1,6 @@
 [package]
 name = "dentiva-desktop"
-version = "1.10.0"
+version = "1.11.0"
 description = "Dentiva untuk Windows & macOS"
 authors = ["Dentiva"]
 edition = "2021"

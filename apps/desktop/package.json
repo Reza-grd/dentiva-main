@@ -1,7 +1,7 @@
 {
   "name": "@dentiva/desktop",
   "private": true,
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Dentiva untuk Windows & macOS (Tauri 2) — membungkus apps/clinic.",
   "scripts": {
     "tauri": "tauri",

@@ -1,7 +1,7 @@
 {
   "name": "dentiva",
   "private": true,
-  "version": "1.10.0",
+  "version": "1.11.0",
   "type": "module",
   "description": "Monorepo Dentiva: aplikasi klinik (apps/clinic), Dentiva Console (apps/console), paket bersama (packages/*), dan Supabase (supabase/).",
   "workspaces": [

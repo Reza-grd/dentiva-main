@@ -1,7 +1,7 @@
 {
   "name": "@dentiva/clinic",
   "private": true,
-  "version": "1.10.0",
+  "version": "1.11.0",
   "type": "module",
   "description": "Dentiva EMR — aplikasi klinik gigi (web/PWA).",
   "scripts": {
