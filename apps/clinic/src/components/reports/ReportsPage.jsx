@@ -9,7 +9,7 @@ import { financialService } from '../../services/financialService';
 import { treatmentService } from '../../services/treatmentService';
 import { dashboardService } from '../../services/dashboardService';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
 const TREATMENT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
@@ -118,7 +118,7 @@ const ReportsPage = () => {
           `${patientGrowth[idx]?.patients || 0} kunjungan`
         ]);
 
-        doc.autoTable({
+        autoTable(doc, {
           startY: 86,
           head: tableHeaders,
           body: tableRows,

@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => ({
           'vendor-pdf': ['jspdf', 'jspdf-autotable'],
           'vendor-excel': ['xlsx'],
           'vendor-charts': ['recharts'],
-          'vendor-quill': ['react-quill'],
+          'vendor-quill': ['react-quill-new'],
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-ui': ['lucide-react', 'framer-motion'],

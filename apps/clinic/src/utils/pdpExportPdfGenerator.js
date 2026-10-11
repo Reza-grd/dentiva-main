@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 /**
  * Generate PDF report for Data Subject Access Request (UU PDP Compliance)
@@ -47,7 +47,7 @@ export function generatePDPAccessPDF(patient, visits = [], clinic = {}) {
     ['Tanggal Ekspor PDF', new Date().toLocaleString('id-ID')]
   ];
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: yPos,
     head: [['Parameter Data', 'Detail Nilai Rekam Medis']],
     body: infoRows,
@@ -78,7 +78,7 @@ export function generatePDPAccessPDF(patient, visits = [], clinic = {}) {
       v.terapi || '-'
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: yPos,
       head: [['Tanggal', 'Dokter Pemeriksa', 'Anamnesa / Keluhan', 'Diagnosa (ICD-10)', 'Tindakan / Terapi']],
       body: visitRows,

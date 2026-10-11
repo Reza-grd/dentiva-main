@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const ProfitabilityReport = () => {
@@ -78,7 +78,7 @@ const ProfitabilityReport = () => {
       `${Number(item.margin_percent).toFixed(1)}%`
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 60,

@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { parseDateLocal } from './dateUtils';
 
 /**
@@ -68,7 +68,7 @@ export const generatePrescriptionPdf = (visit, patient, doctor, clinic) => {
       p.frekuensi || '-'
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 75,
       margin: { left: 20, right: 20 },
       head: [['No', 'Nama Obat', 'Dosis', 'Jumlah', 'Aturan Pakai']],
