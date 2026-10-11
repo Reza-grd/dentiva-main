@@ -55,6 +55,13 @@ Pelajaran gladi 11 Okt 2026:
 - Hasil gladi pertama: 143 tabel / 1.563 baris cocok, 119 fungsi, 222 aturan RLS, 155 trigger, 290 indeks, 23 aturan storage,
   4 berkas storage identik (sha256).
 
+## Migrasi database (pengganti `supabase db push`)
+- `bash infra/vps/terapkan-migrasi.sh` untuk melihat daftar migrasi yang belum diterapkan.
+- `… --uji` menjalankannya dalam transaksi lalu ROLLBACK.
+- `… --terapkan` menerapkannya sebagai `postgres` (satu transaksi per berkas) dan mencatatnya di `supabase_migrations.schema_migrations`.
+- Uji perilaku keamanan di `infra/vps/uji/`, selalu di-rollback. Uji itu menyamar sebagai akun nyata lewat klaim JWT (`sub` + `app_metadata` asli), dan keluarannya hanya benar/salah.
+- Uji gerbang pemulihan: `bash /opt/dentiva/bin/uji-gerbang-verifikasi.sh`.
+
 ## Edge function
 - Deploy dari laptop: `bash infra/vps/deploy-functions.sh [nama…]` (pengganti `supabase functions deploy`).
 - Router `infra/vps/functions-main/index.ts` (dipasang ke `volumes/functions/main`): JWT diverifikasi per fungsi
@@ -99,7 +106,9 @@ Satu pintu pengirim di `supabase/functions/_shared/whatsapp.ts`, dipilih lewat `
 - Buka backup (uji): kunci dikirim lewat stdin, tidak disimpan di server:
   `ssh … 'age -d -i /dev/stdin /opt/dentiva/backup/<berkas>.tar.age | tar -t' < ~/.ssh/dentiva_backup`
 - Uji buka 11 Okt: lolos (schema/data lengkap, `lengkap.dump` terbaca, sidik hak akses = sumber).
-- Belum: salinan offsite (IDCloudHost Object Storage).
+- Sejak 11 Okt siang, semua artefak database diambil dari **satu snapshot** (`pg_export_snapshot`) sehingga konsisten satu sama lain. Isinya: dump, skema, data, hitungan, sidik, publikasi Realtime, dan daftar storage. Berkas storage disertai manifest `files.sha256`. Backup **gagal** kalau ada berkas yang tidak terunduh.
+- Pemulihan bersifat **fail-closed**: `pulihkan-ke-vps.sh` keluar dengan exit 1 kalau himpunan tabel, jumlah baris, atau sidik keamanan berbeda (GRANT, pemilik, RLS, policy, trigger, publikasi). `--verifikasi-saja` membandingkan database sekarang dengan sebuah backup tanpa memulihkan apa pun.
+- Belum: salinan offsite (IDCloudHost Object Storage) dan uji pemulihan penuh di server terisolasi.
 
 ## Catatan pemasangan
 - **Jangan mencetak `docker compose config`** (atau env container) walau difilter: `SUPABASE_DB_URL` berisi kata sandi DB

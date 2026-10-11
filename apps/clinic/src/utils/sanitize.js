@@ -15,6 +15,23 @@ export const sanitizeInput = (input) => {
 };
 
 /**
+ * Encoding output untuk teks yang disisipkan ke string HTML (mis. kuitansi via document.write):
+ * semua karakter khusus HTML menjadi entitas, sehingga isian tampil sebagai teks apa adanya.
+ * null/undefined → string kosong; angka/boolean diubah ke string.
+ * @param {unknown} value
+ * @returns {string}
+ */
+export const escapeHtml = (value) => {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+/**
  * Sanitizes rich text input (allows safe HTML tags like b, i, p, etc).
  * @param {string} input - The raw rich text string
  * @returns {string} - The sanitized rich text

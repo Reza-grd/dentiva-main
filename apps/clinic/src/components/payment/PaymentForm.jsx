@@ -9,6 +9,7 @@ import { usePermission } from '../../contexts/PermissionsContext';
 import { DollarSign, Plus, Trash2, Printer, Search, Check, AlertCircle, ChevronLeft, MessageSquare, Lock } from 'lucide-react';
 import { useToast } from '../common/ToastNotification';
 import { parseDateLocal } from '../../utils/dateUtils';
+import { escapeHtml as esc } from '../../utils/sanitize';
 import { supabase } from '../../services/supabase';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 import QrisPanel from './QrisPanel';
@@ -561,10 +562,10 @@ const PaymentForm = () => {
 
     const tindakanRows = selectedTreatments.map((t, i) => `
       <tr>
-        <td colspan="2">${i + 1}. ${t.nama_treatment}${t.tooth_number ? ' [No Gigi: ' + t.tooth_number + ']' : ''}</td>
+        <td colspan="2">${i + 1}. ${esc(t.nama_treatment)}${t.tooth_number ? ' [No Gigi: ' + esc(t.tooth_number) + ']' : ''}</td>
       </tr>
       <tr>
-        <td style="padding-left:16px;">${formatRp(t.harga_satuan)} X ${t.quantity}</td>
+        <td style="padding-left:16px;">${formatRp(t.harga_satuan)} X ${esc(t.quantity)}</td>
         <td style="text-align:right;">-0</td>
       </tr>
       <tr>
@@ -575,10 +576,10 @@ const PaymentForm = () => {
 
     const obatRows = selectedObat.map((o, i) => `
       <tr>
-        <td colspan="2">${i + 1}. ${o.nama_obat}</td>
+        <td colspan="2">${i + 1}. ${esc(o.nama_obat)}</td>
       </tr>
       <tr>
-        <td style="padding-left:16px;">${formatRp(o.harga_satuan)} X ${o.qty}</td>
+        <td style="padding-left:16px;">${formatRp(o.harga_satuan)} X ${esc(o.qty)}</td>
         <td style="text-align:right;">${formatRp(o.subtotal)}</td>
       </tr>
     `).join('');
@@ -591,7 +592,7 @@ const PaymentForm = () => {
 <html>
 <head>
 <meta charset="UTF-8"/>
-<title>Kwitansi - ${existingPayment?.invoice_number || '-'}</title>
+<title>Kwitansi - ${esc(existingPayment?.invoice_number || '-')}</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
@@ -626,13 +627,13 @@ const PaymentForm = () => {
 <body>
   <div class="top-info">
     <span></span>
-    <span>${klinikInfo.cabang}</span>
+    <span>${esc(klinikInfo.cabang)}</span>
   </div>
-  <div class="klinik-nama">${klinikInfo.nama}</div>
-  <div class="klinik-alamat">${klinikInfo.alamat}</div>
+  <div class="klinik-nama">${esc(klinikInfo.nama)}</div>
+  <div class="klinik-alamat">${esc(klinikInfo.alamat)}</div>
   <div class="top-info" style="margin-top:4px;">
     <span></span>
-    <span>Phone : ${klinikInfo.phone}</span>
+    <span>Phone : ${esc(klinikInfo.phone)}</span>
   </div>
 
   <hr class="separator-solid"/>
@@ -640,18 +641,18 @@ const PaymentForm = () => {
   <hr class="separator-solid"/>
 
   <div class="info-row">
-    <span class="info-label">Tgl : ${now.toLocaleDateString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric'})} - No.Kwitansi : ${existingPayment?.invoice_number || '-'}</span>
+    <span class="info-label">Tgl : ${now.toLocaleDateString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric'})} - No.Kwitansi : ${esc(existingPayment?.invoice_number || '-')}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Waktu Cetak : ${waktuCetak}</span>
-    <span>Kasir : ${userProfile?.full_name || 'Admin'}</span>
+    <span class="info-label">Waktu Cetak : ${esc(waktuCetak)}</span>
+    <span>Kasir : ${esc(userProfile?.full_name || 'Admin')}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Pelanggan : ${visit?.patient?.no_rm} - ${visit?.patient?.nama_lengkap}</span>
-    <span>Jenis Pelanggan : ${visit?.patient?.jaminan_kesehatan || 'NON-MEMBER'}</span>
+    <span class="info-label">Pelanggan : ${esc(visit?.patient?.no_rm)} - ${esc(visit?.patient?.nama_lengkap)}</span>
+    <span>Jenis Pelanggan : ${esc(visit?.patient?.jaminan_kesehatan || 'NON-MEMBER')}</span>
   </div>
   <div class="info-row">
-    <span class="info-label">Dokter : ${visit?.dokter?.full_name || '-'}</span>
+    <span class="info-label">Dokter : ${esc(visit?.dokter?.full_name || '-')}</span>
     <span>Kunjungan Berikutnya : 00-00-0000 00:00:00</span>
   </div>
 
@@ -687,7 +688,7 @@ const PaymentForm = () => {
 
   ${biayaTambahan > 0 ? `
   <div class="info-row">
-    <span class="info-label">${paymentData.keterangan_tambahan || 'Biaya Tambahan'}</span>
+    <span class="info-label">${esc(paymentData.keterangan_tambahan || 'Biaya Tambahan')}</span>
     <span style="text-align:right;">${formatRp(biayaTambahan)}</span>
   </div>
   <hr class="separator"/>
@@ -707,7 +708,7 @@ const PaymentForm = () => {
       <td style="text-align:right;">${formatRp(totalBayar)}</td>
     </tr>
     <tr>
-      <td>Pembayaran > ${paymentData.metode_pembayaran === 'cash' ? 'tunai' : paymentData.metode_pembayaran}</td>
+      <td>Pembayaran &gt; ${esc(paymentData.metode_pembayaran === 'cash' ? 'tunai' : paymentData.metode_pembayaran)}</td>
       <td style="text-align:right;">${formatRp(jumlahBayarPrint)}</td>
     </tr>
     <tr>

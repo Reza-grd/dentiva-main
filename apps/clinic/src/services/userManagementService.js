@@ -54,8 +54,10 @@ export const userManagementService = {
         throw new Error(result.error || 'Gagal membuat pengguna');
       }
 
-      // Log audit
-      await this.logAudit('CREATE', `Mendaftarkan staf baru: ${payload.full_name} (${payload.role})`, null, payload);
+      // Log audit — hanya field yang diizinkan; password/kredensial TIDAK PERNAH ikut dicatat
+      // (server juga menyamarkan kunci sensitif lewat trigger a_audit_log_integrity).
+      await this.logAudit('CREATE', `Mendaftarkan staf baru: ${payload.full_name} (${payload.role})`, null,
+        { full_name: payload.full_name, role: payload.role });
 
       return { success: true, data: result.user };
     } catch (error) {

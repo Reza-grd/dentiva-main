@@ -2,8 +2,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 #  Pulihkan salinan Supabase Cloud (hasil salin-dari-supabase.sh) ke database VPS.
 #
-#    /opt/dentiva/bin/pulihkan-ke-vps.sh <folder-salinan>
+#    /opt/dentiva/bin/pulihkan-ke-vps.sh <folder-salinan> [--izinkan-selisih-baris] [--tanpa-sidik]
 #
+#  - GAGAL KERAS (exit 1) bila verifikasi tidak lolos: himpunan tabel berbeda, jumlah baris berbeda,
+#    sidik keamanan (GRANT, pemilik, RLS, policy, trigger, publikasi) berbeda atau tidak tersedia.
+#    --izinkan-selisih-baris hanya untuk gladi saat sumber masih dipakai; --tanpa-sidik untuk salinan lama.
+#    --verifikasi-saja: TIDAK memulihkan apa pun — hanya membandingkan database sekarang dengan
+#    hitungan.tsv & sidik-acl.tsv di folder (uji gerbang verifikasi / cek pascapemulihan).
 #  - Hanya untuk database yang masih kosong (menolak jika skema Dentiva sudah ada).
 #  - Struktur dibuat sebagai role `postgres` (pemilik objek sama seperti di Supabase Cloud);
 #    data dimuat sebagai `supabase_admin` dengan trigger dimatikan sementara
@@ -15,9 +20,20 @@ set -Eeuo pipefail
 umask 077
 export LC_ALL=C
 
-D="${1:?pakai: pulihkan-ke-vps.sh <folder-salinan>}"
+D="${1:?pakai: pulihkan-ke-vps.sh <folder-salinan> [--izinkan-selisih-baris] [--tanpa-sidik]}"
+shift
+IZINKAN_SELISIH=false; TANPA_SIDIK=false; VERIFIKASI_SAJA=false
+for o in "$@"; do
+  case "$o" in
+    --izinkan-selisih-baris) IZINKAN_SELISIH=true ;;
+    --verifikasi-saja) VERIFIKASI_SAJA=true ;;
+    --tanpa-sidik) TANPA_SIDIK=true ;;
+    *) echo "Opsi tidak dikenal: $o"; exit 1 ;;
+  esac
+done
 [ -d "$D" ] || D="/opt/dentiva/migrasi/$D"
-for f in schema.sql data.sql storage-extra.sql hitungan.tsv .selesai; do
+if $VERIFIKASI_SAJA; then perlu=(hitungan.tsv); else perlu=(schema.sql data.sql storage-extra.sql hitungan.tsv .selesai); fi
+for f in "${perlu[@]}"; do
   [ -e "$D/$f" ] || { echo "Berkas $D/$f tidak ada — salinan belum lengkap."; exit 1; }
 done
 LOG="$D/pulihkan.log"
@@ -31,6 +47,7 @@ sql()   { docker exec -i supabase-db psql -X -q -v ON_ERROR_STOP=1 -d postgres "
 admin() { sql -U supabase_admin "$@"; }
 pg()    { sql -U postgres "$@"; }
 
+if ! $VERIFIKASI_SAJA; then
 say "Memeriksa database tujuan masih kosong…"
 ada=$(admin -tAc "select (select count(*) from pg_namespace where nspname in ('private','platform','supabase_migrations','backup_20260929'))
                        + (select count(*) from pg_tables where schemaname = 'public') + (select count(*) from auth.users)")
@@ -91,31 +108,66 @@ say "Aturan keamanan storage…"
 admin -1 < "$D/storage-extra.sql"
 ok "$(admin -tAc "select count(*) from pg_policies where schemaname = 'storage'") aturan storage aktif"
 
+if [ -s "$D/publikasi.tsv" ]; then
+  say "Publikasi Realtime…"
+  while IFS=$'\t' read -r -u 3 sch tbl; do
+    [ -n "$tbl" ] || continue
+    admin -c "do \$\$ begin if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='$sch' and tablename='$tbl') then alter publication supabase_realtime add table \"$sch\".\"$tbl\"; end if; end \$\$"
+  done 3< "$D/publikasi.tsv"
+  ok "$(wc -l < "$D/publikasi.tsv") tabel di supabase_realtime"
+fi
+
 say "Statistik planner (ANALYZE)…"
 admin -c "analyze"
 ok "selesai"
+fi
+
+GAGAL=0
+gagal() { printf '  \033[31m✗ %s\033[0m\n' "$*"; GAGAL=$((GAGAL + 1)); }
+
+say "Verifikasi himpunan tabel (sumber vs VPS)…"
+[ -s "$D/hitungan.tsv" ] || gagal "hitungan.tsv kosong — tidak ada acuan jumlah baris"
+admin -tA -F $'\t' -c "select table_schema, table_name from information_schema.tables
+  where table_type = 'BASE TABLE'
+    and (table_schema in ('public','private','platform','supabase_migrations','backup_20260929')
+         or (table_schema, table_name) in (('auth','users'),('auth','identities'),('auth','mfa_factors'),('storage','buckets'),('storage','objects')))" \
+  | sort > "$D/tabel-vps.tsv"
+cut -f1,2 "$D/hitungan.tsv" | sort > "$D/tabel-sumber.tsv"
+hilang=$(comm -23 "$D/tabel-sumber.tsv" "$D/tabel-vps.tsv" | tr '\t' '.')
+lebih=$(comm -13 "$D/tabel-sumber.tsv" "$D/tabel-vps.tsv" | tr '\t' '.')
+[ -z "$hilang" ] || gagal "tabel ada di sumber tapi TIDAK ada di VPS: $(echo $hilang)"
+[ -z "$lebih" ] || gagal "tabel ada di VPS tapi tidak ada di sumber: $(echo $lebih)"
+[ -n "$hilang$lebih" ] || ok "$(wc -l < "$D/tabel-vps.tsv") tabel, himpunan sama"
 
 say "Verifikasi jumlah baris (sumber vs VPS)…"
-q=$(awk -F'\t' -v sq="'" '{printf "%sselect %s%s%s, %s%s%s, (select count(*) from \"%s\".\"%s\")\n", (NR>1 ? "union all " : ""), sq, $1, sq, sq, $2, sq, $1, $2}' "$D/hitungan.tsv")
+q=$(comm -12 "$D/tabel-sumber.tsv" "$D/tabel-vps.tsv" | awk -F'\t' -v sq="'" '{printf "%sselect %s%s%s, %s%s%s, (select count(*) from \"%s\".\"%s\")\n", (NR>1 ? "union all " : ""), sq, $1, sq, sq, $2, sq, $1, $2}')
 admin -tA -F $'\t' -c "$q" | sort > "$D/hitungan-vps.tsv"
-selisih=$(join -t $'\t' <(awk -F'\t' '{print $1"."$2"\t"$3}' "$D/hitungan.tsv" | sort) \
+selisih=$(join -t $'\t' -a1 -e HILANG -o 0,1.2,2.2 <(awk -F'\t' '{print $1"."$2"\t"$3}' "$D/hitungan.tsv" | sort) \
                          <(awk -F'\t' '{print $1"."$2"\t"$3}' "$D/hitungan-vps.tsv" | sort) | awk -F'\t' '$2 != $3')
 if [ -z "$selisih" ]; then
   ok "$(wc -l < "$D/hitungan.tsv") tabel cocok, total $(awk -F'\t' '{s+=$3} END {print s+0}' "$D/hitungan-vps.tsv") baris"
+elif $IZINKAN_SELISIH; then
+  echo "  ! Ada selisih (diizinkan untuk gladi — sumber masih dipakai):"; echo "$selisih" | sed 's/^/    /'
 else
-  echo "  Ada selisih (tabel  sumber  vps):"; echo "$selisih" | sed 's/^/    /'
-  echo "  Catatan: data sumber bisa bertambah antara dump & hitung (gladi, aplikasi masih jalan)."
+  gagal "jumlah baris berbeda (tabel  sumber  vps):"; echo "$selisih" | sed 's/^/    /'
 fi
 
-if [ -s "$D/sidik-acl.tsv" ]; then
-  say "Verifikasi hak akses (sidik GRANT sumber vs VPS)…"
+say "Verifikasi sidik keamanan (GRANT, pemilik, RLS, policy, trigger, publikasi)…"
+if [ ! -s "$D/sidik-acl.tsv" ]; then
+  if $TANPA_SIDIK; then echo "  ! sidik sumber tidak ada — dilewati atas permintaan (--tanpa-sidik)"
+  else gagal "sidik sumber (sidik-acl.tsv) tidak ada — tidak bisa dibuktikan identik"; fi
+else
   admin -tA -F $'\t' < /opt/dentiva/bin/acl-sidik.sql > "$D/sidik-acl-vps.tsv"
   if cmp -s "$D/sidik-acl.tsv" "$D/sidik-acl-vps.tsv"; then
     ok "identik ($(awk -F'\t' '$1 == "SEMUA" {print $2}' "$D/sidik-acl-vps.tsv") entri)"
   else
-    echo "  ✗ BERBEDA — jangan dipakai sebelum diperiksa:"; diff "$D/sidik-acl.tsv" "$D/sidik-acl-vps.tsv" | sed 's/^/    /' || true
+    gagal "sidik keamanan BERBEDA:"; diff "$D/sidik-acl.tsv" "$D/sidik-acl-vps.tsv" | sed 's/^/    /' || true
   fi
 fi
 
 trap - ERR
-say "Pemulihan selesai. Catatan: $LOG"
+if [ "$GAGAL" -gt 0 ]; then
+  printf '\n\033[1;31m✗ Pemulihan TIDAK lolos verifikasi (%s masalah) — jangan dipakai sebelum diperiksa. Catatan: %s\033[0m\n' "$GAGAL" "$LOG"
+  exit 1
+fi
+say "Pemulihan selesai & lolos semua verifikasi. Catatan: $LOG"
