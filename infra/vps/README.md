@@ -53,7 +53,8 @@ Pelajaran gladi 11 Okt 2026:
 
 ## Catatan pemasangan
 - **Jangan mencetak `docker compose config`** (atau env container) walau difilter: `SUPABASE_DB_URL` berisi kata sandi DB
-  dan `SUPABASE_JWKS` berisi JWT secret (kunci HS256). (Kejadian 11 Okt → proxy HTTPS dihentikan sampai semua rahasia server dibuat ulang.)
+  dan `SUPABASE_JWKS` berisi JWT secret (kunci HS256). (Kejadian 11 Okt → proxy HTTPS dihentikan, lalu `reset-gladi.sh` membuat ulang semua rahasia server dan
+  pemulihan diulang dari nol: lolos semua verifikasi dalam satu kali jalan.)
 - `utils/*.sh --update-env` meninggalkan `.env.old` berizin 644 berisi rahasia lama → `shred -u .env.old`.
 - Jangan menjalankan `setup.sh` dengan `umask 077`: file `volumes/db/*.sql` harus bisa dibaca container (644);
   hanya `.env` yang 600. (Kejadian 11 Okt: init database berhenti di `98-webhooks.sql: Permission denied`.)
