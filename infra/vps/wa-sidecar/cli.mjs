@@ -26,15 +26,21 @@ if (cmd === 'pair-link') {
 } else if (cmd === 'login') {
   let lastQr = null
   let codeShown = false
+  let lastCode = null
   for (let i = 0; i < 200; i++) {
     const st = await call('GET', '/status')
     if (st.status === 'connected') {
       console.log(`\n✓ WhatsApp tersambung sebagai ${st.me}. Dentiva siap mengirim pesan.\n`)
       process.exit(0)
     }
-    if (arg && !codeShown && st.status === 'qr') {
+    if (arg && codeShown && st.code && st.code !== lastCode) {
+      lastCode = st.code
+      console.log(`Kode tautan BARU (yang lama tidak berlaku): ${st.code}`)
+    }
+    if (arg && !codeShown) {
       const r = await call('POST', '/pairing-code', { phone: arg })
       if (r.code) {
+        lastCode = r.code
         console.log(`\nKode tautan: ${r.code}   (masukkan dalam ±${r.validForSec ?? 150} detik)\n` +
           'Di HP: WhatsApp → Perangkat tertaut → Tautkan perangkat → "Tautkan dengan nomor telepon saja" → masukkan kode di atas.\n' +
           'Gunakan HANYA kode terakhir yang tampil. Menunggu tersambung…\n')

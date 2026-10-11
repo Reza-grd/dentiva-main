@@ -1,20 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
-//  Sidecar WhatsApp Dentiva — mode TIDAK RESMI (Baileys, nomor ditautkan lewat QR).
+//  Sidecar WhatsApp Dentiva — mode TIDAK RESMI: WhatsApp Web ASLI (whatsapp-web.js + Chromium
+//  headless) di VPS. Nomor ditautkan lewat QR / kode tautan seperti WhatsApp Web biasa.
 //  Dipakai sambil menunggu WhatsApp Cloud API resmi (Meta) disetujui.
 //
-//  - Hanya bisa diakses dari jaringan internal Docker (tidak ada port publik).
+//  - Hanya bisa diakses dari jaringan internal Docker + 127.0.0.1:3002 (halaman QR lewat terowongan SSH).
 //    Edge function memanggil http://wa-sidecar:3000 dengan header x-api-key.
-//  - Kunci sesi WhatsApp disimpan di /data/auth (volume, izin 700).
-//  - Isi pesan & nomor pasien TIDAK dicatat di log (nomor disamarkan); pesan masuk tidak disimpan.
+//  - Sesi WhatsApp Web (profil Chromium) di /data/wwebjs (volume, izin 700). Seperti WhatsApp Web di
+//    komputer mana pun, profil itu memuat riwayat chat nomor tsb — volume ini setara data rahasia.
+//  - Isi pesan & nomor pasien TIDAK dicatat di log (nomor disamarkan). Pesan tidak ditandai "dibaca".
 //  - Kirim berurutan dengan jeda acak & batas per jam untuk mengurangi risiko nomor diblokir.
 //
 //  API (semua kecuali /health dan /pair wajib x-api-key):
 //    GET  /health                 → { ok, status }
+//    GET  /status                 → { status, me, since, lastError, code }
+//    GET  /qr[?format=terminal]   → { status, qr }
 //    POST /pair-token             → { token } halaman QR sekali pakai, berlaku 10 menit
-//    GET  /pair?t=TOKEN           → halaman QR (gambar SVG, diperbarui otomatis) — dibuka lewat
-//                                   terowongan SSH ke 127.0.0.1:3002, tidak pernah dari internet
-//    GET  /status                 → { status, me, since, lastError }
-//    GET  /qr[?format=terminal]   → { status, qr } (qr = teks QR atau gambar terminal)
+//    GET  /pair?t=TOKEN           → halaman QR (SVG, diperbarui otomatis)
 //    POST /pairing-code {phone}   → { code }   (alternatif QR: "Tautkan dengan nomor telepon")
 //    POST /send {to, text}        → { ok, id }
 //    POST /logout                 → { ok }
@@ -22,13 +23,13 @@
 import http from 'node:http'
 import { rm, mkdir } from 'node:fs/promises'
 import { randomBytes } from 'node:crypto'
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, Browsers } from 'baileys'
-import pino from 'pino'
+import wweb from 'whatsapp-web.js'
 import QRCode from 'qrcode'
 import { normalizeTo, mask, safeEqual, createSender, cleanText } from './lib.mjs'
 
+const { Client, LocalAuth } = wweb
 const PORT = Number(process.env.PORT || 3000)
-const AUTH_DIR = process.env.AUTH_DIR || '/data/auth'
+const DATA_DIR = process.env.WWEB_DIR || '/data/wwebjs'
 const API_KEY = process.env.WA_SIDECAR_KEY || ''
 if (API_KEY.length < 32) {
   console.error('WA_SIDECAR_KEY belum diisi (minimal 32 karakter) — sidecar tidak dijalankan.')
@@ -36,120 +37,99 @@ if (API_KEY.length < 32) {
 }
 
 const log = (...a) => console.log(new Date().toISOString(), ...a)
-const baileysLogger = pino({ level: process.env.BAILEYS_LOG_LEVEL || 'warn' })
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const send = createSender({
   minGapMs: Number(process.env.WA_MIN_GAP_MS || 1500),
   jitterMs: Number(process.env.WA_JITTER_MS || 1500),
   perHour: Number(process.env.WA_PER_HOUR || 200),
 })
 
-const state = { status: 'starting', qr: null, me: null, since: new Date().toISOString(), lastError: null }
-let sock = null
-let gen = 0 // nomor generasi soket; event dari soket lama diabaikan
+const state = { status: 'starting', qr: null, code: null, me: null, since: new Date().toISOString(), lastError: null }
+let client = null
+let gen = 0 // generasi klien; event dari klien lama diabaikan
 let retry = 0
-let starting = false
-let authStore = null // kunci sesi dimuat SEKALI & dipakai ulang antar sambung-ulang (tidak dibaca ulang dari disk)
-let pairing = null // { code, digits, gen, at } — kode tautan aktif, agar tidak ditimpa kode baru
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+let pairing = null // { digits, gen } — mode kode tautan aktif
+let readyWatchdog = null
 
 function setStatus(status, extra = {}) {
   Object.assign(state, { status, since: new Date().toISOString() }, extra)
 }
 
-async function loadAuth(fresh) {
-  if (fresh) {
-    await rm(AUTH_DIR, { recursive: true, force: true })
-    authStore = null
-  }
-  if (!authStore) {
-    await mkdir(AUTH_DIR, { recursive: true, mode: 0o700 })
-    authStore = await useMultiFileAuthState(AUTH_DIR)
-  }
-  return authStore
+function makeClient(pairDigits) {
+  return new Client({
+    authStrategy: new LocalAuth({ dataPath: DATA_DIR, clientId: 'dentiva' }),
+    puppeteer: {
+      headless: true,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu',
+             '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--mute-audio'],
+    },
+    authTimeoutMs: 120_000,
+    takeoverOnConflict: true, // bila WhatsApp Web dibuka di tempat lain, Dentiva mengambil alih kembali
+    takeoverTimeoutMs: 15_000,
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    ...(pairDigits ? { pairWithPhoneNumber: { phoneNumber: pairDigits, showNotification: true, intervalMs: 180_000 } } : {}),
+  })
 }
 
-async function start({ fresh = false } = {}) {
-  if (starting) return
-  starting = true
-  try {
-    const { state: auth, saveCreds } = await loadAuth(fresh)
-    const { version } = await fetchLatestBaileysVersion().catch(() => ({ version: undefined }))
-    const myGen = ++gen
-    const s = makeWASocket({
-      auth,
-      version,
-      logger: baileysLogger,
-      browser: Browsers.ubuntu('Chrome'),
-      markOnlineOnConnect: false, // notifikasi di HP pemilik nomor tetap muncul
-      // Riwayat penuh tidak diunduh. Sinkron awal bawaan Baileys tetap jalan karena dibutuhkan untuk
-      // pemetaan LID (tanpa itu sesi tidak stabil); isinya tidak disimpan — tidak ada store pesan.
-      syncFullHistory: false,
-      generateHighQualityLinkPreview: false,
-      getMessage: async () => undefined,
-    })
-    sock = s
-    // ev.process memproses event berurutan: kunci sesi baru (mis. setelah scan QR berhasil) SELESAI
-    // disimpan sebelum sambung-ulang (kode 515) — tanpa ini HP diminta scan ulang.
-    // Pesan masuk sengaja diabaikan (tidak disimpan) — belum ada fitur balasan otomatis.
-    s.ev.process(async (events) => {
-      if (myGen !== gen) return
-      if (events['creds.update']) await saveCreds()
-      if (events['connection.update']) await onConnectionUpdate(events['connection.update'])
-    })
-  } catch (err) {
-    state.lastError = String(err?.message || err)
-    log('gagal memulai:', state.lastError)
-    scheduleRestart()
-  } finally {
-    starting = false
-  }
-}
+async function start({ fresh = false, pairDigits = null } = {}) {
+  const myGen = ++gen
+  clearTimeout(readyWatchdog)
+  const old = client
+  client = null
+  if (old) await old.destroy().catch(() => {})
+  if (fresh) await rm(DATA_DIR, { recursive: true, force: true })
+  await mkdir(DATA_DIR, { recursive: true, mode: 0o700 })
+  setStatus('starting', { qr: null, code: null })
 
-function scheduleRestart(delayMs, opts) {
-  const wait = delayMs ?? Math.min(60_000, 2_000 * 2 ** Math.min(retry++, 5))
-  const at = gen
-  setTimeout(() => { if (at === gen) start(opts) }, wait)
-}
+  const c = makeClient(pairDigits)
+  client = c
+  const mine = (fn) => (...args) => { if (myGen === gen) return fn(...args) }
 
-/** Hentikan soket sekarang dan mulai yang baru (fresh = buang kunci sesi yang belum terdaftar). */
-async function restartNow({ fresh = false } = {}) {
-  const old = sock
-  gen++
-  sock = null
-  setStatus('starting', { qr: null })
-  try { old?.end(undefined) } catch {}
-  await start({ fresh })
-}
-
-async function onConnectionUpdate({ connection, lastDisconnect, qr }) {
-  if (qr) {
-    setStatus('qr', { qr })
-    log('menunggu scan QR')
-  }
-  if (connection === 'open') {
+  c.on('qr', mine((qr) => { setStatus('qr', { qr }); log('menunggu scan QR') }))
+  c.on('code', mine((code) => { setStatus('pairing_code', { code, qr: null }); log('kode tautan siap') }))
+  c.on('authenticated', mine(() => {
+    setStatus('authenticating', { qr: null, code: null })
+    log('penautan diterima, memuat WhatsApp Web…')
+    // Kadang "ready" tidak pernah datang setelah "authenticated" (isu wwebjs) → muat ulang.
+    readyWatchdog = setTimeout(mine(() => {
+      if (state.status === 'authenticating') { log('ready tidak datang dalam 120 dtk — muat ulang'); restartLater(1_000) }
+    }), 120_000)
+  }))
+  c.on('ready', mine(() => {
+    clearTimeout(readyWatchdog)
     retry = 0
     pairing = null
-    setStatus('connected', { qr: null, me: sock?.user?.id ?? null, lastError: null })
+    setStatus('connected', { qr: null, code: null, me: c.info?.wid?.user ?? null, lastError: null })
     log('tersambung sebagai', mask(state.me))
+  }))
+  c.on('auth_failure', mine((msg) => {
+    state.lastError = `penautan gagal: ${msg}`
+    log(state.lastError, '— sesi dihapus')
+    restartLater(3_000, { fresh: true })
+  }))
+  c.on('disconnected', mine((reason) => {
+    state.lastError = `terputus (${reason})`
+    const loggedOut = ['LOGOUT', 'UNPAIRED', 'UNPAIRED_IDLE'].includes(String(reason))
+    log(state.lastError, loggedOut ? '— dikeluarkan dari HP, sesi dihapus' : '— sambung ulang')
+    restartLater(loggedOut ? 3_000 : undefined, { fresh: loggedOut })
+  }))
+  c.on('change_state', mine((s) => log('status WhatsApp Web:', s)))
+
+  try {
+    await c.initialize()
+  } catch (err) {
+    if (myGen !== gen) return
+    state.lastError = String(err?.message || err).slice(0, 200)
+    log('gagal memulai WhatsApp Web:', state.lastError)
+    restartLater()
   }
-  if (connection === 'close') {
-    const code = lastDisconnect?.error?.output?.statusCode
-    state.lastError = `terputus (kode ${code ?? '?'})`
-    if (code === DisconnectReason.loggedOut) {
-      log('sesi dikeluarkan dari HP — kunci sesi dihapus, menunggu QR baru')
-      setStatus('logged_out', { qr: null, me: null })
-      pairing = null
-      scheduleRestart(2_000, { fresh: true })
-    } else if (code === DisconnectReason.restartRequired) {
-      log('penautan diterima, menyambung ulang dengan kunci sesi baru')
-      setStatus('reconnecting', { qr: null })
-      scheduleRestart(0)
-    } else {
-      setStatus('reconnecting', { qr: null })
-      log('terputus, sambung ulang —', state.lastError)
-      scheduleRestart()
-    }
-  }
+}
+
+function restartLater(delayMs, opts) {
+  const wait = delayMs ?? Math.min(120_000, 5_000 * 2 ** Math.min(retry++, 5))
+  const at = gen
+  setTimeout(() => { if (at === gen) start(opts).catch((e) => log('restart gagal:', e?.message)) }, wait)
 }
 
 // ── HTTP ─────────────────────────────────────────────────────────────────────
@@ -175,7 +155,7 @@ function readJson(req, limit = 64 * 1024) {
   })
 }
 
-// Token halaman QR: sekali dibuat lewat API ber-kunci, berlaku 10 menit.
+// Token halaman QR: dibuat lewat API ber-kunci, berlaku 10 menit.
 const pairTokens = new Map()
 const pairTokenValid = (t) => {
   const exp = pairTokens.get(String(t ?? ''))
@@ -189,37 +169,37 @@ const PAIR_PAGE = `<!doctype html><html lang="id"><head><meta charset="utf-8">
 <style>body{font-family:system-ui,sans-serif;background:#f4f6f8;color:#14213d;display:grid;place-items:center;min-height:100vh;margin:0}
 main{background:#fff;border-radius:16px;padding:28px 32px;box-shadow:0 6px 30px #0001;max-width:440px;text-align:center}
 #qr svg{width:320px;height:320px}#qr{min-height:320px;display:grid;place-items:center}
-ol{text-align:left;line-height:1.6;padding-left:20px}.ok{color:#0a7d3b;font-size:22px;font-weight:700}small{color:#667}</style></head>
+ol{text-align:left;line-height:1.6;padding-left:20px}.ok{color:#0a7d3b;font-size:22px;font-weight:700}small{color:#667}
+.code{font:700 34px ui-monospace,monospace;letter-spacing:4px}</style></head>
 <body><main><h2>Tautkan WhatsApp ke Dentiva</h2>
-<div id="qr">Menyiapkan QR…</div><p id="st"><small>memuat…</small></p>
-<ol><li>Buka <b>WhatsApp</b> di HP nomor klinik</li><li><b>⋮ / Setelan → Perangkat tertaut → Tautkan perangkat</b></li><li>Arahkan kamera ke QR di atas</li></ol>
-<small>QR berganti otomatis ±20 detik sekali. Halaman ini hanya bisa dibuka lewat terowongan SSH.</small></main>
+<div id="qr">Menyiapkan WhatsApp Web…</div><p id="st"><small>memuat…</small></p>
+<ol><li>Buka <b>WhatsApp</b> di HP nomor klinik</li><li><b>⋮ / Setelan → Perangkat tertaut → Tautkan perangkat</b></li><li>Scan QR di atas <b>dari layar itu</b> (bukan kamera biasa)</li></ol>
+<small>QR berganti otomatis. Halaman ini hanya bisa dibuka lewat terowongan SSH.</small></main>
 <script>const t=new URLSearchParams(location.search).get('t');let last='';
 async function tick(){try{const r=await fetch('/pair/state?t='+encodeURIComponent(t));const d=await r.json();
 const q=document.getElementById('qr'),st=document.getElementById('st');
 if(!r.ok){q.textContent='';st.innerHTML='<b>'+(d.error||'Token tidak berlaku')+'</b>';return}
 if(d.status==='connected'){q.innerHTML='<div class="ok">✓ Tersambung</div>';st.innerHTML='WhatsApp '+(d.me||'')+' siap dipakai Dentiva. Halaman ini boleh ditutup.';return}
-if(d.svg&&d.svg!==last){q.innerHTML=d.svg;last=d.svg}
-if(!d.svg){q.textContent='Menunggu QR baru…'}
+if(d.code){q.innerHTML='<div><div>Kode tautan</div><div class="code">'+d.code+'</div></div>';last=''}
+else if(d.svg&&d.svg!==last){q.innerHTML=d.svg;last=d.svg}
+else if(!d.svg){q.textContent=d.status==='authenticating'?'Penautan diterima, memuat…':'Menunggu QR…'}
 st.innerHTML='<small>status: '+d.status+'</small>'}catch(e){}setTimeout(tick,2000)}tick()</script></body></html>`
 
 const pairRoutes = {
   '/pair': async () => [200, PAIR_PAGE, 'text/html; charset=utf-8'],
   '/pair/state': async () => {
     if (state.status === 'connected') return [200, { status: state.status, me: state.me ? mask(state.me) : null }]
+    if (state.status === 'pairing_code') return [200, { status: state.status, code: state.code }]
     const svg = state.status === 'qr' && state.qr ? await QRCode.toString(state.qr, { type: 'svg', margin: 2 }) : null
     return [200, { status: state.status, svg }]
   },
 }
 
 const routes = {
-  'POST /pair-token': async () => {
-    const token = randomBytes(24).toString('hex')
-    pairTokens.set(token, Date.now() + 10 * 60_000)
-    return [200, { token, expiresInSec: 600 }]
-  },
-
-  'GET /status': async () => [200, { status: state.status, me: state.me ? mask(state.me) : null, since: state.since, lastError: state.lastError }],
+  'GET /status': async () => [200, {
+    status: state.status, me: state.me ? mask(state.me) : null, since: state.since, lastError: state.lastError,
+    code: state.status === 'pairing_code' ? state.code : null,
+  }],
 
   'GET /qr': async (req, url) => {
     if (state.status !== 'qr' || !state.qr) return [200, { status: state.status, qr: null }]
@@ -229,24 +209,27 @@ const routes = {
     return [200, { status: state.status, qr }]
   },
 
+  'POST /pair-token': async () => {
+    const token = randomBytes(24).toString('hex')
+    pairTokens.set(token, Date.now() + 10 * 60_000)
+    return [200, { token, expiresInSec: 600 }]
+  },
+
   'POST /pairing-code': async (req) => {
     const { phone } = await readJson(req)
     const digits = normalizeTo(phone)
     if (!digits) return [400, { error: 'Nomor tidak valid' }]
     if (state.status === 'connected') return [409, { error: 'Sudah tersambung' }]
-    // Minta ulang untuk nomor yang sama → kode yang sama (kode baru membatalkan kode lama di HP).
-    if (pairing && pairing.digits === digits && pairing.gen === gen && Date.now() - pairing.at < 120_000) {
-      return [200, { code: pairing.code, reused: true, validForSec: Math.round((pairing.at + 150_000 - Date.now()) / 1000) }]
+    // Nomor sama & masih aktif → kode yang sedang berlaku (kode baru membatalkan kode lama di HP).
+    if (pairing && pairing.digits === digits && pairing.gen === gen && state.code) {
+      return [200, { code: state.code, reused: true }]
     }
-    // Soket segar → waktu penuh ±2,5 menit untuk memasukkan kode.
-    const registered = authStore?.state?.creds?.registered === true
-    await restartNow({ fresh: !registered })
-    for (let i = 0; i < 40 && state.status !== 'qr'; i++) await sleep(500)
-    if (!sock || state.status !== 'qr') return [503, { error: 'Sidecar belum siap, coba lagi sebentar' }]
-    const code = await sock.requestPairingCode(digits)
-    pairing = { code, digits, gen, at: Date.now() }
+    pairing = { digits, gen: gen + 1 }
+    start({ fresh: true, pairDigits: digits }).catch((e) => log('gagal memulai:', e?.message))
+    for (let i = 0; i < 180 && !state.code; i++) await sleep(500)
+    if (!state.code) return [503, { error: 'WhatsApp Web belum memberi kode — coba lagi sebentar' }]
     log('kode tautan dibuat untuk', mask(digits))
-    return [200, { code, validForSec: 150 }]
+    return [200, { code: state.code, validForSec: 180 }]
   },
 
   'POST /send': async (req) => {
@@ -255,22 +238,23 @@ const routes = {
     const text = cleanText(body.text)
     if (!to) return [400, { ok: false, error: 'Nomor tujuan tidak valid' }]
     if (!text) return [400, { ok: false, error: 'Isi pesan kosong atau terlalu panjang' }]
-    if (state.status !== 'connected' || !sock) return [503, { ok: false, error: `WhatsApp belum tersambung (status: ${state.status})` }]
+    if (state.status !== 'connected' || !client) return [503, { ok: false, error: `WhatsApp belum tersambung (status: ${state.status})` }]
+    const c = client
     const id = await send(async () => {
-      const [hit] = (await sock.onWhatsApp(to)) ?? []
-      if (!hit?.exists) throw Object.assign(new Error('Nomor tidak terdaftar di WhatsApp'), { status: 422 })
-      const sent = await sock.sendMessage(hit.jid, { text })
-      return sent?.key?.id ?? null
+      const wid = await c.getNumberId(to)
+      if (!wid) throw Object.assign(new Error('Nomor tidak terdaftar di WhatsApp'), { status: 422 })
+      const chatId = wid._serialized || (wid.user && wid.server ? `${wid.user}@${wid.server}` : `${to}@c.us`)
+      const msg = await c.sendMessage(chatId, text, { linkPreview: false, sendSeen: false })
+      return msg?.id?.id ?? null
     })
     log('terkirim ke', mask(to))
     return [200, { ok: true, id }]
   },
 
   'POST /logout': async () => {
-    if (sock && state.status === 'connected') await sock.logout().catch(() => {})
-    setStatus('logged_out', { qr: null, me: null })
+    if (client && state.status === 'connected') await client.logout().catch(() => {})
     pairing = null
-    await restartNow({ fresh: true })
+    await start({ fresh: true })
     return [200, { ok: true }]
   },
 }
@@ -298,19 +282,20 @@ const server = http.createServer(async (req, res) => {
     reply(res, status, body)
   } catch (err) {
     const status = err?.status || 500
-    if (status >= 500) log('galat', req.method, url.pathname, String(err?.message || err))
-    reply(res, status, { ok: false, error: String(err?.message || 'Galat internal') })
+    if (status >= 500) log('galat', req.method, url.pathname, String(err?.message || err).slice(0, 200))
+    reply(res, status, { ok: false, error: String(err?.message || 'Galat internal').slice(0, 300) })
   }
 })
 
-server.listen(PORT, '0.0.0.0', () => log(`sidecar WhatsApp Dentiva siap di :${PORT}`))
-start()
+server.listen(PORT, '0.0.0.0', () => log(`sidecar WhatsApp Dentiva (WhatsApp Web) siap di :${PORT}`))
+start().catch((e) => log('gagal memulai:', e?.message))
 
 for (const sig of ['SIGTERM', 'SIGINT']) {
-  process.on(sig, () => {
+  process.on(sig, async () => {
     log('berhenti')
     server.close()
-    try { sock?.end(undefined) } catch {}
-    setTimeout(() => process.exit(0), 500)
+    gen++
+    await client?.destroy().catch(() => {})
+    process.exit(0)
   })
 }
