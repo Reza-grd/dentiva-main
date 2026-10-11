@@ -61,6 +61,37 @@ Pelajaran gladi 11 Okt 2026:
   (`FUNCTIONS_VERIFY_JWT=true`, kecuali `FUNCTIONS_NO_VERIFY_JWT=whatsapp-webhook,midtrans-webhook`), import map
   `deno.json` per fungsi, batas 256 MB / 150 detik seperti Cloud. **Pasang ulang setelah `update.sh` Supabase.**
 
+## WhatsApp
+Satu pintu pengirim di `supabase/functions/_shared/whatsapp.ts`, dipilih lewat `WA_PROVIDER` di `functions.env`:
+
+| Mode | Status | Kunci di `functions.env` |
+|---|---|---|
+| `sidecar`: WhatsApp Web asli di VPS (tidak resmi) | **aktif**, nomor belum tertaut | `WA_SIDECAR_URL=http://wa-sidecar:3000`, `WA_SIDECAR_KEY` (sama dengan `wa-sidecar.env`) |
+| `meta`: WhatsApp Cloud API (resmi) | kode siap, menunggu pendaftaran Meta | `META_WA_TOKEN`, `META_WA_PHONE_NUMBER_ID`, `META_WA_TEMPLATE_PENGINGAT`, opsional `META_WA_API_VERSION` (bawaan v22.0), `META_WA_TEMPLATE_LANG` (bawaan `id`) |
+| `whapi`: Whapi.cloud (lama) | tidak dipakai | `WHAPI_TOKEN` |
+
+**Sidecar** (`infra/vps/wa-sidecar`, container `dentiva-wa`, profil compose `wa-sidecar`):
+- **Mesin:** whatsapp-web.js dari commit resmi 2026-09-28, terkunci di lockfile, dengan Chromium headless. Pemakaian memori ±450 MB.
+- **Akses:** tidak ada port publik. Fungsi edge memanggilnya lewat jaringan Docker. Halaman QR hanya di 127.0.0.1:3002 (lewat terowongan SSH).
+- **Data sesi:** profil WhatsApp Web di `volumes/wa-sidecar/wwebjs` (izin 700). Profil ini memuat riwayat chat nomor tersebut, jadi perlakukan sebagai data rahasia.
+- **Pesan dan log:** nomor disamarkan di log. Pesan kiriman tidak menandai chat sebagai "dibaca". Pengiriman diberi jeda acak dan batas 200/jam.
+- **Gangguan sementara:** kalau WhatsApp belum tersambung, pengingat **ditunda**, tidak dicatat gagal, dan dicoba lagi di putaran cron berikutnya.
+- **Menautkan nomor** (pakai nomor klinik, bukan nomor pribadi):
+  1. Di laptop, buka terowongan: `ssh -N -L 3002:127.0.0.1:3002 dentiva@202.74.74.163`.
+  2. Di server, buat tautan halaman QR: `docker exec dentiva-wa node cli.mjs pair-link`.
+  3. Buka tautan itu di browser, lalu di HP: **Perangkat tertaut → Tautkan perangkat** dan scan QR.
+  4. Cara lain tanpa QR, dengan kode tautan: `docker exec -it dentiva-wa node cli.mjs login 08xx…`.
+- **Perintah lain:** `docker exec dentiva-wa node cli.mjs status`, atau `… logout` untuk melepas nomor.
+- **11 Okt — Baileys 7 rc ditinggalkan:** QR maupun kode tautannya tidak pernah menghasilkan `pair-success`.
+- **11 Okt — nomor utama ditolak HP:** setelah puluhan percobaan, HP menampilkan "Tidak dapat menautkan perangkat", padahal QR sudah buatan WhatsApp Web resmi. Kemungkinan besar nomor dikunci sementara. Coba lagi beberapa jam kemudian, cek batas 4 perangkat tertaut, atau uji dulu dengan nomor lain.
+
+**Mengaktifkan mode resmi Meta** setelah pendaftaran disetujui:
+1. Isi `META_WA_TOKEN` (token System User permanen) dan `META_WA_PHONE_NUMBER_ID`.
+2. Buat template **Utility** berbahasa `id` dengan nama sesuai `META_WA_TEMPLATE_PENGINGAT`, misalnya `pengingat_jadwal`. Isinya: *"Halo {{1}}, Anda memiliki jadwal kunjungan pada {{2}} pukul {{3}} dengan {{4}} di {{5}}. Mohon hadir tepat waktu. Hubungi {{6}} jika perlu menjadwal ulang."*
+3. Webhook Meta mengarah ke `https://api.dentiva.id/functions/v1/whatsapp-webhook`, dengan `WHATSAPP_VERIFY_TOKEN` dan `WHATSAPP_APP_SECRET`.
+4. Ubah `WA_PROVIDER=meta`, lalu jalankan `docker compose up -d --force-recreate functions`.
+5. Untuk pesan bebas (misalnya dari kasir) di luar jendela 24 jam, Meta menolak. Pesan seperti itu perlu template tersendiri.
+
 ## Backup
 - Kunci pembuka hanya di laptop pemilik: `~/.ssh/dentiva_backup` (ed25519) — **salin juga ke USB/brankas**;
   tanpa kunci ini backup tidak bisa dibuka. Kunci publiknya di `/opt/dentiva/backup/penerima.txt`.
