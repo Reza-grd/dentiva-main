@@ -170,7 +170,7 @@ export const HELP_BODY = [
   '- **Perintah** — "buka jadwal dokter", "mode gelap", "bacakan", "mulai baru"',
   '- **Pemandu** — *"buka laporan"*, *"di mana pengaturan?"*, *"ajarkan cara …"*, *"checklist harian"*',
   '- **Kamus istilah** — *"apa itu scaling?"*, *"HPP itu apa"*, *"arti odontogram"*',
-  '- **Seru-seruan** — *"kuis"*, *"tahukah kamu"*, *"pamer otot"*, *"semua gerakan"*',
+  '- **Seru-seruan** — *"kuis"*, *"tahukah kamu"*, *"pamer otot"*, *"semua gerakan"*, *"main suit"*, *"lempar koin"*',
   '',
   'Contoh pertanyaan: *"Berapa pendapatan bulan ini?"*, *"Bahan apa yang hampir kadaluarsa?"*, *"Ringkas kondisi klinik hari ini."*',
 ].join('\n');
@@ -181,7 +181,7 @@ export const HELP_BODY_STAFF = [
   '- **Kamus istilah** — *"apa itu odontogram?"*, *"recall itu apa"*, *"arti scaling"*',
   '- **Hitung cepat** — diskon, persen naik/turun, cicilan, terbilang kuitansi, hitung tanggal',
   '- **Perintah** — *"mode gelap"*, *"kembali"*, *"muat ulang"*, *"mulai baru"*',
-  '- **Seru-seruan** — *"kuis"*, *"tahukah kamu"*, *"ngopi"*, *"semua gerakan"*',
+  '- **Seru-seruan** — *"kuis"*, *"tahukah kamu"*, *"ngopi"*, *"semua gerakan"*, *"main suit"*, *"lempar koin"*',
   '',
   'Coba: *"cara mulai kunjungan"*, *"cara isi rekam medis"*, *"cara proses booking"* — sesuai peran Anda.',
 ].join('\n');

@@ -140,6 +140,17 @@ export const FACTS = [
   'Minum air putih setelah makan membantu **membilas sisa makanan** dan menetralkan asam ringan.',
 ];
 const FACT_ASK = /^(fun fact|kasih fakta|beri fakta|ada fakta|fakta apa|tahukah kamu|tahukah anda|tau gak|tau nggak|tau tidak|tahu tidak|tahu nggak|tahu gak|info menarik|informasi menarik|ceritakan sesuatu|kasih info menarik|fakta seru)( dong| gigi)?$/;
+// ── Permainan kecil (tanpa keadaan; hasil dari seed) ──
+const COIN = /^(lempar koin|koin|flip coin|toss|tos|toss koin|lempar uang logam|undi koin|lempar koin dong|tos koin)( dong)?$/;
+const DICE = /^(lempar dadu|dadu|roll dice|kocok dadu|lempar dadunya|main dadu|dadu dong)( dong)?$/;
+const CHOOSE = /^(?:pilihin|pilihkan|tentukan|undi|bantu pilih|bantu pilihin|bantu tentukan) (?:antara )?(.{1,28}?) (?:atau|or|vs) (.{1,28})$/;
+// opsi yang menyangkut data/urusan klinik ('tentukan harga scaling atau tambal') bukan undian iseng
+const CHOOSE_DATA = /(harga|tarif|pasien|dokter|tindakan|laporan|biaya|bulan|jadwal|stok|bahan|pendapatan|pengeluaran|laba|margin|booking|tagihan|kunjungan|klinik|diskon|promo|obat|resep|staf|\d)/;
+const RPS_START = /^(main suit|suit|jankenpon|batu gunting kertas|ayo suit|main batu gunting kertas|suit dong|ayo main suit|main jankenpon)( dong)?$/;
+const RPS_PICK = /^(batu|gunting|kertas)( dong)?$/;
+const RPS = ['batu', 'gunting', 'kertas'];
+const RPS_EMOJI = { batu: '✊', gunting: '✌️', kertas: '✋' };
+const BEATS = { batu: 'gunting', gunting: 'kertas', kertas: 'batu' }; // kunci mengalahkan nilai
 const AGAIN_FUN = /^(lagi|satu lagi|sekali lagi|ulangi|ulang|ulangi lagi|lagi lagi|yang lain|lainnya|another one|more|ulang lagi)( dong| yuk| deh)?$/;
 const GIVE_UP = /^(nyerah|menyerah|aku nyerah|saya nyerah|jawabannya|apa jawabannya|kasih tahu|kasih tau|kasih tahu jawabannya|tidak tahu|gak tau|nggak tau|ga tau|tidak tau|skip|lewat|ganti soal|soal lain|pass|kasih jawabannya|bocoran|jawaban)( dong)?$/;
 const HINT = /^(petunjuk|hint|kasih petunjuk|clue|bantu dong|kasih clue|kasih hint|minta petunjuk)( dong)?$/;
@@ -214,6 +225,35 @@ export function funReply(t0, { seed = 0, recent = [], quiz = null, name = '', la
     if (lastIntent === 'fact') return { intent: 'fact', state: 'idea', reply: `🦷 **Tahukah Anda?** ${fresh(FACTS, seed + 1, recent.map((r) => r.replace(/^.*?\*\* /, '')))}` };
     if (['quizRight', 'quizReveal', 'quiz'].includes(lastIntent)) return funReply('kuis', { seed: seed + 1, recent, quiz: null, name });
     if (lastIntent === 'showoff') return funReply('atraksi', { seed, recent, quiz: null, name });
+    if (lastIntent === 'coin') return funReply('lempar koin', { seed: seed + 1, recent, quiz: null, name });
+    if (lastIntent === 'dice') return funReply('lempar dadu', { seed: seed + 1, recent, quiz: null, name });
+    if (lastIntent === 'rpsPlay' || lastIntent === 'rps') return funReply('main suit', { seed, recent, quiz: null, name });
+  }
+  if (COIN.test(t)) {
+    const side = Math.abs(seed) % 2 ? 'Gambar' : 'Angka';
+    return { intent: 'coin', state: 'spin', reply: `🪙 *Cling!* Koin berputar… hasilnya: **${side}**!\n\nKetik *"lagi"* untuk melempar ulang.` };
+  }
+  if (DICE.test(t)) {
+    const n = (Math.abs(seed) % 6) + 1;
+    return { intent: 'dice', state: 'jump', reply: `🎲 Dadu bergulir… muncul **${n}**!\n\nKetik *"lagi"* untuk melempar ulang.` };
+  }
+  const ch = t.match(CHOOSE);
+  if (ch && !CHOOSE_DATA.test(`${ch[1]} ${ch[2]}`)) {
+    const options = [ch[1].trim(), ch[2].trim()];
+    const pick = options[Math.abs(seed) % 2];
+    return { intent: 'choose', state: 'idea', reply: `🤔 Hmm… saya pilih **${pick}**! ${pickOf(['Keputusan final. 😎', 'Feeling saya bilang begitu. ✨', 'Kalau ragu, ikuti kata Denti! 😄'], seed)}` };
+  }
+  if (RPS_START.test(t)) {
+    return { intent: 'rps', state: 'excited', reply: '✊✌️✋ **Suit!** Pilih: *batu*, *gunting*, atau *kertas* — saya sudah siap!' };
+  }
+  const pk = t.match(RPS_PICK);
+  if (pk && lastIntent && (lastIntent === 'rps' || lastIntent === 'rpsPlay')) {
+    const you = pk[1];
+    const me = RPS[(Math.abs(seed) + you.length) % 3];
+    const face = `Kamu ${RPS_EMOJI[you]} **${you}** vs saya ${RPS_EMOJI[me]} **${me}**.`;
+    if (me === you) return { intent: 'rpsPlay', state: 'wink', reply: `${face} **Seri!** 🤝 Ketik *"lagi"* untuk ronde berikutnya.` };
+    if (BEATS[me] === you) return { intent: 'rpsPlay', state: 'flex', reply: `${face} **Saya menang!** 😎💪 Mau balas dendam? Ketik *"lagi"*.` };
+    return { intent: 'rpsPlay', state: 'cry', reply: `${face} **Kamu menang!** 🎉 Huhu, saya kalah… Ketik *"lagi"* untuk ronde berikutnya.` };
   }
   if (FACT_ASK.test(t)) {
     return { intent: 'fact', state: 'idea', reply: `🦷 **Tahukah Anda?** ${pickOf(FACTS, seed)}\n\nKetik *"lagi"* untuk fakta lainnya, atau *"kuis"* untuk menguji pengetahuan. 🎯` };
@@ -240,4 +280,4 @@ export const FUN_STATES = [...new Set([...MOVES.map((m) => m[1]), ...EMO.map((e)
 
 /** Kata bermakna dari pola gerakan/emosi/kuis — dipakai agar tidak "dikoreksi" ke kata lain saat normalisasi. */
 export const FUN_WORDS = [...new Set([...MOVES, ...EMO].flatMap(([, , re]) => String(re.source).match(/[a-z]{3,}/g) || [])
-  .concat(String(QUIZ_START.source + SHOWOFF.source + SHOWOFF_FULL.source + GIVE_UP.source + HINT.source + FACT_ASK.source + AGAIN_FUN.source).replace(/\\./g, ' ').match(/[a-z]{3,}/g) || []))];
+  .concat(String(COIN.source + DICE.source + CHOOSE.source + RPS_START.source + RPS_PICK.source + QUIZ_START.source + SHOWOFF.source + SHOWOFF_FULL.source + GIVE_UP.source + HINT.source + FACT_ASK.source + AGAIN_FUN.source).replace(/\\./g, ' ').match(/[a-z]{3,}/g) || []))];

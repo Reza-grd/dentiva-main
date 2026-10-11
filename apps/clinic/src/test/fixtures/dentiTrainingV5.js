@@ -134,7 +134,7 @@ export const CYCLES_V5 = [
       quiz: [['lagi', { lastIntent: 'quizRight' }], ['soal lagi', { lastIntent: 'quizRight' }], ['kuis lagi', { lastIntent: 'quizReveal' }], ['sekali lagi', { lastIntent: 'quizRight' }], ['lagi', { lastIntent: 'quizReveal' }]],
       showoff: [['lagi', { lastIntent: 'showoff' }], ['ulangi', { lastIntent: 'showoff' }]],
     },
-    states: [['lagi', 'wink', { lastIntent: 'move:wink' }], ['lagi', 'coffee', { lastIntent: 'move:coffee' }], ['lagi', 'idea', { lastIntent: 'fact' }]],
+    states: [['lagi', 'spin', { lastIntent: 'coin' }], ['lagi', 'jump', { lastIntent: 'dice' }], ['lagi', 'excited', { lastIntent: 'rpsPlay' }], ['lagi', 'wink', { lastIntent: 'move:wink' }], ['lagi', 'coffee', { lastIntent: 'move:coffee' }], ['lagi', 'idea', { lastIntent: 'fact' }]],
     distinct: [['ngopi', 3], ['pamer otot', 3], ['mode detektif', 3], ['pura pura marah', 3], ['pura pura nangis', 3], ['telepon', 3], ['meregang', 3]],
     ai: [['lagi', { lastIntent: 'unknown' }], ['tampilkan lagi laporan tadi', {}], ['berapa lagi sisa hari bulan ini', {}]],
   },
@@ -259,5 +259,21 @@ export const CYCLES_V5 = [
     replies: [['ya', 'Biaya & Modal', OFFER], ['tidak', 'tidak saya buka', OFFER]],
     // tanpa tawaran → bukan perintah buka halaman
     ai: ['ke sana', 'buka halamannya', 'bawa aku ke sana', 'antar ke sana', 'langsung buka'],
+  },
+  {
+    name: 'Siklus 66 · permainan kecil (koin, dadu, undi pilihan, suit) & "lagi"',
+    intents: {
+      coin: ['lempar koin', 'koin', 'flip coin', 'toss', 'toss koin', 'undi koin', 'tos koin', 'lempar uang logam', 'lempar koin dong', 'LEMPAR KOIN', 'lempar koinn'],
+      dice: ['lempar dadu', 'dadu', 'roll dice', 'kocok dadu', 'main dadu', 'dadu dong', 'lempar dadunya'],
+      choose: ['pilihin kopi atau teh', 'tentukan makan atau tidur', 'undi budi atau ani', 'pilihkan merah atau biru', 'bantu pilih nasi atau mie', 'pilihin a vs b', 'tentukan siapa traktir aku atau kamu',
+        'pilihin pizza or burger', 'undi kiri atau kanan', 'tentukan sate atau bakso dong'],
+      rps: ['main suit', 'suit', 'jankenpon', 'batu gunting kertas', 'ayo suit', 'main batu gunting kertas', 'suit dong', 'ayo main suit'],
+      rpsPlay: [['batu', { lastIntent: 'rps' }], ['gunting', { lastIntent: 'rps' }], ['kertas', { lastIntent: 'rps' }], ['batu dong', { lastIntent: 'rpsPlay' }], ['Gunting!', { lastIntent: 'rpsPlay' }],
+        ['kertas', { lastIntent: 'rpsPlay' }], ['BATU', { lastIntent: 'rps' }]],
+    },
+    states: [['lempar koin', 'spin'], ['lempar dadu', 'jump'], ['pilihin kopi atau teh', 'idea'], ['main suit', 'excited']],
+    replies: [['lempar koin', 'Cling'], ['lempar dadu', 'Dadu'], ['pilihin kopi atau teh', 'saya pilih'], ['main suit', 'batu'], ['batu', 'vs saya', { lastIntent: 'rps' }]],
+    ai: ['batu', 'gunting', 'kertas', 'harga kertas hvs berapa', 'koin berapa', 'tentukan harga scaling atau tambal', 'pilihin dokter alya atau budi untuk jadwal', 'tentukan jadwal besok atau lusa',
+      'undi pasien mana yang dipanggil duluan', 'pilihin tindakan paling untung atau paling laris', 'tentukan margin 30% atau 40%', 'bantu pilih bahan scaling atau tambal'],
   },
 ];

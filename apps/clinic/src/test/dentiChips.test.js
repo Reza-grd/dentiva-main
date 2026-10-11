@@ -7,6 +7,7 @@ const CTX = {
   define: {}, glossaryList: {}, tip: {}, daily: {}, guide: {}, navlist: {}, offerNo: {}, navdeny: {}, navunknown: {},
   fact: { lastIntent: 'fact' }, showoff: { lastIntent: 'showoff' }, quizRight: { lastIntent: 'quizRight' }, quizReveal: { lastIntent: 'quizReveal' },
   quiz: { quiz: 0 }, quizHint: { quiz: 0 }, quizWrong: { quiz: 0 },
+  coin: { lastIntent: 'coin' }, dice: { lastIntent: 'dice' }, rps: { lastIntent: 'rps' }, rpsPlay: { lastIntent: 'rpsPlay' }, choose: {},
   'move:wink': { lastIntent: 'move:wink' }, 'move:coffee': { lastIntent: 'move:coffee' }, 'emo:sad': {}, 'emo:proud': {},
 };
 

@@ -718,6 +718,7 @@ const FOLLOW = {
   fact: ['Lagi dong', 'Kuis gigi'], tip: ['Fakta unik tentang gigi', 'Kuis gigi', 'Tahukah kamu'],
   quiz: ['Petunjuk', 'Nyerah'], quizHint: ['Nyerah'], quizWrong: ['Petunjuk', 'Nyerah'], quizRight: ['Kuis lagi', 'Tahukah kamu'], quizReveal: ['Kuis lagi', 'Tahukah kamu'],
   showoff: ['Lagi dong', 'Kuis gigi'], daily: ['Menu apa saja', 'Kamu bisa apa saja?'], guide: ['Menu apa saja', 'Kuis gigi'], navlist: ['Checklist harian'],
+  coin: ['Lagi dong', 'Lempar dadu'], dice: ['Lagi dong', 'Lempar koin'], rps: ['Batu', 'Gunting', 'Kertas'], rpsPlay: ['Lagi dong', 'Kuis gigi'], choose: ['Lempar koin', 'Kuis gigi'],
   offerNo: ['Menu apa saja'], navdeny: ['Menu apa saja', 'Checklist harian'], navunknown: ['Menu apa saja'],
 };
 export function followUps(key, exclude = '') {

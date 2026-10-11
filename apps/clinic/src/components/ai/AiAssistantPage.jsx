@@ -71,7 +71,7 @@ const SUGGEST_BANK = [
 const IDLE_NUDGES = [
   'Bosan? Ketik "kuis" untuk menguji pengetahuan gigi 🎯', 'Ketik "tahukah kamu" — saya punya fakta gigi seru 🦷', 'Mau lihat atraksi? Ketik "semua gerakan" 🎭',
   'Bingung mulai dari mana? Ketik "checklist harian" 📋', 'Istilah baru? Tanya "apa itu odontogram?" 📖', 'Ketik "ajarkan cara …" — saya pandu langkah demi langkah 🧭',
-  'Saya bisa membuka halaman: coba "buka laporan" ✨', 'Butuh jeda? Ketik "ngopi" ☕',
+  'Saya bisa membuka halaman: coba "buka laporan" ✨', 'Butuh jeda? Ketik "ngopi" ☕', 'Main suit yuk? Ketik "main suit" ✊✌️✋', 'Bingung memutuskan? Ketik "lempar koin" 🪙',
 ];
 /** Gerakan kecil saat Denti dibiarkan (agar terasa hidup). */
 const IDLE_MOVES = [
