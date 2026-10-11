@@ -13,15 +13,10 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
+import { configProblem, reminderTemplate, sendWhatsApp } from "../_shared/whatsapp.ts"
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
-
-function normalizePhoneForWhapi(phone: string): string {
-  let clean = phone.replace(/[^0-9]/g, '')
-  if (clean.startsWith('0')) clean = '62' + clean.slice(1)
-  return clean
-}
 
 const getDocName = (doc: any) => {
   if (!doc) return 'Dokter Gigi'
@@ -36,8 +31,8 @@ Deno.serve(async (req) => {
     return json(401, { error: 'Unauthorized: Service role key required' })
   }
 
-  const whapiToken = Deno.env.get('WHAPI_TOKEN')
-  if (!whapiToken) return json(500, { error: 'WHAPI_TOKEN belum dikonfigurasi' })
+  const waProblem = configProblem()
+  if (waProblem) return json(500, { error: waProblem })
 
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey)
 
@@ -86,15 +81,11 @@ Deno.serve(async (req) => {
     const wibHour = wib.getUTCHours()
     const dayWindowOpen = wibHour >= 8 && wibHour < 20
 
-    const sendWhapi = async (phone: string, text: string) => {
-      const response = await fetch('https://gate.whapi.cloud/messages/text', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${whapiToken}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: normalizePhoneForWhapi(phone) + '@s.whatsapp.net', body: text }),
-      })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok || data.error) throw new Error(data.message || data.error || `Whapi HTTP ${response.status}`)
-      return data
+    // Teks untuk sidecar/Whapi; penyedia Meta memakai template resmi bila dikonfigurasi.
+    const sendReminder = async (phone: string, text: string, params: string[]) => {
+      const r = await sendWhatsApp({ to: phone, text, template: reminderTemplate(params) })
+      if (!r.ok) throw new Error(r.error || 'Pengiriman WhatsApp gagal')
+      return { provider: r.provider, id: r.id }
     }
 
     const fetchVisits = async (date: string) => {
@@ -113,7 +104,7 @@ Deno.serve(async (req) => {
 
     const results: Array<Record<string, unknown>> = []
 
-    const process = async (visit: any, type: 'reminder_day' | 'reminder_hour', build: (p: any, c: ReturnType<typeof cfg>) => string) => {
+    const process = async (visit: any, type: 'reminder_day' | 'reminder_hour', build: (p: any, c: ReturnType<typeof cfg>) => { text: string; params: string[] }) => {
       const { data: existing, error: logErr } = await supabase
         .from('notification_logs')
         .select('id')
@@ -138,7 +129,8 @@ Deno.serve(async (req) => {
       if (!wa) return
 
       try {
-        const resp = await sendWhapi(wa, build({ ...visit.patient, nama_lengkap: nama }, cfg(visit.clinic_id)))
+        const { text, params } = build({ ...visit.patient, nama_lengkap: nama }, cfg(visit.clinic_id))
+        const resp = await sendReminder(wa, text, params)
         await log('sent', JSON.stringify(resp))
         results.push({ visitId: visit.id, type, status: 'sent' })
       } catch (err: any) {
@@ -152,7 +144,9 @@ Deno.serve(async (req) => {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta',
       })
       const time = visit.jam_kunjungan ? visit.jam_kunjungan.slice(0, 5) : '--:--'
-      return `🦷 *PENGINGAT JADWAL*\n${c.name}\n━━━━━━━━━━━━━━━━━━\nHalo ${patient.nama_lengkap},\nAnda memiliki jadwal kunjungan:\n📅 ${dateFormatted} jam ${time} WIB\n👨‍⚕️ Dokter: ${getDocName(visit.dokter)}\n📍 ${c.name}\n━━━━━━━━━━━━━━━━━━\nMohon hadir tepat waktu. Hubungi kami jika perlu reschedule: ${c.phone}`
+      const params = [patient.nama_lengkap, dateFormatted, `${time} WIB`, getDocName(visit.dokter), c.name, c.phone]
+      const text = `🦷 *PENGINGAT JADWAL*\n${c.name}\n━━━━━━━━━━━━━━━━━━\nHalo ${patient.nama_lengkap},\nAnda memiliki jadwal kunjungan:\n📅 ${dateFormatted} jam ${time} WIB\n👨‍⚕️ Dokter: ${getDocName(visit.dokter)}\n📍 ${c.name}\n━━━━━━━━━━━━━━━━━━\nMohon hadir tepat waktu. Hubungi kami jika perlu reschedule: ${c.phone}`
+      return { text, params }
     }
 
     // 4. H-1 hari (jam kerja saja)

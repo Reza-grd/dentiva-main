@@ -26,3 +26,27 @@ services:
         required: false
     environment:
       FUNCTIONS_NO_VERIFY_JWT: whatsapp-webhook,midtrans-webhook
+
+  # Sidecar WhatsApp Dentiva (tidak resmi, Baileys) — kode di infra/vps/wa-sidecar, dipasang ke
+  # /opt/dentiva/wa-sidecar. TIDAK ada port publik: edge function memanggil http://wa-sidecar:3000
+  # dengan WA_SIDECAR_KEY (wa-sidecar.env & functions.env, izin 600). Kunci sesi WhatsApp di
+  # volumes/wa-sidecar (izin 700). Login: docker exec -it dentiva-wa node cli.mjs login
+  wa-sidecar:
+    container_name: dentiva-wa
+    profiles: ["wa-sidecar"] # hanya jalan bila diminta: docker compose --profile wa-sidecar up -d wa-sidecar
+    build: /opt/dentiva/wa-sidecar
+    image: dentiva/wa-sidecar:local
+    restart: unless-stopped
+    env_file:
+      - path: ./wa-sidecar.env
+        required: false
+    environment:
+      AUTH_DIR: /data/auth
+    volumes:
+      - ./volumes/wa-sidecar:/data
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -2,19 +2,12 @@ import { requireActiveAccount } from "../_shared/activeAccount.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
+import { configProblem, sendWhatsApp } from "../_shared/whatsapp.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
-
-function normalizePhoneForWhapi(phone: string): string {
-  let clean = phone.replace(/[^0-9]/g, '')
-  if (clean.startsWith('0')) {
-    clean = '62' + clean.slice(1)
-  }
-  return clean
 }
 
 // In-memory rate limiting per client IP
@@ -165,10 +158,9 @@ serve(async (req) => {
       }
     }
 
-    const whapiToken = Deno.env.get('WHAPI_TOKEN')
-
-    if (!whapiToken) {
-      return new Response(JSON.stringify({ error: 'Whapi.cloud Token (WHAPI_TOKEN) is not configured in Supabase Secrets' }), {
+    const waProblem = configProblem()
+    if (waProblem) {
+      return new Response(JSON.stringify({ error: waProblem }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
@@ -257,92 +249,32 @@ serve(async (req) => {
       })
     }
 
-    const jidPhone = normalizePhoneForWhapi(finalPhone) + "@s.whatsapp.net";
-
     let msgType = messageType;
     if (isTest) msgType = 'test';
     if (!msgType) msgType = 'manual';
 
-    console.log(`[WHAPI] Sending message type ${msgType}`);
-
-    let response;
-    let responseText = '';
-    try {
-      response = await fetch('https://gate.whapi.cloud/messages/text', {
-        method: 'POST',
-        headers: { 
-          'Authorization': `Bearer ${whapiToken}`,
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({ to: jidPhone, body: message }),
-      })
-      responseText = await response.text()
-    } catch (e: any) {
-      console.error(`[WHAPI] Network error: ${e.message}`)
-      
-      if (!isTest && (finalPatientId || visitId)) {
-          await supabase.from('notification_logs').insert({
-              patient_id: finalPatientId || null,
-              visit_id: visitId || null,
-              message_type: msgType,
-              status: 'failed',
-              gateway_response: `Network error: ${e.message}`,
-              triggered_by: triggeredBy || null
-          });
-      }
-
-      return new Response(JSON.stringify({ error: 'Network error calling Whapi.cloud: ' + e.message }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    console.log(`[WHAPI] HTTP status: ${response.status} ${response.statusText}`)
-    
-    let data;
-    try {
-      data = JSON.parse(responseText)
-    } catch (e) {
-      console.error(`[WHAPI] Failed to parse response: ${responseText}`)
-      if (!isTest && (finalPatientId || visitId)) {
-        await supabase.from('notification_logs').insert({
-            patient_id: finalPatientId || null,
-            visit_id: visitId || null,
-            message_type: msgType,
-            status: 'failed',
-            gateway_response: `Failed to parse response: ${responseText}`,
-            triggered_by: triggeredBy || null
-        });
-      }
-      return new Response(JSON.stringify({ error: 'Failed to parse response from Whapi', rawResponse: responseText }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    const isSuccess = response.ok && (!data.error);
+    const result = await sendWhatsApp({ to: finalPhone, text: message })
+    console.log(`[WA] ${result.provider ?? '-'} type=${msgType} ok=${result.ok}`)
 
     if (!isTest && (finalPatientId || visitId)) {
-        await supabase.from('notification_logs').insert({
-            patient_id: finalPatientId || null,
-            visit_id: visitId || null,
-            message_type: msgType,
-            status: isSuccess ? 'sent' : 'failed',
-            gateway_response: JSON.stringify(data).slice(0, 500),
-            triggered_by: triggeredBy || null
-        });
+      await supabase.from('notification_logs').insert({
+        patient_id: finalPatientId || null,
+        visit_id: visitId || null,
+        message_type: msgType,
+        status: result.ok ? 'sent' : 'failed',
+        gateway_response: JSON.stringify(result.ok ? { provider: result.provider, id: result.id } : { provider: result.provider, error: result.error }).slice(0, 500),
+        triggered_by: triggeredBy || null
+      });
     }
 
-    if (!isSuccess) {
-      console.error(`[WHAPI] API failure: ${JSON.stringify(data)}`)
-      return new Response(JSON.stringify({ error: data.message || data.error || 'Whapi send failure', detail: data }), {
+    if (!result.ok) {
+      return new Response(JSON.stringify({ error: result.error || 'Pengiriman WhatsApp gagal', detail: result.detail ?? null }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    console.log(`[WHAPI] Success. Gateway response: ${JSON.stringify(data)}`)
-    return new Response(JSON.stringify({ success: true, detail: data }), {
+    return new Response(JSON.stringify({ success: true, detail: { provider: result.provider, id: result.id } }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
