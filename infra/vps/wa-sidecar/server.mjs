@@ -56,19 +56,51 @@ function setStatus(status, extra = {}) {
   Object.assign(state, { status, since: new Date().toISOString() }, extra)
 }
 
+// Struktur QR untuk log diagnosis — TANPA isi kunci: awalan, jumlah bagian, panjang.
+const qrShape = (q) => {
+  if (!q) return 'kosong'
+  const i = q.indexOf('#')
+  const body = i >= 0 ? q.slice(i + 1) : q
+  return `${i >= 0 ? q.slice(0, i) : 'tanpa-awalan'} | ${body.split(',').length} bagian | ${q.length} karakter`
+}
+
+// whatsapp-web.js menyusun QR format LAMA (ref,noise,identitas,adv,platform) — WhatsApp sekarang
+// menggambar format BARU dengan awalan tautan berikut (terbukti 11 Okt: kelima bagian identik,
+// hanya awalan yang berbeda). QR format lama terbaca HP tetapi penautannya ditolak.
+const QR_PREFIX = 'https://wa.me/settings/linked_devices#'
+const qrBaru = (q) => (q && !q.includes('#') ? QR_PREFIX + q : q)
+
+// QR persis seperti yang DIGAMBAR WhatsApp Web (atribut data-ref di halaman), bukan susunan ulang wwebjs.
+async function readDomQr(c) {
+  try {
+    return await c.pupPage?.evaluate(() => document.querySelector('[data-ref]')?.getAttribute('data-ref') || null)
+  } catch {
+    return null
+  }
+}
+
+// Chromium berjalan sebagai browser BIASA (bukan headless) di layar virtual Xvfb (lihat Dockerfile),
+// dan user-agent TIDAK ditimpa: UA, Client Hints (brands) & sidik lain asli Chrome desktop Linux.
+// (Headless memperkenalkan diri sebagai "HeadlessChrome"; UA tiruan mengosongkan brands.)
+const CHROMIUM = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium'
+const HEADLESS = process.env.WA_HEADLESS === 'true' || !process.env.DISPLAY
+
 function makeClient(pairDigits) {
   return new Client({
     authStrategy: new LocalAuth({ dataPath: DATA_DIR, clientId: 'dentiva' }),
     puppeteer: {
-      headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium',
+      headless: HEADLESS,
+      executablePath: CHROMIUM,
+      // Tanpa penanda otomasi (navigator.webdriver / --enable-automation).
+      ignoreDefaultArgs: ['--enable-automation'],
       args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu',
-             '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--mute-audio'],
+             '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--mute-audio',
+             '--disable-blink-features=AutomationControlled', '--lang=id-ID,id', '--window-size=1280,800'],
     },
     authTimeoutMs: 120_000,
     takeoverOnConflict: true, // bila WhatsApp Web dibuka di tempat lain, Dentiva mengambil alih kembali
     takeoverTimeoutMs: 15_000,
-    userAgent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+    userAgent: false, // jangan timpa — pakai UA asli Chromium
     ...(pairDigits ? { pairWithPhoneNumber: { phoneNumber: pairDigits, showNotification: true, intervalMs: 180_000 } } : {}),
   })
 }
@@ -93,9 +125,42 @@ async function start({ fresh = false, pairDigits = null } = {}) {
   client = c
   const mine = (fn) => (...args) => { if (myGen === gen) return fn(...args) }
 
-  c.on('qr', mine((qr) => { setStatus('qr', { qr }); log('menunggu scan QR') }))
+  let qrPoll = null
+  let compared = false
+  let consoleHooked = false
+  const stopQrPoll = () => { clearInterval(qrPoll); qrPoll = null }
+  c.on('qr', mine(async (qr) => {
+    setStatus('qr', { qr: qrBaru(qr) })
+    log('menunggu scan QR')
+    if (!consoleHooked && c.pupPage) {
+      consoleHooked = true
+      c.pupPage.evaluate(() => ({
+        webdriver: navigator.webdriver, ua: navigator.userAgent.replace(/\s+Safari.*$/, ''),
+        brands: (navigator.userAgentData?.brands || []).map((b) => b.brand + ' ' + b.version).join(' / '),
+      })).then((f) => log('sidik browser:', JSON.stringify(f))).catch(() => {})
+      // Pesan galat WhatsApp Web selama penautan (belum ada data chat pada tahap ini).
+      c.pupPage.on('console', (m) => {
+        if (myGen !== gen || state.status === 'connected') return
+        const t = m.text()
+        if (m.type() === 'error' || /pair|link|companion|adv|device|logout|ban/i.test(t)) log('[waweb]', m.type(), t.slice(0, 200))
+      })
+    }
+    if (qrPoll) return
+    // Selama menunggu scan: tampilkan QR asli dari halaman WhatsApp Web, bukan susunan wwebjs.
+    qrPoll = setInterval(mine(async () => {
+      if (state.status !== 'qr') return stopQrPoll()
+      const dom = await readDomQr(c)
+      if (!dom) return
+      if (!compared) {
+        compared = true
+        log('QR asli WA Web:', qrShape(dom), '| QR tampil:', qrShape(state.qr), dom === state.qr ? '(sama)' : '(BERBEDA — dipakai yang asli)')
+      }
+      if (dom !== state.qr) setStatus('qr', { qr: dom })
+    }), 1500)
+  }))
   c.on('code', mine((code) => { setStatus('pairing_code', { code, qr: null }); log('kode tautan siap') }))
   c.on('authenticated', mine(() => {
+    stopQrPoll()
     setStatus('authenticating', { qr: null, code: null })
     log('penautan diterima, memuat WhatsApp Web…')
     // Kadang "ready" tidak pernah datang setelah "authenticated" (isu wwebjs) → muat ulang.
@@ -298,7 +363,7 @@ const server = http.createServer(async (req, res) => {
   }
 })
 
-server.listen(PORT, '0.0.0.0', () => log(`sidecar WhatsApp Dentiva (WhatsApp Web) siap di :${PORT}`))
+server.listen(PORT, '0.0.0.0', () => log(`sidecar WhatsApp Dentiva (WhatsApp Web, ${HEADLESS ? 'headless' : 'layar virtual ' + process.env.DISPLAY}) siap di :${PORT}`))
 start().catch((e) => log('gagal memulai:', e?.message))
 
 for (const sig of ['SIGTERM', 'SIGINT']) {
