@@ -44,6 +44,9 @@ services:
       AUTH_DIR: /data/auth
     volumes:
       - ./volumes/wa-sidecar:/data
+    # Hanya 127.0.0.1 (halaman QR lewat terowongan SSH: ssh -L 3002:127.0.0.1:3002 …).
+    ports:
+      - "127.0.0.1:3002:3000"
     mem_limit: 512m
     logging:
       driver: json-file

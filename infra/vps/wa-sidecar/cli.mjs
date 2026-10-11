@@ -1,6 +1,7 @@
 // Alat baris perintah sidecar (dijalankan DI DALAM container):
 //   node cli.mjs login              tampilkan QR di terminal sampai tersambung
 //   node cli.mjs login 0812xxxxxxx  pakai kode tautan (tanpa scan QR)
+//   node cli.mjs pair-link          buat tautan halaman QR (dibuka lewat terowongan SSH)
 //   node cli.mjs status | logout
 const KEY = process.env.WA_SIDECAR_KEY || ''
 const BASE = `http://127.0.0.1:${process.env.PORT || 3000}`
@@ -15,7 +16,10 @@ const call = async (method, path, body) => {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const [cmd, arg] = process.argv.slice(2)
 
-if (cmd === 'status') {
+if (cmd === 'pair-link') {
+  const { token } = await call('POST', '/pair-token')
+  console.log(`http://localhost:3002/pair?t=${token}`)
+} else if (cmd === 'status') {
   console.log(await call('GET', '/status'))
 } else if (cmd === 'logout') {
   console.log(await call('POST', '/logout'))
@@ -31,10 +35,14 @@ if (cmd === 'status') {
     if (arg && !codeShown && st.status === 'qr') {
       const r = await call('POST', '/pairing-code', { phone: arg })
       if (r.code) {
-        console.log(`\nKode tautan: ${r.code}\n` +
-          'Di HP: WhatsApp → Perangkat tertaut → Tautkan perangkat → "Tautkan dengan nomor telepon saja" → masukkan kode di atas.\n')
+        console.log(`\nKode tautan: ${r.code}   (masukkan dalam ±${r.validForSec ?? 150} detik)\n` +
+          'Di HP: WhatsApp → Perangkat tertaut → Tautkan perangkat → "Tautkan dengan nomor telepon saja" → masukkan kode di atas.\n' +
+          'Gunakan HANYA kode terakhir yang tampil. Menunggu tersambung…\n')
         codeShown = true
-      } else console.log('Gagal membuat kode tautan:', r.error)
+      } else {
+        console.log('Gagal membuat kode tautan:', r.error, '— tunggu 1 menit lalu jalankan lagi.')
+        process.exit(1)
+      }
     } else if (!arg) {
       const { qr } = await call('GET', '/qr?format=terminal')
       if (qr && qr !== lastQr) {
