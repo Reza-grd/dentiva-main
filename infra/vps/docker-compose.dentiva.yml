@@ -16,3 +16,13 @@ services:
   studio:
     ports:
       - "127.0.0.1:3000:3000"
+
+  # Edge function: rahasia & konfigurasi Dentiva di functions.env (izin 600, diisi lewat
+  # /opt/dentiva/bin/isi-rahasia-functions.sh). Router (volumes/functions/main) memeriksa JWT
+  # per fungsi; webhook pihak ketiga dikecualikan seperti verify_jwt = false di Supabase Cloud.
+  functions:
+    env_file:
+      - path: ./functions.env
+        required: false
+    environment:
+      FUNCTIONS_NO_VERIFY_JWT: whatsapp-webhook,midtrans-webhook
