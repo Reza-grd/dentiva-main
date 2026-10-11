@@ -93,8 +93,9 @@ const SchedulePage = () => {
   const [availableSlots, setAvailableSlots] = useState([]);   // slot waktu dari jadwal dokter terpilih
   const [takenSlots,     setTakenSlots]     = useState([]);   // slot yang sudah terpakai di tanggal itu
 
-  const isAdminOrResepsionis =
-    userProfile?.role === 'admin' || userProfile?.role === 'resepsionis';
+  // Admin tidak lagi mengelola kunjungan (pemisahan kewenangan); yang boleh: resepsionis & dokter.
+  const isAdminOrResepsionis = userProfile?.role === 'resepsionis';
+  const isDokter = userProfile?.role === 'dokter';
 
   // ── Load visits ─────────────────────────────────────────────────────────────
   const loadVisits = useCallback(async () => {
@@ -615,7 +616,7 @@ const SchedulePage = () => {
                     Profil
                   </button>
 
-                  {(userProfile?.role === 'dokter' || userProfile?.role === 'admin') && (
+                  {userProfile?.role === 'dokter' && (
                     <button
                       onClick={() => navigate(`/rekam-medis/${visit.patient_id}`)}
                       className="text-xs px-3 py-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20 rounded-lg hover:bg-[var(--color-accent)]/20 transition-colors"
@@ -633,7 +634,7 @@ const SchedulePage = () => {
                     </button>
                   )}
 
-                  {visit.status === 'scheduled' && (
+                  {isDokter && visit.status === 'scheduled' && (
                     <button
                       onClick={() => handleUpdateStatus(visit.id, 'ongoing')}
                       className="text-xs px-3 py-1.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg hover:bg-yellow-100"
@@ -642,7 +643,7 @@ const SchedulePage = () => {
                     </button>
                   )}
 
-                  {visit.status === 'ongoing' && (
+                  {isDokter && visit.status === 'ongoing' && (
                     <button
                       onClick={() => handleUpdateStatus(visit.id, 'completed')}
                       className="text-xs px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100"

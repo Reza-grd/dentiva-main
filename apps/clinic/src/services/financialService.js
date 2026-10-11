@@ -7,12 +7,8 @@ export const financialService = {
     try {
       // BUG-C2 FIX: tanggal_pembayaran adalah tipe DATE (bukan TIMESTAMPTZ).
       // Cukup pakai string 'YYYY-MM-DD' langsung — tidak perlu suffix ISO timestamp.
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('total_bayar')
-        .eq('status_pembayaran', 'paid')
-        .gte('tanggal_pembayaran', startDate)
-        .lte('tanggal_pembayaran', endDate);
+      const { data: payRows } = await supabase.rpc('report_revenue_daily', { p_start: startDate, p_end: endDate });
+      const payments = (payRows || []).map((r) => ({ total_bayar: r.total_revenue }));
 
       // Get expenses
       const { data: expenses } = await supabase
@@ -50,22 +46,12 @@ export const financialService = {
       switch (period) {
         case 'daily':
           startDate = getLocalDateRange(limit).start;
-          query = supabase
-            .from('v_daily_revenue')
-            .select('*')
-            .gte('tanggal', startDate)
-            .lte('tanggal', endDate)
-            .order('tanggal', { ascending: true });
+          query = supabase.rpc('report_revenue_daily', { p_start: startDate, p_end: endDate });
           break;
         
         case 'monthly':
           startDate = getLocalDateRange(limit * 30).start;
-          query = supabase
-            .from('payments')
-            .select('tanggal_pembayaran, total_bayar')
-            .eq('status_pembayaran', 'paid')
-            .gte('tanggal_pembayaran', startDate)
-            .lte('tanggal_pembayaran', endDate);
+          query = supabase.rpc('report_revenue_daily', { p_start: startDate, p_end: endDate });
           break;
         
         default:
@@ -81,7 +67,7 @@ export const financialService = {
       if (period === 'monthly') {
         const monthlyMap = {};
         (data || []).forEach(row => {
-          const key = String(row.tanggal_pembayaran || '').substring(0, 7); // 'YYYY-MM'
+          const key = String(row.tanggal || '').substring(0, 7); // 'YYYY-MM'
           if (!monthlyMap[key]) {
             monthlyMap[key] = {
               bulan: key,
@@ -90,8 +76,8 @@ export const financialService = {
               total_transactions: 0,
             };
           }
-          monthlyMap[key].total_revenue += parseFloat(row.total_bayar || 0);
-          monthlyMap[key].total_transactions += 1;
+          monthlyMap[key].total_revenue += parseFloat(row.total_revenue || 0);
+          monthlyMap[key].total_transactions += Number(row.total_transactions) || 0;
         });
         const aggregated = Object.values(monthlyMap).sort((a, b) => a.bulan.localeCompare(b.bulan));
         return { success: true, data: aggregated };
@@ -222,24 +208,14 @@ export const financialService = {
 
       // BUG-C2 FIX: tanggal_pembayaran adalah tipe DATE — gunakan string 'YYYY-MM-DD'
       // langsung tanpa suffix ISO timestamp (T00:00:00+00:00 dll).
-      const { data: todayPayments } = await supabase
-        .from('payments')
-        .select('total_bayar')
-        .eq('status_pembayaran', 'paid')
-        .gte('tanggal_pembayaran', today)
-        .lte('tanggal_pembayaran', today);
+      const { data: todayPayments } = await supabase.rpc('report_revenue_daily', { p_start: today, p_end: today });
 
-      const todayRevenue = (todayPayments || []).reduce((sum, p) => sum + parseFloat(p.total_bayar || 0), 0);
+      const todayRevenue = (todayPayments || []).reduce((sum, p) => sum + parseFloat(p.total_revenue || 0), 0);
 
       // BUG-C2 FIX: month filter pakai DATE range biasa
-      const { data: monthPayments } = await supabase
-        .from('payments')
-        .select('total_bayar')
-        .eq('status_pembayaran', 'paid')
-        .gte('tanggal_pembayaran', monthStart)
-        .lte('tanggal_pembayaran', monthEnd);
+      const { data: monthPayments } = await supabase.rpc('report_revenue_daily', { p_start: monthStart, p_end: monthEnd });
 
-      const monthRevenue = (monthPayments || []).reduce((sum, p) => sum + parseFloat(p.total_bayar || 0), 0);
+      const monthRevenue = (monthPayments || []).reduce((sum, p) => sum + parseFloat(p.total_revenue || 0), 0);
 
       // Month's expenses
       const { data: monthExpenses } = await supabase
@@ -250,16 +226,10 @@ export const financialService = {
 
       const monthExpensesTotal = (monthExpenses || []).reduce((sum, e) => sum + parseFloat(e.jumlah || 0), 0);
 
-      // Total patients
-      const { count: totalPatients } = await supabase
-        .from('patients')
-        .select('*', { count: 'exact', head: true });
-
-      // Today's visits
-      const { count: todayVisits } = await supabase
-        .from('visits')
-        .select('*', { count: 'exact', head: true })
-        .eq('tanggal_kunjungan', today);
+      // Jumlah pasien & kunjungan hari ini (agregat dari server)
+      const { data: cnt } = await supabase.rpc('report_counts', { p_start: today, p_end: today });
+      const totalPatients = Number(cnt?.[0]?.patients_total) || 0;
+      const todayVisits = Number(cnt?.[0]?.visits_in_range) || 0;
 
       return {
         success: true,
@@ -287,18 +257,9 @@ export const financialService = {
       if (!summary.success) throw new Error(summary.error);
 
       // Get patient count
-      const { count: patientCount } = await supabase
-        .from('patients')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', startDate)
-        .lte('created_at', endDate);
-
-      // Get visit count
-      const { count: visitCount } = await supabase
-        .from('visits')
-        .select('*', { count: 'exact', head: true })
-        .gte('tanggal_kunjungan', startDate)
-        .lte('tanggal_kunjungan', endDate);
+      const { data: cnt } = await supabase.rpc('report_counts', { p_start: startDate, p_end: endDate });
+      const patientCount = Number(cnt?.[0]?.patients_new) || 0;
+      const visitCount = Number(cnt?.[0]?.visits_in_range) || 0;
 
       // Hanya kembalikan data tanpa simpan ke DB (report_type 'custom' tidak
       // ada di CHECK constraint: 'daily' | 'monthly' | 'yearly')
@@ -329,13 +290,9 @@ export const financialService = {
       const yearEnd   = `${year}-12-31`;
 
       // Satu query untuk semua payments dalam setahun
-      const { data: payments, error: pErr } = await supabase
-        .from('payments')
-        .select('tanggal_pembayaran, total_bayar')
-        .eq('status_pembayaran', 'paid')
-        .gte('tanggal_pembayaran', yearStart)
-        .lte('tanggal_pembayaran', yearEnd);
+      const { data: payRows, error: pErr } = await supabase.rpc('report_revenue_daily', { p_start: yearStart, p_end: yearEnd });
       if (pErr) throw pErr;
+      const payments = (payRows || []).map((r) => ({ tanggal_pembayaran: r.tanggal, total_bayar: r.total_revenue }));
 
       // Satu query untuk semua expenses dalam setahun
       const { data: expenses, error: eErr } = await supabase

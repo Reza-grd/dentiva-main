@@ -149,7 +149,7 @@ function App() {
           {/* Halaman unduhan ada di website resmi (dentiva.id/unduh) */}
           <Route path="/unduh" element={<ExternalRedirect to={DOWNLOAD_URL} />} />
           <Route path="/booking-requests" element={
-            <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <BookingRequests />
             </ProtectedRoute>
           } />
@@ -165,37 +165,37 @@ function App() {
           } />
 
           <Route path="/dokter/*" element={
-            <ProtectedRoute allowedRoles={['dokter', 'admin']}>
+            <ProtectedRoute allowedRoles={['dokter']}>
               <DoctorDashboard />
             </ProtectedRoute>
           } />
 
           <Route path="/resepsionis/*" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <ReceptionistDashboard />
             </ProtectedRoute>
           } />
 
           <Route path="/pasien" element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={['dokter', 'resepsionis']}>
               <PatientList />
             </ProtectedRoute>
           } />
 
           <Route path="/pasien/daftar" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <PatientRegistration />
             </ProtectedRoute>
           } />
 
           <Route path="/pasien/:patientId" element={
-            <ProtectedRoute allowedRoles={['dokter', 'resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['dokter', 'resepsionis']}>
               <PatientDetail />
             </ProtectedRoute>
           } />
 
           <Route path="/pasien/:patientId/kunjungan" element={
-            <ProtectedRoute allowedRoles={['dokter', 'resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['dokter', 'resepsionis']}>
               <VisitHistory />
             </ProtectedRoute>
           } />
@@ -207,13 +207,13 @@ function App() {
           } />
 
           <Route path="/pembayaran/:visitId" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <PaymentForm />
             </ProtectedRoute>
           } />
 
           <Route path="/resepsionis/pembayaran/:visitId" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <PaymentForm />
             </ProtectedRoute>
           } />
@@ -224,14 +224,8 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/admin/pembayaran" element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <PaymentList />
-            </ProtectedRoute>
-          } />
 
           {/* Transaksi dulu duplikat Pembayaran; alamat lama dialihkan agar bookmark tetap jalan. */}
-          <Route path="/admin/transaksi" element={<Navigate to="/admin/pembayaran" replace />} />
 
           <Route path="/admin/treatments" element={
             <ProtectedRoute allowedRoles={['admin']}>
@@ -251,11 +245,6 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/admin/recall" element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <RecallPage />
-            </ProtectedRoute>
-          } />
 
           <Route path="/resepsionis/recall" element={
             <ProtectedRoute allowedRoles={['resepsionis']}>
@@ -317,14 +306,9 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/admin/jadwal" element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <SchedulePage />
-            </ProtectedRoute>
-          } />
 
           <Route path="/dokter/jadwal" element={
-            <ProtectedRoute allowedRoles={['dokter', 'admin']}>
+            <ProtectedRoute allowedRoles={['dokter']}>
               <SchedulePage />
             </ProtectedRoute>
           } />
@@ -342,25 +326,25 @@ function App() {
           } />
 
           <Route path="/dokter/kunjungan" element={
-            <ProtectedRoute allowedRoles={['dokter', 'admin']}>
+            <ProtectedRoute allowedRoles={['dokter']}>
               <VisitHistory />
             </ProtectedRoute>
           } />
 
           <Route path="/resepsionis/kunjungan" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <VisitHistory />
             </ProtectedRoute>
           } />
 
           <Route path="/resepsionis/jadwal" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <SchedulePage />
             </ProtectedRoute>
           } />
 
           <Route path="/resepsionis/pembayaran" element={
-            <ProtectedRoute allowedRoles={['resepsionis', 'admin']}>
+            <ProtectedRoute allowedRoles={['resepsionis']}>
               <PaymentList />
             </ProtectedRoute>
           } />

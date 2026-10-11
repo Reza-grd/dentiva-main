@@ -163,7 +163,8 @@ const UserManagementPage = () => {
                           disabled={!isActive}
                         >
                           <option value="admin">Admin</option>
-                          <option value="dokter">Dokter</option>
+                          {/* Peran dokter hanya diberikan tim Dentiva (verifikasi) — tampil hanya bila sudah dokter */}
+                          {u.role === 'dokter' && <option value="dokter">Dokter</option>}
                           <option value="resepsionis">Resepsionis</option>
                         </select>
                       </td>
@@ -273,11 +274,9 @@ const UserManagementPage = () => {
                     className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-text-primary text-sm focus:ring-2 focus:ring-accent-primary outline-none"
                   >
                     <option value="resepsionis">Resepsionis</option>
-                    <option value="dokter">Dokter</option>
-                    <option value="kasir">Kasir</option>
-                    <option value="perawat">Perawat</option>
                   </select>
                   {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>}
+                  <p className="text-xs text-text-muted mt-1">Akun dokter dibuat dan diverifikasi oleh tim Dentiva — hubungi dukungan.</p>
                 </div>
               </div>
 

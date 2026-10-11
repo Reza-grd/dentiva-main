@@ -112,7 +112,14 @@ serve(async (req) => {
       })
     }
 
-    if (!['admin', 'dokter', 'resepsionis'].includes(role)) {
+    if (role === 'dokter') {
+      return new Response(JSON.stringify({ error: 'Akun dokter (akses rekam medis) dibuat dan diverifikasi oleh tim Dentiva — hubungi dukungan Dentiva' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (!['admin', 'resepsionis'].includes(role)) {
       return new Response(JSON.stringify({ error: 'Role tidak valid' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { financialService } from '../../services/financialService';
 import { dashboardService } from '../../services/dashboardService';
-import { visitService } from '../../services/visitService';
+import { supabase } from '../../services/supabase';
 import { getGreeting, formatDateFull, formatRupiah } from '../../utils/dateUtils';
 import {
   Users, Calendar, DollarSign, TrendingUp, Activity, AlertCircle,
@@ -172,8 +172,9 @@ const AdminDashboard = () => {
 
   const loadRecentVisits = useCallback(async () => {
     setLoadingRecent(true);
-    const { success, data } = await visitService.getTodayVisits();
-    if (success) setRecentVisits((data || []).slice(0, 5));
+    // Antrean sederhana dari server: nomor, jam, dokter, status — tanpa identitas/keluhan pasien.
+    const { data, error } = await supabase.rpc('queue_today');
+    if (!error) setRecentVisits((data || []).slice(0, 5));
     setLoadingRecent(false);
   }, []);
 
@@ -372,14 +373,6 @@ const AdminDashboard = () => {
                     title="Aktivitas Terbaru"
                     subtitle="5 kunjungan hari ini"
                     loading={loadingRecent}
-                    action={
-                      <button
-                        onClick={() => navigate('/admin/jadwal')}
-                        className="text-xs text-primary-600 hover:underline font-medium"
-                      >
-                        Lihat semua →
-                      </button>
-                    }
                   >
                     {recentVisits.length === 0 ? (
                       <div className="h-48 flex flex-col items-center justify-center text-gray-400 gap-2">
@@ -388,17 +381,17 @@ const AdminDashboard = () => {
                       </div>
                     ) : (
                       <div className="space-y-2.5 py-1">
-                        {recentVisits.map((visit) => (
-                          <div key={visit.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                        {recentVisits.map((visit, i) => (
+                          <div key={`${visit.nomor}-${i}`} className="flex items-center gap-3 p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
                             <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
                               <Stethoscope size={14} className="text-primary-600" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-semibold text-gray-900 truncate">
-                                {visit.patient?.nama_lengkap || '—'}
+                                Antrean #{visit.nomor ?? '—'}{visit.jam ? ` · ${String(visit.jam).slice(0, 5)}` : ''}
                               </p>
                               <p className="text-xs text-gray-400 truncate">
-                                {visit.keluhan || 'Tidak ada keluhan tercatat'}
+                                {visit.dokter || 'Dokter belum ditentukan'}
                               </p>
                             </div>
                             <StatusBadge status={visit.status} />

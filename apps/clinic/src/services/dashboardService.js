@@ -7,11 +7,8 @@ export const dashboardService = {
     try {
       const startDate = getLocalDateRange(days).start;
 
-      const { data, error } = await supabase
-        .from('visits')
-        .select('tanggal_kunjungan')
-        .gte('tanggal_kunjungan', startDate)
-        .order('tanggal_kunjungan', { ascending: true });
+      // Agregat dari server (tanpa membaca baris kunjungan/identitas pasien).
+      const { data, error } = await supabase.rpc('report_visit_counts', { p_start: startDate, p_end: getTodayLocal() });
 
       if (error) throw error;
 
@@ -23,8 +20,8 @@ export const dashboardService = {
       }
 
       (data || []).forEach((v) => {
-        const d = v.tanggal_kunjungan;
-        if (dateMap[d] !== undefined) dateMap[d]++;
+        const d = String(v.tanggal).split('T')[0];
+        if (dateMap[d] !== undefined) dateMap[d] += Number(v.jumlah) || 0;
       });
 
       const result = Object.entries(dateMap).map(([tanggal, kunjungan]) => ({
@@ -60,16 +57,10 @@ export const dashboardService = {
         endDate = getTodayLocal();
       }
 
-      let query = supabase
-        .from('visits')
-        .select('tanggal_kunjungan')
-        .gte('tanggal_kunjungan', startDate);
-
-      if (yearMode) {
-        query = query.lte('tanggal_kunjungan', endDate);
-      }
-
-      const { data, error } = await query.order('tanggal_kunjungan', { ascending: true });
+      const { data, error } = await supabase.rpc('report_visit_counts', {
+        p_start: startDate,
+        p_end: yearMode ? endDate : getTodayLocal(),
+      });
 
       if (error) throw error;
 
@@ -99,8 +90,8 @@ export const dashboardService = {
       }
 
       (data || []).forEach((v) => {
-        const key = v.tanggal_kunjungan.substring(0, 7);
-        if (monthMap[key]) monthMap[key].kunjungan++;
+        const key = String(v.tanggal).substring(0, 7);
+        if (monthMap[key]) monthMap[key].kunjungan += Number(v.jumlah) || 0;
       });
 
       const result = Object.entries(monthMap).map(([, val]) => val);
@@ -117,12 +108,7 @@ export const dashboardService = {
       const startDate = getLocalDateRange(days).start;
       const endDate = getTodayLocal();
 
-      const { data, error } = await supabase
-        .from('v_daily_revenue')
-        .select('*')
-        .gte('tanggal', startDate)
-        .lte('tanggal', endDate)
-        .order('tanggal', { ascending: true });
+      const { data, error } = await supabase.rpc('report_revenue_daily', { p_start: startDate, p_end: endDate });
 
       if (error) throw error;
 
@@ -168,13 +154,17 @@ export const dashboardService = {
       // Sebelumnya: loop 12 bulan × 2 tabel = 24 query beruntun
       const startDate = formatLocalISO(new Date(new Date().getFullYear(), new Date().getMonth() - months + 1, 1));
 
-      const { data: revenueRows, error: revErr } = await supabase
-        .from('v_monthly_revenue')
-        .select('bulan, label_bulan, total_revenue')
-        .gte('bulan', startDate)
-        .order('bulan', { ascending: true });
+      const { data: dailyRows, error: revErr } = await supabase
+        .rpc('report_revenue_daily', { p_start: startDate, p_end: getTodayLocal() });
 
       if (revErr) throw revErr;
+      // Agregasi harian → bulanan (tanggal sudah dalam WIB dari server).
+      const perBulan = {};
+      (dailyRows || []).forEach((r) => {
+        const k = String(r.tanggal).substring(0, 7) + '-01';
+        perBulan[k] = (perBulan[k] || 0) + (parseFloat(r.total_revenue) || 0);
+      });
+      const revenueRows = Object.entries(perBulan).map(([bulan, total_revenue]) => ({ bulan, total_revenue }));
 
       // Ambil expenses bulanan dalam satu query
       const { data: expRows, error: expErr } = await supabase
@@ -222,10 +212,7 @@ export const dashboardService = {
   // ─── Top 5 treatment terpopuler via v_popular_treatments ─────────────────
   async getPopularTreatments(limit = 5) {
     try {
-      const { data, error } = await supabase
-        .from('v_popular_treatments')
-        .select('*')
-        .limit(limit);
+      const { data, error } = await supabase.rpc('report_popular_treatments', { p_limit: limit });
 
       if (error) throw error;
 
