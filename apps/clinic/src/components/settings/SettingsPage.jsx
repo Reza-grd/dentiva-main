@@ -340,12 +340,8 @@ const SettingsPage = () => {
         : rawPhone;
 
       const { data, error } = await supabase.functions.invoke('send-whatsapp', {
-        body: { 
-          isTest: true, 
-          targetPhone: phone,
-          target: phone,
-          message: `🦷 TEST WHATSAPP GATEWAY\nWhatsApp gateway ${formData.clinicName || 'klinik'} berhasil terhubung!\nStatus: ✅ AKTIF (Whapi.cloud)`
-        }
+        // Isi pesan uji disusun server (teks tetap) — browser hanya menentukan nomor tujuan.
+        body: { isTest: true, targetPhone: phone, target: phone }
       });
       
       if (error) throw error;

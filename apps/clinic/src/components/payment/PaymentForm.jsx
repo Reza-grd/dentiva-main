@@ -251,54 +251,10 @@ const PaymentForm = () => {
     try {
       const result = await paymentService.saveVisitPayment(visitId, selectedTreatments, selectedObat, paymentData);
       if (result.success) {
-        // 4. Trigger WhatsApp Edge Function securely
         if (paymentData.status_pembayaran === 'paid') {
-          try {
-            let sentReceipt = false;
-            
-            const hasConsent = visit.patient?.wa_consent === true;
-            const isConfirmationEnabled = settings?.wa_payment_confirmation_enabled !== 'false' && settings?.wa_payment_confirmation_enabled !== false;
-            const isEducationEnabled = settings?.wa_post_treatment_education_enabled === 'true' || settings?.wa_post_treatment_education_enabled === true;
-
-            if (!hasConsent) {
-               toast.info('WA tidak terkirim: Pasien menolak/tidak memberikan izin notifikasi WA.');
-               
-               // Log skipped directly
-               await supabase.from('notification_logs').insert([
-                  { visit_id: visitId, patient_id: visit.patient_id, message_type: 'receipt', status: 'skipped_no_consent', gateway_response: 'Patient wa_consent is false' },
-                  { visit_id: visitId, patient_id: visit.patient_id, message_type: 'education', status: 'skipped_no_consent', gateway_response: 'Patient wa_consent is false' }
-               ]);
-            } else {
-               // Patient has consent
-               if (!isConfirmationEnabled) {
-                  await supabase.from('notification_logs').insert([{ visit_id: visitId, patient_id: visit.patient_id, message_type: 'receipt', status: 'skipped_disabled', gateway_response: 'wa_payment_confirmation_enabled is false' }]);
-               } else {
-                 await sendWhatsAppInvoice(result.data);
-                 sentReceipt = true;
-                 
-                 const { error: updateErr } = await supabase
-                   .from('payments')
-                   .update({ wa_sent: true })
-                   .eq('id', result.data.id);
-                 if (updateErr) console.error('Failed to update wa_sent status:', updateErr);
-                   
-                 toast.success('Struk pembayaran telah dikirim ke WhatsApp pasien!');
-               }
-
-               if (!isEducationEnabled) {
-                  await supabase.from('notification_logs').insert([{ visit_id: visitId, patient_id: visit.patient_id, message_type: 'education', status: 'skipped_disabled', gateway_response: 'wa_post_treatment_education_enabled is false' }]);
-               } else {
-                 if (sentReceipt) {
-                   await new Promise(resolve => setTimeout(resolve, 2000));
-                 }
-                 await sendWhatsAppEducation(result.data);
-                 toast.success('Edukasi perawatan pasca tindakan telah dikirim ke WhatsApp pasien!');
-               }
-            }
-          } catch (waTriggerError) {
-            console.error('WhatsApp trigger failed:', waTriggerError);
-            toast.warning('Pembayaran tersimpan, namun gagal kirim WA: ' + waTriggerError.message);
-          }
+          toast.success('Pembayaran lunas tersimpan!');
+          // Invoice & edukasi disusun dan dikirim SERVER dari data tercatat.
+          await notifyAfterPayment();
         } else {
           toast.success('Pembayaran berhasil disimpan!');
         }
@@ -316,228 +272,55 @@ const PaymentForm = () => {
     }
   };
 
-  const sendWhatsAppInvoice = async (paymentObj) => {
-    const activePayment = paymentObj || existingPayment;
-    const rawPhone = visit.patient?.no_wa?.replace(/[^0-9]/g, '') || '';
-    if (!rawPhone) {
-      throw new Error('Pasien tidak memiliki nomor WhatsApp');
-    }
-    const targetPhone = rawPhone.startsWith('0')
-      ? '62' + rawPhone.slice(1)
-      : rawPhone;
-
-    const clinicName = settings.clinic_name || 'Dentiva Dental Clinic';
-    const doctorName = visit.dokter?.full_name || 'Dokter Jaga';
-    const formatRp = (num) => 'Rp ' + (num || 0).toLocaleString('id-ID');
-
-    let waMessage = `*🦷 ${clinicName.toUpperCase()}*\n`;
-    waMessage += `==============================\n`;
-    waMessage += `No. Invoice  : ${activePayment?.invoice_number || '-'}\n`;
-    waMessage += `Pasien       : ${visit.patient?.nama_lengkap || '-'}\n`;
-    waMessage += `No. RM       : ${visit.patient?.no_rm || '-'}\n`;
-    waMessage += `Dokter       : ${doctorName}\n`;
-    waMessage += `------------------------------\n`;
-    waMessage += `*RINCIAN PERAWATAN:*\n`;
-
-    selectedTreatments.forEach((vt) => {
-      waMessage += `• ${vt.nama_treatment || 'Treatment'} — ${formatRp(vt.subtotal)}\n`;
-    });
-
-    if (selectedObat.length > 0) {
-      waMessage += `\n*OBAT/RESEP:*\n`;
-      selectedObat.forEach((vo) => {
-        waMessage += `• ${vo.nama_obat || 'Obat'} x${vo.qty} — ${formatRp(vo.subtotal)}\n`;
-      });
-    }
-
-    waMessage += `------------------------------\n`;
-    waMessage += `Total        : ${formatRp(totals.totalBayar)}\n`;
-    waMessage += `Metode Bayar : ${paymentData.metode_pembayaran?.toUpperCase() || 'CASH'}\n`;
-    waMessage += `Status       : *LUNAS*\n`;
-    waMessage += `==============================`;
-
-    const { data: waData, error: waErr } = await supabase.functions.invoke('send-whatsapp', {
-      body: {
-        visitId,
-        patientId: visit.patient_id,
-        target: targetPhone,
-        message: waMessage,
-        messageType: 'receipt'
-      }
-    });
-
-    if (waErr) throw waErr;
-    if (waData && waData.success === false) {
-      throw new Error(waData.message || 'WhatsApp sending failed');
-    }
-    return waData;
+  // Invoice & edukasi WhatsApp disusun dan dikirim oleh SERVER (send-visit-notifications) dari data
+  // tercatat: sekali per kunjungan, dan dicoba ulang otomatis bila WhatsApp sedang tidak tersambung.
+  const NOTIF_LABEL = {
+    sent: 'terkirim',
+    deferred: 'akan dikirim otomatis begitu WhatsApp tersambung',
+    skipped_no_consent: 'tidak dikirim — pasien tidak memberi izin WA',
+    skipped_disabled: 'tidak dikirim — dinonaktifkan di Pengaturan',
+    skipped_no_phone: 'tidak dikirim — pasien tidak punya nomor WA',
+    skipped_no_template: 'tidak ada edukasi yang cocok untuk tindakan ini',
+    skipped_plan: 'tidak tersedia di paket langganan klinik',
+    failed: 'gagal dikirim',
   };
 
-  const sendWhatsAppEducation = async (paymentObj) => {
-    const rawPhone = visit.patient?.no_wa?.replace(/[^0-9]/g, '') || '';
-    if (!rawPhone) {
-      throw new Error('Pasien tidak memiliki nomor WhatsApp');
-    }
-    const targetPhone = rawPhone.startsWith('0')
-      ? '62' + rawPhone.slice(1)
-      : rawPhone;
+  const callVisitNotifications = async (extra = {}) => {
+    const { data, error } = await supabase.functions.invoke('send-visit-notifications', { body: { visitId, ...extra } });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+    return data?.results || [];
+  };
 
-    const treatmentNames = selectedTreatments.map(t => t.nama_treatment).filter(Boolean);
-    if (treatmentNames.length === 0) return;
-
-    // Helper to normalize strings
-    const normalizeString = (str) => {
-      if (!str) return '';
-      return str.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
-    };
-
-    // Fetch ALL templates for client-side matching
-    const { data: eduData, error: eduError } = await supabase
-      .from('treatment_education_templates')
-      .select('*');
-
-    if (eduError) throw eduError;
-
-    const clinicName = settings.clinic_name || 'Dentiva Dental Clinic';
-    const clinicPhone = settings.clinic_phone || '-';
-
-    let educationMessage = `📋 *INFORMASI PERAWATAN*\n${clinicName}\n━━━━━━━━━━━━━━━━━━\n`;
-    let hasAddedEducation = false;
-
-    selectedTreatments.forEach((vt) => {
-      const treatmentName = vt.nama_treatment || '';
-      const normalizedTreatment = normalizeString(treatmentName);
-      
-      let matchedTemplate = null;
-      let matchType = 'none';
-      let matchScore = 0;
-      let matchedKeyword = '';
-
-      // Priority 1: Case-insensitive exact match
-      const exactMatch = eduData.find(t => t.treatment_type.toLowerCase() === treatmentName.toLowerCase());
-      
-      if (exactMatch) {
-        matchedTemplate = exactMatch;
-        matchType = 'exact_case_insensitive';
-      } else {
-        // Priority 2: Normalized exact match
-        const normMatch = eduData.find(t => normalizeString(t.treatment_type) === normalizedTreatment);
-        if (normMatch) {
-          matchedTemplate = normMatch;
-          matchType = 'exact_normalized';
-        } else {
-          // Priority 3: Keyword scoring
-          let bestScore = 0;
-          let bestTemplate = null;
-          let bestKeyword = '';
-
-          eduData.forEach(t => {
-            if (t.keywords && Array.isArray(t.keywords)) {
-              let currentScore = 0;
-              let currentBestKw = '';
-              t.keywords.forEach(kw => {
-                const normKw = normalizeString(kw);
-                if (normKw && normalizedTreatment.includes(normKw)) {
-                  currentScore += 1;
-                  if (normKw.length > currentBestKw.length) {
-                    currentBestKw = normKw;
-                  }
-                }
-              });
-
-              if (currentScore > 0) {
-                if (currentScore > bestScore) {
-                  bestScore = currentScore;
-                  bestTemplate = t;
-                  bestKeyword = currentBestKw;
-                } else if (currentScore === bestScore) {
-                  if (currentBestKw.length > bestKeyword.length) {
-                    bestTemplate = t;
-                    bestKeyword = currentBestKw;
-                  }
-                }
-              }
-            }
-          });
-
-          if (bestTemplate) {
-            matchedTemplate = bestTemplate;
-            matchType = 'keyword';
-            matchScore = bestScore;
-            matchedKeyword = bestKeyword;
-          }
-        }
+  const notifyAfterPayment = async () => {
+    try {
+      const results = await callVisitNotifications();
+      for (const r of results) {
+        if (r.status.startsWith('already_')) continue;
+        const label = r.type === 'receipt' ? 'Invoice WhatsApp' : 'Edukasi perawatan';
+        const text = `${label}: ${NOTIF_LABEL[r.status] || r.status}`;
+        if (r.status === 'sent') toast.success(text);
+        else if (r.status === 'failed') toast.warning(text + (r.detail ? ` (${r.detail})` : ''));
+        else toast.info(text);
       }
-
-      if (matchedTemplate && (matchedTemplate.education_text || matchedTemplate.medication_instructions)) {
-         hasAddedEducation = true;
-         educationMessage += `*${treatmentName}:*\n`;
-         if (matchedTemplate.education_text) {
-           educationMessage += `${matchedTemplate.education_text}\n\n`;
-         }
-         if (matchedTemplate.medication_instructions && matchedTemplate.medication_instructions !== '[Diisi oleh dokter sesuai resep]') {
-           educationMessage += `💊 *Instruksi Obat:*\n${matchedTemplate.medication_instructions}\n\n`;
-         }
-         educationMessage += `━━━━━━━━━━━━━━━━━━\n`;
-      } else {
-         console.warn(`[WA Edukasi] Template tidak ditemukan untuk treatment: ${treatmentName}`);
-         supabase.from('notification_logs').insert([{ 
-             visit_id: visitId, 
-             patient_id: visit.patient_id, 
-             message_type: 'education', 
-             status: 'skipped_no_template', 
-             gateway_response: JSON.stringify({
-                 reason: 'No template matched',
-                 treatment_name: treatmentName,
-                 match_type: matchType,
-                 matched_keyword: matchedKeyword,
-                 match_score: matchScore
-             }) 
-         }]).then(() => {});
-      }
-    });
-
-    if (!hasAddedEducation) {
-      // Nothing to send
-      return;
+    } catch (e) {
+      console.error('Notifikasi WhatsApp:', e);
+      toast.info('Invoice & edukasi akan dikirim otomatis oleh server (dijadwalkan ulang).');
     }
-
-    educationMessage += `Hubungi kami jika ada pertanyaan: ${clinicPhone}`;
-
-    const { data: waData, error: waErr } = await supabase.functions.invoke('send-whatsapp', {
-      body: {
-        visitId,
-        patientId: visit.patient_id,
-        target: targetPhone,
-        message: educationMessage,
-        messageType: 'education'
-      }
-    });
-
-    if (waErr) throw waErr;
-    if (waData && waData.success === false) {
-      throw new Error(waData.message || 'WhatsApp sending failed');
-    }
-    return waData;
   };
 
   const handleResendWhatsApp = async () => {
     setSendingWA(true);
     try {
-      await sendWhatsAppInvoice(existingPayment);
-      
-      // Update payment record's wa_sent status
-      await supabase
-        .from('payments')
-        .update({ wa_sent: true })
-        .eq('id', existingPayment.id);
-        
-      toast.success('Struk pembayaran berhasil dikirim ulang ke WhatsApp pasien!');
+      const [r] = await callVisitNotifications({ resend: true });
+      if (r?.status === 'sent') toast.success('Invoice berhasil dikirim ulang ke WhatsApp pasien!');
+      else toast.warning('Invoice: ' + (NOTIF_LABEL[r?.status] || r?.status || 'tidak terkirim') + (r?.detail ? ` (${r.detail})` : ''));
     } catch (err) {
-      console.error('WhatsApp resend failed:', err);
-      toast.error('Gagal mengirim ulang WA: ' + err.message);
+      console.error('Kirim ulang invoice gagal:', err);
+      toast.error('Gagal mengirim ulang invoice: ' + err.message);
     } finally {
       setSendingWA(false);
+      await loadData();
     }
   };
 

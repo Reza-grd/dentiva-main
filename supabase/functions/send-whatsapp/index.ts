@@ -10,7 +10,7 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// In-memory rate limiting per client IP
+// Pembatas sederhana (per worker): per IP dan per klinik untuk pesan uji.
 const rateLimitMap = new Map<string, number[]>()
 
 function isRateLimited(ip: string, limit = 100, windowMs = 15 * 60 * 1000): boolean {
@@ -138,7 +138,29 @@ serve(async (req) => {
       })
     }
 
-    const { visitId, patientId, isTest, targetPhone, target, message, messageType, triggeredBy } = body
+    const { visitId, patientId, isTest, targetPhone, target, messageType, triggeredBy } = body
+    let { message } = body
+
+    // Dari browser (JWT staf) fungsi ini HANYA untuk pesan uji dari Pengaturan, dengan teks tetap
+    // yang disusun server. Pesan ke pasien (invoice, edukasi) disusun & dikirim server lewat
+    // send-visit-notifications — tidak boleh ada isi/nomor bebas dari browser memakai WA klinik.
+    if (authHeader !== `Bearer ${supabaseServiceKey}`) {
+      if (!isTest || visitId || patientId) {
+        return new Response(JSON.stringify({ error: 'Pesan pasien dikirim otomatis oleh server (invoice/edukasi). Fungsi ini hanya untuk pesan uji.' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      if (isRateLimited(`uji:${callingClinicId}`, 5, 10 * 60 * 1000)) {
+        return new Response(JSON.stringify({ error: 'Terlalu banyak pesan uji — coba lagi 10 menit lagi' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      const { data: nameRow } = await supabase.from('clinic_settings').select('value')
+        .eq('clinic_id', callingClinicId).eq('key', 'clinic_name').maybeSingle()
+      message = `🦷 *Uji WhatsApp Dentiva*
+${nameRow?.value || 'Klinik'}: koneksi WhatsApp aktif ✅
+Pesan ini dikirim dari menu Pengaturan.`
+    }
 
     // Isolasi klinik: data dibaca dengan service role, jadi pastikan kunjungan/pasien
     // milik klinik pemanggil (dulu staf klinik A bisa memicu pesan ke pasien klinik B).
