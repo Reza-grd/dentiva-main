@@ -391,7 +391,7 @@ const INTENTS = [
   { id: 'wake', state: 'wake', whole: /^(bangun|wake up|ada orang|halo ada orang|hai ada orang|kamu tidur|lagi tidur|masih (di sana|hidup|bangun))$/,
     reply: ({ sapa }) => L.wake(sapa) },
   { id: 'help', state: 'point', whole: /^((kamu|anda) )?(bisa (bantu )?apa( saja| aja)?|bisa ngapain( aja)?|apa (saja |aja )?(yang )?(bisa|dapat) (kamu|anda) (bantu|lakukan)|help|bantuan|tolong|apa (saja |aja )?fitur(mu| kamu| anda)?|fitur apa (saja |aja )?(yang )?(kamu|anda) (punya|miliki)|((gimana|bagaimana) )?cara (pakai|memakai|menggunakan|pake)( kamu| anda)?|what can you do|contoh pertanyaan(nya)?|(aku|saya) (harus|bisa) tanya apa( saja| aja)?|mulai dari mana)$/,
-    reply: () => L.HELP_INTROS.map((intro) => `${intro}\n${L.HELP_BODY}`) },
+    reply: ({ role }) => L.HELP_INTROS.map((intro) => `${intro}\n${role === 'admin' || !role ? L.HELP_BODY : L.HELP_BODY_STAFF}`) },
   { id: 'confused', state: 'think', whole: /^(maksudnya( (gimana|bagaimana|apa))?|maksud(mu| kamu| anda)|apa maksud(mu|nya| kamu| anda)?|hah|ha|huh|hm+|eh|tidak (ngerti|mengerti|paham)|kurang (paham|jelas|ngerti)|bingung|aku bingung|saya bingung|jelasin lagi|jelaskan lagi|ulangi|ulang|coba lagi)$/,
     reply: ({ afterAnswer }) => L.confused(afterAnswer) },
 
@@ -535,7 +535,7 @@ function talkWith(text, t, {
   // Interaksi seru: perintah gerakan, kuis gigi, reaksi emosi
   const fun = funReply(t, { seed, recent, quiz, name, lastIntent });
   if (fun) return fun;
-  const ctx = { t, raw: text, name, greeting, seed, now, afterAnswer, provider, lastTopic, sapa: name ? `, ${name}` : '' };
+  const ctx = { t, raw: text, name, greeting, seed, now, afterAnswer, provider, lastTopic, role, sapa: name ? `, ${name}` : '' };
   const answer = (it, sd = seed) => {
     const r = it.reply({ ...ctx, seed: sd });
     const state = typeof it.state === 'function' ? it.state(ctx) : it.state;
@@ -713,9 +713,16 @@ const FOLLOW = {
   laugh: ['Satu lagi dong 😄'], dance: ['Lagi dong 🎵'], persona: ['Kamu bisa apa saja?'], privacy: ['Kamu bisa apa saja?'],
   calc: ['Hitung diskon 10% dari 500rb', '6 bulan lagi tanggal berapa?'], datecalc: ['6 bulan lagi tanggal berapa?', 'Berapa hari lagi akhir bulan?'],
   nav: [], clear: START,
+  // interaksi seru & pemandu (v4/v5)
+  define: ['Istilah apa saja', 'Kuis gigi', 'Tahukah kamu'], glossaryList: ['Apa itu scaling?', 'Apa itu HPP?', 'Apa itu odontogram?'],
+  fact: ['Lagi dong', 'Kuis gigi'], tip: ['Fakta unik tentang gigi', 'Kuis gigi', 'Tahukah kamu'],
+  quiz: ['Petunjuk', 'Nyerah'], quizHint: ['Nyerah'], quizWrong: ['Petunjuk', 'Nyerah'], quizRight: ['Kuis lagi', 'Tahukah kamu'], quizReveal: ['Kuis lagi', 'Tahukah kamu'],
+  showoff: ['Lagi dong', 'Kuis gigi'], daily: ['Menu apa saja', 'Kamu bisa apa saja?'], guide: ['Menu apa saja', 'Kuis gigi'], navlist: ['Checklist harian'],
+  offerNo: ['Menu apa saja'], navdeny: ['Menu apa saja', 'Checklist harian'], navunknown: ['Menu apa saja'],
 };
 export function followUps(key, exclude = '') {
-  const list = FOLLOW[key] || FOLLOW['data klinik'];
+  const dyn = String(key).startsWith('move:') ? ['Lagi dong', 'Semua gerakan', 'Kuis gigi'] : String(key).startsWith('emo:') ? ['Tahukah kamu', 'Kuis gigi', 'Gerakan apa saja'] : null;
+  const list = dyn || FOLLOW[key] || FOLLOW['data klinik'];
   return list.filter((q) => norm(q) !== norm(exclude)).slice(0, 3);
 }
 

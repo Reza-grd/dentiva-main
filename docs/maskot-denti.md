@@ -273,6 +273,19 @@ Properti yang dipegang (kaca pembesar, ponsel, cangkir) ada **di dalam grup leng
   "dikoreksi" ke kata lain. Hasil uji acak (`dentiFuzz.test.js`): **92,6% maksud tetap dikenali** dengan salah ketik (sebelumnya ±47%),
   dan **0 dari 1.107** pertanyaan data + salah ketik yang bocor jadi obrolan.
 
+### Denti Pemandu — pendamping mengambang untuk semua peran
+
+Asisten AI (analisis data) hanya untuk admin, tetapi otak lokal Denti berguna untuk semua staf. **`components/ai/DentiGuideWidget.jsx`** dipasang di
+`MainLayout`: tombol bulat Denti di pojok kanan bawah (di atas navigasi bawah pada layar kecil) yang membuka panel obrolan.
+
+- Hanya memakai `smallTalk` (tanpa AI, **tanpa kuota**): membuka halaman/tab, "di mana …", tutorial sesuai peran, kamus istilah, checklist harian, kuis, gerakan.
+- Tombol saran awal per peran (`HINTS`), tombol "Buka …" untuk tawaran, dan chip lanjutan (`followUps`) — semuanya dijamin dipahami Denti (`dentiChips.test.js`).
+- Pertanyaan data: **admin** ditawari "Tanya Asisten AI" (pertanyaan dibawa lewat `navigate(..., { state: { ask } })`); **dokter/resepsionis** diberi arahan, tanpa tombol AI.
+- Bantuan ("kamu bisa apa") sadar peran: staf tidak melihat daftar analisis keuangan admin (`HELP_BODY_STAFF`).
+- Tersembunyi di halaman Asisten AI (sudah ada Denti di sana); `Esc` menutup; percakapan disimpan di `sessionStorage` (per tab, maks. 30 pesan).
+- Konteks percakapan (tawaran, kuis, "lagi") dihitung `utils/dentiChatContext.js` dari daftar pesan.
+- Di halaman Asisten AI, saat dibiarkan Denti sesekali menampilkan **ajakan singkat** di gelembung (`IDLE_NUDGES`: kuis, fakta, atraksi, checklist, kamus).
+
 ### Cara melatih (siklus 54–64)
 
 Tambahkan kalimat ke `src/test/fixtures/dentiTrainingV5.js` (format sama dengan V4; konteks `{ role, offer, quiz, lastIntent }`). Fixture kamus

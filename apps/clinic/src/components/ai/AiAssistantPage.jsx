@@ -67,6 +67,12 @@ const SUGGEST_BANK = [
   'Biaya tetap 30 juta margin 150rb, BEP berapa pasien?', 'Kasih tips gigi', 'Bacakan jawabannya', 'Ganti mode gelap',
   'Buka layar antrean', 'Kamu bisa apa saja?',
 ];
+/** Ajakan singkat di gelembung Denti saat dibiarkan — memperkenalkan kemampuan tanpa mengganggu. */
+const IDLE_NUDGES = [
+  'Bosan? Ketik "kuis" untuk menguji pengetahuan gigi 🎯', 'Ketik "tahukah kamu" — saya punya fakta gigi seru 🦷', 'Mau lihat atraksi? Ketik "semua gerakan" 🎭',
+  'Bingung mulai dari mana? Ketik "checklist harian" 📋', 'Istilah baru? Tanya "apa itu odontogram?" 📖', 'Ketik "ajarkan cara …" — saya pandu langkah demi langkah 🧭',
+  'Saya bisa membuka halaman: coba "buka laporan" ✨', 'Butuh jeda? Ketik "ngopi" ☕',
+];
 /** Gerakan kecil saat Denti dibiarkan (agar terasa hidup). */
 const IDLE_MOVES = [
   ['think', 1800], ['happy', 1600], ['nod', 1800], ['wave', 1600], ['wink', 1500], ['peek', 2400], ['sigh', 2300],
@@ -182,6 +188,7 @@ export default function AiAssistantPage() {
       if (Date.now() - lastActive.current < 12000 || Math.random() < 0.45) return;
       const [move, ms] = IDLE_MOVES[Math.floor(Math.random() * IDLE_MOVES.length)];
       play(move, ms);
+      if (Math.random() < 0.35) setDentiLine(IDLE_NUDGES[Math.floor(Math.random() * IDLE_NUDGES.length)]);
     }, 9000);
     return () => clearInterval(t);
   }, [play]);

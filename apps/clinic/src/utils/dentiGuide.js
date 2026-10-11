@@ -144,8 +144,8 @@ const NAV_G = new RegExp(`^${LEAD}${VERBS}(?: (?:halaman|menu|tab|page|fitur|bag
 const WHERE_G = /^(?:dimana|di mana|letak|lokasi|posisi|ada dimana|menu)\s+(?:letak |lokasi |menu |halaman |tab |fitur )?(.+?)(?:\s+(?:ada dimana|dimana|di mana|itu dimana))?$/;
 const WHERE_END = /^(?:letak |lokasi |posisi )?(?:(?:halaman|menu|tab|fitur) )?(.+?) (?:ada )?(?:dimana|di mana)$/;
 
-const YES = /^(?:(?:ya|iya|oke|ok|okee|baik|boleh|silakan|silahkan|tentu|sip|yup|yap) )?(?:ya|iya|yap|yup|boleh|oke|ok|okee|siap|silakan|silahkan|lanjut|gas|yuk|ayo|mau|sip|buka|bukakan|bukain|tolong buka|boleh banget|tentu|baik|buka aja)(?: (?:dong|aja|saja|deh|sekarang|banget|kak|ya))*$/;
-const NO = /^(?:tidak|nggak|enggak|gak|ga|jangan|nanti|nanti aja|belum|tidak usah|gak usah|ga usah|tak usah)(?: (?:dulu|usah|perlu|dong|deh|terima kasih|makasih))?$/;
+const YES = /^(?:(?:ya|iya|oke|ok|okee|baik|boleh|silakan|silahkan|tentu|sip|yup|yap|siap|ayo|yuk|gas|tolong|langsung|mau) )*(?:ya|iya|yap|yup|yoi|boleh|oke|ok|okee|siap|silakan|silahkan|lanjut|lanjutkan|lanjutin|gas|gaskeun|yuk|ayo|hayuk|hayu|mau|sip|buka|bukakan|bukain|tampilkan|tentu|tentu saja|pasti|jelas|baik|setuju|betul|benar|bawa(?: aku| saya)? ke sana|antar(?: aku| saya)? ke sana|ke sana|boleh banget)(?: (?:dong|aja|saja|deh|sekarang|banget|kak|ya|buka|bukakan|halamannya|tolong|dong))*$/;
+const NO = /^(?:tidak|nggak|enggak|gak|ga|jangan|nanti|nanti aja|belum|tidak usah|gak usah|ga usah|tak usah|batal|batalkan|skip|lewati|lain kali|tidak jadi|tidak perlu)(?: (?:dulu|usah|perlu|dong|deh|terima kasih|makasih|buka|dibuka|saja|aja|jadi|ya|kali))*$/;
 const BACK = /^(?:kembali|balik|mundur|ke belakang|halaman sebelumnya|kembali ke halaman sebelumnya|balik ke halaman sebelumnya|back|go back|kembali dong|sebelumnya)$/;
 const FORWARD = /^(?:maju|ke depan|halaman berikutnya|halaman selanjutnya|forward|go forward|berikutnya halaman)$/;
 const RELOAD = /^(?:(?:muat|load) ulang(?: halaman)?|refresh(?: halaman)?|reload(?: halaman)?|segarkan(?: halaman)?|perbarui halaman|segarkan ulang)$/;

@@ -23,6 +23,8 @@ const Q = { vitD: iOf(/Vitamin yang membantu/), vitC: iOf(/Kekurangan vitamin ap
 const quizRight = QUIZ.map((q, i) => [q.a[0], { quiz: i }]);
 const quizWrong = QUIZ.map((_, i) => [i % 2 ? 'entahlah salah sekali' : 'bunga matahari', { quiz: i }]);
 
+const OFFER = { offer: { to: '/admin/costing', label: 'Biaya & Modal' } };
+
 export const CYCLES_V5 = [
   {
     name: 'Siklus 54 · kamus istilah Dentiva',
@@ -238,5 +240,24 @@ export const CYCLES_V5 = [
       'apa itu plak dan berapa pasien dengan plak', 'tolong jelaskan laporan keuangan bulan ini secara lengkap', 'jelaskan kenapa laba bersih turun dibanding bulan lalu',
       'apa yang harus dikerjakan untuk menaikkan margin', 'hari ini ngapain saja pasien dokter alya', 'checklist stok bahan untuk bulan depan', 'kuis berapa pendapatan hari ini',
     ],
+  },
+  {
+    name: 'Siklus 65 · jawaban tawaran buka halaman (ya / tidak, ragam bahasa)',
+    intents: {
+      offerYes: [
+        'ya', 'iya', 'oke', 'boleh', 'silakan', 'buka', 'bukakan', 'buka dong', 'ya buka', 'iya tolong', 'ya tolong buka', 'oke buka', 'siap buka', 'gas', 'gaskeun', 'yuk',
+        'ayo buka', 'mau', 'mau dong', 'lanjut', 'lanjutkan', 'setuju', 'betul', 'tentu', 'tentu saja', 'pasti', 'langsung buka', 'buka halamannya', 'ke sana', 'bawa aku ke sana',
+        'antar ke sana', 'tampilkan', 'ok', 'sip', 'yoi', 'ya dong', 'iya deh', 'boleh banget', 'ya silakan', 'okee', 'Iya!', 'YA', 'yap', 'yup', 'baik', 'jelas', 'benar',
+        'ya boleh', 'oke silakan', 'siap', 'ayo', 'lanjutin', 'hayuk', 'ya ya', 'mau buka', 'yuk buka', 'ya sekarang', 'buka sekarang', 'bukain',
+      ].map((p) => [p, OFFER]),
+      offerNo: [
+        'tidak', 'nggak', 'gak usah', 'nanti aja', 'jangan', 'batal', 'batalkan', 'skip', 'lewati', 'lain kali', 'tidak jadi', 'gak jadi', 'tidak perlu', 'nggak dulu', 'belum',
+        'jangan dibuka', 'tidak usah', 'ga usah', 'tak usah', 'nanti', 'tidak dulu', 'jangan dulu', 'enggak', 'ga', 'nanti saja', 'gak perlu', 'jangan buka',
+      ].map((p) => [p, OFFER]),
+    },
+    actions: [['ya', 'navigate', '/admin/costing', OFFER], ['buka halamannya', 'navigate', '/admin/costing', OFFER], ['ke sana', 'navigate', '/admin/costing', OFFER], ['gas', 'navigate', '/admin/costing', OFFER]],
+    replies: [['ya', 'Biaya & Modal', OFFER], ['tidak', 'tidak saya buka', OFFER]],
+    // tanpa tawaran → bukan perintah buka halaman
+    ai: ['ke sana', 'buka halamannya', 'bawa aku ke sana', 'antar ke sana', 'langsung buka'],
   },
 ];

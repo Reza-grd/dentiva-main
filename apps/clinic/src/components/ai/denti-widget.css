@@ -1,0 +1,63 @@
+/* Denti Pemandu — pendamping mengambang untuk semua peran. Mengikuti warna aksen klinik, terang & gelap. */
+.denti-widget { position: fixed; right: 1rem; bottom: 4.9rem; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; }
+@media (min-width: 768px) { .denti-widget { right: 1.5rem; bottom: 1.5rem; } }
+
+.denti-widget__launch {
+  padding: .2rem; border: 0; border-radius: 999px; cursor: pointer; line-height: 0;
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--color-card, #fff));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+  box-shadow: 0 10px 28px -10px color-mix(in srgb, var(--color-accent) 55%, #0f172a);
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s ease;
+}
+.denti-widget__launch:hover { transform: translateY(-3px) scale(1.05); }
+.denti-widget__launch:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.denti-widget__launch svg { display: block; height: auto; border-radius: 999px; }
+
+.denti-widget__panel {
+  display: flex; flex-direction: column; width: min(380px, calc(100vw - 2rem)); height: min(560px, calc(100vh - 11rem));
+  border-radius: 1.25rem; overflow: hidden; color: var(--color-text, #0f172a);
+  background: var(--color-card, #fff); border: 1px solid var(--color-border, #e5e7eb);
+  box-shadow: 0 24px 60px -24px rgb(15 23 42 / .45); animation: denti-widget-in .3s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes denti-widget-in { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+
+.denti-widget__head {
+  display: flex; align-items: center; gap: .6rem; padding: .55rem .6rem .55rem .8rem;
+  background: color-mix(in srgb, var(--color-accent) 9%, var(--color-card, #fff)); border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+.denti-widget__head svg.denti { flex: none; height: auto; }
+.denti-widget__title { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.denti-widget__title strong { font-size: .95rem; }
+.denti-widget__title span { font-size: .7rem; color: var(--color-text-muted, #6b7280); }
+.denti-widget__icon {
+  display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border: 0; border-radius: .6rem; cursor: pointer;
+  background: transparent; color: var(--color-text-muted, #6b7280); transition: background .2s, color .2s;
+}
+.denti-widget__icon:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent); }
+
+.denti-widget__list { flex: 1; overflow-y: auto; padding: .8rem; display: flex; flex-direction: column; gap: .6rem; }
+.denti-widget__row { display: flex; flex-direction: column; align-items: flex-start; gap: .45rem; max-width: 92%; }
+.denti-widget__row > .ai-md, .denti-widget__row > p {
+  padding: .55rem .8rem; border-radius: 1rem 1rem 1rem .3rem; font-size: .88rem;
+  background: color-mix(in srgb, var(--color-accent) 7%, var(--color-card, #fff)); border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+.denti-widget__row--me { align-self: flex-end; align-items: flex-end; }
+.denti-widget__row--me > p { border-radius: 1rem 1rem .3rem 1rem; color: #fff; background: var(--color-accent); border-color: transparent; margin: 0; }
+.denti-widget__md { font-size: .88rem; }
+.denti-widget__chips { display: flex; flex-wrap: wrap; gap: .4rem; padding-top: .2rem; }
+.denti-widget__chips .ai-chip { font-size: .75rem; padding: .3rem .65rem; }
+
+.denti-widget__form { display: flex; gap: .4rem; padding: .6rem; border-top: 1px solid var(--color-border, #e5e7eb); }
+.denti-widget__form input {
+  flex: 1; min-width: 0; padding: .55rem .8rem; border-radius: .8rem; font-size: .88rem; color: inherit;
+  background: var(--color-background, #f8fafc); border: 1px solid var(--color-border, #e5e7eb);
+}
+.denti-widget__form input:focus { outline: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent); border-color: transparent; }
+.denti-widget__form button {
+  display: grid; place-items: center; width: 2.4rem; border: 0; border-radius: .8rem; cursor: pointer; color: #fff; background: var(--color-accent);
+  transition: opacity .2s, transform .2s;
+}
+.denti-widget__form button:disabled { opacity: .4; cursor: not-allowed; }
+.denti-widget__form button:not(:disabled):hover { transform: translateY(-1px); }
+
+@media (prefers-reduced-motion: reduce) { .denti-widget__panel, .denti-widget__launch { animation: none; transition: none; } }

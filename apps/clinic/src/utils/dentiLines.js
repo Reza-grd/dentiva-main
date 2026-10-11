@@ -168,9 +168,22 @@ export const HELP_BODY = [
   '- **Operasional** — ringkasan hari ini, beban jadwal dokter, recall pasien, stok bahan',
   '- **Hitung cepat** — diskon, margin, BEP, cicilan, persen naik/turun, terbilang kuitansi, hitung tanggal',
   '- **Perintah** — "buka jadwal dokter", "mode gelap", "bacakan", "mulai baru"',
-  '- **Panduan Dentiva** — cara memakai menu & fitur',
+  '- **Pemandu** — *"buka laporan"*, *"di mana pengaturan?"*, *"ajarkan cara …"*, *"checklist harian"*',
+  '- **Kamus istilah** — *"apa itu scaling?"*, *"HPP itu apa"*, *"arti odontogram"*',
+  '- **Seru-seruan** — *"kuis"*, *"tahukah kamu"*, *"pamer otot"*, *"semua gerakan"*',
   '',
   'Contoh pertanyaan: *"Berapa pendapatan bulan ini?"*, *"Bahan apa yang hampir kadaluarsa?"*, *"Ringkas kondisi klinik hari ini."*',
+].join('\n');
+
+/** Bantuan untuk dokter & resepsionis — tanpa analisis data klinik (khusus admin). */
+export const HELP_BODY_STAFF = [
+  '- **Pemandu** — *"buka jadwal"*, *"di mana layar antrean?"*, *"ajarkan cara …"*, *"checklist harian"*',
+  '- **Kamus istilah** — *"apa itu odontogram?"*, *"recall itu apa"*, *"arti scaling"*',
+  '- **Hitung cepat** — diskon, persen naik/turun, cicilan, terbilang kuitansi, hitung tanggal',
+  '- **Perintah** — *"mode gelap"*, *"kembali"*, *"muat ulang"*, *"mulai baru"*',
+  '- **Seru-seruan** — *"kuis"*, *"tahukah kamu"*, *"ngopi"*, *"semua gerakan"*',
+  '',
+  'Coba: *"cara mulai kunjungan"*, *"cara isi rekam medis"*, *"cara proses booking"* — sesuai peran Anda.',
 ].join('\n');
 
 export const privacy = (chat) => (chat
