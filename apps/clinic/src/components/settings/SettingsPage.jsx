@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity, Palette, Monitor } from 'lucide-react';
+import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity, Palette } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
@@ -9,7 +9,7 @@ import TreatmentEducationTemplates from './TreatmentEducationTemplates';
 import SoapTemplates from './SoapTemplates';
 import { satusehatService } from '../../services/satusehatService';
 import ThemeGallery from '../common/ThemeGallery';
-import QueueDisplayLinks from './QueueDisplayLinks';
+import { TEMPLATE_VARS, DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, MAX_TEMPLATE_LENGTH, renderPreview, unknownPlaceholders } from '../../utils/waTemplates';
 import PaymentSettings from './PaymentSettings';
 import BookingSettings from './BookingSettings';
 
@@ -241,6 +241,8 @@ const SettingsPage = () => {
       waReminderH1DayEnabled: true,
       waReminderH1HourEnabled: true,
       waPostTreatmentEducationEnabled: false,
+      waTemplateReminderDay: '',
+      waTemplateReminderHour: '',
     };
 
     try {
@@ -264,6 +266,8 @@ const SettingsPage = () => {
             waReminderH1DayEnabled: parsed.waReminderH1DayEnabled !== false,
             waReminderH1HourEnabled: parsed.waReminderH1HourEnabled !== false,
             waPostTreatmentEducationEnabled: !!parsed.waPostTreatmentEducationEnabled,
+            waTemplateReminderDay: '',
+            waTemplateReminderHour: '',
           };
         }
       }
@@ -285,6 +289,8 @@ const SettingsPage = () => {
         waReminderH1DayEnabled: clinicSettings.wa_reminder_h1_day_enabled !== 'false',
         waReminderH1HourEnabled: clinicSettings.wa_reminder_h1_hour_enabled !== 'false',
         waPostTreatmentEducationEnabled: clinicSettings.wa_post_treatment_education_enabled === 'true',
+        waTemplateReminderDay: clinicSettings.wa_template_reminder_day || '',
+        waTemplateReminderHour: clinicSettings.wa_template_reminder_hour || '',
       }));
     }
   }, [clinicSettings]);
@@ -296,6 +302,8 @@ const SettingsPage = () => {
     if (formData.clinicEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.clinicEmail)) {
       newErrors.clinicEmail = 'Format email tidak valid';
     }
+    if ((formData.waTemplateReminderDay || '').length > MAX_TEMPLATE_LENGTH) newErrors.waTemplateReminderDay = `Maksimal ${MAX_TEMPLATE_LENGTH} karakter`;
+    if ((formData.waTemplateReminderHour || '').length > MAX_TEMPLATE_LENGTH) newErrors.waTemplateReminderHour = `Maksimal ${MAX_TEMPLATE_LENGTH} karakter`;
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
@@ -314,6 +322,9 @@ const SettingsPage = () => {
         wa_reminder_h1_day_enabled: String(formData.waReminderH1DayEnabled),
         wa_reminder_h1_hour_enabled: String(formData.waReminderH1HourEnabled),
         wa_post_treatment_education_enabled: String(formData.waPostTreatmentEducationEnabled),
+        // kosong = pakai teks bawaan
+        wa_template_reminder_day: (formData.waTemplateReminderDay || '').trim(),
+        wa_template_reminder_hour: (formData.waTemplateReminderHour || '').trim(),
       });
 
       if (!success) {
@@ -366,7 +377,6 @@ const SettingsPage = () => {
       { id: 'treatment-education', label: 'Edukasi Perawatan', icon: MessageSquare },
       { id: 'soap-templates', label: 'Template SOAP', icon: Save },
       { id: 'satusehat', label: 'SATUSEHAT', icon: Shield },
-      { id: 'queue-display', label: 'Layar Antrean TV', icon: Monitor },
       { id: 'payments', label: 'Pembayaran & QRIS', icon: CreditCard },
       { id: 'booking', label: 'Booking Online', icon: Activity },
     ] : []),
@@ -673,6 +683,66 @@ const SettingsPage = () => {
                         <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--color-accent)]"></div>
                       </label>
                     </div>
+                  </div>
+
+                  {/* Template pesan pengingat */}
+                  <div className="p-5 border border-gray-100 dark:border-gray-800 rounded-2xl space-y-5">
+                    <div>
+                      <h3 className="font-bold text-gray-900 dark:text-white text-sm">Isi Pesan Pengingat</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Ubah teks yang dikirim ke pasien. Data otomatis disisipkan dengan kode berikut:
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {TEMPLATE_VARS.map((v) => (
+                          <span key={v.key} title={`${v.label}, contoh: ${v.contoh}`}
+                            className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                            {`{${v.key}}`} <span className="font-sans text-gray-400">= {v.label}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {[
+                      { key: 'waTemplateReminderDay', judul: 'Pengingat H-1 hari', bawaan: DEFAULT_REMINDER_DAY },
+                      { key: 'waTemplateReminderHour', judul: 'Pengingat H-1 jam', bawaan: DEFAULT_REMINDER_HOUR },
+                    ].map(({ key, judul, bawaan }) => {
+                      const nilai = formData[key] || '';
+                      const aktif = nilai.trim() ? nilai : bawaan;
+                      const salah = unknownPlaceholders(aktif);
+                      return (
+                        <div key={key}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="text-sm font-semibold text-gray-800 dark:text-gray-200">{judul}</label>
+                            <button type="button" disabled={!isAdmin || !nilai}
+                              onClick={() => setFormData({ ...formData, [key]: '' })}
+                              className="text-xs text-[var(--color-accent)] hover:underline disabled:opacity-40 disabled:no-underline">
+                              Kembalikan ke teks bawaan
+                            </button>
+                          </div>
+                          <textarea
+                            rows={9}
+                            maxLength={MAX_TEMPLATE_LENGTH}
+                            value={nilai}
+                            placeholder={bawaan}
+                            disabled={!isAdmin}
+                            onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
+                            className="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono leading-relaxed disabled:opacity-60"
+                          />
+                          <div className="flex justify-between text-[11px] text-gray-400 mt-1">
+                            <span>{nilai.trim() ? 'Memakai teks buatan Anda' : 'Memakai teks bawaan (kolom kosong)'}</span>
+                            <span>{nilai.length}/{MAX_TEMPLATE_LENGTH}</span>
+                          </div>
+                          {errors[key] && <p className="text-red-500 text-xs mt-1">{errors[key]}</p>}
+                          {salah.length > 0 && (
+                            <p className="text-amber-600 text-xs mt-1">Kode tidak dikenal (tampil apa adanya): {salah.map((k) => `{${k}}`).join(', ')}</p>
+                          )}
+                          <div className="mt-2 p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-900/30">
+                            <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Pratinjau (data contoh)</p>
+                            <pre className="whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300 font-sans">{renderPreview(aktif, { klinik: formData.clinicName || undefined, telepon: formData.clinicPhone || undefined })}</pre>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <p className="text-[11px] text-gray-400">Klik <b>Simpan</b> di bagian bawah halaman untuk menerapkan. Jika klinik memakai WhatsApp resmi (Meta), pengingat memakai template yang disetujui Meta, bukan teks ini.</p>
                   </div>
 
                   {/* Test Send Section */}
@@ -1211,14 +1281,13 @@ const SettingsPage = () => {
             {/* SaaS Billing Tab */}
             {activeTab === 'billing' && <BillingSettings />}
 
-            {activeTab === 'queue-display' && <QueueDisplayLinks />}
 
             {activeTab === 'payments' && <PaymentSettings />}
 
             {activeTab === 'booking' && <BookingSettings />}
 
             {/* Save Button */}
-            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && activeTab !== 'queue-display' && activeTab !== 'payments' && activeTab !== 'booking' && (
+            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && activeTab !== 'payments' && activeTab !== 'booking' && (
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3 items-center">
                 {saved && (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mr-2 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg">

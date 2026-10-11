@@ -18,6 +18,7 @@ const ROUTE_LABELS = {
   '/profil': 'Profil Saya',
   '/dokter/profil-dokter': 'Profil Dokter',
   '/pengaturan': 'Pengaturan',
+  '/layar-antrean': 'Layar Antrean',
 };
 
 const getInitials = (name) => {

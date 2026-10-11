@@ -173,3 +173,33 @@ export function buildEducation(e: EduInput): { message: string | null; matches: 
   L.push(`Jika ada keluhan atau pertanyaan, hubungi kami${e.clinicPhone ? `: ${e.clinicPhone}` : '.'}`)
   return { message: L.join('\n'), matches }
 }
+
+// ── Template pengingat yang bisa diatur admin (clinic_settings.wa_template_reminder_day / _hour) ──
+export const TEMPLATE_PLACEHOLDERS = ['nama', 'klinik', 'tanggal', 'jam', 'dokter', 'telepon'] as const
+export const DEFAULT_REMINDER_DAY =
+  `🦷 *PENGINGAT JADWAL*
+{klinik}
+━━━━━━━━━━━━━━━━━━
+Halo {nama},
+Anda memiliki jadwal kunjungan:
+📅 {tanggal} jam {jam} WIB
+👨‍⚕️ Dokter: {dokter}
+📍 {klinik}
+━━━━━━━━━━━━━━━━━━
+Mohon hadir tepat waktu. Hubungi kami jika perlu reschedule: {telepon}`
+export const DEFAULT_REMINDER_HOUR =
+  `⏰ *SEBENTAR LAGI JADWAL ANDA*
+{klinik}
+━━━━━━━━━━━━━━━━━━
+Halo {nama}, kunjungan Anda dimulai sekitar 1 jam lagi:
+📅 {tanggal} jam {jam} WIB
+👨‍⚕️ Dokter: {dokter}
+━━━━━━━━━━━━━━━━━━
+Mohon hadir tepat waktu. Perlu reschedule? Hubungi {telepon}`
+
+/** Ganti {placeholder} dikenal; yang tidak dikenal dibiarkan apa adanya. Kosong/terlalu panjang → bawaan. */
+export function renderTemplate(template: string | null | undefined, vars: Record<string, string>, fallback: string): string {
+  const t = (template ?? '').trim()
+  const use = t && t.length <= 1500 ? t : fallback
+  return use.replace(/\{(nama|klinik|tanggal|jam|dokter|telepon)\}/g, (_m, k) => vars[k] ?? '')
+}

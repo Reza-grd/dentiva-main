@@ -45,6 +45,7 @@ const SchedulePage = lazy(() => import('./components/schedule/SchedulePage'));
 const VisitHistory = lazy(() => import('./components/schedule/VisitHistory'));
 const DoctorSchedulePage = lazy(() => import('./components/schedule/DoctorSchedulePage'));
 const QueueDisplay = lazy(() => import('./components/queue/QueueDisplay'));
+const QueueDisplayPage = lazy(() => import('./components/queue/QueueDisplayPage'));
 const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
@@ -154,6 +155,11 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/queue-display" element={<QueueDisplay />} />
+          <Route path="/layar-antrean" element={
+            <ProtectedRoute allowedRoles={['admin', 'resepsionis']}>
+              <QueueDisplayPage />
+            </ProtectedRoute>
+          } />
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/daftar" element={user ? <Navigate to="/" replace /> : <RegisterClinicPage />} />

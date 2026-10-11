@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.168.0/testing/asserts.ts";
-import { buildEducation, buildReceipt, doctorDisplayName, matchEducation, rupiah } from "./visitMessages.ts";
+import { buildEducation, buildReceipt, DEFAULT_REMINDER_DAY, doctorDisplayName, matchEducation, renderTemplate, rupiah } from "./visitMessages.ts";
 
 Deno.test("rupiah & nama dokter bergelar", () => {
   assertEquals(rupiah(1250000), "Rp 1.250.000");
@@ -82,4 +82,14 @@ Deno.test("edukasi: satu bagian per tindakan unik + obat yang diresepkan", () =>
 Deno.test("edukasi: tidak ada yang cocok & tanpa obat → tidak dikirim", () => {
   const { message } = buildEducation({ clinicName: "K", patientName: "B", treatments: [{ treatmentId: "z", name: "Konsultasi" }], medicines: [], templates, linked });
   assertEquals(message, null);
+});
+
+Deno.test("template pengingat: placeholder diganti, yang tak dikenal tetap, kosong → bawaan", () => {
+  const v = { nama: "Budi", klinik: "Klinik X", tanggal: "Senin, 12 Oktober 2026", jam: "09:00", dokter: "drg. Ani", telepon: "021-1" };
+  assertEquals(renderTemplate("Halo {nama}, jam {jam} di {klinik}. {tidak_ada}", v, "x"), "Halo Budi, jam 09:00 di Klinik X. {tidak_ada}");
+  const bawaan = renderTemplate("", v, DEFAULT_REMINDER_DAY);
+  assertStringIncludes(bawaan, "Halo Budi");
+  assertStringIncludes(bawaan, "Senin, 12 Oktober 2026 jam 09:00 WIB");
+  assert(!bawaan.includes("{"));
+  assertEquals(renderTemplate("a".repeat(1501), v, "cadangan"), "cadangan");
 });

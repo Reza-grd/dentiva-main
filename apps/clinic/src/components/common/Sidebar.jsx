@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles, Receipt, BellRing,
+  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles, Receipt, BellRing, Monitor,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -27,6 +27,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: LayoutDashboard, label: 'Dashboard',        path: baseUrl },
         { group: 'KLINIK' },
         { icon: CalendarClock,   label: 'Jadwal Dokter',    path: `${baseUrl}/jadwal-dokter` },
+        { icon: Monitor,         label: 'Layar Antrean',    path: '/layar-antrean' },
         { group: 'KEUANGAN' },
         { icon: Receipt,         label: 'Pengeluaran',      path: `${baseUrl}/pengeluaran` },
         { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
@@ -61,6 +62,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: CalendarCheck,   label: 'Booking Online',     path: '/booking-requests' },
         { icon: BellRing,        label: 'Recall Pasien',      path: `${baseUrl}/recall` },
         { icon: ClipboardList,   label: 'Riwayat Kunjungan', path: `${baseUrl}/kunjungan` },
+        { icon: Monitor,         label: 'Layar Antrean',      path: '/layar-antrean' },
         { icon: DollarSign,      label: 'Pembayaran',         path: `${baseUrl}/pembayaran` },
       ],
     };

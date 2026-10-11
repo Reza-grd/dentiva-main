@@ -14,6 +14,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
 import { configProblem, reminderTemplate, sendWhatsApp } from "../_shared/whatsapp.ts"
+import { DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, renderTemplate } from "../_shared/visitMessages.ts"
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -71,6 +72,8 @@ Deno.serve(async (req) => {
         phone: s['clinic_phone'] || '-',
         day: s['wa_reminder_h1_day_enabled'] !== 'false',
         hour: s['wa_reminder_h1_hour_enabled'] !== 'false',
+        tplDay: s['wa_template_reminder_day'] || '',
+        tplHour: s['wa_template_reminder_hour'] || '',
       }
     }
 
@@ -145,13 +148,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    const message = (visit: any, patient: any, c: ReturnType<typeof cfg>) => {
+    const message = (visit: any, patient: any, c: ReturnType<typeof cfg>, type: 'reminder_day' | 'reminder_hour') => {
       const dateFormatted = new Date(`${visit.tanggal_kunjungan}T00:00:00+07:00`).toLocaleDateString('id-ID', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta',
       })
       const time = visit.jam_kunjungan ? visit.jam_kunjungan.slice(0, 5) : '--:--'
       const params = [patient.nama_lengkap, dateFormatted, `${time} WIB`, getDocName(visit.dokter), c.name, c.phone]
-      const text = `🦷 *PENGINGAT JADWAL*\n${c.name}\n━━━━━━━━━━━━━━━━━━\nHalo ${patient.nama_lengkap},\nAnda memiliki jadwal kunjungan:\n📅 ${dateFormatted} jam ${time} WIB\n👨‍⚕️ Dokter: ${getDocName(visit.dokter)}\n📍 ${c.name}\n━━━━━━━━━━━━━━━━━━\nMohon hadir tepat waktu. Hubungi kami jika perlu reschedule: ${c.phone}`
+      const text = renderTemplate(type === 'reminder_day' ? c.tplDay : c.tplHour, {
+        nama: patient.nama_lengkap || 'Bapak/Ibu', klinik: c.name, tanggal: dateFormatted, jam: time,
+        dokter: getDocName(visit.dokter), telepon: c.phone,
+      }, type === 'reminder_day' ? DEFAULT_REMINDER_DAY : DEFAULT_REMINDER_HOUR)
       return { text, params }
     }
 
@@ -159,7 +165,7 @@ Deno.serve(async (req) => {
     if (dayWindowOpen) {
       for (const visit of await fetchVisits(tomorrowStr)) {
         if (!cfg(visit.clinic_id).day) continue
-        await process(visit, 'reminder_day', (p, c) => message(visit, p, c))
+        await process(visit, 'reminder_day', (p, c) => message(visit, p, c, 'reminder_day'))
       }
     }
 
@@ -170,7 +176,7 @@ Deno.serve(async (req) => {
       const [h, m] = String(visit.jam_kunjungan).split(':').map(Number)
       const diff = h * 60 + m - nowMin
       if (diff < 0 || diff > 60) continue
-      await process(visit, 'reminder_hour', (p, c) => message(visit, p, c))
+      await process(visit, 'reminder_hour', (p, c) => message(visit, p, c, 'reminder_hour'))
     }
 
     return json(200, { success: true, clinics: eligible.size, dayWindowOpen, processed: results })
