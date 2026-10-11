@@ -7,6 +7,7 @@ export const DENTI_DURATIONS = {
   call: 6000, wake: 6000, celebrate: 2400, spin: 2000, surprise: 2000, thanks: 3200, nod: 1800, clap: 2000,
   wink: 1500, cheer: 2400, jump: 1600, bow: 2200, shrug: 1900, cool: 2600, sigh: 2300, idea: 2400, confused: 2400, peek: 2400,
   excited: 2200, salute: 2000,
+  angry: 2400, cry: 2800, dizzy: 2600, stretch: 2800, search: 3000, phone: 3200, coffee: 3000, flex: 2400,
 };
 
 const clamp = (v) => Math.max(-1, Math.min(1, v));

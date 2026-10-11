@@ -70,7 +70,7 @@ const SUGGEST_BANK = [
 /** Gerakan kecil saat Denti dibiarkan (agar terasa hidup). */
 const IDLE_MOVES = [
   ['think', 1800], ['happy', 1600], ['nod', 1800], ['wave', 1600], ['wink', 1500], ['peek', 2400], ['sigh', 2300],
-  ['shrug', 1900], ['idea', 2400], ['jump', 1600], ['cool', 2600], ['salute', 2000],
+  ['shrug', 1900], ['idea', 2400], ['jump', 1600], ['cool', 2600], ['salute', 2000], ['stretch', 2800], ['search', 3000], ['coffee', 3000],
 ];
 const MAX_LEN = 1000;
 /** Tanpa aktivitas selama ini → Denti tertidur (bangun lagi saat pengguna mengetik/bertanya). */
@@ -301,7 +301,7 @@ export default function AiAssistantPage() {
         setMessages((m) => [...m, { role: 'assistant', content: chat.reply, local: true, intent: chat.intent, action, fresh: true }]);
         if (action?.type === 'showoff') {
           setDentiLine(bubble(chat.reply));
-          denti.sequence(action.seq.map((st) => [st]));
+          denti.sequence(action.seq.map((st) => (Array.isArray(st) ? st : [st])));
           later(() => setBurst((b) => b + 1), 1500);
         } else {
           react(chat.state, bubble(chat.reply), ms);

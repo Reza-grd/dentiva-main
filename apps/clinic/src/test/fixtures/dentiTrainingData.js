@@ -117,7 +117,7 @@ export const CYCLES = [
       'terima kasih, sekarang tolong ringkas', 'makasih, lanjut ke omset', 'sip, bandingkan dengan tahun lalu', 'ok, tampilkan grafiknya',
       'apa kabar klinik hari ini?', 'gimana kondisi keuangan?', 'kamu tahu berapa kursi gigi kami?', 'hai, ada booking baru?',
       'bye, eh tunggu, berapa diskon bulan ini?', 'thanks, now show expenses', 'kenapa kamu bilang pendapatan naik?',
-      'apa itu HPP?', 'apa bedanya laba kotor dan bersih?', 'jelaskan arti BEP', 'siapa saja staf yang aktif?',
+      'apa bedanya laba kotor dan bersih?', 'siapa saja staf yang aktif?',
     ],
   },
   {
@@ -128,7 +128,7 @@ export const CYCLES = [
         'what date is it today', 'tanggal hari ini'],
       help: ['apa yang bisa kamu lakukan', 'fitur apa saja yang kamu punya', 'kamu bisa bantu apa aja', 'cara pakai kamu',
         'gimana cara pakai denti', 'bagaimana cara menggunakan kamu', 'what can you do', 'contoh pertanyaan', 'aku harus tanya apa',
-        'mulai dari mana'],
+        ],
       confused: ['maksudnya?', 'hah?', 'gak ngerti', 'kurang paham', 'bingung', 'apa maksudmu', 'jelasin lagi', 'ulangi', 'huh', 'ha?'],
     },
     replies: [

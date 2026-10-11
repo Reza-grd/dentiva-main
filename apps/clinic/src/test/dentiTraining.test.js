@@ -7,9 +7,10 @@ import { describe, it, expect } from 'vitest';
 import { smallTalk, normalizeChat, moodForAnswer, topicOf, followUps, lineForQuestion } from '../utils/dentiMood';
 import { CYCLES as CYCLES_BASE } from './fixtures/dentiTrainingData';
 import { CYCLES_V4 } from './fixtures/dentiTrainingV4';
+import { CYCLES_V5 } from './fixtures/dentiTrainingV5';
 import { augmentedCases } from './fixtures/dentiAugment';
 
-const CYCLES = [...CYCLES_BASE, ...CYCLES_V4];
+const CYCLES = [...CYCLES_BASE, ...CYCLES_V4, ...CYCLES_V5];
 const NOW = new Date(2026, 9, 10, 9, 5);
 const asCase = (c) => (Array.isArray(c) ? c : [c, {}]);
 const talk = (text, ctx = {}) => smallTalk(text, { now: NOW, afterAnswer: true, ...ctx });
@@ -93,12 +94,12 @@ describe.each(CYCLES)('$name', (c) => {
   }
 });
 
-describe('Siklus 53 · ketahanan otomatis (augmentasi)', () => {
+describe('Siklus 64 · ketahanan otomatis (augmentasi)', () => {
   const cases = augmentedCases(CYCLES);
   it(`${cases.length} variasi kalimat ("denti, …", "… ya", "…!!", KAPITAL, emoji) tetap dipahami sama`, () => {
     const wrong = cases.filter((k) => intentOf(k.text) !== k.expect).map((k) => [k.how, k.text, intentOf(k.text), k.expect]);
     expect(wrong).toEqual([]);
-    expect(cases.length).toBeGreaterThanOrEqual(5000);
+    expect(cases.length).toBeGreaterThanOrEqual(8000);
   }, 60000);
 });
 
@@ -133,6 +134,6 @@ describe('Latihan Denti — balasan', () => {
     const n = CYCLES.reduce((s, c) => s + Object.values(c.intents || {}).flat().length + (c.ai || []).length
       + (c.moods || []).length + (c.topics || []).length + (c.replies || []).length + (c.actions || []).length
       + (c.followups || []).length + (c.lines || []).length + (c.distinct || []).length + (c.moodLines || []).length, 0);
-    expect(n).toBeGreaterThanOrEqual(1500);
+    expect(n).toBeGreaterThanOrEqual(2500);
   });
 });

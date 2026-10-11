@@ -10,8 +10,9 @@ import {
   pctChange, marginCalc, bepCalc, installment, terbilang, dateDiff, themeCommand, isSpeakCommand,
 } from './dentiSkills.js';
 import * as L from './dentiLines.js';
-import { guideReply, PAGES, TUTORIALS } from './dentiGuide.js';
+import { guideReply, PAGES, TUTORIALS, GUIDE_WORDS } from './dentiGuide.js';
 import { funReply, FUN_WORDS } from './dentiFun.js';
+import { glossaryReply, GLOSSARY_WORDS } from './dentiGlossary.js';
 
 const norm = (t) => (t || '').toLowerCase().replace(/\s+/g, ' ').trim();
 const any = (t, words) => words.some((w) => t.includes(w));
@@ -49,7 +50,7 @@ const DATA_WORDS = [
   'stok', 'bahan', 'dokter', 'jadwal', 'pasien', 'kunjungan', 'recall', 'bayar', 'pembayaran', 'tagihan', 'harga', 'diskon',
   'promo', 'transaksi', 'nota', 'kwitansi', 'invoice', 'input', 'koreksi', 'target', 'staf', 'karyawan', 'kursi', 'grafik',
   'bep', 'impas', 'kas', 'laporan', 'bulan', 'minggu', 'cara', 'bagaimana', 'menu', 'fitur',
-  'tindakan', 'obat', 'resep', 'antrean', 'booking', 'ringkas', 'cek', 'tampilkan', 'hitung', 'proyeksi',
+  'tindakan', 'obat', 'resep', 'antrean', 'booking', 'ringkas', 'cek', 'tampilkan', 'hitung', 'proyeksi', 'promosi',
   // bahasa Inggris
   'revenue', 'income', 'expense', 'expenses', 'profit', 'stock', 'schedule', 'report', 'show', 'patient', 'patients', 'chart',
 ];
@@ -92,7 +93,8 @@ const KNOWN = new Set([
 ]);
 
 // Kosakata pemandu & gerakan (nama halaman, kata tutorial, perintah gerak) tidak boleh "dikoreksi" ke kata lain.
-[...PAGES.flatMap((p) => p.aliases.flatMap((a) => a.split(' '))), ...FUN_WORDS,
+[...PAGES.flatMap((p) => p.aliases.flatMap((a) => a.split(' '))), ...FUN_WORDS, ...GLOSSARY_WORDS,
+  'ngapain', 'tugas', 'kerjaan', 'checklist', 'rutinitas', 'harian', 'dikerjakan', 'kerjakan', 'sebaiknya', 'mulai', 'konfirmasi', 'booking',
   ...TUTORIALS.flatMap((tu) => String(tu.re.source).match(/[a-z]{3,}/g) || []),
   'jump', 'badan', 'hpp', 'spin', 'quiz', 'trivia', 'ajarkan', 'tutorial', 'panduan', 'dimana', 'letak', 'lokasi', 'template', 'pengingat',
   'invoice', 'edukasi', 'tunjukkan', 'gerakan', 'atraksi', 'kedip', 'lompat', 'loncat', 'hormat', 'show', 'off',
@@ -118,24 +120,102 @@ function editDistance(a, b) {
   return d[a.length][b.length];
 }
 
+/** Kata dari regex (dan dari regex literal di dalam fungsi uji) — ikut jadi kosakata koreksi salah ketik. */
+const reWords = (re) => {
+  const src = typeof re === 'function'
+    ? (String(re).match(/\/((?:\\.|[^/\n\\])+)\//g) || []).join(' ')
+    : String(re?.source || '');
+  return src.replace(/\\./g, ' ').match(/[a-z]{4,}/g) || [];
+};
+/** Kosakata dasar koreksi salah ketik: obrolan + kata data. */
 let fuzzyVocab = null;
-/** Koreksi satu kata yang salah ketik ke kosakata terdekat (≤1 huruf; ≤2 untuk kata ≥7 huruf). */
-function fuzzyWord(w) {
-  if (w.length < 4 || /\d/.test(w) || KNOWN.has(w)) return w;
+const baseVocab = () => {
   fuzzyVocab = fuzzyVocab || [...new Set([...VOCAB, ...DATA_WORDS.filter((x) => !x.includes(' ') && x.length >= 4)])];
-  if (fuzzyVocab.includes(w)) return w;
+  return fuzzyVocab;
+};
+/** Kosakata tambahan (mode agresif): perintah halaman, gerakan, istilah, dan kata di dalam regex maksud. Dipakai hanya bila cara biasa gagal. */
+let extVocab = null;
+let extSet = null;
+let extByLen = null;
+const extendedVocab = () => {
+  if (!extVocab) {
+    const base = new Set(baseVocab());
+    extVocab = [...new Set([
+      ...GUIDE_WORDS, ...FUN_WORDS.filter((x) => x.length >= 4), ...GLOSSARY_WORDS.filter((x) => x.length >= 4), ...[...KNOWN].filter((x) => x.length >= 5),
+      ...INTENTS.flatMap((it) => [...reWords(it.re), ...reWords(it.whole)]), ...EARLY_INTENTS.flatMap((it) => reWords(it.test)), ...PERSONA.flatMap(([re]) => reWords(re)),
+    ])].filter((v) => !base.has(v));
+    extSet = new Set(extVocab);
+    extByLen = new Map();
+    extVocab.forEach((v) => extByLen.set(v.length, [...(extByLen.get(v.length) || []), v]));
+  }
+  return extVocab;
+};
+// jarak sama → utamakan huruf awal yang sama ("hbat" → "hebat", bukan "obat"), lalu panjang yang paling mirip ("mkasiih" → "makasih")
+const rankOf = (v, w) => (v[0] === w[0] ? 0 : 10) + Math.abs(v.length - w.length);
+
+/** Koreksi dasar: kosakata kecil, ≤ 1 huruf (≤ 2 untuk kata ≥ 7 huruf). */
+function fuzzyWordBase(w) {
+  if (w.length < 4 || /\d/.test(w) || KNOWN.has(w)) return w;
+  const vocab = baseVocab();
+  if (vocab.includes(w)) return w;
   const max = w.length >= 7 ? 2 : 1;
   let best = w;
   let bestD = max + 1;
-  for (const v of fuzzyVocab) {
+  for (const v of vocab) {
     if (Math.abs(v.length - w.length) > max) continue;
     const dist = editDistance(w, v);
-    // jarak sama → utamakan huruf awal yang sama (salah ketik jarang di huruf pertama: "hbat" → "hebat", bukan "obat"),
-    // lalu panjang yang paling mirip ("mkasiih" → "makasih", bukan "kasih")
-    const rank = (x) => (x[0] === w[0] ? 0 : 10) + Math.abs(x.length - w.length);
-    if (dist < bestD || (dist === bestD && rank(v) < rank(best))) { bestD = dist; best = v; }
+    if (dist < bestD || (dist === bestD && rankOf(v, w) < rankOf(best, w))) { bestD = dist; best = v; }
   }
   return bestD <= max ? best : w;
+}
+
+/** Koreksi agresif (cadangan): kosakata luas, tanpa mengubah kata yang hanya berbeda imbuhan/akhiran. */
+function fuzzyWordAggressive(w) {
+  const first = fuzzyWordBase(w);
+  if (first !== w) return first;
+  if (w.length < 4 || /\d/.test(w) || KNOWN.has(w)) return w;
+  extendedVocab();
+  if (extSet.has(w) || baseVocab().includes(w)) return w;
+  const max = w.length >= 7 ? 2 : 1;
+  let best = w;
+  let bestD = max + 1;
+  for (let len = w.length - max; len <= w.length + max; len += 1) {
+    for (const v of extByLen.get(len) || []) {
+      if (Math.abs(v.length - w.length) >= 2 && (w.startsWith(v) || v.startsWith(w))) continue; // "kabar" ↔ "kabarmu": imbuhan, bukan salah ketik
+      if (w.length <= 5 && v[0] !== w[0]) continue; // kata pendek: huruf awal jarang salah ("kalau" ≠ "galau")
+      const dist = editDistance(w, v);
+      if (dist < bestD || (dist === bestD && rankOf(v, w) < rankOf(best, w))) { bestD = dist; best = v; }
+    }
+  }
+  if (bestD <= max) return best;
+  // kata berimbuhan (-mu/-ku/-nya/-lah/-kah): perbaiki akarnya lalu pasang kembali ("kabamu" → "kabarmu")
+  const sfx = w.match(/^(.{4,}?)(mu|ku|nya|lah|kah)$/);
+  if (sfx && !KNOWN.has(sfx[1])) {
+    const stem = fuzzyWord(sfx[1], true);
+    if (stem !== sfx[1]) return stem + sfx[2];
+  }
+  return w;
+}
+
+const fuzzyMemo = new Map();
+function fuzzyWord(w, aggressive = false) {
+  const key = aggressive ? `~${w}` : w;
+  if (fuzzyMemo.has(key)) return fuzzyMemo.get(key);
+  const out = aggressive ? fuzzyWordAggressive(w) : fuzzyWordBase(w);
+  if (fuzzyMemo.size > 5000) fuzzyMemo.clear();
+  fuzzyMemo.set(key, out);
+  return out;
+}
+
+/** Perbaiki salah ketik per kata pada teks asli (angka & tanda baca dibiarkan) — untuk keterampilan hitung. */
+function fixRaw(text) {
+  return String(text || '').split(' ').map((tok) => {
+    const m = tok.match(/^([^a-zA-Z]*)([a-zA-Z]{4,})([^a-zA-Z]*)$/);
+    if (!m) return tok;
+    const low = m[2].toLowerCase();
+    const fixed = SLANG[low] || fuzzyWord(low, true);
+    return fixed === low ? tok : m[1] + fixed + m[3];
+  }).join(' ');
 }
 
 /** Pesan yang isinya hanya emoji/tanda tanya → kalimat yang setara maknanya. */
@@ -156,7 +236,7 @@ function emojiOnly(text) {
  * Rapikan kalimat obrolan: huruf kecil, tanpa tanda baca/emoji, huruf berulang dipendekkan
  * ("makasihhh" → "makasih"), sapaan ke Denti & partikel penutup dibuang ("halo denti dong ya" → "halo").
  */
-export function normalizeChat(text) {
+export function normalizeChat(text, { aggressive = false } = {}) {
   let t = norm(text)
     .replace(/<[^>]*>/g, ' ')
     .replace(/[^\p{L}\p{N}\s']/gu, ' ')
@@ -165,7 +245,7 @@ export function normalizeChat(text) {
     .trim();
   // huruf ganda di akhir kata ("kerenn", "sipp", "okk"); vokal ganda di tengah ("maaf") dibiarkan
   t = t.replace(/([b-df-hj-kmnp-tv-z])\1+(?=\s|$)/g, '$1'); // tanpa "l" (well, all, still)
-  t = t.split(' ').map((w) => SLANG[w] || w).map(fuzzyWord).join(' ');
+  t = t.split(' ').map((w) => SLANG[w] || w).map((w) => fuzzyWord(w, aggressive)).join(' ');
   t = t.replace(/\b(denti|kak|kakak|min|mimin|bot)\b/g, ' ').replace(/\s+/g, ' ').trim();
   for (let i = 0; i < 3; i += 1) t = t.replace(/\s(ya|yah|yaa|ya|dong|deh|nih|sih|kok|lho|loh|banget|bgt|sekali|nya)$/, '').trim();
   return t;
@@ -398,18 +478,38 @@ const BIZ_SKILLS = [
 const REPEATABLE = { joke: 'joke', laugh: 'joke', dance: 'dance' };
 const AGAIN = /^(lagi|satu lagi|sekali lagi|yang lain|lainnya|another( one)?|more|terus|lanjutkan)$/;
 
-export function smallTalk(text, {
+/** Keterampilan instan dari kalimat asli: kalkulator & hitungan bisnis. */
+function runSkills(src) {
+  const calc = calculate(src);
+  if (calc) return { intent: 'calc', state: 'talk', reply: calc };
+  for (const [intent, skill, state] of BIZ_SKILLS) {
+    const out = skill(src);
+    if (out) return { intent, state, reply: out };
+  }
+  return null;
+}
+
+/**
+ * Dua tahap: (1) pahami kalimat apa adanya (koreksi ringan); (2) bila tidak dikenali, ulangi dengan koreksi salah ketik agresif
+ * (kosakata perintah/halaman/istilah) — sehingga kata yang benar tidak pernah "dikoreksi" ke kata lain.
+ */
+export function smallTalk(text, opts = {}) {
+  const first = runSkills(text) || talkWith(text, emojiOnly(text) || normalizeChat(text), opts);
+  if (first) return first;
+  if (emojiOnly(text)) return null;
+  const fixed = fixRaw(text);
+  if (fixed !== text) {
+    const skill = runSkills(fixed);
+    if (skill) return skill;
+  }
+  const loose = normalizeChat(text, { aggressive: true });
+  return loose !== normalizeChat(text) ? talkWith(text, loose, opts) : null;
+}
+
+function talkWith(text, t, {
   name = '', greeting = 'Halo', seed = 0, now = new Date(), afterAnswer = false, lastIntent = null, provider = '', lastTopic = null,
   recent = [], role = 'admin', offer = null, quiz = null,
 } = {}) {
-  // Keterampilan instan dari kalimat asli: kalkulator
-  const calc = calculate(text);
-  if (calc) return { intent: 'calc', state: 'talk', reply: calc };
-  for (const [intent, skill, state] of BIZ_SKILLS) {
-    const out = skill(text);
-    if (out) return { intent, state, reply: out };
-  }
-  const t = emojiOnly(text) || normalizeChat(text);
   if (!t || t.length > 70) return null;
   const date = dateCalc(t, now);
   if (date) return { intent: 'datecalc', state: 'talk', reply: date };
@@ -428,9 +528,12 @@ export function smallTalk(text, {
   // Pemandu: buka halaman/tab (sadar peran), "di mana …", "ajarkan cara …", kembali/muat ulang, jawaban "ya" untuk tawaran
   const guide = guideReply(t, { role, offer });
   if (guide) return guide;
+  // Kamus istilah: "apa itu scaling?", "HPP itu apa?" — hanya istilah yang dikenal
+  const gloss = glossaryReply(t, { role, seed });
+  if (gloss) return gloss;
   if (isClearCommand(t)) return { intent: 'clear', state: 'wave', reply: 'Siap, percakapan dibersihkan. Kita mulai dari awal! ✨', action: { type: 'clear' } };
   // Interaksi seru: perintah gerakan, kuis gigi, reaksi emosi
-  const fun = funReply(t, { seed, recent, quiz, name });
+  const fun = funReply(t, { seed, recent, quiz, name, lastIntent });
   if (fun) return fun;
   const ctx = { t, raw: text, name, greeting, seed, now, afterAnswer, provider, lastTopic, sapa: name ? `, ${name}` : '' };
   const answer = (it, sd = seed) => {

@@ -236,7 +236,7 @@ export const CYCLES_V4 = [
       'jelaskan laporan keuangan bulan ini', 'apa saja tindakan dengan margin tertinggi', 'gimana performa tindakan scaling', 'bagaimana cara mengurangi no show pasien',
       'ajarkan cara meningkatkan retensi pasien', 'langkah langkah mengurangi biaya overhead klinik', 'apa itu bep dan berapa bep klinik kita', 'bagaimana hpp tambal gigi kita',
       'buka tab yang paling sering dipakai pasien', 'lihat jadwal dokter alya minggu ini lalu analisis', 'tampilkan pendapatan per dokter', 'kenapa pasien batal kunjungan',
-      'cara kerja dokter gigi spesialis', 'ajarkan cara mencabut gigi', 'gimana cara menambal gigi berlubang', 'bagaimana cara scaling yang benar', 'apa itu karies gigi',
+      'cara kerja dokter gigi spesialis', 'ajarkan cara mencabut gigi', 'gimana cara menambal gigi berlubang', 'bagaimana cara scaling yang benar',
       'jelaskan prosedur perawatan saluran akar', 'tutorial memasang behel', 'fungsi fluoride untuk gigi', 'apa itu gingivitis dan cara mengobatinya',
       'bagaimana proses klaim bpjs', 'cara menaikkan harga tanpa kehilangan pasien', 'kapan waktu terbaik promosi', 'ide promosi yang cocok untuk klinik saya berdasarkan data',
       'laporan pasien yang menunggak', 'lihat tagihan yang belum lunas', 'berapa pasien yang membatalkan jadwal', 'berapa persen pasien yang menyetujui izin wa',

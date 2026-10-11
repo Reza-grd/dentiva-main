@@ -27,6 +27,8 @@ export const DENTI_STATES = [
   'nod', 'clap',
   // gerakan & ekspresi tambahan (v4)
   'wink', 'cheer', 'jump', 'bow', 'shrug', 'cool', 'sigh', 'idea', 'confused', 'peek', 'excited', 'salute',
+  // gerakan & ekspresi tambahan (v5)
+  'angry', 'cry', 'dizzy', 'stretch', 'search', 'phone', 'coffee', 'flex',
 ];
 
 const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z';
@@ -45,12 +47,28 @@ export function dentiSvg(uid = 'd') {
   const url = (n) => `url(#${g(n)})`;
   // posisi diletakkan di <g> pembungkus agar transform animasi CSS tidak menimpanya
   const at = (x, y, sc, inner) => `<g transform="translate(${x} ${y})${sc ? ` scale(${sc})` : ''}">${inner}</g>`;
+  const armProps = (side) => (side === 'r' ? `
+      <g class="d-lens">
+        <path d="M0 98 V122" stroke="${url('gold')}" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="0" cy="140" r="20" fill="#bfeeff" fill-opacity=".28" stroke="${url('gold')}" stroke-width="6"/>
+        <path d="M-11 133 Q-8 126 0 124" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".9"/>
+      </g>
+      <g class="d-phone">
+        <rect x="-11" y="92" width="22" height="44" rx="6" fill="#0b1426" stroke="${url('gold')}" stroke-width="2.5"/>
+        <rect x="-7" y="97" width="14" height="30" rx="3" fill="#5fd0ff" opacity=".85"/>
+        <circle cx="0" cy="131.5" r="1.8" fill="#fff4de"/>
+      </g>
+      <g class="d-cup">
+        <path d="M-9 100 L9 100 L14 136 L-14 136 Z" fill="#fff" stroke="${url('gold')}" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M13 108 Q28 112 22 128 Q19 134 13 132" fill="none" stroke="${url('gold')}" stroke-width="3.5" stroke-linecap="round"/>
+        <ellipse cx="0" cy="136" rx="14" ry="3.2" fill="#8a5a34"/>
+      </g>` : '');
   const arm = (side, x) => `
     <g class="d-arm-${side}"><g transform="translate(${x} 322) rotate(${side === 'l' ? 22 : -22})">
       <path d="${ARM}" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="1.5"/>
       <path d="${ARM_CAP}" fill="${url('blue')}"/>
       <path d="M-26 20 C-12 28 12 28 26 20" stroke="${url('gold')}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
-      <path d="M-15 32 C-15 52 -14 70 -12 82" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
+      <path d="M-15 32 C-15 52 -14 70 -12 82" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>${armProps(side)}
     </g></g>`;
   const ear = (side, cx, face) => `
     <g class="d-ear-${side}">
@@ -199,6 +217,19 @@ export function dentiSvg(uid = 'd') {
         <path d="M192 148 H208" stroke="${url('gold')}" stroke-width="4" stroke-linecap="round"/>
         <path d="M138 146 L158 146 L146 166 Z" fill="#fff" opacity=".22"/><path d="M216 146 L236 146 L224 166 Z" fill="#fff" opacity=".22"/>
       </g>
+      <g class="d-brows" fill="none" stroke="#ff8a7a" stroke-width="9" stroke-linecap="round" filter="url(#${g('glow')})">
+        <path d="M134 126 L190 148"/><path d="M266 126 L210 148"/>
+      </g>
+      <g class="d-tears" fill="#9fe0ff" filter="url(#${g('glow')})">
+        ${at(146, 184, 0, `<path class="d-tear d-tear-1" d="${DROP}"/>`)}
+        ${at(254, 184, 0, `<path class="d-tear d-tear-2" d="${DROP}"/>`)}
+        ${at(176, 188, 0, `<path class="d-tear d-tear-3" d="${DROP}"/>`)}
+        ${at(224, 188, 0, `<path class="d-tear d-tear-4" d="${DROP}"/>`)}
+      </g>
+      <g class="d-spirals" fill="none" stroke="${url('eye')}" stroke-width="6" stroke-linecap="round" filter="url(#${g('glow')})">
+        <g transform="translate(162 160)"><path class="d-spiral" d="M0 0 a4 4 0 0 1 8 0 a8 8 0 0 1 -16 0 a12 12 0 0 1 24 0 a16 16 0 0 1 -32 0"/></g>
+        <g transform="translate(238 160)"><path class="d-spiral d-spiral-r" d="M0 0 a4 4 0 0 1 8 0 a8 8 0 0 1 -16 0 a12 12 0 0 1 24 0 a16 16 0 0 1 -32 0"/></g>
+      </g>
       </g>
 
       <g class="d-gaze-soft"><g class="d-mouth" filter="url(#${g('glow')})">
@@ -294,6 +325,19 @@ export function dentiSvg(uid = 'd') {
   <g class="d-quest" fill="${url('gold')}" font-family="Inter, system-ui, sans-serif" font-weight="800" filter="url(#${g('glow')})">
     <text class="d-q d-q-1" x="300" y="50" font-size="54">?</text>
     <text class="d-q d-q-2" x="56" y="76" font-size="34">?</text>
+  </g>
+  <g class="d-puffs" fill="#ffd5cc" opacity=".9">
+    <circle class="d-puff d-puff-1" cx="58" cy="96" r="9"/><circle class="d-puff d-puff-2" cx="70" cy="80" r="6"/>
+    <circle class="d-puff d-puff-3" cx="342" cy="96" r="9"/><circle class="d-puff d-puff-4" cx="330" cy="80" r="6"/>
+  </g>
+  <g class="d-vein" fill="none" stroke="#ff6b6b" stroke-width="5" stroke-linecap="round" filter="url(#${g('glow')})">
+    ${at(320, 70, 1, `<path d="M-12 -4 Q-4 -4 -4 -12 M12 -4 Q4 -4 4 -12 M-12 4 Q-4 4 -4 12 M12 4 Q4 4 4 12"/>`)}
+  </g>
+  <g class="d-steam" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8">
+    <path class="d-steam-1" d="M362 196 q-8 -12 0 -22 q8 -10 0 -22"/><path class="d-steam-2" d="M378 200 q-8 -12 0 -22 q8 -10 0 -22"/>
+  </g>
+  <g class="d-dizzy" fill="#fff4de" filter="url(#${g('glow')})">
+    ${at(128, 36, 1.1, `<path d="${STAR}"/>`)}${at(272, 36, 1.1, `<path d="${STAR}"/>`)}${at(200, 0, 1.1, `<path d="${STAR}"/>`)}${at(200, 76, .9, `<path d="${STAR}"/>`)}
   </g>
   <g class="d-sweat">${at(318, 96, 0, `<path d="${DROP}" fill="#a9e4ff"/>`)}</g>
   <g class="d-arrows" fill="none" stroke="${url('gold')}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">

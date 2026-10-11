@@ -240,3 +240,40 @@ Tambahkan kalimat ke `src/test/fixtures/dentiTrainingV4.js` (`intents`, `ai`, `s
 `dentiTraining.test.js` juga membuat **±6.000 variasi otomatis** (awalan "denti,", akhiran "ya"/"dong", `!!`, KAPITAL,
 emoji) dan menuntut intent-nya sama. Kata baru yang terkena koreksi ejaan (`normalizeChat`) harus masuk `KNOWN`
 (`dentiMood.js`) — kosakata pemandu & gerakan sudah otomatis.
+
+### Gerakan & ekspresi v5 (8 state baru, total 43)
+
+| `data-state` | Kapan | Gerak |
+|---|---|---|
+| `angry` (2,4 dtk) | "pura pura marah", "ngambek" | alis menukik, mata merah, uap di telinga, 💢, bergetar |
+| `cry` (2,8 dtk) | "hiks", "pura pura nangis"; juga saat pengguna menangis | air mata mengalir, kepala tertunduk, sesenggukan |
+| `dizzy` (2,6 dtk) | "pura pura pusing", "kepala berputar" | mata spiral, bintang berputar di atas kepala, badan oleng |
+| `stretch` (2,8 dtk) | "meregang", "peregangan" | kedua tangan terangkat, badan memanjang, menguap |
+| `search` (3 dtk) | "mode detektif", "kaca pembesar" | kaca pembesar di tangan kanan, mata melirik kiri-kanan |
+| `phone` (3,2 dtk) | "telepon" | ponsel di telinga, mulut berbicara |
+| `coffee` (3 dtk) | "ngopi", "minum kopi" | cangkir berasap, menyeruput, mata terpejam senang |
+| `flex` (2,4 dtk) | "pamer otot" | kedua lengan menekuk-mengembang, bintang & kilau |
+
+Properti yang dipegang (kaca pembesar, ponsel, cangkir) ada **di dalam grup lengan kanan** sehingga ikut bergerak bersama lengan.
+"Semua gerakan" memutar pertunjukan 17 langkah; "gerakan apa saja" memutar 8 langkah.
+
+### Otak v5: kamus, checklist, "lagi", dan koreksi salah ketik dua tahap
+
+- **`utils/dentiGlossary.js` — kamus 47 istilah** (kedokteran gigi + Dentiva): "apa itu scaling?", "HPP itu apa", "arti odontogram",
+  "maksud BEP", "istilah apa saja". Hanya istilah yang dikenal yang dijawab lokal; pertanyaan data klinik tetap ke AI. Istilah terkait fitur
+  menawarkan membuka halamannya sesuai peran. Penjelasan umum — keputusan perawatan tetap oleh dokter.
+- **Checklist harian per peran** ("hari ini ngapain", "checklist harian", "mulai dari mana") — admin, dokter, resepsionis berbeda.
+- **Tutorial baru** (sadar peran): membuat kunjungan, memproses booking, recall, memulai/menyelesaikan kunjungan (dokter), mengisi rekam
+  medis, menulis resep, mengatasi error/lambat/tidak bisa login. Langkah-langkahnya dicocokkan dengan tombol yang benar-benar ada di aplikasi.
+  Tema & Keamanan kini bisa dibuka semua peran; ada halaman **Profil Dokter**.
+- **"lagi" / "sekali lagi"** mengulang gerakan, fakta, atau kuis terakhir. **Fakta gigi** ("tahukah kamu", 25 fakta) dan **kuis 38 soal**
+  (kunci jawaban satu huruf tidak lagi membuat jawaban sembarang dianggap benar; salah ketik 1 huruf pada jawaban diterima).
+- **Koreksi salah ketik dua tahap** (`smallTalk`): tahap 1 memahami kalimat apa adanya (koreksi ringan, perilaku lama); bila tidak dikenali,
+  tahap 2 mengulang dengan **kosakata luas** (perintah, halaman, gerakan, istilah, kata dalam regex maksud). Kata benar tidak pernah
+  "dikoreksi" ke kata lain. Hasil uji acak (`dentiFuzz.test.js`): **92,6% maksud tetap dikenali** dengan salah ketik (sebelumnya ±47%),
+  dan **0 dari 1.107** pertanyaan data + salah ketik yang bocor jadi obrolan.
+
+### Cara melatih (siklus 54–64)
+
+Tambahkan kalimat ke `src/test/fixtures/dentiTrainingV5.js` (format sama dengan V4; konteks `{ role, offer, quiz, lastIntent }`). Fixture kamus
+dan kuis dibangkitkan otomatis dari `GLOSSARY` dan `QUIZ`, jadi istilah/soal baru langsung ikut diuji. `dentiAugment` menambah ±9.000 variasi.

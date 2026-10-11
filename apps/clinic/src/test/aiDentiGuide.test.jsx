@@ -79,6 +79,39 @@ describe('Denti membuka halaman yang diminta', () => {
   });
 });
 
+describe('Denti sebagai kamus & pemandu harian', () => {
+  it('"apa itu HPP" dijawab lokal, lalu "ya" membuka Biaya & Modal', async () => {
+    wrap();
+    await say('apa itu HPP?');
+    expect((await screen.findAllByText(/Harga Pokok Penjualan/)).length).toBeGreaterThan(0);
+    expect(screen.getByRole('button', { name: /Buka .*Biaya/i })).toBeInTheDocument();
+    await say('ya');
+    await waitFor(() => expect(where()).toBe('/admin/costing'), { timeout: 3000 });
+    expect(ai.ask).not.toHaveBeenCalled();
+  });
+
+  it('"checklist harian" menampilkan daftar tugas admin', async () => {
+    wrap();
+    await say('checklist harian');
+    expect((await screen.findAllByText(/checklist harian admin/)).length).toBeGreaterThan(0);
+    expect(ai.ask).not.toHaveBeenCalled();
+  });
+
+  it('salah ketik ringan tetap dipahami ("apa itu skeling")', async () => {
+    wrap();
+    await say('apa itu skeling');
+    expect((await screen.findAllByText(/karang gigi/)).length).toBeGreaterThan(0);
+    expect(ai.ask).not.toHaveBeenCalled();
+  });
+
+  it('"pertunjukan" memutar rangkaian gerakan dan "lagi" tidak diteruskan ke AI', async () => {
+    wrap();
+    await say('semua gerakan');
+    expect((await screen.findAllByText(/Pertunjukan lengkap/)).length).toBeGreaterThan(0);
+    expect(ai.ask).not.toHaveBeenCalled();
+  });
+});
+
 describe('Denti seru diajak ngobrol', () => {
   it('kuis gigi: mulai → menyerah → jawaban terungkap', async () => {
     wrap();

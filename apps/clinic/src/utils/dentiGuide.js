@@ -14,6 +14,8 @@ const roleName = { admin: 'admin', dokter: 'dokter', resepsionis: 'resepsionis' 
 export const PAGES = [
   { id: 'dashboard', label: 'Dashboard', aliases: ['dashboard', 'beranda', 'home', 'halaman utama', 'halaman depan', 'dasbor'],
     to: { admin: '/admin', dokter: '/dokter', resepsionis: '/resepsionis' }, roles: ['admin', 'dokter', 'resepsionis'], where: 'Menu samping → Dashboard' },
+  { id: 'profil-dokter', label: 'Profil Dokter', aliases: ['profil dokter', 'data dokter', 'biodata dokter', 'profil praktik'],
+    to: '/dokter/profil-dokter', roles: ['dokter'], deny: { admin: 'Profil dokter diisi oleh dokter yang bersangkutan.', resepsionis: 'Profil dokter diisi oleh dokter yang bersangkutan.' }, where: 'Menu samping (dokter) → Profil Dokter' },
   { id: 'pasien', label: 'Data Pasien', aliases: ['pasien', 'data pasien', 'daftar pasien', 'patients', 'list pasien', 'semua pasien', 'database pasien'],
     to: '/pasien', roles: ['dokter', 'resepsionis'], deny: { admin: ADMIN_NO_PATIENT }, where: 'Menu samping → Data Pasien' },
   { id: 'pendaftaran', label: 'Pendaftaran Pasien', aliases: ['pendaftaran pasien', 'registrasi pasien', 'tambah pasien', 'pasien baru', 'daftarkan pasien'],
@@ -25,7 +27,7 @@ export const PAGES = [
   { id: 'pembayaran', label: 'Pembayaran', aliases: ['pembayaran', 'kasir', 'transaksi', 'payments', 'kwitansi'],
     to: '/resepsionis/pembayaran', roles: ['resepsionis'], deny: { admin: 'Penerimaan pembayaran hanya dilakukan **resepsionis** (kasir). Admin cukup melihat laporan keuangan. 💳', dokter: 'Penerimaan pembayaran dilakukan **resepsionis** (kasir).' },
     where: 'Menu samping (resepsionis) → Pembayaran' },
-  { id: 'jadwal', label: 'Jadwal Kunjungan', aliases: ['jadwal', 'kalender', 'jadwal kunjungan', 'janji temu', 'schedule', 'agenda', 'appointment'],
+  { id: 'jadwal', label: 'Jadwal Kunjungan', aliases: ['jadwal', 'kalender', 'jadwal kunjungan', 'janji temu', 'schedule', 'agenda', 'appointment', 'jadwal hari ini', 'jadwal harian'],
     to: { dokter: '/dokter/jadwal', resepsionis: '/resepsionis/jadwal' }, roles: ['dokter', 'resepsionis'],
     deny: { admin: 'Jadwal kunjungan dikelola **resepsionis** dan **dokter**. Untuk jam praktik dokter, buka **Jadwal Dokter**. 📅' }, where: 'Menu samping → Jadwal' },
   { id: 'riwayat', label: 'Riwayat Kunjungan', aliases: ['riwayat kunjungan', 'riwayat', 'history kunjungan', 'daftar kunjungan'],
@@ -62,7 +64,7 @@ export const PAGES = [
   { id: 'profil', label: 'Profil Saya', aliases: ['profil', 'profil saya', 'profile', 'akun saya', 'akunku'],
     to: '/profil', roles: ['admin', 'dokter', 'resepsionis'], where: 'Klik nama Anda di kanan atas → Profil' },
   // ── Tab di Pengaturan (admin)
-  { id: 'tab-tema', label: 'Pengaturan › Tampilan Tema', aliases: ['tema', 'tampilan', 'tema tampilan', 'tampilan tema', 'warna', 'mode gelap tab'], to: '/admin/pengaturan?tab=appearance', roles: ['admin'], deny: {}, where: 'Pengaturan → tab Tampilan Tema' },
+  { id: 'tab-tema', label: 'Pengaturan › Tampilan Tema', aliases: ['tema', 'tampilan', 'tema tampilan', 'tampilan tema', 'warna', 'mode gelap tab'], to: { admin: '/admin/pengaturan?tab=appearance', dokter: '/pengaturan?tab=appearance', resepsionis: '/pengaturan?tab=appearance' }, roles: ['admin', 'dokter', 'resepsionis'], deny: {}, where: 'Pengaturan → tab Tampilan Tema' },
   { id: 'tab-profil-klinik', label: 'Pengaturan › Profil Klinik', aliases: ['profil klinik', 'data klinik', 'identitas klinik', 'alamat klinik', 'nama klinik'], to: '/admin/pengaturan?tab=profile', roles: ['admin'], deny: {}, where: 'Pengaturan → tab Profil Klinik' },
   { id: 'tab-notifikasi', label: 'Pengaturan › Notifikasi', aliases: ['notifikasi', 'pengaturan notifikasi'], to: '/admin/pengaturan?tab=notifications', roles: ['admin'], deny: {}, where: 'Pengaturan → tab Notifikasi' },
   { id: 'tab-wa', label: 'Pengaturan › WhatsApp', aliases: ['pengaturan whatsapp', 'pengaturan whatsap', 'whatsapp', 'whatsap', 'wa', 'pengaturan wa', 'template pengingat', 'template pesan', 'pesan pengingat', 'isi pesan pengingat', 'template wa', 'template whatsapp', 'pengingat', 'pengingat wa', 'pengingat whatsapp', 'invoice wa', 'uji coba wa', 'tes wa'],
@@ -72,7 +74,7 @@ export const PAGES = [
   { id: 'tab-satusehat', label: 'Pengaturan › SATUSEHAT', aliases: ['satusehat', 'satu sehat', 'pengaturan satusehat', 'integrasi satusehat'], to: '/admin/pengaturan?tab=satusehat', roles: ['admin'], deny: {}, where: 'Pengaturan → tab SATUSEHAT' },
   { id: 'tab-qris', label: 'Pengaturan › Pembayaran & QRIS', aliases: ['qris', 'pengaturan pembayaran', 'pembayaran qris', 'rekening', 'metode pembayaran'], to: '/admin/pengaturan?tab=payments', roles: ['admin'], deny: {}, where: 'Pengaturan → tab Pembayaran & QRIS' },
   { id: 'tab-booking', label: 'Pengaturan › Booking Online', aliases: ['pengaturan booking', 'booking online', 'tautan booking', 'link booking'], to: '/admin/pengaturan?tab=booking', roles: ['admin'], deny: {}, where: 'Pengaturan → tab Booking Online' },
-  { id: 'tab-keamanan', label: 'Pengaturan › Keamanan', aliases: ['keamanan', 'kata sandi', 'password', 'sandi', 'ganti password', 'ganti kata sandi', 'mfa', 'verifikasi dua langkah'], to: '/admin/pengaturan?tab=security', roles: ['admin'], deny: {}, where: 'Pengaturan → tab Keamanan' },
+  { id: 'tab-keamanan', label: 'Pengaturan › Keamanan', aliases: ['keamanan', 'kata sandi', 'password', 'sandi', 'ganti password', 'ganti kata sandi', 'mfa', 'verifikasi dua langkah'], to: { admin: '/admin/pengaturan?tab=security', dokter: '/pengaturan?tab=security', resepsionis: '/pengaturan?tab=security' }, roles: ['admin', 'dokter', 'resepsionis'], deny: {}, where: 'Pengaturan → tab Keamanan' },
   { id: 'tab-langganan', label: 'Pengaturan › Langganan', aliases: ['langganan', 'billing', 'paket langganan', 'paket', 'tagihan dentiva', 'upgrade'], to: '/admin/pengaturan?tab=billing', roles: ['admin'], deny: {}, where: 'Pengaturan → tab Langganan SaaS' },
 ];
 
@@ -87,6 +89,9 @@ const STEM = {
   memasukkan: 'masukkan', memilih: 'pilih', menetapkan: 'tetapkan', mengelola: 'kelola', menjelaskan: 'jelaskan', mempelajari: 'pelajari',
   mengajarkan: 'ajarkan', mengerti: 'mengerti', membayar: 'bayar', memberi: 'beri',
   menyetel: 'setel', menyetting: 'setting', meng: 'meng',
+  menolak: 'tolak', memproses: 'proses', mengonfirmasi: 'konfirmasi', mengkonfirmasi: 'konfirmasi', memulai: 'mulai', mengakhiri: 'akhiri',
+  menyelesaikan: 'selesaikan', menghubungi: 'hubungi', menulis: 'tulis', mencetak: 'cetak', mengunci: 'kunci', menginput: 'input', mengingatkan: 'ingatkan',
+  membuatkan: 'buatkan',
 };
 const stem = (t) => t.split(' ').map((w) => STEM[w] || w).join(' ');
 
@@ -214,10 +219,10 @@ const TUTORIALS = [
     title: 'mengaktifkan booking online', to: '/admin/pengaturan?tab=booking', label: 'Pengaturan › Booking Online', roles: ['admin'],
     steps: ['Buka **Pengaturan → Booking Online**.', 'Aktifkan fitur dan salin **tautan booking** klinik Anda.', 'Bagikan tautan itu ke pasien (WhatsApp, Instagram, Google Maps).', 'Permintaan booking masuk ke **resepsionis** untuk dikonfirmasi.'] },
   { id: 'tema', re: /(ganti|ubah|pilih|atur)( warna| tema| tampilan)|(warna|tema|tampilan) (diganti|diubah|diatur)|mode gelap (di mana|dimana|gimana|bagaimana)/,
-    title: 'mengganti tema & tampilan', to: '/admin/pengaturan?tab=appearance', label: 'Pengaturan › Tampilan Tema', roles: ['admin'],
+    title: 'mengganti tema & tampilan', to: { admin: '/admin/pengaturan?tab=appearance', dokter: '/pengaturan?tab=appearance', resepsionis: '/pengaturan?tab=appearance' }, label: 'Pengaturan › Tampilan Tema', roles: ['admin', 'dokter', 'resepsionis'],
     steps: ['Buka **Pengaturan → Tampilan Tema**, atau klik ikon tema di bilah atas.', 'Pilih tema warna dan mode terang/gelap.'], tip: 'Cukup bilang ke saya *"nyalakan mode gelap"* — langsung saya ubah! 🌙' },
   { id: 'password', re: /(ganti|ubah|reset|lupa|atur)( kata sandi| password| sandi)|(kata sandi|password) (diganti|diubah|lupa)|(aktifkan|pasang|atur) (mfa|verifikasi dua langkah|2fa)|keamanan akun/,
-    title: 'mengganti kata sandi & keamanan akun', to: '/admin/pengaturan?tab=security', label: 'Pengaturan › Keamanan', roles: ['admin'],
+    title: 'mengganti kata sandi & keamanan akun', to: { admin: '/admin/pengaturan?tab=security', dokter: '/pengaturan?tab=security', resepsionis: '/pengaturan?tab=security' }, label: 'Pengaturan › Keamanan', roles: ['admin', 'dokter', 'resepsionis'],
     steps: ['Buka **Pengaturan → Keamanan**.', 'Isi kata sandi baru (minimal 8 karakter, campur huruf dan angka), lalu simpan.', 'Aktifkan **verifikasi dua langkah** bila tersedia untuk perlindungan ekstra.'],
     tip: 'Lupa kata sandi? Di halaman login klik **Lupa password** (email pemulihan dikirim ke email akun).' },
   { id: 'audit', re: /(lihat|cek|buka|baca)( log| jejak)? (audit|aktivitas)|siapa (yang )?(ubah|hapus|mengubah|menghapus|akses)|(audit|log) (di mana|dimana|gimana|bagaimana)|(log|jejak) audit (itu )?apa/,
@@ -247,6 +252,31 @@ const TUTORIALS = [
     title: 'memakai Asisten AI', to: null, label: null, roles: ['admin'],
     steps: ['Ketik pertanyaan biasa, misalnya *"Berapa pendapatan bulan ini?"* atau *"Ringkas kondisi klinik hari ini"*.', 'Saya juga bisa **menghitung** (margin, BEP, cicilan, persen), **membuka halaman** (*"buka pengeluaran"*), **mengajarkan cara** (*"ajarkan cara membuat layar antrean"*), dan **mengobrol**.', 'Beri 👍/👎 di jawaban agar saya makin pintar.'],
     tip: 'Saya hanya membaca angka ringkasan klinik — bukan nama atau data identitas pasien.' },
+  { id: 'buat-kunjungan', re: /(buat|bikin|tambah|jadwalkan|atur|input|daftarkan)( jadwal| janji)? (kunjungan|jadwal kunjungan|janji temu|appointment)|cara (buat|bikin|jadwalkan) (kunjungan|jadwal|janji)/,
+    title: 'membuat jadwal kunjungan pasien', to: { resepsionis: '/resepsionis/jadwal' }, label: 'Jadwal', roles: ['resepsionis'],
+    steps: ['Buka **Jadwal**, lalu klik **Tambah Jadwal Kunjungan**.', 'Pilih **dokter**, lalu cari pasien lewat nama atau **No. RM** (atau ketik manual).', 'Pilih tanggal dan jam — slot mengikuti jadwal praktik dokter.', 'Isi **keluhan** bila ada, lalu simpan. Pengingat WhatsApp H-1 hari dan H-1 jam terkirim otomatis.'],
+    tip: 'Pasien baru? Daftarkan dulu lewat **Daftar Pasien** (centang izin WhatsApp).' },
+  { id: 'booking-konfirmasi', re: /(konfirmasi|terima|tolak|proses|setujui)( permintaan)? booking|permintaan booking( masuk)? (diproses|dikonfirmasi|diapakan)|booking masuk (diapakan|bagaimana|gimana)|cara (proses|konfirmasi) booking/,
+    title: 'memproses permintaan booking pasien', to: '/booking-requests', label: 'Permintaan Booking', roles: ['resepsionis'],
+    steps: ['Buka **Booking Online** di menu samping — yang menunggu tampil di status *pending*.', 'Periksa tanggal, jam, dan keluhan, lalu klik **Konfirmasi** atau **Tolak**.', 'Klik **Kabari via WA** — pesan dibuka di WhatsApp Anda (tidak terkirim otomatis).', 'Untuk pasien baru yang dikonfirmasi, klik **Daftarkan pasien**: data nama dan nomor WA terisi otomatis.']},
+  { id: 'recall', re: /(pakai|pake|gunakan|kerjakan|hubungi|lihat|cara|kirim|bagaimana|gimana|ajarkan|ajari|tutorial|panduan)( fitur)? recall|recall( pasien)? (itu )?(gimana|bagaimana|caranya|dipakai|dikerjakan|digunakan)|(hubungi|ingatkan|ingetin|ingatin) pasien (lama|yang lama|untuk kontrol|kontrol)|pasien (lama )?(tidak|belum|gak|nggak) kontrol/,
+    title: 'mengingatkan pasien lama untuk kontrol (recall)', to: '/resepsionis/recall', label: 'Recall Pasien', roles: ['resepsionis'],
+    steps: ['Buka **Recall Pasien** — isinya pasien yang sudah lama tidak kontrol dan belum punya jadwal berikutnya.', 'Atur filter **Terakhir datang ≥ …** atau cari nama/No. RM.', 'Klik aksi WhatsApp pada pasien (hanya yang **mengizinkan kontak WA** dan nomornya valid). Pesan dibuka di WhatsApp Anda — **tidak ada yang terkirim otomatis**.', 'Tandai pasien sebagai **Dihubungi** supaya tidak diulang selama 30 hari.', 'Ubah gaya kalimat lewat **Template pesan WA**, atau isi *Gaya* (mis. santai, singkat) agar AI menyusunnya.']},
+  { id: 'dokter-mulai', re: /(mulai|memulai)( kunjungan| pemeriksaan| pasien| tindakan)|cara (mulai|memulai|periksa|menyelesaikan|selesaikan|mengakhiri|akhiri) (kunjungan|pemeriksaan|pasien|tindakan)|(selesaikan|akhiri|menyelesaikan)( kunjungan| tindakan| pemeriksaan)/,
+    title: 'memulai dan menyelesaikan kunjungan (dokter)', to: { dokter: '/dokter/jadwal' }, label: 'Jadwal Hari Ini', roles: ['dokter'],
+    steps: ['Buka **Jadwal Hari Ini** di menu samping dokter.', 'Pada pasien yang sudah datang (status *Terjadwal*), klik **Mulai** — status menjadi *Berlangsung*.', 'Isi **Rekam Medis**: SOAP, odontogram, tindakan, dan resep.', 'Setelah tindakan selesai, klik **Selesai**. Kasir (resepsionis) lalu menerima pembayaran.'],
+    tip: 'Hanya dokter yang dapat memulai dan menyelesaikan kunjungan.' },
+  { id: 'rekam-medis', re: /(isi|mengisi|buat|tulis|menulis|catat|input|lengkapi)( rekam medis| soap| odontogram| catatan medis| catatan)|cara (isi|mengisi|menulis) (rekam medis|soap|odontogram)|(kunci|buka kunci) catatan|cetak rekam medis|rekam medis (diisi|ditulis)/,
+    title: 'mengisi rekam medis pasien', to: { dokter: '/dokter/rekam-medis' }, label: 'Rekam Medis', roles: ['dokter'],
+    steps: ['Buka **Rekam Medis** (atau tombol rekam medis pada baris pasien di Jadwal Hari Ini).', 'Isi **SOAP** — pakai *Template SOAP* agar lebih cepat.', 'Tandai kondisi gigi di **Odontogram**, pilih **tindakan**, dan isi resep bila perlu.', 'Klik **Simpan Rekam Medis**. Catatan bisa dikunci dengan **Kunci Catatan**; riwayat versinya tersimpan di **Daftar Versi**.'],
+    tip: 'Rekam medis berisi data rahasia — hanya dokter yang menangani yang dapat membukanya.' },
+  { id: 'resep', re: /(buat|tulis|menulis|isi|input|catat|beri|memberi)( resep| e resep| obat)|cara (resep|memberi obat|menulis resep|buat resep)|resep elektronik (diisi|dibuat)/,
+    title: 'menulis resep obat (E-Prescription)', to: { dokter: '/dokter/rekam-medis' }, label: 'Rekam Medis', roles: ['dokter'],
+    steps: ['Buka **Rekam Medis** pasien dan cari bagian **E-Prescription (Resep Obat)**.', 'Pilih obat (cari nama obat), lalu isi **dosis**, **frekuensi**, **jumlah**, dan **aturan pakai**.', 'Simpan bersama rekam medis. Obat yang dicatat ikut tampil di halaman kasir.']},
+  { id: 'masalah', concept: true, re: /(aplikasi|sistem|halaman|layar|dentiva)( saya| ini| nya)? (lambat|lemot|error|macet|hang|nge ?lag|kosong|blank|putih|tidak bisa dibuka|gak bisa dibuka|nggak bisa dibuka|loading terus|berkedip|tidak mau jalan|gak mau jalan)|(tidak|gak|nggak|ga) bisa (login|masuk)|gagal (login|masuk)|error terus|muncul error|kok error|loading (terus|lama)/,
+    title: 'mengatasi halaman error, lambat, atau tidak bisa login', to: null, label: null, roles: ['admin', 'dokter', 'resepsionis'],
+    steps: ['Coba **muat ulang** halaman — ketik *"muat ulang"* ke saya, atau tekan **F5**.', 'Periksa koneksi internet; coba buka situs lain. Aplikasi tetap butuh internet untuk menyimpan data.', 'Keluar (logout) lalu masuk lagi. Untuk lupa kata sandi, klik **Lupa password** di halaman login.', 'Masih bermasalah? Catat **pesan error** dan **jam kejadian**, lalu hubungi tim Dentiva.'],
+    tip: 'Data yang sudah tersimpan aman di server — masalah tampilan tidak menghapus data.' },
   { id: 'unduh', re: /\b(unduh|download|install|instal)\b|(pasang|perbarui|update) aplikasi|aplikasi desktop/,
     title: 'memasang aplikasi desktop Dentiva', to: null, label: null, roles: ['admin', 'dokter', 'resepsionis'],
     steps: ['Buka **dentiva.id/unduh** dan pilih Windows atau macOS.', 'Jalankan pemasang yang terunduh. Jika Windows menampilkan peringatan, klik **More info → Run anyway**.', 'Login memakai akun yang sama dengan versi web.', 'Aplikasi menawarkan pembaruan sendiri bila ada versi baru.'] },
@@ -254,6 +284,32 @@ const TUTORIALS = [
     title: 'penyimpanan & cadangan data', to: null, label: null, roles: ['admin'],
     steps: ['Data klinik disimpan di **server di Indonesia** (Jakarta), sesuai kewajiban penyimpanan rekam medis.', '**Cadangan terenkripsi** dibuat otomatis setiap malam; kunci pembukanya hanya dipegang pemilik.', 'Anda tidak perlu mengatur apa pun. Butuh pemulihan data? Hubungi tim Dentiva.'] },
 ];
+
+// ── Checklist harian (sadar peran) ───────────────────────────────────────────
+const DAILY = {
+  admin: { title: 'checklist harian admin', to: '/admin', label: 'Dashboard', items: [
+    'Buka **Dashboard**: lihat antrean hari ini dan ringkasan pendapatan.', 'Pantau **Lap. Keuangan** bila ada transaksi besar.',
+    'Cek **Pengaturan → WhatsApp**: pastikan sakelar invoice, edukasi, dan pengingat aktif.', 'Catat **Pengeluaran** hari ini.',
+    'Seminggu sekali, tengok **Audit Log** untuk aktivitas tak biasa.'] },
+  dokter: { title: 'checklist harian dokter', to: '/dokter/jadwal', label: 'Jadwal Hari Ini', items: [
+    'Buka **Jadwal Hari Ini** dan lihat pasien terjadwal.', 'Klik **Mulai** saat pasien masuk ruang periksa.',
+    'Isi **Rekam Medis**: SOAP, odontogram, tindakan, resep.', 'Klik **Selesai** setelah tindakan — kasir lalu menerima pembayaran.',
+    'Cek **Riwayat Kunjungan** bila perlu melanjutkan perawatan.'] },
+  resepsionis: { title: 'checklist harian resepsionis', to: '/resepsionis', label: 'Dashboard', items: [
+    'Cek **Booking Online**, lalu **Konfirmasi** atau **Tolak** permintaan baru.', 'Buka **Jadwal** hari ini; hubungi pasien yang belum pasti hadir.',
+    'Pastikan **Layar Antrean** menyala di TV ruang tunggu.', 'Daftarkan pasien baru, buat kunjungan, dan atur antrean saat pasien datang.',
+    'Terima **Pembayaran**: pilih **Lunas**, **Simpan** — invoice WhatsApp terkirim otomatis.', 'Tengok **Recall Pasien** untuk pasien lama yang perlu dihubungi.'] },
+};
+const TODO = /^(?:hari ini (?:aku |saya )?ngapain|(?:aku |saya )?(?:harus |perlu |mesti |sebaiknya )ngapain(?: hari ini)?)$|^(?:hari ini )?(?:aku |saya )?(?:harus |perlu |mesti |sebaiknya )?(?:apa yang (?:harus|perlu|sebaiknya) (?:aku |saya )?(?:dikerjakan|kerjakan|dilakukan|lakukan)|apa tugas(?: ?ku| saya)?|apa kerjaan(?: ?ku| saya)?)(?: hari ini)?$|^(?:tugas|kerjaan|checklist|rutinitas|to do|todo|daftar tugas|tugas harian|checklist harian|checklist hari ini|tugas hari ini|kerjaan hari ini|rutinitas harian)(?: list)?$|^(?:baiknya |sebaiknya )?mulai dari mana$/;
+
+function dailyReply(role) {
+  const d = DAILY[role] || DAILY.admin;
+  return {
+    intent: 'daily', state: 'idea',
+    reply: `Ini **${d.title}**: 📋\n${d.items.map((s, i) => `${i + 1}. ${s}`).join('\n')}\n\nMau saya buka **${d.label}** sekarang? Ketik *"ya"* atau klik tombol di bawah. 👇`,
+    action: { type: 'offer', to: d.to, label: d.label },
+  };
+}
 
 // ── Balasan ──────────────────────────────────────────────────────────────────
 const listPages = (role) => {
@@ -275,8 +331,11 @@ function navReply(p, role, say) {
 
 const stepsText = (tu) => tu.steps.map((s, i) => `${i + 1}. ${s}`).join('\n');
 
+const tuTo = (tu, role) => (typeof tu.to === 'string' ? tu.to : tu.to?.[role] || null);
+
 function tutorialReply(tu, role) {
-  const canOpen = tu.to && tu.roles.includes(role);
+  const to = tuTo(tu, role);
+  const canOpen = Boolean(to) && tu.roles.includes(role);
   const head = `Siap, ini caranya **${tu.title}**: 🧭\n${stepsText(tu)}`;
   const tip = tu.tip ? `\n💡 ${tu.tip}` : '';
   if (tu.to && !tu.roles.includes(role)) {
@@ -285,7 +344,7 @@ function tutorialReply(tu, role) {
   return {
     intent: 'guide', state: 'idea',
     reply: `${head}${tip}${canOpen ? `\n\nMau saya buka **${tu.label}** sekarang? Ketik *"ya"* atau klik tombol di bawah. 👇` : ''}`,
-    ...(canOpen ? { action: { type: 'offer', to: tu.to, label: tu.label } } : {}),
+    ...(canOpen ? { action: { type: 'offer', to, label: tu.label } } : {}),
   };
 }
 
@@ -306,6 +365,8 @@ export function guideReply(t0, { role = 'admin', offer = null } = {}) {
     const { rows, tabs } = listPages(role);
     return { intent: 'navlist', state: 'idea', reply: `Ini yang bisa saya buka untuk peran **${roleName[role] || role}**: 🧭\n${rows.join('\n')}\n\n**Tab di Pengaturan:**\n${tabs.join('\n')}\n\nCukup ketik *"buka …"* diikuti nama halamannya.` };
   }
+
+  if (TODO.test(t)) return dailyReply(role);
 
   // tutorial: hanya bila kalimat diawali ajakan belajar ("cara …", "ajarkan …", "bagaimana …")
   if (TEACH_START.test(t)) {
@@ -340,3 +401,10 @@ export function guideReply(t0, { role = 'admin', offer = null } = {}) {
 }
 
 export { TUTORIALS };
+
+/** Kata perintah/halaman/tutorial (≥ 4 huruf) — bahan koreksi salah ketik di normalizeChat. */
+const wordsOf = (re) => String(re.source || re).replace(/\\./g, ' ').match(/[a-z]{4,}/g) || [];
+export const GUIDE_WORDS = [...new Set([
+  ...PAGES.flatMap((p) => p.aliases.flatMap((a) => a.split(' '))), ...TUTORIALS.flatMap((tu) => wordsOf(tu.re)),
+  ...[BACK, FORWARD, RELOAD, LIST, TODO, YES, NO].flatMap(wordsOf), ...wordsOf(VERBS), ...wordsOf(TEACH),
+].filter((w) => w.length >= 4))];

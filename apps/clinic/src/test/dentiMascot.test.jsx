@@ -102,7 +102,8 @@ describe('Maskot Denti — kelengkapan state', () => {
   });
 
   it('state sekali-putar punya durasi bawaan agar kembali ke dasar', () => {
-    for (const s of ['wink', 'cheer', 'jump', 'bow', 'shrug', 'cool', 'sigh', 'idea', 'confused', 'peek', 'excited', 'salute']) {
+    for (const s of ['wink', 'cheer', 'jump', 'bow', 'shrug', 'cool', 'sigh', 'idea', 'confused', 'peek', 'excited', 'salute',
+      'angry', 'cry', 'dizzy', 'stretch', 'search', 'phone', 'coffee', 'flex']) {
       expect(DENTI_DURATIONS[s]).toBeGreaterThan(0);
     }
   });
