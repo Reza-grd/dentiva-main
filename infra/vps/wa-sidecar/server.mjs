@@ -97,6 +97,9 @@ function makeClient(pairDigits) {
              '--no-first-run', '--no-default-browser-check', '--disable-extensions', '--mute-audio',
              '--disable-blink-features=AutomationControlled', '--lang=id-ID,id', '--window-size=1280,800'],
     },
+    // Cache versi WhatsApp Web harus di lokasi yang bisa ditulis user `node` (bawaan ./.wwebjs_cache
+    // di /app milik root → EACCES diam-diam setelah "authenticated" sehingga "ready" tak pernah datang).
+    webVersionCache: { type: 'local', path: path.join(path.dirname(DATA_DIR), 'wwebjs-cache') },
     authTimeoutMs: 120_000,
     takeoverOnConflict: true, // bila WhatsApp Web dibuka di tempat lain, Dentiva mengambil alih kembali
     takeoverTimeoutMs: 15_000,
@@ -362,6 +365,9 @@ const server = http.createServer(async (req, res) => {
     reply(res, status, { ok: false, error: String(err?.message || 'Galat internal').slice(0, 300) })
   }
 })
+
+// Galat async yang tertelan (mis. di dalam fungsi yang di-expose ke halaman) tetap tercatat.
+process.on('unhandledRejection', (e) => log('galat async:', String(e?.message || e).slice(0, 300)))
 
 server.listen(PORT, '0.0.0.0', () => log(`sidecar WhatsApp Dentiva (WhatsApp Web, ${HEADLESS ? 'headless' : 'layar virtual ' + process.env.DISPLAY}) siap di :${PORT}`))
 start().catch((e) => log('gagal memulai:', e?.message))

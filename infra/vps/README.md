@@ -73,7 +73,7 @@ Satu pintu pengirim di `supabase/functions/_shared/whatsapp.ts`, dipilih lewat `
 
 | Mode | Status | Kunci di `functions.env` |
 |---|---|---|
-| `sidecar`: WhatsApp Web asli di VPS (tidak resmi) | **aktif**, nomor belum tertaut | `WA_SIDECAR_URL=http://wa-sidecar:3000`, `WA_SIDECAR_KEY` (sama dengan `wa-sidecar.env`) |
+| `sidecar`: WhatsApp Web asli di VPS (tidak resmi) | **aktif**, nomor klinik tertaut 11 Okt 13:29 WIB | `WA_SIDECAR_URL=http://wa-sidecar:3000`, `WA_SIDECAR_KEY` (sama dengan `wa-sidecar.env`) |
 | `meta`: WhatsApp Cloud API (resmi) | kode siap, menunggu pendaftaran Meta | `META_WA_TOKEN`, `META_WA_PHONE_NUMBER_ID`, `META_WA_TEMPLATE_PENGINGAT`, opsional `META_WA_API_VERSION` (bawaan v22.0), `META_WA_TEMPLATE_LANG` (bawaan `id`) |
 | `whapi`: Whapi.cloud (lama) | tidak dipakai | `WHAPI_TOKEN` |
 
@@ -90,7 +90,12 @@ Satu pintu pengirim di `supabase/functions/_shared/whatsapp.ts`, dipilih lewat `
   4. Cara lain tanpa QR, dengan kode tautan: `docker exec -it dentiva-wa node cli.mjs login 08xx…`.
 - **Perintah lain:** `docker exec dentiva-wa node cli.mjs status`, atau `… logout` untuk melepas nomor.
 - **11 Okt — Baileys 7 rc ditinggalkan:** QR maupun kode tautannya tidak pernah menghasilkan `pair-success`.
-- **11 Okt — nomor utama ditolak HP:** setelah puluhan percobaan, HP menampilkan "Tidak dapat menautkan perangkat", padahal QR sudah buatan WhatsApp Web resmi. Kemungkinan besar nomor dikunci sementara. Coba lagi beberapa jam kemudian, cek batas 4 perangkat tertaut, atau uji dulu dengan nomor lain.
+- **11 Okt — penyebab "Tidak dapat menautkan perangkat" (sudah diperbaiki):**
+  1. whatsapp-web.js menyusun QR format LAMA tanpa awalan `https://wa.me/settings/linked_devices#`. Kelima bagian isinya identik, hanya awalan yang berbeda. HP bisa membacanya, tapi WhatsApp menolak penautan. Kini QR yang tampil sama persis dengan QR asli WhatsApp Web (dicocokkan ke `data-ref` halaman).
+  2. Sidik browser: Chromium kini berjalan non-headless di Xvfb, dengan UA dan Client Hints asli dan tanpa `navigator.webdriver`.
+  3. Setelah "authenticated", `ready` tak pernah datang karena cache versi WA Web ditulis ke `/app` (milik root). Gagalnya EACCES dan galatnya tertelan diam-diam. Kini cache disimpan di `/data/wwebjs-cache`, dan galat async dicatat ke log.
+  4. Chromium gagal start setelah container dibuat ulang karena kunci profil `Singleton*` dari hostname lama. Kini kunci itu dibersihkan sebelum start, hostname dibuat tetap, dan `/health` menjawab 503 kalau macet.
+- **Teruji:** restart dan pembuatan ulang container tersambung lagi otomatis ±15 detik tanpa QR. Memori ±750 MB.
 
 **Mengaktifkan mode resmi Meta** setelah pendaftaran disetujui:
 1. Isi `META_WA_TOKEN` (token System User permanen) dan `META_WA_PHONE_NUMBER_ID`.
