@@ -1,0 +1,18 @@
+# Override khusus Dentiva (dipasang lewat COMPOSE_FILE di .env).
+# Docker menembus firewall ufw untuk port yang dipublikasikan, jadi semua port internal
+# dikunci ke 127.0.0.1 — hanya bisa diakses dari server itu sendiri / terowongan SSH.
+# HTTPS publik hanya lewat Caddy (docker-compose.caddy.yml) setelah DNS api.dentiva.id siap.
+services:
+  api-gw:
+    ports: !override
+      - "127.0.0.1:${API_GW_HTTP_PORT:-8000}:8000/tcp"
+
+  supavisor:
+    ports: !override
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+      - "127.0.0.1:${POOLER_PROXY_PORT_TRANSACTION}:6543"
+
+  # Studio TIDAK dibuka ke internet. Akses lewat: ssh -L 3000:127.0.0.1:3000 dentiva@<IP>
+  studio:
+    ports:
+      - "127.0.0.1:3000:3000"
