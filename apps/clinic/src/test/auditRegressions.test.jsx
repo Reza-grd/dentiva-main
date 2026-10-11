@@ -127,6 +127,6 @@ describe('Layar antrean lama tanpa token', () => {
     render(<MemoryRouter initialEntries={['/queue-display']}><Routes><Route path="/queue-display" element={<QueueDisplay />} /></Routes></MemoryRouter>);
     await waitFor(() => expect(rpc).toHaveBeenCalledWith('get_queue_display', { p_token: '' }));
     fireEvent.click(document.body);
-    expect(await screen.findByText(/Layar Antrean TV/)).toBeInTheDocument();
+    expect(await screen.findByText(/menu Layar Antrean/)).toBeInTheDocument();
   });
 });

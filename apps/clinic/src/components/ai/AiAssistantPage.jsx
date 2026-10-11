@@ -33,7 +33,7 @@ const SUGGESTION_GROUPS = [
     'Proyeksikan arus kas 3 bulan ke depan.',
   ] },
   { label: 'Panduan Dentiva', items: [
-    'Bagaimana cara membuat tautan layar antrean TV?',
+    'Bagaimana cara membuat tautan layar antrean TV di menu Layar Antrean?',
     'Bagaimana cara mengaktifkan booking online untuk pasien?',
     'Apa saja yang perlu diisi agar HPP dan margin tindakan terhitung?',
   ] },

@@ -142,7 +142,7 @@ function App() {
       <Suspense fallback={<LoadingSpinner fullScreen />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
-          {/* Layar antrean TV (tanpa login): token dibuat admin di Pengaturan → Layar Antrean TV.
+          {/* Layar antrean TV (tanpa login): token dibuat admin/resepsionis di menu Layar Antrean.
               /queue-display lama tanpa token menampilkan petunjuk membuat tautan. */}
           <Route path="/antrean/:token" element={<QueueDisplay />} />
           {/* Booking online publik (tanpa login) */}

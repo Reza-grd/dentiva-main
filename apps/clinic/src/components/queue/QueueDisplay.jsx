@@ -170,7 +170,7 @@ const QueueDisplay = () => {
               <p>
                 {unavailable === 'inactive'
                   ? 'Layar antrean tidak tersedia: klinik sedang tidak aktif.'
-                  : 'Tautan layar antrean tidak valid atau sudah dicabut. Minta admin klinik membuat tautan baru di Pengaturan → Layar Antrean TV.'}
+                  : 'Tautan layar antrean tidak valid atau sudah dicabut. Minta admin klinik membuat tautan baru di menu Layar Antrean.'}
               </p>
             </>
           ) : (
