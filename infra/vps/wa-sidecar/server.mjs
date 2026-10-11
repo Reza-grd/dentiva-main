@@ -22,6 +22,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 import http from 'node:http'
 import { rm, mkdir } from 'node:fs/promises'
+import path from 'node:path'
 import { randomBytes } from 'node:crypto'
 import wweb from 'whatsapp-web.js'
 import QRCode from 'qrcode'
@@ -80,6 +81,12 @@ async function start({ fresh = false, pairDigits = null } = {}) {
   if (old) await old.destroy().catch(() => {})
   if (fresh) await rm(DATA_DIR, { recursive: true, force: true })
   await mkdir(DATA_DIR, { recursive: true, mode: 0o700 })
+  // Kunci profil Chromium dari container/proses sebelumnya (SingletonLock menyimpan hostname-pid)
+  // membuat Chromium menolak start ("profile appears to be in use by another Chromium process").
+  // Di container ini hanya ada satu Chromium dan klien lama sudah dimatikan → aman dihapus.
+  for (const f of ['SingletonLock', 'SingletonCookie', 'SingletonSocket']) {
+    await rm(path.join(DATA_DIR, 'session-dentiva', f), { force: true }).catch(() => {})
+  }
   setStatus('starting', { qr: null, code: null })
 
   const c = makeClient(pairDigits)
@@ -261,7 +268,11 @@ const routes = {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost')
-  if (req.method === 'GET' && url.pathname === '/health') return reply(res, 200, { ok: true, status: state.status })
+  if (req.method === 'GET' && url.pathname === '/health') {
+    // Tidak sehat bila macet memulai/menyambung > 3 menit (mis. Chromium gagal start) — terlihat di Docker.
+    const macet = ['starting', 'reconnecting'].includes(state.status) && Date.now() - Date.parse(state.since) > 180_000
+    return reply(res, macet ? 503 : 200, { ok: !macet, status: state.status, since: state.since, lastError: macet ? state.lastError?.slice(0, 160) : null })
+  }
   if (req.method === 'GET' && pairRoutes[url.pathname]) {
     if (!pairTokenValid(url.searchParams.get('t'))) return reply(res, 403, { error: 'Token tidak berlaku — buat tautan baru' })
     const [status, body, type] = await pairRoutes[url.pathname]()

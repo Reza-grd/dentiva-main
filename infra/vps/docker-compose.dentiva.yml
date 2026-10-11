@@ -34,6 +34,7 @@ services:
   # volumes/wa-sidecar (izin 700). Login: docker exec -it dentiva-wa node cli.mjs login
   wa-sidecar:
     container_name: dentiva-wa
+    hostname: dentiva-wa # tetap, agar kunci profil Chromium tidak dianggap milik "komputer lain"
     profiles: ["wa-sidecar"] # hanya jalan bila diminta: docker compose --profile wa-sidecar up -d wa-sidecar
     build: /opt/dentiva/wa-sidecar
     image: dentiva/wa-sidecar:local
