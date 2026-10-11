@@ -32,10 +32,18 @@ Supabase Cloud (Seoul, `ap-northeast-2`) ke **Supabase self-host di VPS Indonesi
 | 0 · Persiapan | Claude | kunci SSH (`~/.ssh/dentiva_vps`), inventaris, dokumen ini | ✅ selesai |
 | 1 · Beli VPS | Pemilik | NEO Lite MM 8.4, Ubuntu 24.04, tempel kunci SSH publik; A record `api.dentiva.id` → IP VPS | ✅ VPS aktif `202.74.74.163`, DNS `api.dentiva.id` aktif (11 Okt) |
 | 2 · Siapkan server | Claude | firewall (22/80/443), fail2ban, update otomatis, swap, Docker, Supabase self-host, HTTPS | ✅ selesai — HTTPS Let's Encrypt aktif di `https://api.dentiva.id` (lihat `infra/vps/README.md`) |
-| 3 · Gladi migrasi | Claude + Pemilik | salin data dari Supabase Cloud (pemilik mengetik kata sandi DB di terminal), storage, edge function, rahasia, cron; uji 147 smoke test + 311 tes + uji alur utama dengan web staging | 🔄 berjalan — 11 Okt: salin + pulihkan DB lolos verifikasi (143 tabel / 1.563 baris, hak akses identik), 4 berkas storage, Vault; berikutnya: edge function, SMTP, web staging |
-| 4 · Backup & pantau | Claude | backup harian terenkripsi ke IDCloudHost, **uji pemulihan**, pemantau uptime | ± ½ hari |
-| 5 · Pindah resmi | Claude + Pemilik | malam hari, jeda ± 1–2 jam: dump final → pulihkan → cek jumlah baris → ganti env Vercel/GitHub/console → uji | 1 malam |
-| 6 · Masa transisi | Pemilik | Supabase lama disimpan 7–14 hari sebagai cadangan, lalu dihapus atas persetujuan pemilik | 2 minggu |
+| 3 · Gladi migrasi | Claude + Pemilik | salin data dari Supabase Cloud (pemilik mengetik kata sandi DB di terminal), storage, edge function, rahasia, cron; uji 147 smoke test + 311 tes + uji alur utama dengan web staging | ✅ selesai 11 Okt — 2× pemulihan dari nol lolos verifikasi (baris, hak akses, storage) |
+| 4 · Backup & pantau | Claude | backup harian terenkripsi ke IDCloudHost, **uji pemulihan**, pemantau uptime | 🔄 backup harian lokal terenkripsi aktif & uji buka lolos; menunggu: offsite IDCloudHost, uji pemulihan penuh, pemantau uptime |
+| 5 · Pindah resmi | Claude + Pemilik | malam hari, jeda ± 1–2 jam: dump final → pulihkan → cek jumlah baris → ganti env Vercel/GitHub/console → uji | ✅ **11 Okt 2026 ±09:05–09:45 WIB** — Cloud dibekukan, 143 tabel / 1.564 baris dipindah, web klinik & console → `api.dentiva.id`, login + simpan data diuji pemilik |
+| 6 · Masa transisi | Pemilik | Supabase lama disimpan 7–14 hari sebagai cadangan, lalu dihapus atas persetujuan pemilik | 🔄 Cloud read-only sejak 11 Okt 09:05 WIB (cadangan); hapus ≥ 18–25 Okt atas persetujuan pemilik |
+
+## Status setelah pindah resmi (11 Okt 2026)
+- ✅ Langkah 1–5 & 7 selesai: database resmi kini di VPS Jakarta; Cloud read-only + 6 jadwal cron Cloud mati.
+- ⏳ Langkah 6: token Whapi & webhook WhatsApp, Midtrans (jika dipakai) — fitur WhatsApp mati sampai token diisi.
+- ⏳ Langkah 8: installer desktop v1.11.0 (build GitHub Actions) → `unggah-installer.sh` → push `dentiva_website`
+  (`unduh.html` sudah disiapkan, commit lokal). Desktop v1.10.0 tidak bisa login lagi (masih ke Cloud).
+- ⏳ SMTP (email reset sandi/undangan) — `docs/briefing-gpt-migrasi.md` T1.
+- Catatan pengguna web: PWA memuat versi lama dari cache → **refresh 2×** atau tutup-buka tab sekali.
 
 ## Runbook pindah resmi (±45–60 menit, aplikasi tidak bisa dipakai selama langkah 2–5)
 
