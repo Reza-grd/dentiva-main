@@ -37,6 +37,40 @@ Supabase Cloud (Seoul, `ap-northeast-2`) ke **Supabase self-host di VPS Indonesi
 | 5 · Pindah resmi | Claude + Pemilik | malam hari, jeda ± 1–2 jam: dump final → pulihkan → cek jumlah baris → ganti env Vercel/GitHub/console → uji | 1 malam |
 | 6 · Masa transisi | Pemilik | Supabase lama disimpan 7–14 hari sebagai cadangan, lalu dihapus atas persetujuan pemilik | 2 minggu |
 
+## Runbook pindah resmi (±45–60 menit, aplikasi tidak bisa dipakai selama langkah 2–5)
+
+**Prasyarat (11 Okt):**
+
+- Selesai:
+  - edge function terpasang (JWT per fungsi);
+  - pengaturan login & redirect;
+  - CSP mengizinkan `api.dentiva.id`;
+  - backup harian terenkripsi (01:30 WIB, uji buka lolos);
+  - skrip jadwal cron.
+- Belum:
+  - rahasia edge function (pemilik, `isi-rahasia-functions.sh`);
+  - SMTP (boleh menyusul, lihat `docs/briefing-gpt-migrasi.md` T1).
+
+| # | Siapa | Langkah |
+|---|---|---|
+| 1 | Pemilik | Kirim pengumuman pemeliharaan; pastikan tidak ada yang sedang input data |
+| 2 | Claude | **Bekukan Supabase Cloud**: matikan 6 jadwal cron Cloud → database `default_transaction_read_only = on` → putus koneksi aplikasi (bisa dibatalkan) |
+| 3 | Pemilik | Jalankan `salin-dari-supabase.sh` (ketik kata sandi DB Cloud) |
+| 4 | Claude | `reset-gladi.sh --ya-hapus-semua --simpan-rahasia` → `pulihkan-ke-vps.sh` → `unggah-storage.sh` → `buat-vault.sh` → `buat-jadwal-cron.sh --pindah-resmi` → `backup-harian.sh`; semua verifikasi harus lolos |
+| 5 | Pemilik | Vercel (`dentiva-main` & `dentiva-main-console`): `VITE_SUPABASE_URL=https://api.dentiva.id`, `VITE_SUPABASE_ANON_KEY=<kunci publik VPS dari Claude>` → Redeploy. GitHub → Settings → Variables: nilai yang sama (untuk installer desktop) |
+| 6 | Pemilik | Midtrans → notification URL `https://api.dentiva.id/functions/v1/midtrans-webhook`; Whapi → webhook `https://api.dentiva.id/functions/v1/whatsapp-webhook` |
+| 7 | Claude + Pemilik | Uji: login pemilik, data tampil, AI Denti, antrian realtime, kirim WA uji. **Go/No-go** |
+| 8 | Claude | Build installer desktop v1.11.0 (GitHub Actions) → unggah ke bucket `downloads` VPS; pemilik perbarui tautan unduhan di dentiva.id |
+| 9 | Pemilik | Pengumuman selesai (login ulang sekali; pengguna desktop pasang versi baru) |
+
+**Mundur (rollback):**
+- **Sebelum langkah 5:** cabut pembekuan Cloud (`alter database postgres reset default_transaction_read_only` + aktifkan lagi cron Cloud). Aplikasi lanjut di Cloud seperti biasa, tanpa kehilangan data.
+- **Sesudah langkah 5:** data baru sudah masuk VPS, jadi rollback butuh penyalinan balik. Karena itu keputusan Go/No-go diambil di langkah 7, sebelum pengumuman selesai.
+
+**Setelah pindah:**
+- Cloud tetap dibekukan (read-only) 7–14 hari sebagai cadangan, lalu di-pause/hapus atas persetujuan pemilik.
+- Backup offsite ke IDCloudHost menyusul setelah pembelian.
+
 ## Hal yang hanya bisa dilakukan pemilik
 
 - Membeli VPS & object storage, menempelkan **kunci SSH publik** saat membuat VPS (bukan kata sandi).

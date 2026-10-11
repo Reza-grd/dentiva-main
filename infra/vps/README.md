@@ -39,7 +39,11 @@ lalu buka `http://localhost:3000` (Studio tidak pernah dibuka ke internet).
 | `pulihkan-ke-vps.sh <folder>` | Pulihkan ke DB VPS yang masih kosong: ekstensi → struktur (sebagai `postgres`) → hak akses disamakan → data (trigger dimatikan sementara) → aturan storage → verifikasi jumlah baris & sidik hak akses |
 | `unggah-storage.sh <folder>` | Unggah berkas storage lewat API (service role, lokal), kembalikan pemilik asli, cek sha256 lewat HTTPS |
 | `buat-vault.sh` | Rahasia Vault `dentiva_project_url` & `dentiva_service_role_key` dari `.env` (tanpa menampilkan nilai). **Tidak** membuat jadwal pg_cron |
-| `reset-gladi.sh --ya-hapus-semua` | Hanya gladi: kosongkan DB & storage VPS dan buat ulang semua rahasia server |
+| `reset-gladi.sh --ya-hapus-semua [--simpan-rahasia]` | Kosongkan DB & storage VPS; tanpa `--simpan-rahasia` juga membuat ulang semua rahasia server |
+| `isi-rahasia-functions.sh` | Dijalankan pemilik: isi rahasia/konfigurasi edge function (prompt tersembunyi) → `functions.env` (600) |
+| `pasang-functions.sh` | Terima arsip edge function dari `infra/vps/deploy-functions.sh` (laptop, dari commit HEAD) dan pasang |
+| `jadwal-cron.sql`, `buat-jadwal-cron.sh --pindah-resmi` | 6 jadwal pg_cron (salinan persis Cloud) — hanya saat pindah resmi |
+| `backup-harian.sh` | Backup harian 01:30 WIB (crontab user `dentiva`), terenkripsi `age` ke kunci publik pemilik; simpan 14 hari di `/opt/dentiva/backup` |
 | `acl-sidik.sql` | Sidik md5 seluruh GRANT tabel/fungsi/skema Dentiva (dipakai salin & pulihkan) |
 
 Pelajaran gladi 11 Okt 2026:
@@ -50,6 +54,21 @@ Pelajaran gladi 11 Okt 2026:
 - `docker exec -i` di dalam loop `while read` ikut menghabiskan stdin → loop membaca dari fd 3.
 - Hasil gladi pertama: 143 tabel / 1.563 baris cocok, 119 fungsi, 222 aturan RLS, 155 trigger, 290 indeks, 23 aturan storage,
   4 berkas storage identik (sha256).
+
+## Edge function
+- Deploy dari laptop: `bash infra/vps/deploy-functions.sh [nama…]` (pengganti `supabase functions deploy`).
+- Router `infra/vps/functions-main/index.ts` (dipasang ke `volumes/functions/main`): JWT diverifikasi per fungsi
+  (`FUNCTIONS_VERIFY_JWT=true`, kecuali `FUNCTIONS_NO_VERIFY_JWT=whatsapp-webhook,midtrans-webhook`), import map
+  `deno.json` per fungsi, batas 256 MB / 150 detik seperti Cloud. **Pasang ulang setelah `update.sh` Supabase.**
+
+## Backup
+- Kunci pembuka hanya di laptop pemilik: `~/.ssh/dentiva_backup` (ed25519) — **salin juga ke USB/brankas**;
+  tanpa kunci ini backup tidak bisa dibuka. Kunci publiknya di `/opt/dentiva/backup/penerima.txt`.
+- Status terakhir: `/opt/dentiva/backup/terakhir.txt`; log: `/opt/dentiva/backup/backup.log`.
+- Buka backup (uji): kunci dikirim lewat stdin, tidak disimpan di server:
+  `ssh … 'age -d -i /dev/stdin /opt/dentiva/backup/<berkas>.tar.age | tar -t' < ~/.ssh/dentiva_backup`
+- Uji buka 11 Okt: lolos (schema/data lengkap, `lengkap.dump` terbaca, sidik hak akses = sumber).
+- Belum: salinan offsite (IDCloudHost Object Storage).
 
 ## Catatan pemasangan
 - **Jangan mencetak `docker compose config`** (atau env container) walau difilter: `SUPABASE_DB_URL` berisi kata sandi DB
