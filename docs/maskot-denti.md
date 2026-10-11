@@ -198,3 +198,45 @@ Bagian **GAYA DENTI** di system prompt: hangat & natural, kalimat pertama langsu
 
 Bila Denti salah paham, tambahkan kalimatnya sebagai siklus baru, perbaiki pola di `utils/dentiMood.js`,
 lalu jalankan tes sampai semua siklus kembali 100%.
+
+### Gerakan & ekspresi v4 (12 state baru, total 35)
+
+| `data-state` | Kapan | Gerak |
+|---|---|---|
+| `wink` (1,5 dtk) | genit / "kedip" | satu mata mengedip, senyum miring |
+| `cheer` (2,4 dtk) | sorak, kuis benar | kedua tangan terangkat, mata riang, konfeti kecil |
+| `jump` (1,6 dtk) | "lompat" | melompat dua kali, mulut "o" |
+| `bow` (2,2 dtk) | hormat / terima kasih besar | membungkuk, mata terpejam |
+| `shrug` (1,9 dtk) | tak tahu / menyerah kuis | tangan terbuka, bahu naik, mulut datar |
+| `cool` (2,6 dtk) | pamer / "keren" | kacamata hitam turun ke visor |
+| `sigh` (2,3 dtk) | capek / "huft" | tarik & buang napas, uap di samping kepala |
+| `idea` (2,4 dtk) | minta ide / petunjuk | bohlam menyala di atas kepala |
+| `confused` (2,4 dtk) | tidak paham / tebakan salah | alis turun, tanda tanya melayang |
+| `peek` (2,4 dtk) | mengintip | badan miring, melirik ke samping |
+| `excited` (2,2 dtk) | girang | bergetar kecil, hati & bintang di sekitar |
+| `salute` (2 dtk) | siap! | tangan hormat di pelipis |
+
+Gerakan acak saat dibiarkan (`IDLE_MOVES` di `AiAssistantPage.jsx`) kini 12 macam, bukan 4. Meminta
+**"gerakan apa saja"** memutar rangkaian wave → wink → jump → cool → spin → cheer → bow.
+
+### Otak v4: pemandu, tutorial & interaksi seru
+
+- **`utils/dentiGuide.js`** — Denti bisa **membuka tab/halaman** yang diminta ("buka jadwal", "bawa saya ke kasir",
+  "ke layar antrean") dan menjawab **"X di mana?"** dengan letak menu + tawaran buka. Jawaban **"ya / boleh / buka"**
+  menjalankan tawaran terakhir (chip "Buka …" juga muncul). Juga: **kembali / maju / muat ulang**.
+  Menghormati peran: admin tidak diarahkan ke halaman pasien/kasir, dokter ke halamannya, dsb. (`navdeny` di fixture).
+- **Tutorial langkah demi langkah** ("ajarkan cara …", "cara tambah pasien", "bagaimana membuat template pengingat", "cara
+  pasang aplikasi desktop") — 27 topik di `TUTORIALS`: pasien, jadwal, kasir/pembayaran, invoice & edukasi WA, template
+  pengingat, layar antrean, laporan, HPP, stok, pengguna/hak akses, backup, unduh aplikasi, dan lain-lain. Setiap tutorial
+  menawarkan membuka halaman terkait bila perannya berhak.
+- **`utils/dentiFun.js`** — **kuis gigi** (tebak, petunjuk, menyerah, soal berikutnya), **permintaan gerakan** (kedip, lompat,
+  hormat, kacamata, putar, tepuk tangan, ngintip, angkat bahu, tarik napas, kasih ide), **reaksi emosi** (sedih, kesal, takut,
+  lapar, ngantuk, bosan, senang, berhasil, …) dengan balasan yang menyesuaikan.
+- Pola pemandu hanya aktif pada kalimat pendek tanpa data; pertanyaan data klinik (omzet, pasien, stok) tetap ke AI.
+
+### Cara melatih (siklus 41–53)
+
+Tambahkan kalimat ke `src/test/fixtures/dentiTrainingV4.js` (`intents`, `ai`, `states`, `replies`, `actions`, `navdeny`).
+`dentiTraining.test.js` juga membuat **±6.000 variasi otomatis** (awalan "denti,", akhiran "ya"/"dong", `!!`, KAPITAL,
+emoji) dan menuntut intent-nya sama. Kata baru yang terkena koreksi ejaan (`normalizeChat`) harus masuk `KNOWN`
+(`dentiMood.js`) — kosakata pemandu & gerakan sudah otomatis.

@@ -63,9 +63,9 @@ describe('Penilaian jawaban Asisten AI', () => {
   });
 
   it('jawaban dari basis pengetahuan ditandai instan', async () => {
-    ai.ask.mockResolvedValue({ success: true, data: { answer: 'Buka Pengaturan → Layar Antrean TV.', tools: [], usage_id: 'u3', cached: true } });
+    ai.ask.mockResolvedValue({ success: true, data: { answer: 'Gunakan alat steril sesuai prosedur klinik.', tools: [], usage_id: 'u3', cached: true } });
     wrap();
-    await askQuestion('Bagaimana cara membuat tautan layar antrean TV?');
+    await askQuestion('Bagaimana prosedur sterilisasi alat setelah dipakai?');
     expect(await screen.findByText(/Jawaban terverifikasi · instan/)).toBeInTheDocument();
   });
 

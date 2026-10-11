@@ -25,6 +25,8 @@ export const DENTI_STATES = [
   // aksi tambahan
   'brush', 'tooth', 'dance', 'spin', 'laugh', 'love', 'shy', 'surprise', 'sorry', 'scan', 'point', 'thanks',
   'nod', 'clap',
+  // gerakan & ekspresi tambahan (v4)
+  'wink', 'cheer', 'jump', 'bow', 'shrug', 'cool', 'sigh', 'idea', 'confused', 'peek', 'excited', 'salute',
 ];
 
 const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z';
@@ -191,6 +193,12 @@ export function dentiSvg(uid = 'd') {
       <g class="d-lids" fill="#070b16">
         <path d="M136 128 L190 128 L190 146 L136 166 Z"/><path d="M264 128 L210 128 L210 146 L264 166 Z"/>
       </g>
+      <g class="d-shades">
+        <path d="M130 138 H192 V170 Q192 188 172 188 H150 Q130 188 130 168 Z" fill="#05080f" stroke="${url('gold')}" stroke-width="3"/>
+        <path d="M208 138 H270 V168 Q270 188 250 188 H228 Q208 188 208 170 Z" fill="#05080f" stroke="${url('gold')}" stroke-width="3"/>
+        <path d="M192 148 H208" stroke="${url('gold')}" stroke-width="4" stroke-linecap="round"/>
+        <path d="M138 146 L158 146 L146 166 Z" fill="#fff" opacity=".22"/><path d="M216 146 L236 146 L224 166 Z" fill="#fff" opacity=".22"/>
+      </g>
       </g>
 
       <g class="d-gaze-soft"><g class="d-mouth" filter="url(#${g('glow')})">
@@ -276,6 +284,16 @@ export function dentiSvg(uid = 'd') {
     <text class="d-ha d-ha-1" x="300" y="70" font-size="30">ha</text>
     <text class="d-ha d-ha-2" x="30" y="96" font-size="26">ha</text>
     <text class="d-ha d-ha-3" x="326" y="26" font-size="22">ha!</text>
+  </g>
+  <g class="d-bulb" filter="url(#${g('glow')})">
+    <circle cx="200" cy="-14" r="24" fill="#ffe9a8" stroke="#ecca97" stroke-width="3"/>
+    <path d="M188 6 H212 V16 Q212 22 206 22 H194 Q188 22 188 16 Z" fill="#c9a56a"/>
+    <path d="M190 -14 Q200 -2 210 -14" fill="none" stroke="#ecca97" stroke-width="3" stroke-linecap="round"/>
+    <g stroke="#ffe9a8" stroke-width="4" stroke-linecap="round"><path d="M200 -50 V-60"/><path d="M168 -34 L160 -42"/><path d="M232 -34 L240 -42"/><path d="M160 -12 H150"/><path d="M240 -12 H250"/></g>
+  </g>
+  <g class="d-quest" fill="${url('gold')}" font-family="Inter, system-ui, sans-serif" font-weight="800" filter="url(#${g('glow')})">
+    <text class="d-q d-q-1" x="300" y="50" font-size="54">?</text>
+    <text class="d-q d-q-2" x="56" y="76" font-size="34">?</text>
   </g>
   <g class="d-sweat">${at(318, 96, 0, `<path d="${DROP}" fill="#a9e4ff"/>`)}</g>
   <g class="d-arrows" fill="none" stroke="${url('gold')}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">

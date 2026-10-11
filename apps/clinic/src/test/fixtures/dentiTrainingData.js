@@ -396,18 +396,20 @@ export const CYCLES = [
   {
     name: 'Siklus 21 · buka halaman lewat perintah',
     intents: {
-      nav: ['buka jadwal', 'ke halaman pasien', 'buka menu pengaturan', 'pergi ke laporan', 'tampilkan halaman recall', 'buka layar antrean',
-        'ke dashboard', 'buka pengeluaran', 'buka halaman pembayaran', 'buka pengguna', 'buka biaya dan modal', 'buka keuangan',
-        'buka jadwal dokter', 'buka pendaftaran pasien', 'buka booking', 'buka pengaturan whatsapp', 'buka profil', 'go to settings', 'open reports'],
+      nav: ['buka menu pengaturan', 'pergi ke laporan', 'buka layar antrean',
+        'ke dashboard', 'buka pengeluaran', 'buka pengguna', 'buka biaya dan modal', 'buka keuangan',
+        'buka jadwal dokter', 'buka pengaturan whatsapp', 'buka profil', 'go to settings', 'open reports'],
+      // Sejak Tahap 2 (11 Okt 2026) admin tidak mengakses data pasien/kasir/jadwal kunjungan → Denti menolak dengan alasan
+      navdeny: ['buka jadwal', 'ke halaman pasien', 'tampilkan halaman recall', 'buka halaman pembayaran', 'buka pendaftaran pasien', 'buka booking'],
     },
     actions: [
-      ['buka jadwal', 'navigate', '/admin/jadwal'], ['buka jadwal dokter', 'navigate', '/admin/jadwal-dokter'], ['ke halaman pasien', 'navigate', '/pasien'],
-      ['buka layar antrean', 'navigate', '/admin/pengaturan?tab=queue-display'], ['buka pengaturan whatsapp', 'navigate', '/admin/pengaturan?tab=whatsapp'],
-      ['ke dashboard', 'navigate', '/admin'], ['buka pendaftaran pasien', 'navigate', '/pasien/daftar'], ['go to settings', 'navigate', '/admin/pengaturan'],
-      ['open reports', 'navigate', '/admin/laporan'], ['buka biaya dan modal', 'navigate', '/admin/costing'], ['buka booking', 'navigate', '/booking-requests'],
-      ['tampilkan halaman recall', 'navigate', '/admin/recall'], ['buka profil', 'navigate', '/profil'],
+      ['buka jadwal dokter', 'navigate', '/admin/jadwal-dokter'],
+      ['buka layar antrean', 'navigate', '/layar-antrean'], ['buka pengaturan whatsapp', 'navigate', '/admin/pengaturan?tab=whatsapp'],
+      ['ke dashboard', 'navigate', '/admin'], ['go to settings', 'navigate', '/admin/pengaturan'],
+      ['open reports', 'navigate', '/admin/laporan'], ['buka biaya dan modal', 'navigate', '/admin/costing'],
+      ['buka profil', 'navigate', '/profil'],
     ],
-    replies: [['buka jadwal', 'Jadwal']],
+    replies: [['buka jadwal', 'resepsionis'], ['ke halaman pasien', 'dokter']],
     ai: ['lihat jadwal besok', 'buka laporan bulan lalu dan ringkas', 'tampilkan pengeluaran terbesar', 'buka data pasien yang belum bayar',
       'ke mana uang bulan ini pergi?', 'buka toko obat'],
   },
@@ -493,7 +495,7 @@ export const CYCLES = [
     intents: {
       calc: ['tolong hitung 3 x 250rb', '450rb dibagi 3 orang'],
       datecalc: ['tanggal berapa 3 bulan lagi?'],
-      nav: ['tolong buka halaman pengeluaran', 'antar aku ke recall'],
+      nav: ['tolong buka halaman pengeluaran', 'antar aku ke laporan'],
       setName: ['panggil saya Pak Joko'],
       thanks: ['makasih banyak denti, kamu keren', 'thank you so much'],
       persona: ['kamu robot atau manusia sih?', 'denti umurnya berapa?'],

@@ -68,7 +68,10 @@ const SUGGEST_BANK = [
   'Buka layar antrean', 'Kamu bisa apa saja?',
 ];
 /** Gerakan kecil saat Denti dibiarkan (agar terasa hidup). */
-const IDLE_MOVES = [['think', 1800], ['happy', 1600], ['nod', 1800], ['wave', 1600]];
+const IDLE_MOVES = [
+  ['think', 1800], ['happy', 1600], ['nod', 1800], ['wave', 1600], ['wink', 1500], ['peek', 2400], ['sigh', 2300],
+  ['shrug', 1900], ['idea', 2400], ['jump', 1600], ['cool', 2600], ['salute', 2000],
+];
 const MAX_LEN = 1000;
 /** Tanpa aktivitas selama ini → Denti tertidur (bangun lagi saat pengguna mengetik/bertanya). */
 const DOZE_AFTER_MS = 2 * 60 * 1000;
@@ -267,8 +270,14 @@ export default function AiAssistantPage() {
     touch();
     // Obrolan ringan dijawab Denti langsung — tidak memakai kuota AI
     const replies = [...messages].reverse().filter((m) => m.role === 'assistant');
+    // Konteks percakapan: tawaran buka halaman (hanya bila balasan terakhir), dan kuis yang sedang berjalan
+    const lastMsg = messages[messages.length - 1];
+    const offer = lastMsg?.role === 'assistant' && lastMsg.action?.type === 'offer' ? { to: lastMsg.action.to, label: lastMsg.action.label } : null;
+    const lastQuiz = replies.find((m) => m.action?.type === 'quiz');
+    const quiz = lastQuiz && lastQuiz.action.idx != null ? lastQuiz.action.idx : null;
     const chat = smallTalk(question, {
       name, greeting: getGreeting(), seed: messages.length, now: new Date(),
+      role: userProfile?.role || 'admin', offer, quiz,
       afterAnswer: replies.some((m) => !m.local && !m.error),
       lastIntent: replies[0]?.intent || null,
       lastTopic: replies.find((m) => !m.local && !m.error)?.topic || null,
@@ -290,9 +299,18 @@ export default function AiAssistantPage() {
           return;
         }
         setMessages((m) => [...m, { role: 'assistant', content: chat.reply, local: true, intent: chat.intent, action, fresh: true }]);
-        react(chat.state, bubble(chat.reply), ms);
+        if (action?.type === 'showoff') {
+          setDentiLine(bubble(chat.reply));
+          denti.sequence(action.seq.map((st) => [st]));
+          later(() => setBurst((b) => b + 1), 1500);
+        } else {
+          react(chat.state, bubble(chat.reply), ms);
+        }
         if (action?.type === 'setName') { saveNick(action.name); setNick(action.name); }
         if (action?.type === 'navigate') later(() => navigate(action.to), 900);
+        if (action?.type === 'back') later(() => navigate(-1), 900);
+        if (action?.type === 'forward') later(() => navigate(1), 900);
+        if (action?.type === 'reload') later(() => window.location.reload(), 1100);
         if (action?.type === 'theme') theme?.setThemeMode?.(action.mode);
         if (action?.type === 'speak') {
           const lastAi = replies.find((m) => !m.local && !m.error);
@@ -534,7 +552,7 @@ export default function AiAssistantPage() {
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-accent)]">Jawaban diperbaiki</p>
                   )}
                   {m.error ? m.content : <Answer text={m.content} fresh={m.fresh} />}
-                  {m.action?.type === 'navigate' && (
+                  {(m.action?.type === 'navigate' || m.action?.type === 'offer') && (
                     <button type="button" onClick={() => navigate(m.action.to)} className="ai-chip ai-chip--action mt-3">
                       Buka {m.action.label} <ArrowRight size={14} />
                     </button>

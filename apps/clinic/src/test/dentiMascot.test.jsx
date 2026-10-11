@@ -2,7 +2,9 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
-import DentiMascot, { useDentiDirector } from '../components/mascot/DentiMascot';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import DentiMascot, { useDentiDirector, DENTI_DURATIONS } from '../components/mascot/DentiMascot';
 import { DENTI_STATES } from '../components/mascot/dentiSvg';
 
 describe('Maskot Denti', () => {
@@ -88,5 +90,20 @@ describe('Maskot Denti', () => {
     act(() => { vi.advanceTimersByTime(3000); });
     expect(result.current.state).toBe('idle');
     vi.useRealTimers();
+  });
+});
+
+describe('Maskot Denti — kelengkapan state', () => {
+  const css = readFileSync(resolve(__dirname, '../components/mascot/denti.css'), 'utf8');
+
+  it('setiap state punya aturan CSS (kecuali idle sebagai dasar)', () => {
+    const tanpaAturan = DENTI_STATES.filter((s) => s !== 'idle' && !css.includes(`data-state="${s}"`));
+    expect(tanpaAturan).toEqual([]);
+  });
+
+  it('state sekali-putar punya durasi bawaan agar kembali ke dasar', () => {
+    for (const s of ['wink', 'cheer', 'jump', 'bow', 'shrug', 'cool', 'sigh', 'idea', 'confused', 'peek', 'excited', 'salute']) {
+      expect(DENTI_DURATIONS[s]).toBeGreaterThan(0);
+    }
   });
 });

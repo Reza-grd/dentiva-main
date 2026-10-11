@@ -5,16 +5,19 @@
  */
 import { describe, it, expect } from 'vitest';
 import { smallTalk, normalizeChat, moodForAnswer, topicOf, followUps, lineForQuestion } from '../utils/dentiMood';
-import { CYCLES } from './fixtures/dentiTrainingData';
+import { CYCLES as CYCLES_BASE } from './fixtures/dentiTrainingData';
+import { CYCLES_V4 } from './fixtures/dentiTrainingV4';
 import { augmentedCases } from './fixtures/dentiAugment';
 
+const CYCLES = [...CYCLES_BASE, ...CYCLES_V4];
 const NOW = new Date(2026, 9, 10, 9, 5);
 const asCase = (c) => (Array.isArray(c) ? c : [c, {}]);
 const talk = (text, ctx = {}) => smallTalk(text, { now: NOW, afterAnswer: true, ...ctx });
 const intentOf = (text, ctx = {}) => talk(text, ctx)?.intent ?? null;
+const asCase3 = (c) => [c[0], c[1], c[2] || {}];
 
 describe.each(CYCLES)('$name', (c) => {
-  const { intents = {}, ai = [], moods = [], topics = [], replies = [], actions = [], followups = [], lines = [], distinct = [], moodLines = [] } = c;
+  const { intents = {}, ai = [], moods = [], topics = [], replies = [], actions = [], followups = [], lines = [], distinct = [], moodLines = [], states = [] } = c;
   for (const [intent, phrases] of Object.entries(intents)) {
     it(`mengenali "${intent}" (${phrases.length} kalimat)`, () => {
       const wrong = phrases.map(asCase).map(([p, ctx]) => [p, intentOf(p, ctx)]).filter(([, got]) => got !== intent);
@@ -50,8 +53,14 @@ describe.each(CYCLES)('$name', (c) => {
     it(`${actions.length} aksi (buka halaman, ingat nama, hapus obrolan)`, () => {
       const wrong = actions.filter(([t, type, value, ctx]) => {
         const a = talk(t, ctx)?.action;
-        return !(a?.type === type && (value == null || a.to === value || a.name === value || a.mode === value));
+        return !(a?.type === type && (value == null || a.to === value || a.name === value || a.mode === value || a.idx === value));
       }).map(([t, type, value, ctx]) => [t, type, value, talk(t, ctx)?.action ?? null]);
+      expect(wrong).toEqual([]);
+    });
+  }
+  if (states.length) {
+    it(`${states.length} ekspresi gerak yang dipilih Denti`, () => {
+      const wrong = states.map(asCase3).filter(([t, st, ctx]) => talk(t, ctx)?.state !== st).map(([t, st, ctx]) => [t, st, talk(t, ctx)?.state ?? null]);
       expect(wrong).toEqual([]);
     });
   }
@@ -84,13 +93,13 @@ describe.each(CYCLES)('$name', (c) => {
   }
 });
 
-describe('Siklus 38 · ketahanan otomatis (augmentasi)', () => {
+describe('Siklus 53 · ketahanan otomatis (augmentasi)', () => {
   const cases = augmentedCases(CYCLES);
   it(`${cases.length} variasi kalimat ("denti, …", "… ya", "…!!", KAPITAL, emoji) tetap dipahami sama`, () => {
     const wrong = cases.filter((k) => intentOf(k.text) !== k.expect).map((k) => [k.how, k.text, intentOf(k.text), k.expect]);
     expect(wrong).toEqual([]);
-    expect(cases.length).toBeGreaterThanOrEqual(3000);
-  });
+    expect(cases.length).toBeGreaterThanOrEqual(5000);
+  }, 60000);
 });
 
 describe('Latihan Denti — balasan', () => {
@@ -124,6 +133,6 @@ describe('Latihan Denti — balasan', () => {
     const n = CYCLES.reduce((s, c) => s + Object.values(c.intents || {}).flat().length + (c.ai || []).length
       + (c.moods || []).length + (c.topics || []).length + (c.replies || []).length + (c.actions || []).length
       + (c.followups || []).length + (c.lines || []).length + (c.distinct || []).length + (c.moodLines || []).length, 0);
-    expect(n).toBeGreaterThanOrEqual(540);
+    expect(n).toBeGreaterThanOrEqual(1500);
   });
 });

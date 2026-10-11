@@ -6,10 +6,12 @@
 // ─────────────────────────────────────────────
 
 import {
-  calculate, dateCalc, extractName, navigateTo, isClearCommand, timeOf, dateOf,
+  calculate, dateCalc, extractName, isClearCommand, timeOf, dateOf,
   pctChange, marginCalc, bepCalc, installment, terbilang, dateDiff, themeCommand, isSpeakCommand,
 } from './dentiSkills.js';
 import * as L from './dentiLines.js';
+import { guideReply, PAGES, TUTORIALS } from './dentiGuide.js';
+import { funReply, FUN_WORDS } from './dentiFun.js';
 
 const norm = (t) => (t || '').toLowerCase().replace(/\s+/g, ' ').trim();
 const any = (t, words) => words.some((w) => t.includes(w));
@@ -88,6 +90,13 @@ const KNOWN = new Set([
   'cicil', 'cicilan', 'dicicil', 'terbilang', 'huruf', 'modal', 'jual', 'dijual', 'tarif', 'kontribusi', 'impas', 'persen',
   'kenaikan', 'penurunan', 'perubahan', 'menjadi', 'malam', 'nyalakan', 'aktifkan', 'ubah', 'ganti',
 ]);
+
+// Kosakata pemandu & gerakan (nama halaman, kata tutorial, perintah gerak) tidak boleh "dikoreksi" ke kata lain.
+[...PAGES.flatMap((p) => p.aliases.flatMap((a) => a.split(' '))), ...FUN_WORDS,
+  ...TUTORIALS.flatMap((tu) => String(tu.re.source).match(/[a-z]{3,}/g) || []),
+  'jump', 'badan', 'hpp', 'spin', 'quiz', 'trivia', 'ajarkan', 'tutorial', 'panduan', 'dimana', 'letak', 'lokasi', 'template', 'pengingat',
+  'invoice', 'edukasi', 'tunjukkan', 'gerakan', 'atraksi', 'kedip', 'lompat', 'loncat', 'hormat', 'show', 'off',
+].forEach((w) => KNOWN.add(w));
 
 /** Calon nama memuat kata data atau kata umum di awal ("nama saya di laporan salah") → bukan nama. */
 const isWordy = (name) => {
@@ -391,7 +400,7 @@ const AGAIN = /^(lagi|satu lagi|sekali lagi|yang lain|lainnya|another( one)?|mor
 
 export function smallTalk(text, {
   name = '', greeting = 'Halo', seed = 0, now = new Date(), afterAnswer = false, lastIntent = null, provider = '', lastTopic = null,
-  recent = [],
+  recent = [], role = 'admin', offer = null, quiz = null,
 } = {}) {
   // Keterampilan instan dari kalimat asli: kalkulator
   const calc = calculate(text);
@@ -416,9 +425,13 @@ export function smallTalk(text, {
       ? { intent: 'speak', state: 'talk', reply: 'Siap, saya bacakan jawaban terakhir. 🔊', action: { type: 'speak' } }
       : { intent: 'speak', state: 'think', reply: 'Belum ada jawaban untuk dibacakan. Tanyakan sesuatu dulu, ya! 😊' };
   }
-  const nav = navigateTo(t);
-  if (nav) return { intent: 'nav', state: 'point', reply: `Siap, saya buka **${nav.label}**. 👉`, action: { type: 'navigate', ...nav } };
+  // Pemandu: buka halaman/tab (sadar peran), "di mana …", "ajarkan cara …", kembali/muat ulang, jawaban "ya" untuk tawaran
+  const guide = guideReply(t, { role, offer });
+  if (guide) return guide;
   if (isClearCommand(t)) return { intent: 'clear', state: 'wave', reply: 'Siap, percakapan dibersihkan. Kita mulai dari awal! ✨', action: { type: 'clear' } };
+  // Interaksi seru: perintah gerakan, kuis gigi, reaksi emosi
+  const fun = funReply(t, { seed, recent, quiz, name });
+  if (fun) return fun;
   const ctx = { t, raw: text, name, greeting, seed, now, afterAnswer, provider, lastTopic, sapa: name ? `, ${name}` : '' };
   const answer = (it, sd = seed) => {
     const r = it.reply({ ...ctx, seed: sd });
