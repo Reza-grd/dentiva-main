@@ -6,6 +6,9 @@
 \set ON_ERROR_ROLLBACK on
 \pset tuples_only on
 \pset format unaligned
+-- PENGAMAN: skrip ini mengubah data (peran, status kunjungan, izin) untuk disimulasikan lalu di-ROLLBACK.
+-- Tanpa transaksi, perubahannya TERCATAT PERMANEN — jangan pernah dijalankan tanpa `begin;` di bawah ini.
+begin;
 
 create temp table hasil(nama text, ok boolean);
 grant all on hasil to public;

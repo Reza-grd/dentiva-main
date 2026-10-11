@@ -63,6 +63,13 @@ Pelajaran gladi 11 Okt 2026:
 - Uji gerbang pemulihan: `bash /opt/dentiva/bin/uji-gerbang-verifikasi.sh`.
 - Uji pengunci item kunjungan lunas (L01, rollback otomatis): `psql … -f infra/vps/uji/uji-guard-item-lunas.sql` setelah migrasi `20261012090000`.
 
+## Pengerasan hasil audit 12 Okt 2026
+- `bash infra/vps/batasi-cors.sh`: CORS gateway API hanya untuk asal Dentiva (dentiva.id, dentiva-main(-console)[-preview].vercel.app, localhost, Tauri). Otomatis rollback bila Envoy menolak konfigurasi
+  (satu regex panjang ditolak: batas program RE2 → dipakai beberapa pola pendek). **Pasang ulang setelah `update.sh` Supabase** (berkas `volumes/api/envoy/lds.template.yaml` ditimpa).
+- Migrasi `20261012100000`: `anon` tanpa hak tabel/urutan di `public`; `authenticated` tanpa TRUNCATE/TRIGGER/REFERENCES; default privileges objek baru; indeks FK.
+- **Skrip `infra/vps/uji/*.sql` mengubah data (peran, status, izin) untuk disimulasikan.** Sekarang masing-masing memuat `begin;` sendiri dan berakhir `rollback;`. Jangan pernah
+  menjalankannya lewat cara yang memecah transaksi (mis. `psql -c` per pernyataan atau autocommit) — perubahan akan permanen.
+
 ## Edge function
 - Deploy dari laptop: `bash infra/vps/deploy-functions.sh [nama…]` (pengganti `supabase functions deploy`).
 - Router `infra/vps/functions-main/index.ts` (dipasang ke `volumes/functions/main`): JWT diverifikasi per fungsi

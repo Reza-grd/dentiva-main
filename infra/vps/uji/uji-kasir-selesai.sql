@@ -3,6 +3,9 @@
 \set ON_ERROR_STOP 0
 \pset tuples_only on
 \pset format unaligned
+-- PENGAMAN: skrip ini mengubah data (peran, status kunjungan, izin) untuk disimulasikan lalu di-ROLLBACK.
+-- Tanpa transaksi, perubahannya TERCATAT PERMANEN — jangan pernah dijalankan tanpa `begin;` di bawah ini.
+begin;
 select id as rsp from public.users where role = 'resepsionis' order by created_at limit 1 \gset
 select id as dok from public.users where role = 'dokter' order by created_at limit 1 \gset
 select raw_app_meta_data::text as am_dok from auth.users where id = :'dok' \gset

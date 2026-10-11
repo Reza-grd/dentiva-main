@@ -8,6 +8,9 @@
 \set ON_ERROR_ROLLBACK on
 \pset tuples_only on
 \pset format unaligned
+-- PENGAMAN: skrip ini mengubah data (peran, status kunjungan, izin) untuk disimulasikan lalu di-ROLLBACK.
+-- Tanpa transaksi, perubahannya TERCATAT PERMANEN — jangan pernah dijalankan tanpa `begin;` di bawah ini.
+begin;
 
 select id as resep from public.users where role = 'resepsionis' order by created_at limit 1 \gset
 select id as adm from public.users where role = 'admin' order by created_at limit 1 \gset
