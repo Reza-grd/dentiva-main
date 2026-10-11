@@ -29,6 +29,14 @@ export const DENTI_STATES = [
   'wink', 'cheer', 'jump', 'bow', 'shrug', 'cool', 'sigh', 'idea', 'confused', 'peek', 'excited', 'salute',
   // gerakan & ekspresi tambahan (v5)
   'angry', 'cry', 'dizzy', 'stretch', 'search', 'phone', 'coffee', 'flex',
+  // 50 ekspresi & gerakan tambahan (v6)
+  'grateful', 'proud', 'worried', 'nervous', 'blush', 'sulk', 'hopeful', 'relieved',
+  'disappointed', 'gloomy', 'cozy', 'shock', 'giggle', 'smug', 'curious', 'suspicious',
+  'determined', 'focused', 'overwhelmed', 'dreamy', 'yawn', 'tired', 'sick', 'freezing',
+  'hot', 'hungry', 'welcome', 'goodbye', 'thumbsup', 'heart_hands', 'pray', 'whisper',
+  'shush', 'listen', 'slowclap', 'facepalm', 'party', 'birthday', 'gift', 'flag',
+  'sing', 'loading', 'success', 'warning', 'error', 'lock', 'shield', 'hourglass',
+  'chart', 'money',
 ];
 
 const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z';
@@ -47,7 +55,31 @@ export function dentiSvg(uid = 'd') {
   const url = (n) => `url(#${g(n)})`;
   // posisi diletakkan di <g> pembungkus agar transform animasi CSS tidak menimpanya
   const at = (x, y, sc, inner) => `<g transform="translate(${x} ${y})${sc ? ` scale(${sc})` : ''}">${inner}</g>`;
-  const armProps = (side) => (side === 'r' ? `
+  const armPropsL = `
+      <g class="d-clip"><g transform="translate(0 116) rotate(53)">
+        <rect x="-24" y="-32" width="48" height="64" rx="5" fill="#fff" stroke="${url('gold')}" stroke-width="3"/>
+        <rect x="-10" y="-38" width="20" height="10" rx="3" fill="${url('gold')}"/>
+        <path d="M-14 -14 H14 M-14 -2 H14 M-14 10 H6" stroke="#7cc4ff" stroke-width="3" stroke-linecap="round"/>
+        <path d="M-12 20 l4 4 l9 -10" fill="none" stroke="#3ddc84" stroke-width="3.5" stroke-linecap="round"/>
+      </g></g>
+      <g class="d-book"><g transform="translate(0 116) rotate(53)">
+        <path d="M-32 -22 H-2 V24 H-32 Z M2 -22 H32 V24 H2 Z" fill="#fff" stroke="#7cc4ff" stroke-width="3" stroke-linejoin="round"/>
+        <path d="M-25 -10 H-9 M-25 0 H-9 M-25 10 H-9 M9 -10 H25 M9 0 H25 M9 10 H25" stroke="#bcd0e8" stroke-width="2.5" stroke-linecap="round"/>
+      </g></g>`;
+  const armPropsR2 = `
+      <g class="d-thumb"><g transform="translate(0 118) rotate(150)">
+        <rect x="-15" y="-4" width="30" height="27" rx="10" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/>
+        <path d="M-6 -4 V-24 Q-6 -33 2 -31 Q9 -29 9 -20 V-4" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/>
+      </g></g>
+      <g class="d-mic"><g transform="translate(0 114) rotate(150)">
+        <rect x="-4" y="-8" width="8" height="32" rx="4" fill="#4a5568"/>
+        <circle cy="-18" r="12" fill="#c9d4e6" stroke="${url('gold')}" stroke-width="3"/>
+      </g></g>
+      <g class="d-flag"><g transform="translate(0 112) rotate(150)">
+        <path d="M0 16 V-74" stroke="#b78a4c" stroke-width="4" stroke-linecap="round"/>
+        <g class="d-flagcloth"><rect x="2" y="-74" width="46" height="12" fill="#ff4d5a"/><rect x="2" y="-62" width="46" height="12" fill="#fff" stroke="#e5e9f2"/></g>
+      </g></g>`;
+  const armProps = (side) => (side === 'l' ? armPropsL : side === 'r' ? `
       <g class="d-lens">
         <path d="M0 98 V122" stroke="${url('gold')}" stroke-width="8" stroke-linecap="round"/>
         <circle cx="0" cy="140" r="20" fill="#bfeeff" fill-opacity=".28" stroke="${url('gold')}" stroke-width="6"/>
@@ -62,7 +94,7 @@ export function dentiSvg(uid = 'd') {
         <path d="M-9 100 L9 100 L14 136 L-14 136 Z" fill="#fff" stroke="${url('gold')}" stroke-width="3" stroke-linejoin="round"/>
         <path d="M13 108 Q28 112 22 128 Q19 134 13 132" fill="none" stroke="${url('gold')}" stroke-width="3.5" stroke-linecap="round"/>
         <ellipse cx="0" cy="136" rx="14" ry="3.2" fill="#8a5a34"/>
-      </g>` : '');
+      </g>${armPropsR2}` : '');
   const arm = (side, x) => `
     <g class="d-arm-${side}"><g transform="translate(${x} 322) rotate(${side === 'l' ? 22 : -22})">
       <path d="${ARM}" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="1.5"/>
@@ -230,6 +262,19 @@ export function dentiSvg(uid = 'd') {
         <g transform="translate(162 160)"><path class="d-spiral" d="M0 0 a4 4 0 0 1 8 0 a8 8 0 0 1 -16 0 a12 12 0 0 1 24 0 a16 16 0 0 1 -32 0"/></g>
         <g transform="translate(238 160)"><path class="d-spiral d-spiral-r" d="M0 0 a4 4 0 0 1 8 0 a8 8 0 0 1 -16 0 a12 12 0 0 1 24 0 a16 16 0 0 1 -32 0"/></g>
       </g>
+      <g class="d-brows-w" fill="none" stroke="#bfeeff" stroke-width="7" stroke-linecap="round" filter="url(#${g('glow')})">
+        <path d="M138 142 L186 124"/><path d="M262 142 L214 124"/>
+      </g>
+      <g class="d-xeyes" fill="none" stroke="#ff8a8a" stroke-width="9" stroke-linecap="round" filter="url(#${g('glow')})">
+        <path d="M146 144 L178 176 M178 144 L146 176"/><path d="M222 144 L254 176 M254 144 L222 176"/>
+      </g>
+      <g class="d-eye-star" fill="${url('eye')}" filter="url(#${g('glow')})">
+        ${at(162, 160, 1.7, `<path d="${STAR}"/>`)}${at(238, 160, 1.7, `<path d="${STAR}"/>`)}
+      </g>
+      <g class="d-eye-coin" filter="url(#${g('glow')})">
+        <circle cx="162" cy="160" r="19" fill="${url('gold')}" stroke="#fff4de" stroke-width="3"/><text x="162" y="170" text-anchor="middle" font-size="27" font-weight="800" fill="#7a5420" font-family="Inter, system-ui, sans-serif">$</text>
+        <circle cx="238" cy="160" r="19" fill="${url('gold')}" stroke="#fff4de" stroke-width="3"/><text x="238" y="170" text-anchor="middle" font-size="27" font-weight="800" fill="#7a5420" font-family="Inter, system-ui, sans-serif">$</text>
+      </g>
       </g>
 
       <g class="d-gaze-soft"><g class="d-mouth" filter="url(#${g('glow')})">
@@ -237,12 +282,21 @@ export function dentiSvg(uid = 'd') {
         <ellipse class="d-mouth-talk" cx="200" cy="200" rx="11" ry="7" fill="#9ee6ff"/>
         <ellipse class="d-mouth-o" cx="200" cy="202" rx="7" ry="8" fill="none" stroke="#9ee6ff" stroke-width="4"/>
         <path class="d-mouth-sad" d="M186 208 Q200 196 214 208" fill="none" stroke="#9ee6ff" stroke-width="5" stroke-linecap="round"/>
+        <path class="d-mouth-flat" d="M186 206 H214" fill="none" stroke="#9ee6ff" stroke-width="5" stroke-linecap="round"/>
+        <path class="d-mouth-wavy" d="M182 206 q4 -8 8 0 t8 0 t8 0 t8 0" fill="none" stroke="#9ee6ff" stroke-width="4.5" stroke-linecap="round"/>
+        <path class="d-mouth-grin" d="M176 194 Q200 224 224 194 Z" fill="#9ee6ff"/>
       </g></g>
 
       <g class="d-cheeks">
         <ellipse cx="134" cy="196" rx="15" ry="8" fill="#ff9cc0" opacity=".5"/>
         <ellipse cx="266" cy="196" rx="15" ry="8" fill="#ff9cc0" opacity=".5"/>
       </g>
+      <g class="d-mask"><path d="M156 192 Q200 184 244 192 L240 224 Q200 238 160 224 Z" fill="#e9f7ff" stroke="#7cc4ff" stroke-width="3"/><path d="M164 203 H236 M166 213 H234" stroke="#bcd9f5" stroke-width="2"/><path d="M156 194 Q136 190 130 176 M244 194 Q264 190 270 176" fill="none" stroke="#7cc4ff" stroke-width="3"/></g>
+      <g class="d-hat"><path d="M168 72 L200 4 L232 72 Z" fill="#ff8fb8" stroke="#fff" stroke-width="2"/><path d="M178 52 H222 M187 34 H213" stroke="#fff4de" stroke-width="4" stroke-linecap="round"/><circle cx="200" cy="4" r="8" fill="#ffd76a"/></g>
+      <g class="d-finger"><rect x="193" y="188" width="14" height="48" rx="7" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/><path d="M184 232 Q200 252 216 232 L216 246 Q200 266 184 246 Z" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/></g>
+      <g class="d-whisper"><ellipse cx="256" cy="208" rx="20" ry="27" transform="rotate(-20 256 208)" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/><path d="M244 192 l10 -9 M249 202 l13 -7" stroke="#9fb7dc" stroke-width="3" stroke-linecap="round"/></g>
+      <g class="d-earhand"><path d="M330 168 Q362 146 360 190 Q356 218 330 206 Z" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/><path d="M342 176 q8 -2 8 8" fill="none" stroke="#9fb7dc" stroke-width="3" stroke-linecap="round"/></g>
+      <g class="d-facepalm"><ellipse cx="200" cy="170" rx="56" ry="42" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/><path d="M160 150 V128 M181 142 V118 M204 140 V116 M227 144 V122" stroke="#9fb7dc" stroke-width="3.5" stroke-linecap="round"/></g>
     </g>
 
     ${arm('l', 90)}
@@ -339,6 +393,34 @@ export function dentiSvg(uid = 'd') {
   <g class="d-dizzy" fill="#fff4de" filter="url(#${g('glow')})">
     ${at(128, 36, 1.1, `<path d="${STAR}"/>`)}${at(272, 36, 1.1, `<path d="${STAR}"/>`)}${at(200, 0, 1.1, `<path d="${STAR}"/>`)}${at(200, 76, .9, `<path d="${STAR}"/>`)}
   </g>
+  <g class="d-cloud">
+    <g fill="#b9c6dc" stroke="#8fa3c4" stroke-width="2"><circle cx="158" cy="12" r="20"/><circle cx="200" cy="-4" r="26"/><circle cx="242" cy="12" r="20"/><rect x="158" y="12" width="84" height="20" rx="10" stroke="none"/></g>
+    <g fill="#7cc4ff">${at(172, 46, .8, `<path class="d-rain d-rain-1" d="${DROP}"/>`)}${at(200, 50, .8, `<path class="d-rain d-rain-2" d="${DROP}"/>`)}${at(228, 46, .8, `<path class="d-rain d-rain-3" d="${DROP}"/>`)}</g>
+  </g>
+  <g class="d-snow" fill="#e8f7ff" stroke="#8fd0ff" stroke-width="1.5">
+    ${at(60, 90, .6, `<path class="d-flake d-flake-1" d="${STAR}"/>`)}${at(340, 110, .5, `<path class="d-flake d-flake-2" d="${STAR}"/>`)}${at(40, 220, .45, `<path class="d-flake d-flake-3" d="${STAR}"/>`)}${at(366, 250, .6, `<path class="d-flake d-flake-4" d="${STAR}"/>`)}${at(120, 40, .5, `<path class="d-flake d-flake-5" d="${STAR}"/>`)}
+  </g>
+  <g class="d-sun">
+    <g stroke="#ffd76a" stroke-width="4" stroke-linecap="round"><path d="M340 6 V-6 M340 74 V86 M300 40 H288 M380 40 H392 M312 12 L304 4 M368 12 L376 4 M312 68 L304 76 M368 68 L376 76"/></g>
+    <circle cx="340" cy="40" r="22" fill="#ffd76a" stroke="#ffb347" stroke-width="3"/>
+  </g>
+  <g class="d-thermo">${at(342, 150, 0, `<rect x="-6" y="-34" width="12" height="52" rx="6" fill="#fff" stroke="#9fb7dc" stroke-width="2"/><circle cy="22" r="10" fill="#ff6b6b" stroke="#9fb7dc" stroke-width="2"/><rect x="-2.5" y="-8" width="5" height="30" fill="#ff6b6b"/>`)}</g>
+  <g class="d-hourglass" fill="none" stroke="${url('gold')}" stroke-width="4" stroke-linecap="round">${at(200, 12, 1.35, `<path d="M-15 -24 H15 M-15 24 H15 M-12 -24 Q-12 -4 0 0 Q-12 4 -12 24 M12 -24 Q12 -4 0 0 Q12 4 12 24"/><path d="M-6 20 H6" stroke="#ffd76a"/>`)}</g>
+  <g class="d-spinner">${at(200, 12, 1.35, `<circle r="20" fill="none" stroke="#bfeeff" stroke-width="5" opacity=".3"/><circle class="d-spin-arc" r="20" fill="none" stroke="${url('gold')}" stroke-width="6" stroke-linecap="round" stroke-dasharray="32 100"/>`)}</g>
+  <g class="d-check">${at(336, 46, 0, `<circle r="24" fill="#3ddc84" stroke="#fff" stroke-width="3"/><path d="M-11 1 L-3 10 L12 -9" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>`)}</g>
+  <g class="d-warn">${at(336, 46, 0, `<path d="M0 -26 L26 20 H-26 Z" fill="#ffcc33" stroke="#e09b00" stroke-width="3" stroke-linejoin="round"/><rect x="-3.5" y="-12" width="7" height="20" rx="3.5" fill="#5b3a00"/><circle cy="14" r="4" fill="#5b3a00"/>`)}</g>
+  <g class="d-lock">${at(336, 46, 0, `<path d="M-10 -4 V-14 a10 10 0 0 1 20 0 V-4" fill="none" stroke="${url('gold')}" stroke-width="6"/><rect x="-18" y="-4" width="36" height="28" rx="6" fill="${url('gold')}" stroke="#b78a4c" stroke-width="2"/><circle cy="9" r="4" fill="#5b3a00"/>`)}</g>
+  <g class="d-shield">${at(336, 46, 0, `<path d="M0 -28 L24 -17 V4 Q24 22 0 31 Q-24 22 -24 4 V-17 Z" fill="#5fbaff" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M-10 2 L-3 10 L11 -8" fill="none" stroke="#fff" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>`)}</g>
+  <g class="d-chart">${at(336, 50, 0, `<rect x="-26" y="2" width="12" height="22" rx="2" fill="#7cc4ff"/><rect x="-6" y="-10" width="12" height="34" rx="2" fill="#5fbaff"/><rect x="14" y="-24" width="12" height="48" rx="2" fill="#3f8ff0"/><path d="M-28 -8 L-6 -24 L8 -16 L28 -38" fill="none" stroke="#3ddc84" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`)}</g>
+  <g class="d-cake">${at(200, 398, 0, `<ellipse cy="28" rx="50" ry="9" fill="#e8eef9"/><rect x="-36" y="-6" width="72" height="34" rx="7" fill="#ffd1dc"/><rect x="-36" y="-6" width="72" height="13" rx="6" fill="#fff"/><rect x="-3" y="-28" width="6" height="22" rx="2" fill="#7cc4ff"/><path class="d-flame" d="M0 -44 q-7 9 0 16 q7 -7 0 -16" fill="#ffb347"/>`)}</g>
+  <g class="d-gift">${at(200, 404, 0, `<rect x="-32" y="-12" width="64" height="46" rx="6" fill="#ff8fb8"/><rect x="-7" y="-12" width="14" height="46" fill="#fff4de"/><rect x="-32" y="5" width="64" height="11" fill="#fff4de" opacity=".9"/><path d="M0 -12 q-20 -24 -24 -6 q5 9 24 6 q19 3 24 -6 q-4 -18 -24 6" fill="#fff4de"/>`)}</g>
+  <g class="d-aura">
+    ${at(54, 232, 1.3, `<path class="d-flame" d="M0 -34 Q18 -10 8 10 Q4 20 -2 20 Q-16 14 -10 -6 Q-4 6 0 -2 Q-2 -16 0 -34Z" fill="#ff9a3c"/>`)}${at(346, 232, 1.3, `<path class="d-flame d-flame-2" d="M0 -34 Q18 -10 8 10 Q4 20 -2 20 Q-16 14 -10 -6 Q-4 6 0 -2 Q-2 -16 0 -34Z" fill="#ff9a3c"/>`)}
+  </g>
+  <g class="d-growl" fill="${url('gold')}" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="20"><text x="200" y="462" text-anchor="middle">grrrk…</text></g>
+  <g class="d-heartbig" filter="url(#${g('glow')})">${at(200, 8, 2.4, `<path d="${HEART}" fill="#ff8fb8"/>`)}</g>
+  <g class="d-pray">${at(200, 322, 0, `<ellipse rx="14" ry="26" transform="rotate(-14)" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/><ellipse rx="14" ry="26" transform="rotate(14)" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="2"/>`)}</g>
+  <g class="d-glitch"><rect x="88" y="118" width="224" height="7" fill="#ff5c8a" opacity=".65"/><rect x="100" y="176" width="200" height="5" fill="#5cffd0" opacity=".6"/><rect x="92" y="210" width="216" height="6" fill="#5c8aff" opacity=".6"/></g>
   <g class="d-sweat">${at(318, 96, 0, `<path d="${DROP}" fill="#a9e4ff"/>`)}</g>
   <g class="d-arrows" fill="none" stroke="${url('gold')}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
     <path class="d-arrow d-arrow-1" d="M64 232 l-13 13 l13 13"/>

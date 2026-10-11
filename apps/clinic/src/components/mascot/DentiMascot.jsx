@@ -8,6 +8,15 @@ export const DENTI_DURATIONS = {
   wink: 1500, cheer: 2400, jump: 1600, bow: 2200, shrug: 1900, cool: 2600, sigh: 2300, idea: 2400, confused: 2400, peek: 2400,
   excited: 2200, salute: 2000,
   angry: 2400, cry: 2800, dizzy: 2600, stretch: 2800, search: 3000, phone: 3200, coffee: 3000, flex: 2400,
+  grateful: 3000, proud: 2600, worried: 2800, nervous: 2600, blush: 2600, sulk: 3000,
+  hopeful: 2800, relieved: 2800, disappointed: 3000, gloomy: 3400, cozy: 3400, shock: 2200,
+  giggle: 2400, smug: 2800, curious: 2800, suspicious: 2800, determined: 2800, focused: 3000,
+  overwhelmed: 3000, dreamy: 3600, yawn: 3000, tired: 3400, sick: 3200, freezing: 3000,
+  hot: 3000, hungry: 2800, welcome: 2800, goodbye: 3200, thumbsup: 2600, heart_hands: 3000,
+  pray: 3200, whisper: 2800, shush: 2600, listen: 3000, slowclap: 2800, facepalm: 2800,
+  party: 3000, birthday: 3200, gift: 2800, flag: 3000, sing: 3200, loading: 3000,
+  success: 2600, warning: 2600, error: 2800, lock: 2800, shield: 2800, hourglass: 3200,
+  chart: 3000, money: 2800,
 };
 
 const clamp = (v) => Math.max(-1, Math.min(1, v));

@@ -290,6 +290,19 @@ Asisten AI (analisis data) hanya untuk admin, tetapi otak lokal Denti berguna un
 - **Permainan kecil** (tanpa AI, hasil dari seed): *lempar koin*, *lempar dadu*, *pilihin A atau B* (opsi bernuansa data klinik diabaikan agar tidak
   menyaingi pertanyaan bisnis), dan *main suit* (batu-gunting-kertas dengan reaksi menang/kalah/seri). "lagi" mengulang permainan terakhir.
 
+### Ekspresi v6 — 50 ekspresi baru (total 93) & mesin empati
+
+- **50 `data-state` baru** (daftar & arti di `docs/briefing-gpt-denti.md` §5): perasaan (terharu, bangga, khawatir, gugup, malu, merajuk, berharap, lega, kecewa, murung, nyaman, kaget, cekikikan, pongah,
+  penasaran, curiga, bertekad, fokus, kewalahan, melamun), tubuh (menguap, lelah, sakit, kedinginan, kepanasan, lapar), sosial (sambutan, pamit, jempol, kirim hati, berdoa, bisik, sstt, menyimak,
+  tepuk pelan, tepuk jidat), perayaan (pesta, ulang tahun, hadiah, bendera, bernyanyi), sistem (memuat, berhasil, peringatan, galat, terkunci, terlindungi, menunggu, grafik naik, mata uang).
+  Dibangkitkan dari satu tabel di `patch_mascot_v6` (mata, mulut, bagian tampil, gerak lengan/badan/kepala lewat variabel CSS `--a0/--y0/--hr0…` pada keyframes `d-v-arm/d-v-body/d-v-head`).
+  Catatan rig: animasi CSS **menimpa** atribut `transform` SVG — jangan menganimasikan grup yang posisinya ditentukan `translate(...)`; animasikan pembungkus luarnya.
+- **`utils/dentiEmpati.js` + `utils/data/dentiEmpatiData.js`**: mesin empati digerakkan data (frasa `say` → balasan `reply` + ekspresi `state`). Menambah situasi cukup menambah entri;
+  `dentiEmpati.test.js` menjaga skema, bentrok dengan intent lain, dan bahwa tiap frasa dikenali. Kalimat bernuansa data klinik tidak pernah masuk jalur ini (tetap ke AI).
+- **Keadaan darurat batin** (`crisisReply`) dijawab mesin dengan balasan hati-hati dan arahan bantuan sebelum intent apa pun — *teks nomor layanan perlu diverifikasi pemilik secara berkala*.
+- Penolakan akses kini memakai ekspresi `lock`; reaksi colek & gerakan acak saat dibiarkan bertambah.
+- Pelatihan paralel dengan GPT: `docs/briefing-gpt-denti.md` (GPT mengisi data empati & fixture jebakan; Claude memegang mesin dan ekspresi).
+
 ### Cara melatih (siklus 54–64)
 
 Tambahkan kalimat ke `src/test/fixtures/dentiTrainingV5.js` (format sama dengan V4; konteks `{ role, offer, quiz, lastIntent }`). Fixture kamus

@@ -77,6 +77,7 @@ const IDLE_NUDGES = [
 const IDLE_MOVES = [
   ['think', 1800], ['happy', 1600], ['nod', 1800], ['wave', 1600], ['wink', 1500], ['peek', 2400], ['sigh', 2300],
   ['shrug', 1900], ['idea', 2400], ['jump', 1600], ['cool', 2600], ['salute', 2000], ['stretch', 2800], ['search', 3000], ['coffee', 3000],
+  ['dreamy', 3600], ['yawn', 3000], ['giggle', 2400], ['curious', 2800], ['listen', 3000], ['smug', 2800],
 ];
 const MAX_LEN = 1000;
 /** Tanpa aktivitas selama ini → Denti tertidur (bangun lagi saat pengguna mengetik/bertanya). */

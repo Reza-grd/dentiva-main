@@ -27,7 +27,7 @@ const HINTS = {
   dokter: ['Checklist harian', 'Ajarkan cara mengisi rekam medis', 'Apa itu odontogram?', 'Buka jadwal hari ini'],
   resepsionis: ['Checklist harian', 'Ajarkan cara memproses booking', 'Apa itu recall?', 'Buka layar antrean'],
 };
-const EXTRA_IDLE_MOVES = [['wink', 1500], ['stretch', 2800], ['coffee', 3000], ['cool', 2600]];
+const EXTRA_IDLE_MOVES = [['wink', 1500], ['stretch', 2800], ['coffee', 3000], ['cool', 2600], ['dreamy', 3600], ['giggle', 2400], ['curious', 2800], ['yawn', 3000]];
 
 const loadChat = () => {
   try { return JSON.parse(sessionStorage.getItem(STORE_KEY) || '[]'); } catch { return []; }

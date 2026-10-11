@@ -323,7 +323,7 @@ const DENY_ENDS = ['Ada lagi yang bisa saya bantu?', 'Mau saya arahkan ke halama
 function navReply(p, role, say) {
   if (!allowed(p, role)) {
     const reason = p.deny?.[role] || `Halaman **${p.label}** tidak tersedia untuk peran ${roleName[role] || role}.`;
-    return { intent: 'navdeny', state: 'shrug', reply: `${reason} ${DENY_ENDS[p.label.length % 2]}` };
+    return { intent: 'navdeny', state: 'lock', reply: `${reason} ${DENY_ENDS[p.label.length % 2]}` };
   }
   const to = toFor(p, role);
   return { intent: 'nav', state: 'point', reply: say(p), action: { type: 'navigate', to, label: p.label } };

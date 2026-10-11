@@ -9,8 +9,9 @@ import { smallTalk } from '../utils/dentiMood';
 import { CYCLES as CYCLES_BASE } from './fixtures/dentiTrainingData';
 import { CYCLES_V4 } from './fixtures/dentiTrainingV4';
 import { CYCLES_V5 } from './fixtures/dentiTrainingV5';
+import { CYCLES_GPT } from './fixtures/dentiTrainingGPT';
 
-const CYCLES = [...CYCLES_BASE, ...CYCLES_V4, ...CYCLES_V5];
+const CYCLES = [...CYCLES_BASE, ...CYCLES_V4, ...CYCLES_V5, ...CYCLES_GPT];
 const NOW = new Date(2026, 9, 10, 9, 5);
 const asCase = (c) => (Array.isArray(c) ? c : [c, {}]);
 const talk = (text, ctx = {}) => smallTalk(text, { now: NOW, afterAnswer: true, ...ctx });

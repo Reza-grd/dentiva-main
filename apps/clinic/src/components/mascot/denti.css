@@ -726,6 +726,415 @@
 @keyframes d-flex-r { 0%, 100% { transform: rotate(-100deg) scale(1); } 50% { transform: rotate(-116deg) scale(1.12, 1.05); } }
 @keyframes d-flex-body { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04, .97) translateY(4px); } }
 
+/* ═════ v6 · 50 ekspresi & gerakan tambahan (dibangkitkan dari daftar di patch_mascot_v6) ═════ */
+.denti .d-brows-w, .denti .d-xeyes, .denti .d-eye-star, .denti .d-eye-coin, .denti .d-mouth-flat, .denti .d-mouth-wavy, .denti .d-mouth-grin, .denti .d-mask, .denti .d-hat, .denti .d-finger, .denti .d-whisper, .denti .d-earhand, .denti .d-facepalm, .denti .d-clip, .denti .d-book, .denti .d-thumb, .denti .d-mic, .denti .d-flag, .denti .d-cloud, .denti .d-snow, .denti .d-sun, .denti .d-thermo, .denti .d-hourglass, .denti .d-spinner, .denti .d-check, .denti .d-warn, .denti .d-lock, .denti .d-shield, .denti .d-chart, .denti .d-cake, .denti .d-gift, .denti .d-aura, .denti .d-growl, .denti .d-heartbig, .denti .d-pray, .denti .d-glitch { opacity: 0; transition: opacity .3s ease; }
+.denti .d-rain, .denti .d-flake, .denti .d-flame, .denti .d-spin-arc, .denti .d-flagcloth { transform-box: fill-box; transform-origin: center; }
+@keyframes d-v-arm { 0%, 100% { transform: rotate(var(--a0, 0deg)); } 50% { transform: rotate(var(--a1, var(--a0, 0deg))); } }
+@keyframes d-v-body { 0%, 100% { transform: translate(var(--x0, 0px), var(--y0, 0px)) rotate(var(--r0, 0deg)) scale(var(--s0, 1)); } 50% { transform: translate(var(--x1, var(--x0, 0px)), var(--y1, var(--y0, 0px))) rotate(var(--r1, var(--r0, 0deg))) scale(var(--s1, var(--s0, 1))); } }
+@keyframes d-v-head { 0%, 100% { transform: translateY(var(--hy0, 0px)) rotate(var(--hr0, 0deg)); } 50% { transform: translateY(var(--hy1, var(--hy0, 0px))) rotate(var(--hr1, var(--hr0, 0deg))); } }
+@keyframes d-v-fall { 0% { opacity: 0; transform: translateY(-6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(34px); } }
+@keyframes d-v-flicker { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(.88, 1.14); } }
+@keyframes d-v-wave { 0%, 100% { transform: skewY(-6deg); } 50% { transform: skewY(6deg); } }
+@keyframes d-v-spinz { to { transform: rotate(360deg); } }
+@keyframes d-v-glitch { 0%, 100% { transform: translateX(0); opacity: .65; } 25% { transform: translateX(-14px); } 50% { transform: translateX(10px); opacity: .2; } 75% { transform: translateX(-6px); } }
+@keyframes d-v-pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+@keyframes d-v-sandflip { 0%, 40% { transform: rotate(0); } 60%, 100% { transform: rotate(180deg); } }
+.denti .d-hat, .denti .d-mask { transform-origin: 200px 150px; }
+.denti .d-hourglass { transform-origin: 200px 12px; } .denti .d-check, .denti .d-warn, .denti .d-lock, .denti .d-shield { transform-origin: 336px 46px; } .denti .d-chart { transform-origin: 336px 50px; }
+.denti[data-state="grateful"] .d-eye-open { opacity: 0; } .denti[data-state="grateful"] .d-eye-happy { opacity: 1; }
+.denti[data-state="grateful"] .d-hearts { opacity: 1; }
+.denti[data-state="grateful"] .d-cheeks { opacity: 1; }
+.denti[data-state="grateful"] .d-tears { opacity: 1; }
+.denti[data-state="grateful"] .d-arm-l { animation: d-v-arm 2.60s ease-in-out infinite; --a0: -75deg; --a1: -80deg; }
+.denti[data-state="grateful"] .d-arm-r { animation: d-v-arm 2.60s ease-in-out infinite; --a0: 75deg; --a1: 80deg; }
+.denti[data-state="grateful"] .d-root { animation: d-v-body 2.60s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="grateful"] .d-head { animation: d-v-head 2.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="proud"] .d-eye-open { opacity: 0; } .denti[data-state="proud"] .d-eye-happy { opacity: 1; }
+.denti[data-state="proud"] .d-mouth-smile { opacity: 0; } .denti[data-state="proud"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="proud"] .d-sparks { opacity: 1; }
+.denti[data-state="proud"] .d-stars { opacity: 1; }
+.denti[data-state="proud"] .d-arm-l { animation: d-v-arm 1.80s ease-in-out infinite; --a0: 30deg; --a1: 36deg; }
+.denti[data-state="proud"] .d-arm-r { animation: d-v-arm 1.80s ease-in-out infinite; --a0: -30deg; --a1: -36deg; }
+.denti[data-state="proud"] .d-root { animation: d-v-body 1.80s ease-in-out infinite; --y0: 0px; --y1: -6px; --s0: 1.03; --s1: 1.06; }
+.denti[data-state="proud"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: -3deg; --hr1: -1deg; }
+.denti[data-state="worried"] .d-mouth-smile { opacity: 0; } .denti[data-state="worried"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="worried"] .d-brows-w { opacity: 1; }
+.denti[data-state="worried"] .d-sweat { opacity: 1; }
+.denti[data-state="worried"] .d-arm-l { animation: d-v-arm 0.40s ease-in-out infinite; --a0: -75deg; --a1: -70deg; }
+.denti[data-state="worried"] .d-arm-r { animation: d-v-arm 0.40s ease-in-out infinite; --a0: 75deg; --a1: 70deg; }
+.denti[data-state="worried"] .d-root { animation: d-v-body 0.40s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="worried"] .d-head { animation: d-v-head 1.20s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="nervous"] .d-eye-open { opacity: 0; } .denti[data-state="nervous"] .d-eye-wow { opacity: 1; }
+.denti[data-state="nervous"] .d-mouth-smile { opacity: 0; } .denti[data-state="nervous"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="nervous"] .d-brows-w { opacity: 1; }
+.denti[data-state="nervous"] .d-sweat { opacity: 1; }
+.denti[data-state="nervous"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -70deg; --a1: -60deg; }
+.denti[data-state="nervous"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 70deg; --a1: 60deg; }
+.denti[data-state="nervous"] .d-root { animation: d-v-body 0.14s ease-in-out infinite; --x0: -3px; --x1: 3px; }
+.denti[data-state="nervous"] .d-head { animation: d-v-head 0.20s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="blush"] .d-eye-open { opacity: 0; } .denti[data-state="blush"] .d-eye-happy { opacity: 1; }
+.denti[data-state="blush"] .d-cheeks { opacity: 1; }
+.denti[data-state="blush"] .d-hearts { opacity: 1; }
+.denti[data-state="blush"] .d-arm-l { animation: d-v-arm 2.20s ease-in-out infinite; --a0: -75deg; --a1: -70deg; }
+.denti[data-state="blush"] .d-root { animation: d-v-body 2.20s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="blush"] .d-head { animation: d-v-head 2.20s ease-in-out infinite; --hr0: 5deg; --hr1: 8deg; }
+.denti[data-state="blush"] .d-eyes { transform: translate(-14px, 0); transition: transform .4s ease; }
+.denti[data-state="sulk"] .d-mouth-smile { opacity: 0; } .denti[data-state="sulk"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="sulk"] .d-cheeks { opacity: 1; }
+.denti[data-state="sulk"] .d-arm-l { animation: d-v-arm 2.60s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="sulk"] .d-arm-r { animation: d-v-arm 2.60s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="sulk"] .d-root { animation: d-v-body 2.60s ease-in-out infinite; --x0: 10px; --x1: 14px; --r0: 5deg; --r1: 7deg; }
+.denti[data-state="sulk"] .d-head { animation: d-v-head 2.60s ease-in-out infinite; --hr0: 6deg; --hr1: 8deg; }
+.denti[data-state="sulk"] .d-eyes { transform: translate(18px, 2px); transition: transform .4s ease; }
+.denti[data-state="hopeful"] .d-eye-open { opacity: 0; } .denti[data-state="hopeful"] .d-eye-star { opacity: 1; }
+.denti[data-state="hopeful"] .d-sparks { opacity: 1; }
+.denti[data-state="hopeful"] .d-stars { opacity: 1; }
+.denti[data-state="hopeful"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -112deg; --a1: -116deg; }
+.denti[data-state="hopeful"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 112deg; --a1: 116deg; }
+.denti[data-state="hopeful"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -8px; }
+.denti[data-state="hopeful"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -4deg; --hr1: 0deg; --hy0: -4px; --hy1: -6px; }
+.denti[data-state="relieved"] .d-eye-open { opacity: 0; } .denti[data-state="relieved"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="relieved"] .d-sweat { opacity: 1; }
+.denti[data-state="relieved"] .d-sparks { opacity: 1; }
+.denti[data-state="relieved"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 6deg; --a1: 10deg; }
+.denti[data-state="relieved"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -6deg; --a1: -10deg; }
+.denti[data-state="relieved"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: 9px; --s0: 1.02; --s1: 0.97; }
+.denti[data-state="relieved"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 0deg; --hr1: -4deg; --hy0: 0px; --hy1: 6px; }
+.denti[data-state="disappointed"] .d-mouth-smile { opacity: 0; } .denti[data-state="disappointed"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="disappointed"] .d-lids { opacity: 1; }
+.denti[data-state="disappointed"] .d-arm-l { animation: d-v-arm 2.80s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="disappointed"] .d-arm-r { animation: d-v-arm 2.80s ease-in-out infinite; --a0: -10deg; --a1: -14deg; }
+.denti[data-state="disappointed"] .d-root { animation: d-v-body 2.80s ease-in-out infinite; --y0: 8px; --y1: 12px; --s0: 0.98; --s1: 0.97; }
+.denti[data-state="disappointed"] .d-head { animation: d-v-head 2.80s ease-in-out infinite; --hr0: -3deg; --hr1: -5deg; --hy0: 10px; --hy1: 14px; }
+.denti[data-state="gloomy"] .d-mouth-smile { opacity: 0; } .denti[data-state="gloomy"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="gloomy"] .d-lids { opacity: 1; }
+.denti[data-state="gloomy"] .d-cloud { opacity: 1; }
+.denti[data-state="gloomy"] .d-arm-l { animation: d-v-arm 3.20s ease-in-out infinite; --a0: 8deg; --a1: 12deg; }
+.denti[data-state="gloomy"] .d-arm-r { animation: d-v-arm 3.20s ease-in-out infinite; --a0: -8deg; --a1: -12deg; }
+.denti[data-state="gloomy"] .d-root { animation: d-v-body 3.20s ease-in-out infinite; --y0: 6px; --y1: 10px; }
+.denti[data-state="gloomy"] .d-head { animation: d-v-head 3.20s ease-in-out infinite; --hr0: -2deg; --hr1: -4deg; --hy0: 8px; --hy1: 12px; }
+.denti[data-state="cozy"] .d-eye-open { opacity: 0; } .denti[data-state="cozy"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="cozy"] .d-hearts { opacity: 1; }
+.denti[data-state="cozy"] .d-cheeks { opacity: 1; }
+.denti[data-state="cozy"] .d-arm-l { animation: d-v-arm 3.40s ease-in-out infinite; --a0: -75deg; --a1: -78deg; }
+.denti[data-state="cozy"] .d-arm-r { animation: d-v-arm 3.40s ease-in-out infinite; --a0: 75deg; --a1: 78deg; }
+.denti[data-state="cozy"] .d-root { animation: d-v-body 3.40s ease-in-out infinite; --y0: 0px; --y1: -8px; }
+.denti[data-state="cozy"] .d-head { animation: d-v-head 3.40s ease-in-out infinite; --hr0: -4deg; --hr1: 4deg; }
+.denti[data-state="shock"] .d-eye-open { opacity: 0; } .denti[data-state="shock"] .d-eye-wow { opacity: 1; }
+.denti[data-state="shock"] .d-mouth-smile { opacity: 0; } .denti[data-state="shock"] .d-mouth-o { opacity: 1; }
+.denti[data-state="shock"] .d-exclaim { opacity: 1; }
+.denti[data-state="shock"] .d-sweat { opacity: 1; }
+.denti[data-state="shock"] .d-arm-l { animation: d-v-arm 0.50s ease-in-out infinite; --a0: 150deg; --a1: 160deg; }
+.denti[data-state="shock"] .d-arm-r { animation: d-v-arm 0.50s ease-in-out infinite; --a0: -150deg; --a1: -160deg; }
+.denti[data-state="shock"] .d-root { animation: d-v-body 0.50s ease-in-out infinite; --y0: -18px; --y1: -24px; --s0: 1.05; --s1: 1.07; }
+.denti[data-state="shock"] .d-head { animation: d-v-head 0.30s ease-in-out infinite; --hr0: -4deg; --hr1: 4deg; --hy0: -6px; --hy1: -8px; }
+.denti[data-state="shock"] .d-mouth-o { transform: scale(1.7); transform-box: fill-box; transform-origin: center; }
+.denti[data-state="giggle"] .d-eye-open { opacity: 0; } .denti[data-state="giggle"] .d-eye-happy { opacity: 1; }
+.denti[data-state="giggle"] .d-mouth-smile { opacity: 0; } .denti[data-state="giggle"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="giggle"] .d-cheeks { opacity: 1; }
+.denti[data-state="giggle"] .d-haha { opacity: 1; }
+.denti[data-state="giggle"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 30deg; --a1: 20deg; }
+.denti[data-state="giggle"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -30deg; --a1: -20deg; }
+.denti[data-state="giggle"] .d-root { animation: d-v-body 0.22s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="giggle"] .d-head { animation: d-v-head 0.22s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="smug"] .d-lids { opacity: 1; }
+.denti[data-state="smug"] .d-sparks { opacity: 1; }
+.denti[data-state="smug"] .d-arm-l { animation: d-v-arm 2.80s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="smug"] .d-arm-r { animation: d-v-arm 2.80s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="smug"] .d-root { animation: d-v-body 2.80s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="smug"] .d-head { animation: d-v-head 2.80s ease-in-out infinite; --hr0: -7deg; --hr1: -4deg; --hy0: -4px; --hy1: -6px; }
+.denti[data-state="curious"] .d-eye-open { opacity: 0; } .denti[data-state="curious"] .d-eye-wow { opacity: 1; }
+.denti[data-state="curious"] .d-mouth-smile { opacity: 0; } .denti[data-state="curious"] .d-mouth-o { opacity: 1; }
+.denti[data-state="curious"] .d-quest { opacity: 1; }
+.denti[data-state="curious"] .d-arm-l { animation: d-v-arm 2.20s ease-in-out infinite; --a0: 20deg; --a1: 20deg; }
+.denti[data-state="curious"] .d-arm-r { animation: d-v-arm 2.20s ease-in-out infinite; --a0: -20deg; --a1: -26deg; }
+.denti[data-state="curious"] .d-root { animation: d-v-body 2.20s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="curious"] .d-head { animation: d-v-head 2.20s ease-in-out infinite; --hr0: -10deg; --hr1: 10deg; }
+.denti[data-state="curious"] .d-mouth-o { transform: scale(.6); transform-box: fill-box; transform-origin: center; }
+.denti[data-state="suspicious"] .d-mouth-smile { opacity: 0; } .denti[data-state="suspicious"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="suspicious"] .d-lids { opacity: 1; }
+.denti[data-state="suspicious"] .d-sweat { opacity: 1; }
+.denti[data-state="suspicious"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="suspicious"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="suspicious"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="suspicious"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 4deg; --hr1: 6deg; }
+.denti[data-state="suspicious"] .d-eyes { transform: translate(-14px, 0); transition: transform .4s ease; }
+.denti[data-state="determined"] .d-mouth-smile { opacity: 0; } .denti[data-state="determined"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="determined"] .d-brows { opacity: 1; }
+.denti[data-state="determined"] .d-aura { opacity: 1; }
+.denti[data-state="determined"] .d-arm-l { animation: d-v-arm 0.70s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="determined"] .d-arm-r { animation: d-v-arm 0.70s ease-in-out infinite; --a0: -14deg; --a1: -18deg; }
+.denti[data-state="determined"] .d-root { animation: d-v-body 0.70s ease-in-out infinite; --s0: 1.03; --s1: 1.07; }
+.denti[data-state="determined"] .d-head { animation: d-v-head 0.70s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="focused"] .d-mouth-smile { opacity: 0; } .denti[data-state="focused"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="focused"] .d-scan { opacity: 1; }
+.denti[data-state="focused"] .d-sparks { opacity: 1; }
+.denti[data-state="focused"] .d-arm-l { animation: d-v-arm 3.00s ease-in-out infinite; --a0: -60deg; --a1: -64deg; }
+.denti[data-state="focused"] .d-arm-r { animation: d-v-arm 3.00s ease-in-out infinite; --a0: 60deg; --a1: 64deg; }
+.denti[data-state="focused"] .d-root { animation: d-v-body 3.00s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="focused"] .d-head { animation: d-v-head 3.00s ease-in-out infinite; --hr0: 3deg; --hr1: 5deg; }
+.denti[data-state="overwhelmed"] .d-eye-open { opacity: 0; } .denti[data-state="overwhelmed"] .d-eye-wow { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-mouth-smile { opacity: 0; } .denti[data-state="overwhelmed"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-sweat { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-quest { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-puffs { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 150deg; --a1: 120deg; }
+.denti[data-state="overwhelmed"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -150deg; --a1: -120deg; }
+.denti[data-state="overwhelmed"] .d-root { animation: d-v-body 0.30s ease-in-out infinite; --x0: -4px; --x1: 4px; --y0: 0px; --y1: -6px; }
+.denti[data-state="overwhelmed"] .d-head { animation: d-v-head 0.30s ease-in-out infinite; --hr0: -6deg; --hr1: 6deg; }
+.denti[data-state="dreamy"] .d-eye-open { opacity: 0; } .denti[data-state="dreamy"] .d-eye-happy { opacity: 1; }
+.denti[data-state="dreamy"] .d-stars { opacity: 1; }
+.denti[data-state="dreamy"] .d-hearts { opacity: 1; }
+.denti[data-state="dreamy"] .d-arm-l { animation: d-v-arm 3.60s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="dreamy"] .d-arm-r { animation: d-v-arm 3.60s ease-in-out infinite; --a0: -14deg; --a1: -18deg; }
+.denti[data-state="dreamy"] .d-root { animation: d-v-body 3.60s ease-in-out infinite; --y0: -4px; --y1: -16px; }
+.denti[data-state="dreamy"] .d-head { animation: d-v-head 3.60s ease-in-out infinite; --hr0: 4deg; --hr1: 8deg; --hy0: -4px; --hy1: -10px; }
+.denti[data-state="dreamy"] .d-eyes { transform: translate(0, -8px); transition: transform .4s ease; }
+.denti[data-state="yawn"] .d-eye-open { opacity: 0; } .denti[data-state="yawn"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="yawn"] .d-mouth-smile { opacity: 0; } .denti[data-state="yawn"] .d-mouth-o { opacity: 1; }
+.denti[data-state="yawn"] .d-zzz { opacity: 1; }
+.denti[data-state="yawn"] .d-arm-l { animation: d-v-arm 2.80s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="yawn"] .d-arm-r { animation: d-v-arm 2.80s ease-in-out infinite; --a0: -10deg; --a1: -14deg; }
+.denti[data-state="yawn"] .d-root { animation: d-v-body 2.80s ease-in-out infinite; --y0: 0px; --y1: 6px; }
+.denti[data-state="yawn"] .d-head { animation: d-v-head 2.80s ease-in-out infinite; --hr0: 0deg; --hr1: -9deg; --hy0: 0px; --hy1: -8px; }
+.denti[data-state="yawn"] .d-mouth-o { animation: d-yawn 2.8s ease-in-out infinite; }
+.denti[data-state="tired"] .d-mouth-smile { opacity: 0; } .denti[data-state="tired"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="tired"] .d-lids { opacity: 1; }
+.denti[data-state="tired"] .d-zzz { opacity: 1; }
+.denti[data-state="tired"] .d-sweat { opacity: 1; }
+.denti[data-state="tired"] .d-arm-l { animation: d-v-arm 3.20s ease-in-out infinite; --a0: 8deg; --a1: 10deg; }
+.denti[data-state="tired"] .d-arm-r { animation: d-v-arm 3.20s ease-in-out infinite; --a0: -8deg; --a1: -10deg; }
+.denti[data-state="tired"] .d-root { animation: d-v-body 3.20s ease-in-out infinite; --y0: 6px; --y1: 10px; --s0: 0.99; --s1: 0.97; }
+.denti[data-state="tired"] .d-head { animation: d-v-head 3.20s ease-in-out infinite; --hr0: -3deg; --hr1: -6deg; --hy0: 8px; --hy1: 12px; }
+.denti[data-state="sick"] .d-lids { opacity: 1; }
+.denti[data-state="sick"] .d-mask { opacity: 1; }
+.denti[data-state="sick"] .d-thermo { opacity: 1; }
+.denti[data-state="sick"] .d-sweat { opacity: 1; }
+.denti[data-state="sick"] .d-arm-l { animation: d-v-arm 1.20s ease-in-out infinite; --a0: -75deg; --a1: -72deg; }
+.denti[data-state="sick"] .d-arm-r { animation: d-v-arm 1.20s ease-in-out infinite; --a0: 6deg; --a1: 8deg; }
+.denti[data-state="sick"] .d-root { animation: d-v-body 1.20s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="sick"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: -5deg; --hr1: 5deg; --hy0: 4px; --hy1: 6px; }
+.denti[data-state="freezing"] .d-mouth-smile { opacity: 0; } .denti[data-state="freezing"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="freezing"] .d-snow { opacity: 1; }
+.denti[data-state="freezing"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -75deg; --a1: -72deg; }
+.denti[data-state="freezing"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 75deg; --a1: 72deg; }
+.denti[data-state="freezing"] .d-root { animation: d-v-body 0.10s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="freezing"] .d-head { animation: d-v-head 0.10s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="hot"] .d-eye-open { opacity: 0; } .denti[data-state="hot"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="hot"] .d-mouth-smile { opacity: 0; } .denti[data-state="hot"] .d-mouth-o { opacity: 1; }
+.denti[data-state="hot"] .d-sun { opacity: 1; }
+.denti[data-state="hot"] .d-sweat { opacity: 1; }
+.denti[data-state="hot"] .d-steam { opacity: 1; }
+.denti[data-state="hot"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 22deg; }
+.denti[data-state="hot"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -14deg; --a1: -22deg; }
+.denti[data-state="hot"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="hot"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="hot"] .d-steam { transform: translate(-240px, 0); }
+.denti[data-state="hungry"] .d-eye-open { opacity: 0; } .denti[data-state="hungry"] .d-eye-wow { opacity: 1; }
+.denti[data-state="hungry"] .d-mouth-smile { opacity: 0; } .denti[data-state="hungry"] .d-mouth-talk { opacity: 1; }
+.denti[data-state="hungry"] .d-growl { opacity: 1; }
+.denti[data-state="hungry"] .d-arm-l { animation: d-v-arm 0.80s ease-in-out infinite; --a0: -75deg; --a1: -80deg; }
+.denti[data-state="hungry"] .d-arm-r { animation: d-v-arm 0.80s ease-in-out infinite; --a0: 75deg; --a1: 80deg; }
+.denti[data-state="hungry"] .d-root { animation: d-v-body 0.80s ease-in-out infinite; --y0: 0px; --y1: 4px; --s0: 1; --s1: 1.04; }
+.denti[data-state="hungry"] .d-head { animation: d-v-head 0.80s ease-in-out infinite; --hr0: 0deg; --hr1: 4deg; }
+.denti[data-state="welcome"] .d-eye-open { opacity: 0; } .denti[data-state="welcome"] .d-eye-happy { opacity: 1; }
+.denti[data-state="welcome"] .d-sparks { opacity: 1; }
+.denti[data-state="welcome"] .d-hearts { opacity: 1; }
+.denti[data-state="welcome"] .d-arm-l { animation: d-v-arm 1.80s ease-in-out infinite; --a0: 88deg; --a1: 96deg; }
+.denti[data-state="welcome"] .d-arm-r { animation: d-v-arm 1.80s ease-in-out infinite; --a0: -88deg; --a1: -96deg; }
+.denti[data-state="welcome"] .d-root { animation: d-v-body 1.80s ease-in-out infinite; --y0: 0px; --y1: -8px; }
+.denti[data-state="welcome"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="goodbye"] .d-eye-open { opacity: 0; } .denti[data-state="goodbye"] .d-eye-happy { opacity: 1; }
+.denti[data-state="goodbye"] .d-tears { opacity: 1; }
+.denti[data-state="goodbye"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="goodbye"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -128deg; --a1: -150deg; }
+.denti[data-state="goodbye"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --r0: -2deg; --r1: 2deg; }
+.denti[data-state="goodbye"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: 3deg; --hr1: -3deg; }
+.denti[data-state="thumbsup"] .d-eye-open { opacity: 0; } .denti[data-state="thumbsup"] .d-eye-happy { opacity: 1; }
+.denti[data-state="thumbsup"] .d-mouth-smile { opacity: 0; } .denti[data-state="thumbsup"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="thumbsup"] .d-thumb { opacity: 1; }
+.denti[data-state="thumbsup"] .d-sparks { opacity: 1; }
+.denti[data-state="thumbsup"] .d-arm-l { animation: d-v-arm 1.40s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="thumbsup"] .d-arm-r { animation: d-v-arm 1.40s ease-in-out infinite; --a0: -128deg; --a1: -122deg; }
+.denti[data-state="thumbsup"] .d-root { animation: d-v-body 1.40s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="thumbsup"] .d-head { animation: d-v-head 1.40s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="heart_hands"] .d-eye-open { opacity: 0; } .denti[data-state="heart_hands"] .d-eye-heart { opacity: 1; }
+.denti[data-state="heart_hands"] .d-heartbig { opacity: 1; }
+.denti[data-state="heart_hands"] .d-cheeks { opacity: 1; }
+.denti[data-state="heart_hands"] .d-arm-l { animation: d-v-arm 2.20s ease-in-out infinite; --a0: 150deg; --a1: 156deg; }
+.denti[data-state="heart_hands"] .d-arm-r { animation: d-v-arm 2.20s ease-in-out infinite; --a0: -150deg; --a1: -156deg; }
+.denti[data-state="heart_hands"] .d-root { animation: d-v-body 2.20s ease-in-out infinite; --y0: -4px; --y1: -12px; }
+.denti[data-state="heart_hands"] .d-head { animation: d-v-head 2.20s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="pray"] .d-eye-open { opacity: 0; } .denti[data-state="pray"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="pray"] .d-pray { opacity: 1; }
+.denti[data-state="pray"] .d-sparks { opacity: 1; }
+.denti[data-state="pray"] .d-arm-l { animation: d-v-arm 3.00s ease-in-out infinite; --a0: -112deg; --a1: -112deg; }
+.denti[data-state="pray"] .d-arm-r { animation: d-v-arm 3.00s ease-in-out infinite; --a0: 112deg; --a1: 112deg; }
+.denti[data-state="pray"] .d-root { animation: d-v-body 3.00s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="pray"] .d-head { animation: d-v-head 3.00s ease-in-out infinite; --hr0: 0deg; --hr1: -3deg; --hy0: 4px; --hy1: 6px; }
+.denti[data-state="whisper"] .d-mouth-smile { opacity: 0; } .denti[data-state="whisper"] .d-mouth-o { opacity: 1; }
+.denti[data-state="whisper"] .d-whisper { opacity: 1; }
+.denti[data-state="whisper"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="whisper"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="whisper"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="whisper"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: -7deg; --hr1: -5deg; }
+.denti[data-state="whisper"] .d-eyes { transform: translate(14px, 0); transition: transform .4s ease; } .denti[data-state="whisper"] .d-mouth-o { transform: scale(.55); transform-box: fill-box; transform-origin: center; }
+.denti[data-state="shush"] .d-mouth-smile { opacity: 0; } .denti[data-state="shush"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="shush"] .d-finger { opacity: 1; }
+.denti[data-state="shush"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="shush"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="shush"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -3px; }
+.denti[data-state="shush"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 0deg; --hr1: 2deg; }
+.denti[data-state="listen"] .d-earhand { opacity: 1; }
+.denti[data-state="listen"] .d-waves { opacity: 1; }
+.denti[data-state="listen"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="listen"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="listen"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -3px; }
+.denti[data-state="listen"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 8deg; --hr1: 11deg; }
+.denti[data-state="listen"] .d-eyes { transform: translate(10px, 0); transition: transform .4s ease; }
+.denti[data-state="slowclap"] .d-mouth-smile { opacity: 0; } .denti[data-state="slowclap"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="slowclap"] .d-lids { opacity: 1; }
+.denti[data-state="slowclap"] .d-arm-l { animation: d-v-arm 1.80s ease-in-out infinite; --a0: -70deg; --a1: -82deg; }
+.denti[data-state="slowclap"] .d-arm-r { animation: d-v-arm 1.80s ease-in-out infinite; --a0: 70deg; --a1: 82deg; }
+.denti[data-state="slowclap"] .d-root { animation: d-v-body 1.80s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="slowclap"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: 0deg; --hr1: -2deg; }
+.denti[data-state="facepalm"] .d-mouth-smile { opacity: 0; } .denti[data-state="facepalm"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="facepalm"] .d-facepalm { opacity: 1; }
+.denti[data-state="facepalm"] .d-sweat { opacity: 1; }
+.denti[data-state="facepalm"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="facepalm"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -10deg; --a1: -14deg; }
+.denti[data-state="facepalm"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 6px; --y1: 9px; }
+.denti[data-state="facepalm"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: -4deg; --hr1: -7deg; --hy0: 8px; --hy1: 12px; }
+.denti[data-state="party"] .d-eye-open { opacity: 0; } .denti[data-state="party"] .d-eye-happy { opacity: 1; }
+.denti[data-state="party"] .d-mouth-smile { opacity: 0; } .denti[data-state="party"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="party"] .d-hat { opacity: 1; }
+.denti[data-state="party"] .d-stars { opacity: 1; }
+.denti[data-state="party"] .d-notes { opacity: 1; }
+.denti[data-state="party"] .d-sparks { opacity: 1; }
+.denti[data-state="party"] .d-arm-l { animation: d-v-arm 0.80s ease-in-out infinite; --a0: 150deg; --a1: 160deg; }
+.denti[data-state="party"] .d-arm-r { animation: d-v-arm 0.80s ease-in-out infinite; --a0: -150deg; --a1: -160deg; }
+.denti[data-state="party"] .d-root { animation: d-v-body 0.80s ease-in-out infinite; --y0: 0px; --y1: -22px; }
+.denti[data-state="party"] .d-head { animation: d-v-head 0.80s ease-in-out infinite; --hr0: -4deg; --hr1: 4deg; }
+.denti[data-state="birthday"] .d-eye-open { opacity: 0; } .denti[data-state="birthday"] .d-eye-happy { opacity: 1; }
+.denti[data-state="birthday"] .d-hat { opacity: 1; }
+.denti[data-state="birthday"] .d-cake { opacity: 1; }
+.denti[data-state="birthday"] .d-stars { opacity: 1; }
+.denti[data-state="birthday"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -72deg; --a1: -76deg; }
+.denti[data-state="birthday"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 72deg; --a1: 76deg; }
+.denti[data-state="birthday"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="birthday"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="gift"] .d-eye-open { opacity: 0; } .denti[data-state="gift"] .d-eye-happy { opacity: 1; }
+.denti[data-state="gift"] .d-gift { opacity: 1; }
+.denti[data-state="gift"] .d-hearts { opacity: 1; }
+.denti[data-state="gift"] .d-sparks { opacity: 1; }
+.denti[data-state="gift"] .d-arm-l { animation: d-v-arm 1.40s ease-in-out infinite; --a0: -72deg; --a1: -76deg; }
+.denti[data-state="gift"] .d-arm-r { animation: d-v-arm 1.40s ease-in-out infinite; --a0: 72deg; --a1: 76deg; }
+.denti[data-state="gift"] .d-root { animation: d-v-body 1.40s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="gift"] .d-head { animation: d-v-head 1.40s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="flag"] .d-eye-open { opacity: 0; } .denti[data-state="flag"] .d-eye-happy { opacity: 1; }
+.denti[data-state="flag"] .d-mouth-smile { opacity: 0; } .denti[data-state="flag"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="flag"] .d-flag { opacity: 1; }
+.denti[data-state="flag"] .d-stars { opacity: 1; }
+.denti[data-state="flag"] .d-arm-l { animation: d-v-arm 1.40s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="flag"] .d-arm-r { animation: d-v-arm 1.40s ease-in-out infinite; --a0: -128deg; --a1: -134deg; }
+.denti[data-state="flag"] .d-root { animation: d-v-body 1.40s ease-in-out infinite; --r0: -2deg; --r1: 2deg; }
+.denti[data-state="flag"] .d-head { animation: d-v-head 1.40s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="sing"] .d-eye-open { opacity: 0; } .denti[data-state="sing"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="sing"] .d-mouth-smile { opacity: 0; } .denti[data-state="sing"] .d-mouth-talk { opacity: 1; }
+.denti[data-state="sing"] .d-mic { opacity: 1; }
+.denti[data-state="sing"] .d-notes { opacity: 1; }
+.denti[data-state="sing"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="sing"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -128deg; --a1: -132deg; }
+.denti[data-state="sing"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --r0: -3deg; --r1: 3deg; }
+.denti[data-state="sing"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -5deg; --hr1: 5deg; }
+.denti[data-state="loading"] .d-mouth-smile { opacity: 0; } .denti[data-state="loading"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="loading"] .d-spinner { opacity: 1; }
+.denti[data-state="loading"] .d-scan { opacity: 1; }
+.denti[data-state="loading"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="loading"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="loading"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -5px; }
+.denti[data-state="loading"] .d-head { animation: d-v-head 3.00s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="success"] .d-eye-open { opacity: 0; } .denti[data-state="success"] .d-eye-happy { opacity: 1; }
+.denti[data-state="success"] .d-check { opacity: 1; }
+.denti[data-state="success"] .d-sparks { opacity: 1; }
+.denti[data-state="success"] .d-stars { opacity: 1; }
+.denti[data-state="success"] .d-arm-l { animation: d-v-arm 0.70s ease-in-out infinite; --a0: 150deg; --a1: 156deg; }
+.denti[data-state="success"] .d-arm-r { animation: d-v-arm 0.70s ease-in-out infinite; --a0: -150deg; --a1: -156deg; }
+.denti[data-state="success"] .d-root { animation: d-v-body 0.70s ease-in-out infinite; --y0: 0px; --y1: -14px; }
+.denti[data-state="success"] .d-head { animation: d-v-head 0.70s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="warning"] .d-eye-open { opacity: 0; } .denti[data-state="warning"] .d-eye-wow { opacity: 1; }
+.denti[data-state="warning"] .d-mouth-smile { opacity: 0; } .denti[data-state="warning"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="warning"] .d-warn { opacity: 1; }
+.denti[data-state="warning"] .d-exclaim { opacity: 1; }
+.denti[data-state="warning"] .d-sweat { opacity: 1; }
+.denti[data-state="warning"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="warning"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -128deg; --a1: -118deg; }
+.denti[data-state="warning"] .d-root { animation: d-v-body 0.30s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="warning"] .d-head { animation: d-v-head 0.30s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="error"] .d-eye-open { opacity: 0; } .denti[data-state="error"] .d-xeyes { opacity: 1; }
+.denti[data-state="error"] .d-mouth-smile { opacity: 0; } .denti[data-state="error"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="error"] .d-glitch { opacity: 1; }
+.denti[data-state="error"] .d-vein { opacity: 1; }
+.denti[data-state="error"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 60deg; --a1: -40deg; }
+.denti[data-state="error"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -60deg; --a1: 40deg; }
+.denti[data-state="error"] .d-root { animation: d-v-body 0.18s ease-in-out infinite; --x0: -5px; --x1: 6px; --y0: 0px; --y1: -3px; }
+.denti[data-state="error"] .d-head { animation: d-v-head 0.15s ease-in-out infinite; --hr0: -5deg; --hr1: 6deg; }
+.denti[data-state="lock"] .d-mouth-smile { opacity: 0; } .denti[data-state="lock"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="lock"] .d-lock { opacity: 1; }
+.denti[data-state="lock"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="lock"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="lock"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="lock"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 0deg; --hr1: 1deg; }
+.denti[data-state="shield"] .d-shield { opacity: 1; }
+.denti[data-state="shield"] .d-sparks { opacity: 1; }
+.denti[data-state="shield"] .d-arm-l { animation: d-v-arm 2.00s ease-in-out infinite; --a0: -75deg; --a1: -78deg; }
+.denti[data-state="shield"] .d-arm-r { animation: d-v-arm 2.00s ease-in-out infinite; --a0: 75deg; --a1: 78deg; }
+.denti[data-state="shield"] .d-root { animation: d-v-body 2.00s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="shield"] .d-head { animation: d-v-head 2.00s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="hourglass"] .d-mouth-smile { opacity: 0; } .denti[data-state="hourglass"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="hourglass"] .d-hourglass { opacity: 1; }
+.denti[data-state="hourglass"] .d-arm-l { animation: d-v-arm 2.60s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="hourglass"] .d-arm-r { animation: d-v-arm 2.60s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="hourglass"] .d-root { animation: d-v-body 2.60s ease-in-out infinite; --y0: 0px; --y1: -3px; }
+.denti[data-state="hourglass"] .d-head { animation: d-v-head 3.20s ease-in-out infinite; --hr0: 5deg; --hr1: -5deg; }
+.denti[data-state="hourglass"] .d-eyes { transform: translate(0, -6px); transition: transform .4s ease; }
+.denti[data-state="chart"] .d-chart { opacity: 1; }
+.denti[data-state="chart"] .d-sparks { opacity: 1; }
+.denti[data-state="chart"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="chart"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -128deg; --a1: -120deg; }
+.denti[data-state="chart"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -5px; }
+.denti[data-state="chart"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="money"] .d-eye-open { opacity: 0; } .denti[data-state="money"] .d-eye-coin { opacity: 1; }
+.denti[data-state="money"] .d-mouth-smile { opacity: 0; } .denti[data-state="money"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="money"] .d-sparks { opacity: 1; }
+.denti[data-state="money"] .d-stars { opacity: 1; }
+.denti[data-state="money"] .d-arm-l { animation: d-v-arm 0.60s ease-in-out infinite; --a0: -72deg; --a1: -84deg; }
+.denti[data-state="money"] .d-arm-r { animation: d-v-arm 0.60s ease-in-out infinite; --a0: 72deg; --a1: 84deg; }
+.denti[data-state="money"] .d-root { animation: d-v-body 0.60s ease-in-out infinite; --y0: 0px; --y1: -14px; }
+.denti[data-state="money"] .d-head { animation: d-v-head 0.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+/* gerakan khusus bagian */
+.denti[data-state="gloomy"] .d-rain, .denti[data-state="gloomy"] .d-rain-1 { animation: d-v-fall 1.1s ease-in infinite; }
+.denti .d-rain-2 { animation-delay: .35s; } .denti .d-rain-3 { animation-delay: .7s; }
+.denti[data-state="freezing"] .d-flake { animation: d-v-fall 2s linear infinite; }
+.denti .d-flake-2 { animation-delay: .4s; } .denti .d-flake-3 { animation-delay: .8s; } .denti .d-flake-4 { animation-delay: 1.2s; } .denti .d-flake-5 { animation-delay: 1.6s; }
+.denti[data-state="hot"] .d-sun { animation: d-v-pop 1.6s ease-in-out infinite; transform-origin: 340px 40px; }
+.denti[data-state="determined"] .d-flame, .denti[data-state="birthday"] .d-flame { animation: d-v-flicker .5s ease-in-out infinite; }
+.denti[data-state="determined"] .d-brows { opacity: 1; }
+.denti[data-state="flag"] .d-flagcloth { animation: d-v-wave 1s ease-in-out infinite; transform-origin: 2px -68px; }
+.denti[data-state="loading"] .d-spin-arc { animation: d-v-spinz 1s linear infinite; }
+.denti[data-state="hourglass"] .d-hourglass { animation: d-v-sandflip 3.2s ease-in-out infinite; }
+.denti[data-state="success"] .d-check, .denti[data-state="shield"] .d-shield, .denti[data-state="warning"] .d-warn, .denti[data-state="lock"] .d-lock, .denti[data-state="chart"] .d-chart { animation: d-v-pop 1.2s ease-in-out infinite; }
+.denti[data-state="error"] .d-glitch { animation: d-v-glitch .4s steps(2) infinite; }
+.denti[data-state="error"] .d-xeyes { animation: d-v-glitch .5s steps(2) infinite; }
+.denti[data-state="party"] .d-hat { animation: none; }
+.denti[data-state="growl"], .denti[data-state="hungry"] .d-growl { animation: d-v-pop .8s ease-in-out infinite; transform-origin: 200px 456px; }
+.denti[data-state="slowclap"] .d-arm-r { animation-delay: .9s; }
+.denti[data-state="listen"] .d-waves { transform: translateX(-30px); }
+.denti[data-state="sick"] .d-sweat { opacity: 1; }
+.denti[data-state="grateful"] .d-tear-1, .denti[data-state="grateful"] .d-tear-2 { animation-duration: 1.8s; }
+.denti[data-state="goodbye"] .d-tear-3, .denti[data-state="goodbye"] .d-tear-4, .denti[data-state="goodbye"] .d-tear-2, .denti[data-state="grateful"] .d-tear-3, .denti[data-state="grateful"] .d-tear-4 { display: none; }
+.denti[data-state="goodbye"] .d-tear, .denti[data-state="grateful"] .d-tear { animation: d-tear-fall 1.8s ease-in infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .denti, .denti * { animation: none !important; transition: none !important; }
 }

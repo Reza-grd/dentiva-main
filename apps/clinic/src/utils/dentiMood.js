@@ -13,6 +13,7 @@ import * as L from './dentiLines.js';
 import { guideReply, PAGES, TUTORIALS, GUIDE_WORDS } from './dentiGuide.js';
 import { funReply, FUN_WORDS } from './dentiFun.js';
 import { glossaryReply, GLOSSARY_WORDS } from './dentiGlossary.js';
+import { buildEmpatiIndex, empatiReply, crisisReply, empatiEntry, EMPATI_WORDS } from './dentiEmpati.js';
 
 const norm = (t) => (t || '').toLowerCase().replace(/\s+/g, ' ').trim();
 const any = (t, words) => words.some((w) => t.includes(w));
@@ -98,6 +99,7 @@ const KNOWN = new Set([
   ...TUTORIALS.flatMap((tu) => String(tu.re.source).match(/[a-z]{3,}/g) || []),
   'jump', 'badan', 'hpp', 'spin', 'quiz', 'trivia', 'ajarkan', 'tutorial', 'panduan', 'dimana', 'letak', 'lokasi', 'template', 'pengingat',
   'invoice', 'edukasi', 'tunjukkan', 'gerakan', 'atraksi', 'kedip', 'lompat', 'loncat', 'hormat', 'show', 'off',
+  ...EMPATI_WORDS,
 ].forEach((w) => KNOWN.add(w));
 
 /** Calon nama memuat kata data atau kata umum di awal ("nama saya di laporan salah") → bukan nama. */
@@ -475,6 +477,7 @@ const BIZ_SKILLS = [
 ];
 
 /** Intent terakhir yang bisa diminta "lagi" → intent yang diulang. */
+let empatiIdx = null;
 const REPEATABLE = { joke: 'joke', laugh: 'joke', dance: 'dance' };
 const AGAIN = /^(lagi|satu lagi|sekali lagi|yang lain|lainnya|another( one)?|more|terus|lanjutkan)$/;
 
@@ -511,6 +514,9 @@ function talkWith(text, t, {
   recent = [], role = 'admin', offer = null, quiz = null,
 } = {}) {
   if (!t || t.length > 70) return null;
+  // Keadaan darurat batin: selalu dijawab hati-hati, sebelum apa pun.
+  const crisis = crisisReply(t);
+  if (crisis) return crisis;
   const date = dateCalc(t, now);
   if (date) return { intent: 'datecalc', state: 'talk', reply: date };
   const diff = dateDiff(t, now);
@@ -531,6 +537,12 @@ function talkWith(text, t, {
   // Kamus istilah: "apa itu scaling?", "HPP itu apa?" — hanya istilah yang dikenal
   const gloss = glossaryReply(t, { role, seed });
   if (gloss) return gloss;
+  // Empati & suasana (data-driven; GPT memperkaya utils/data/dentiEmpatiData.js). Kalimat bernuansa data klinik tidak pernah masuk sini.
+  if (!anyWord(t, DATA_WORDS)) {
+    empatiIdx = empatiIdx || buildEmpatiIndex((p) => normalizeChat(p));
+    const emp = empatiReply(empatiIdx, t, { seed, recent, name });
+    if (emp) return emp;
+  }
   if (isClearCommand(t)) return { intent: 'clear', state: 'wave', reply: 'Siap, percakapan dibersihkan. Kita mulai dari awal! ✨', action: { type: 'clear' } };
   // Interaksi seru: perintah gerakan, kuis gigi, reaksi emosi
   const fun = funReply(t, { seed, recent, quiz, name, lastIntent });
@@ -680,6 +692,11 @@ export const POKE_REACTIONS = [
   { state: 'spin', line: 'Salto untuk Anda!' },
   { state: 'dance', line: 'Ayo semangat!' },
   { state: 'love', line: 'Terima kasih sudah menyapa!' },
+  { state: 'giggle', line: 'Hihihi, jangan digelitik!' },
+  { state: 'blush', line: 'Aduh, jadi malu…' },
+  { state: 'shock', line: 'Waaah! Kaget saya!' },
+  { state: 'welcome', line: 'Halo, halo! Selamat datang!' },
+  { state: 'thumbsup', line: 'Dua jempol untuk Anda!' },
 ];
 
 /** Sapaan pembuka sesuai waktu. */
@@ -718,10 +735,14 @@ const FOLLOW = {
   fact: ['Lagi dong', 'Kuis gigi'], tip: ['Fakta unik tentang gigi', 'Kuis gigi', 'Tahukah kamu'],
   quiz: ['Petunjuk', 'Nyerah'], quizHint: ['Nyerah'], quizWrong: ['Petunjuk', 'Nyerah'], quizRight: ['Kuis lagi', 'Tahukah kamu'], quizReveal: ['Kuis lagi', 'Tahukah kamu'],
   showoff: ['Lagi dong', 'Kuis gigi'], daily: ['Menu apa saja', 'Kamu bisa apa saja?'], guide: ['Menu apa saja', 'Kuis gigi'], navlist: ['Checklist harian'],
-  coin: ['Lagi dong', 'Lempar dadu'], dice: ['Lagi dong', 'Lempar koin'], rps: ['Batu', 'Gunting', 'Kertas'], rpsPlay: ['Lagi dong', 'Kuis gigi'], choose: ['Lempar koin', 'Kuis gigi'],
+  crisis: [], coin: ['Lagi dong', 'Lempar dadu'], dice: ['Lagi dong', 'Lempar koin'], rps: ['Batu', 'Gunting', 'Kertas'], rpsPlay: ['Lagi dong', 'Kuis gigi'], choose: ['Lempar koin', 'Kuis gigi'],
   offerNo: ['Menu apa saja'], navdeny: ['Menu apa saja', 'Checklist harian'], navunknown: ['Menu apa saja'],
 };
 export function followUps(key, exclude = '') {
+  if (String(key).startsWith('empati:')) {
+    const f = empatiEntry(String(key).slice(7))?.follow;
+    return (f && f.length ? f : ['Tahukah kamu', 'Kuis gigi']).filter((q) => norm(q) !== norm(exclude)).slice(0, 3);
+  }
   const dyn = String(key).startsWith('move:') ? ['Lagi dong', 'Semua gerakan', 'Kuis gigi'] : String(key).startsWith('emo:') ? ['Tahukah kamu', 'Kuis gigi', 'Gerakan apa saja'] : null;
   const list = dyn || FOLLOW[key] || FOLLOW['data klinik'];
   return list.filter((q) => norm(q) !== norm(exclude)).slice(0, 3);
