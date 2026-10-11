@@ -20,11 +20,51 @@ set_() { # set_ NAMA NILAI — tulis sebagai 'nilai' (literal, tanpa interpolasi
   tmp=$(mktemp); grep -v "^$k=" "$F" > "$tmp" || true
   printf "%s='%s'\n" "$k" "$v" >> "$tmp"; mv "$tmp" "$F"; chmod 600 "$F"
 }
+nilai() { grep -m1 "^$1=" "$F" | cut -d= -f2- | sed "s/^'//; s/'$//"; }
+
+# cek NAMA NILAI — uji key langsung ke layanannya (key dikirim lewat header dari stdin, tidak
+# masuk daftar proses). Cetak keterangan; kode keluar 1 = ditolak.
+cek() {
+  local k="$1" v="$2" kode base
+  case "$k" in
+    GEMINI_API_KEY)
+      kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -H @<(printf 'x-goog-api-key: %s\n' "$v") \
+             "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1") || kode=000
+      [ "$kode" = 200 ] && { echo "diterima Google"; return 0; }
+      echo "ditolak Google (HTTP $kode)"; return 1 ;;
+    MIDTRANS_SERVER_KEY)
+      [ "$(nilai MIDTRANS_ENVIRONMENT)" = production ] && base=https://api.midtrans.com || base=https://api.sandbox.midtrans.com
+      kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' \
+             -H @<(printf 'Accept: application/json\nAuthorization: Basic %s\n' "$(printf '%s:' "$v" | base64 -w0)") \
+             "$base/v2/dentiva-cek-kunci/status") || kode=000
+      [ "$kode" = 401 ] || [ "$kode" = 000 ] && { echo "ditolak Midtrans $(nilai MIDTRANS_ENVIRONMENT) (HTTP $kode)"; return 1; }
+      echo "diterima Midtrans $(nilai MIDTRANS_ENVIRONMENT)"; return 0 ;;
+    WHAPI_TOKEN)
+      kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -H @<(printf 'Authorization: Bearer %s\n' "$v") \
+             "https://gate.whapi.cloud/health") || kode=000
+      [ "$kode" = 200 ] && { echo "diterima Whapi"; return 0; }
+      echo "ditolak Whapi (HTTP $kode)"; return 1 ;;
+  esac
+  return 0
+}
+
 rahasia() { # rahasia NAMA "keterangan"
-  local v status; ada "$1" && status="sudah ada — Enter untuk tetap" || status="kosong — Enter untuk lewati"
-  printf '\n\033[1m%s\033[0m  (%s)\n  %s\n  Ketik/tempel (tidak tampil): ' "$1" "$status" "$2"
-  read -rs v; echo
-  if [ -n "$v" ]; then set_ "$1" "$v"; printf '  ✓ disimpan (%s karakter)\n' "${#v}"; fi
+  local k="$1" v status hasil
+  while true; do
+    ada "$k" && status="sudah ada — Enter untuk tetap" || status="kosong — Enter untuk lewati"
+    printf '\n\033[1m%s\033[0m  (%s)\n  %s\n  Ketik/tempel (tidak tampil): ' "$k" "$status" "$2"
+    read -rs v; echo
+    v="${v#"${v%%[![:space:]]*}"}"; v="${v%"${v##*[![:space:]]}"}"   # buang spasi di awal/akhir
+    [ -n "$v" ] || return 0
+    if [[ $v =~ [[:space:]] ]]; then
+      printf '  ✗ ada spasi di tengah (%s karakter) — sepertinya yang tertempel bukan key saja. Coba lagi.\n' "${#v}"
+      continue
+    fi
+    if hasil=$(cek "$k" "$v"); then
+      set_ "$k" "$v"; printf '  ✓ disimpan (%s karakter)%s\n' "${#v}" "${hasil:+ — $hasil}"; return 0
+    fi
+    printf '  ✗ %s — tidak disimpan. Tempel lagi, atau Enter untuk lewati.\n' "$hasil"
+  done
 }
 biasa() { # biasa NAMA "keterangan" bawaan — nilai tidak rahasia, boleh tampil
   local v lama; lama=$(grep "^$1=" "$F" | head -1 | cut -d= -f2- | sed "s/^'//; s/'$//") || true
