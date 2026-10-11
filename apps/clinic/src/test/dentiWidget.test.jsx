@@ -44,6 +44,14 @@ describe('Denti Pemandu', () => {
     expect(screen.getByRole('button', { name: 'Buka jadwal hari ini' })).toBeInTheDocument();
   });
 
+  it('saran awal menyesuaikan halaman yang sedang dibuka', () => {
+    auth.profile = { role: 'resepsionis', full_name: 'Sinta' };
+    wrap('/resepsionis/pembayaran');
+    openPanel();
+    expect(screen.getByRole('button', { name: 'Ajarkan cara menerima pembayaran' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Checklist harian' })).toBeInTheDocument();
+  });
+
   it('dokter: tombol saran mengajarkan cara, lalu tombol "Buka" pindah halaman', async () => {
     auth.profile = { role: 'dokter', full_name: 'Alya Putri' };
     wrap('/dokter');

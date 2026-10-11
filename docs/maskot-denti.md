@@ -285,6 +285,10 @@ Asisten AI (analisis data) hanya untuk admin, tetapi otak lokal Denti berguna un
 - Tersembunyi di halaman Asisten AI (sudah ada Denti di sana); `Esc` menutup; percakapan disimpan di `sessionStorage` (per tab, maks. 30 pesan).
 - Konteks percakapan (tawaran, kuis, "lagi") dihitung `utils/dentiChatContext.js` dari daftar pesan.
 - Di halaman Asisten AI, saat dibiarkan Denti sesekali menampilkan **ajakan singkat** di gelembung (`IDLE_NUDGES`: kuis, fakta, atraksi, checklist, kamus).
+- **Saran per halaman** (`utils/dentiPageHints.js`): saat panel dibuka di halaman kasir, jadwal, booking, recall, rekam medis, pengaturan, biaya & modal, dst.,
+  tombol saran awal menyesuaikan ("Ajarkan cara menerima pembayaran" di kasir). Setiap saran dijaga `dentiPageHints.test.js` agar selalu dipahami Denti.
+- **Permainan kecil** (tanpa AI, hasil dari seed): *lempar koin*, *lempar dadu*, *pilihin A atau B* (opsi bernuansa data klinik diabaikan agar tidak
+  menyaingi pertanyaan bisnis), dan *main suit* (batu-gunting-kertas dengan reaksi menang/kalah/seri). "lagi" mengulang permainan terakhir.
 
 ### Cara melatih (siklus 54–64)
 

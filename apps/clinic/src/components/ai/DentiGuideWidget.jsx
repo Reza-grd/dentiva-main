@@ -6,6 +6,7 @@ import DentiMascot, { useDentiDirector, DENTI_DURATIONS } from '../mascot/DentiM
 import { miniMarkdown } from '../../utils/miniMarkdown';
 import { smallTalk, followUps } from '../../utils/dentiMood';
 import { chatContext } from '../../utils/dentiChatContext';
+import { pageHints } from '../../utils/dentiPageHints';
 import { getGreeting } from '../../utils/dateUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -85,14 +86,10 @@ export default function DentiGuideWidget() {
     return () => clearInterval(t);
   }, [open, typing, play]);
 
-  const welcome = useCallback(() => {
-    const hints = HINTS[role] || HINTS.admin;
-    return {
-      role: 'assistant', local: true, intent: 'welcome', fresh: true,
-      content: `${getGreeting()}${name ? `, ${name}` : ''}! 👋 Saya **Denti**, pemandu Dentiva: bisa membuka halaman, mengajarkan cara memakai fitur, menjelaskan istilah, dan memberi checklist harian. Coba salah satu tombol di bawah, atau ketik bebas. 👇`,
-      chips: hints,
-    };
-  }, [role, name]);
+  const welcome = useCallback(() => ({
+    role: 'assistant', local: true, intent: 'welcome', fresh: true,
+    content: `${getGreeting()}${name ? `, ${name}` : ''}! 👋 Saya **Denti**, pemandu Dentiva: bisa membuka halaman, mengajarkan cara memakai fitur, menjelaskan istilah, dan memberi checklist harian. Coba salah satu tombol di bawah, atau ketik bebas. 👇`,
+  }), [name]);
 
   const toggle = () => {
     setOpen((v) => !v);
@@ -116,13 +113,12 @@ export default function DentiGuideWidget() {
     later(() => {
       setTyping(false);
       if (!chat) {
-        const hints = HINTS[role] || HINTS.admin;
         const content = role === 'admin'
           ? 'Hmm, itu sepertinya **pertanyaan data klinik** — paling tepat ditanyakan ke **Asisten AI**. Atau coba perintah yang saya kuasai di bawah. 🤔'
           : 'Hmm, saya belum paham maksudnya. 🤔 Saya paling pandai soal **cara memakai Dentiva**: menu, tutorial langkah demi langkah, istilah, dan checklist harian. Coba salah satu di bawah.';
         setMessages((m) => [...m, {
           role: 'assistant', local: true, intent: 'unknown', content,
-          action: role === 'admin' ? { type: 'askAi', text } : null, chips: hints,
+          action: role === 'admin' ? { type: 'askAi', text } : null,
         }]);
         play('confused', DENTI_DURATIONS.confused);
         return;
@@ -152,8 +148,10 @@ export default function DentiGuideWidget() {
   if (location.pathname.startsWith('/admin/asisten-ai')) return null;
 
   const last = messages[messages.length - 1];
+  // Sapaan & "belum paham": saran menyesuaikan halaman yang sedang dibuka, lalu saran bawaan per peran
+  const hintsNow = [...pageHints(location.pathname, 2), ...(HINTS[role] || HINTS.admin)].filter((v, i, a) => a.indexOf(v) === i).slice(0, 5);
   const chips = last?.role === 'assistant' && !typing
-    ? (last.chips || (last.local && last.intent ? followUps(last.intent) : []))
+    ? (['welcome', 'unknown'].includes(last.intent) ? hintsNow : (last.local && last.intent ? followUps(last.intent) : []))
     : [];
 
   return (
