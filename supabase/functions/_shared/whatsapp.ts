@@ -31,6 +31,8 @@ export interface WaSendResult {
   provider: WaProviderName | null
   id?: string
   error?: string
+  /** true = gangguan sementara (belum tersambung, batas kirim, jaringan) → boleh dicoba lagi nanti. */
+  retryable?: boolean
   detail?: unknown
 }
 
@@ -99,9 +101,11 @@ export async function sendWhatsApp(input: WaSendInput, opts: Options = {}): Prom
     if (provider === 'meta') return await viaMeta(f, env, to, input)
     return await viaWhapi(f, env, to, input.text)
   } catch (e) {
-    return { ok: false, provider, error: `Jaringan ke penyedia WhatsApp gagal: ${(e as Error).message}` }
+    return { ok: false, provider, retryable: true, error: `Jaringan ke penyedia WhatsApp gagal: ${(e as Error).message}` }
   }
 }
+
+const temporary = (status: number) => status === 429 || status >= 500
 
 async function readJson(res: Response): Promise<any> {
   const raw = await res.text()
@@ -122,7 +126,7 @@ async function viaSidecar(f: typeof fetch, env: Env, to: string, text: string): 
   })
   const data = await readJson(res)
   if (!res.ok || data.ok !== true) {
-    return { ok: false, provider: 'sidecar', error: data.error || `Sidecar HTTP ${res.status}`, detail: data }
+    return { ok: false, provider: 'sidecar', retryable: temporary(res.status), error: data.error || `Sidecar HTTP ${res.status}`, detail: data }
   }
   return { ok: true, provider: 'sidecar', id: data.id ?? undefined, detail: data }
 }
@@ -155,7 +159,7 @@ async function viaMeta(f: typeof fetch, env: Env, to: string, input: WaSendInput
   const data = await readJson(res)
   const id = data?.messages?.[0]?.id
   if (!res.ok || !id) {
-    return { ok: false, provider: 'meta', error: data?.error?.message || `Meta HTTP ${res.status}`, detail: data }
+    return { ok: false, provider: 'meta', retryable: temporary(res.status), error: data?.error?.message || `Meta HTTP ${res.status}`, detail: data }
   }
   return { ok: true, provider: 'meta', id, detail: data }
 }
@@ -169,7 +173,7 @@ async function viaWhapi(f: typeof fetch, env: Env, to: string, text: string): Pr
   })
   const data = await readJson(res)
   if (!res.ok || data.error) {
-    return { ok: false, provider: 'whapi', error: data.message || data.error || `Whapi HTTP ${res.status}`, detail: data }
+    return { ok: false, provider: 'whapi', retryable: temporary(res.status), error: data.message || data.error || `Whapi HTTP ${res.status}`, detail: data }
   }
   return { ok: true, provider: 'whapi', id: data?.message?.id ?? data?.id, detail: data }
 }

@@ -51,6 +51,16 @@ Deno.test("sidecar: galat dari sidecar diteruskan", async () => {
   });
   assertEquals(r.ok, false);
   assertEquals(r.error, "WhatsApp belum tersambung (status: qr)");
+  assertEquals(r.retryable, true);
+});
+
+Deno.test("retryable: galat permanen (nomor tidak terdaftar) tidak diulang", async () => {
+  const { fn } = fakeFetch({ status: 422, body: { ok: false, error: "Nomor tidak terdaftar di WhatsApp" } });
+  const r = await sendWhatsApp({ to: "081234567890", text: "Halo" }, {
+    env: envOf({ WA_SIDECAR_URL: "http://s", WA_SIDECAR_KEY: "k" }),
+    fetch: fn,
+  });
+  assertEquals(r.retryable, false);
 });
 
 Deno.test("meta: teks biasa ke Graph API /{phone_number_id}/messages", async () => {
@@ -119,4 +129,5 @@ Deno.test("jaringan putus → ok:false, bukan exception", async () => {
   const r = await sendWhatsApp({ to: "081234567890", text: "x" }, { env: envOf({ WA_SIDECAR_URL: "http://s", WA_SIDECAR_KEY: "k" }), fetch: boom });
   assertEquals(r.ok, false);
   assertEquals(r.error, "Jaringan ke penyedia WhatsApp gagal: ECONNREFUSED");
+  assertEquals(r.retryable, true);
 });

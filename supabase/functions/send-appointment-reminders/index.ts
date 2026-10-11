@@ -84,7 +84,7 @@ Deno.serve(async (req) => {
     // Teks untuk sidecar/Whapi; penyedia Meta memakai template resmi bila dikonfigurasi.
     const sendReminder = async (phone: string, text: string, params: string[]) => {
       const r = await sendWhatsApp({ to: phone, text, template: reminderTemplate(params) })
-      if (!r.ok) throw new Error(r.error || 'Pengiriman WhatsApp gagal')
+      if (!r.ok) throw Object.assign(new Error(r.error || 'Pengiriman WhatsApp gagal'), { retryable: r.retryable === true })
       return { provider: r.provider, id: r.id }
     }
 
@@ -134,6 +134,12 @@ Deno.serve(async (req) => {
         await log('sent', JSON.stringify(resp))
         results.push({ visitId: visit.id, type, status: 'sent' })
       } catch (err: any) {
+        // Gangguan sementara (WA belum tersambung, batas kirim, jaringan): jangan dicatat agar
+        // dicoba lagi di putaran cron berikutnya. Galat permanen dicatat 'failed' (tidak diulang).
+        if (err.retryable) {
+          results.push({ visitId: visit.id, type, status: 'deferred', error: err.message })
+          return
+        }
         await log('failed', err.message)
         results.push({ visitId: visit.id, type, status: 'failed', error: err.message })
       }
