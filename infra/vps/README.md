@@ -61,6 +61,7 @@ Pelajaran gladi 11 Okt 2026:
 - `… --terapkan` menerapkannya sebagai `postgres` (satu transaksi per berkas) dan mencatatnya di `supabase_migrations.schema_migrations`.
 - Uji perilaku keamanan di `infra/vps/uji/`, selalu di-rollback. Uji itu menyamar sebagai akun nyata lewat klaim JWT (`sub` + `app_metadata` asli), dan keluarannya hanya benar/salah.
 - Uji gerbang pemulihan: `bash /opt/dentiva/bin/uji-gerbang-verifikasi.sh`.
+- Uji pengunci item kunjungan lunas (L01, rollback otomatis): `psql … -f infra/vps/uji/uji-guard-item-lunas.sql` setelah migrasi `20261012090000`.
 
 ## Edge function
 - Deploy dari laptop: `bash infra/vps/deploy-functions.sh [nama…]` (pengganti `supabase functions deploy`).

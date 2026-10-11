@@ -9,7 +9,7 @@
  *   - sakelar wa_reminder_h1_day_enabled / wa_reminder_h1_hour_enabled milik klinik itu;
  *   - pasien dengan wa_consent = true; nama & no WA didekripsi di server.
  * H-1 hari hanya dikirim 08.00–20.00 WIB agar pasien tidak menerima pesan tengah malam.
- * Duplikat dicegah lewat notification_logs (satu log per kunjungan per jenis).
+ * Duplikat dicegah dengan klaim atomik di notification_logs (indeks unik 'sending'/'sent' per kunjungan+jenis).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
@@ -38,6 +38,13 @@ Deno.serve(async (req) => {
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey)
 
   try {
+    // 0. Klaim 'sending' pengingat yang macet (> 10 menit): hasil tidak pasti → 'uncertain' (tidak dikirim ulang, agar tidak dobel).
+    const { error: staleErr } = await supabase.from('notification_logs')
+      .update({ status: 'uncertain', gateway_response: '[macet] klaim kedaluwarsa — hasil tidak pasti' })
+      .in('message_type', ['reminder_day', 'reminder_hour']).eq('status', 'sending')
+      .lt('timestamp', new Date(Date.now() - 10 * 60_000).toISOString())
+    if (staleErr) throw staleErr
+
     // 1. Klinik yang berhak (status & paket)
     const { data: subs, error: subErr } = await supabase
       .from('clinic_subscriptions')
@@ -85,8 +92,8 @@ Deno.serve(async (req) => {
     const dayWindowOpen = wibHour >= 8 && wibHour < 20
 
     // Teks untuk sidecar/Whapi; penyedia Meta memakai template resmi bila dikonfigurasi.
-    const sendReminder = async (phone: string, text: string, params: string[]) => {
-      const r = await sendWhatsApp({ to: phone, text, template: reminderTemplate(params) })
+    const sendReminder = async (phone: string, text: string, params: string[], key: string) => {
+      const r = await sendWhatsApp({ to: phone, text, template: reminderTemplate(params), idempotencyKey: key })
       if (!r.ok) throw Object.assign(new Error(r.error || 'Pengiriman WhatsApp gagal'), { retryable: r.retryable === true })
       return { provider: r.provider, id: r.id }
     }
@@ -108,42 +115,70 @@ Deno.serve(async (req) => {
     const results: Array<Record<string, unknown>> = []
 
     const process = async (visit: any, type: 'reminder_day' | 'reminder_hour', build: (p: any, c: ReturnType<typeof cfg>) => { text: string; params: string[] }) => {
-      const { data: existing, error: logErr } = await supabase
+      // Riwayat log kunjungan+jenis ini. 'sending'/'sent'/'failed' = final; 'skipped_*' hanya mencegah log ganda
+      // (persetujuan/nomor yang diperbaiki kemudian tetap dinilai ulang selama jendela pengingat masih terbuka).
+      const { data: logs, error: logErr } = await supabase
         .from('notification_logs')
-        .select('id')
+        .select('status')
         .eq('visit_id', visit.id)
         .eq('message_type', type)
-        .maybeSingle()
-      if (logErr || existing) return
+      if (logErr) throw logErr
+      const statuses = (logs ?? []).map((l: any) => l.status as string)
+      if (statuses.some((st) => ['sending', 'sent', 'failed', 'uncertain'].includes(st))) return
+      const alreadySkipped = statuses.some((st) => st.startsWith('skipped_'))
 
-      const log = (status: string, gateway_response: string) =>
-        supabase.from('notification_logs').insert([{
-          visit_id: visit.id, patient_id: visit.patient_id, clinic_id: visit.clinic_id,
-          message_type: type, status, gateway_response: gateway_response.slice(0, 500),
+      const logSkip = async (status: string, why: string) => {
+        if (alreadySkipped) return
+        const { error } = await supabase.from('notification_logs').insert([{
+          visit_id: visit.id, patient_id: visit.patient_id, clinic_id: visit.clinic_id, message_type: type, status, gateway_response: why,
         }])
+        if (error) console.error('send-appointment-reminders: log skip gagal:', error.message)
+      }
 
       if (!visit.patient) return
       if (visit.patient.wa_consent !== true) {
-        await log('skipped_no_consent', 'Patient wa_consent is false or null')
+        await logSkip('skipped_no_consent', 'Patient wa_consent is false or null')
         results.push({ visitId: visit.id, type, status: 'skipped_no_consent' })
         return
       }
       const [nama, wa] = await decryptBatch(supabase, [visit.patient.nama_lengkap || '', visit.patient.no_wa || ''])
-      if (!wa) return
+      if (!wa) {
+        await logSkip('skipped_no_phone', 'Nomor WA kosong')
+        results.push({ visitId: visit.id, type, status: 'skipped_no_phone' })
+        return
+      }
+
+      // Klaim atomik (indeks unik per kunjungan+jenis untuk 'sending'/'sent'): hanya satu pemanggil yang mengirim.
+      const { data: claim, error: claimErr } = await supabase.from('notification_logs').insert([{
+        visit_id: visit.id, patient_id: visit.patient_id, clinic_id: visit.clinic_id, message_type: type, status: 'sending', gateway_response: '',
+      }]).select('id').single()
+      if (claimErr) {
+        if (claimErr.code !== '23505') console.error('send-appointment-reminders: klaim gagal:', claimErr.code, claimErr.message)
+        results.push({ visitId: visit.id, type, status: claimErr.code === '23505' ? 'already_in_progress' : 'error' })
+        return
+      }
+      const setStatus = async (status: string, why: string) => {
+        const { error } = await supabase.from('notification_logs').update({ status, gateway_response: why.slice(0, 500) }).eq('id', claim.id)
+        if (error) console.error('send-appointment-reminders: status log gagal diperbarui:', status, error.message)
+        return !error
+      }
 
       try {
         const { text, params } = build({ ...visit.patient, nama_lengkap: nama }, cfg(visit.clinic_id))
-        const resp = await sendReminder(wa, text, params)
-        await log('sent', JSON.stringify(resp))
-        results.push({ visitId: visit.id, type, status: 'sent' })
+        const resp = await sendReminder(wa, text, params, `${type}:${visit.id}`)
+        // Pesan sudah terkirim; bila log gagal diperbarui, klaim tetap 'sending' (tidak dikirim ulang; sweep menandai 'uncertain').
+        const ok = await setStatus('sent', JSON.stringify(resp))
+        results.push({ visitId: visit.id, type, status: ok ? 'sent' : 'sent_log_failed' })
       } catch (err: any) {
-        // Gangguan sementara (WA belum tersambung, batas kirim, jaringan): jangan dicatat agar
-        // dicoba lagi di putaran cron berikutnya. Galat permanen dicatat 'failed' (tidak diulang).
+        // Gangguan sementara (WA belum tersambung, batas kirim, jaringan): klaim dilepas agar dicoba lagi di putaran
+        // cron berikutnya selama jendela masih terbuka. Galat permanen dicatat 'failed' (tidak diulang).
         if (err.retryable) {
+          const { error } = await supabase.from('notification_logs').delete().eq('id', claim.id)
+          if (error) console.error('send-appointment-reminders: klaim gagal dilepas:', error.message)
           results.push({ visitId: visit.id, type, status: 'deferred', error: err.message })
           return
         }
-        await log('failed', err.message)
+        await setStatus('failed', err.message || 'gagal')
         results.push({ visitId: visit.id, type, status: 'failed', error: err.message })
       }
     }

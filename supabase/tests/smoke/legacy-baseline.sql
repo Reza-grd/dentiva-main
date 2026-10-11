@@ -83,7 +83,7 @@ create table public.audit_logs (
   clinic_id uuid not null references public.clinics(id), user_id uuid references public.users(id),
   module text not null, action text not null, previous_value jsonb, new_value jsonb, risk_level text
 );
-create table public.notification_logs (id uuid primary key default gen_random_uuid(), clinic_id uuid not null references public.clinics(id), status text not null, "timestamp" timestamptz not null default now());
+create table public.notification_logs (id uuid primary key default gen_random_uuid(), clinic_id uuid not null references public.clinics(id), patient_id uuid, visit_id uuid, message_type text not null default 'manual', status text not null, gateway_response text, "timestamp" timestamptz not null default now(), triggered_by uuid);
 create table public.satusehat_outbox (id uuid primary key default gen_random_uuid(), clinic_id uuid not null references public.clinics(id), status text not null default 'pending', last_attempt_at timestamptz, updated_at timestamptz default now());
 
 create table public.subscription_plans (
@@ -247,3 +247,29 @@ create view public.v_patient_summary as
   select p.id, p.no_rm, p.nama_lengkap, p.no_wa, p.clinic_id, (select count(*) from public.visits v where v.patient_id = p.id) as total_visits
   from public.patients p where p.deleted_at is null;
 grant select on public.v_patient_summary to anon, authenticated, service_role;
+
+-- Supabase menyediakan publikasi Realtime bawaan; migrasi tahap 1 memakainya (L10).
+do $$ begin
+  if not exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    create publication supabase_realtime;
+  end if;
+end $$;
+
+-- Kolom/tabel tambahan agar migrasi Oktober 2026 (notifikasi, tahap 2, kasir) dapat dijalankan di baseline sintetis (L10).
+alter table public.payments
+  add column if not exists visit_id uuid, add column if not exists patient_id uuid, add column if not exists invoice_number text,
+  add column if not exists tanggal_pembayaran timestamptz default now(), add column if not exists total_treatment numeric default 0,
+  add column if not exists biaya_tambahan numeric default 0, add column if not exists keterangan_tambahan text, add column if not exists diskon numeric default 0,
+  add column if not exists total_bayar numeric default 0, add column if not exists metode_pembayaran text, add column if not exists status_pembayaran text default 'pending',
+  add column if not exists processed_by uuid, add column if not exists created_at timestamptz default now(), add column if not exists updated_at timestamptz default now(),
+  add column if not exists jumlah_bayar numeric default 0, add column if not exists kembalian numeric default 0, add column if not exists wa_sent boolean default false;
+alter table public.visit_treatments
+  add column if not exists clinic_id uuid, add column if not exists tooth_number integer, add column if not exists quantity integer default 1,
+  add column if not exists harga_satuan numeric default 0, add column if not exists subtotal numeric default 0, add column if not exists notes text,
+  add column if not exists created_at timestamptz default now();
+create table if not exists public.visit_obat (id uuid primary key default gen_random_uuid(), visit_id uuid references public.visits(id) on delete cascade, obat_id uuid,
+  nama_obat text not null default 'x', qty integer not null default 1, harga_satuan numeric not null default 0, subtotal numeric generated always as (qty::numeric * harga_satuan) stored,
+  dosis text, frekuensi text, created_at timestamptz default now(), master_bahan_id uuid, clinic_id uuid);
+alter table public.visit_obat enable row level security;
+create table if not exists public.permissions (id uuid default gen_random_uuid() primary key, module varchar(50) not null default 'x', action varchar(50) not null default 'x', name varchar(100) not null, description text, created_at timestamptz default now());
+create table if not exists public.user_permissions (user_id uuid not null, permission_id uuid not null, is_revoked boolean default false);

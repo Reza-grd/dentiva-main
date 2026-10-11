@@ -7,6 +7,7 @@ import { paymentService } from '../../services/paymentService';
 const PaymentList = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
@@ -32,7 +33,8 @@ const PaymentList = () => {
 
   const loadPayments = async () => {
     setLoading(true);
-    const { success, data, count } = await paymentService.getAllPayments({
+    setLoadError('');
+    const { success, data, count, error } = await paymentService.getAllPayments({
       page,
       limit: pageSize,
       searchTerm: debouncedSearch,
@@ -42,6 +44,11 @@ const PaymentList = () => {
     if (success) {
       setPayments(data || []);
       setTotalCount(count || 0);
+    } else {
+      // Jangan biarkan data lama tampak seperti hasil terbaru.
+      setPayments([]);
+      setTotalCount(0);
+      setLoadError(error || 'Gagal memuat daftar pembayaran');
     }
     setLoading(false);
   };
@@ -256,6 +263,11 @@ const PaymentList = () => {
         {loading ? (
           <div className="p-8 flex justify-center">
             <LoadingSpinner />
+          </div>
+        ) : loadError ? (
+          <div role="alert" className="m-4 rounded-xl border border-red-200 bg-red-50 dark:bg-red-950/30 p-4 text-sm text-red-700 dark:text-red-300 flex items-center justify-between gap-3">
+            <span>{loadError}</span>
+            <button type="button" onClick={loadPayments} className="shrink-0 rounded-lg border border-red-300 px-3 py-1 font-medium hover:bg-red-100">Coba lagi</button>
           </div>
         ) : filteredPayments.length === 0 ? (
           <div className="text-center py-16">

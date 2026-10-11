@@ -24,6 +24,8 @@ export interface WaSendInput {
   text: string
   /** Hanya dipakai penyedia `meta` (penyedia lain mengirim `text`). */
   template?: WaTemplate
+  /** Kunci peristiwa+jenis pesan: sidecar tidak mengirim dua kali untuk kunci yang sama. */
+  idempotencyKey?: string
 }
 
 export interface WaSendResult {
@@ -97,7 +99,7 @@ export async function sendWhatsApp(input: WaSendInput, opts: Options = {}): Prom
   }
 
   try {
-    if (provider === 'sidecar') return await viaSidecar(f, env, to, input.text)
+    if (provider === 'sidecar') return await viaSidecar(f, env, to, input.text, input.idempotencyKey)
     if (provider === 'meta') return await viaMeta(f, env, to, input)
     return await viaWhapi(f, env, to, input.text)
   } catch (e) {
@@ -116,12 +118,12 @@ async function readJson(res: Response): Promise<any> {
   }
 }
 
-async function viaSidecar(f: typeof fetch, env: Env, to: string, text: string): Promise<WaSendResult> {
+async function viaSidecar(f: typeof fetch, env: Env, to: string, text: string, key?: string): Promise<WaSendResult> {
   const base = env.get('WA_SIDECAR_URL')!.replace(/\/+$/, '')
   const res = await f(`${base}/send`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', 'x-api-key': env.get('WA_SIDECAR_KEY')! },
-    body: JSON.stringify({ to, text }),
+    body: JSON.stringify({ to, text, key }),
     signal: AbortSignal.timeout(60_000),
   })
   const data = await readJson(res)

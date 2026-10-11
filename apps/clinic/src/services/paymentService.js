@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js';
+import { encryptionService } from './encryptionService.js';
 import { getLocalDateRange, getTodayLocal } from '../utils/dateUtils.js';
 import { sanitizeSearchTerm } from '../utils/stringUtils.js';
 
@@ -22,11 +23,12 @@ export const paymentService = {
           processed_by_user:users(full_name)
         `, { count: 'exact' });
 
-      // Apply search term to invoice number or patient name
+      // Pencarian server: nomor invoice atau No. RM. Nama pasien terenkripsi di database sehingga tidak bisa dicari
+      // dengan ILIKE; nama dicocokkan di klien pada halaman yang sudah didekripsi (lihat PaymentList).
       if (searchTerm && searchTerm.trim()) {
         const term = sanitizeSearchTerm(searchTerm);
         if (term) {
-          query = query.or(`invoice_number.ilike.%${term}%,patient.nama_lengkap.ilike.%${term}%`);
+          query = query.or(`invoice_number.ilike.%${term}%,patient.no_rm.ilike.%${term}%`);
         }
       }
 
@@ -38,10 +40,11 @@ export const paymentService = {
       // Apply date filter
       if (dateFilter && dateFilter !== 'all') {
         const { start, end } = getLocalDateRange(dateFilter);
+        // Satu definisi tanggal untuk filter, urutan, dan laporan: tanggal_pembayaran.
         if (dateFilter === 'today') {
-          query = query.gte('created_at', `${start}T00:00:00`).lte('created_at', `${end}T23:59:59`);
+          query = query.gte('tanggal_pembayaran', `${start}T00:00:00`).lte('tanggal_pembayaran', `${end}T23:59:59`);
         } else {
-          query = query.gte('created_at', `${start}T00:00:00`);
+          query = query.gte('tanggal_pembayaran', `${start}T00:00:00`);
         }
       }
 
@@ -50,7 +53,11 @@ export const paymentService = {
         .range(offset, offset + limit - 1);
 
       if (error) throw error;
-      return { success: true, data, count };
+      // Nama pasien disimpan terenkripsi (PGP:/ENC:) → dekripsi lewat jalur resmi (server hanya membuka untuk peran berhak).
+      const rows = data || [];
+      const names = await encryptionService.decryptBatch(rows.map((r) => r.patient?.nama_lengkap || ''));
+      rows.forEach((r, i) => { if (r.patient) r.patient = { ...r.patient, nama_lengkap: names[i] ?? r.patient.nama_lengkap }; });
+      return { success: true, data: rows, count };
     } catch (error) {
       console.error('Error fetching payments:', error);
       return { success: false, error: error.message };
@@ -173,14 +180,15 @@ export const paymentService = {
 
       if (error) throw error;
 
+      // Pendapatan hanya dari pembayaran LUNAS (pending/batal tidak ikut dihitung).
+      const lunas = data.filter((p) => p.status_pembayaran === 'paid');
+      const revenue = lunas.reduce((sum, p) => sum + (parseFloat(p.total_bayar) || 0), 0);
       const stats = {
         total_transactions: data.length,
-        total_revenue: data.reduce((sum, p) => sum + (parseFloat(p.total_bayar) || 0), 0),
-        paid: data.filter(p => p.status_pembayaran === 'paid').length,
-        pending: data.filter(p => p.status_pembayaran === 'pending').length,
-        average_transaction: data.length > 0 
-          ? data.reduce((sum, p) => sum + (parseFloat(p.total_bayar) || 0), 0) / data.length
-          : 0
+        total_revenue: revenue,
+        paid: lunas.length,
+        pending: data.filter((p) => p.status_pembayaran === 'pending').length,
+        average_transaction: lunas.length > 0 ? revenue / lunas.length : 0,
       };
 
       return { success: true, data: stats };

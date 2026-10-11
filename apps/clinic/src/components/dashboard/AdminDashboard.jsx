@@ -170,8 +170,8 @@ const AdminDashboard = () => {
     setLoadingTreatments(false);
   }, []);
 
-  const loadRecentVisits = useCallback(async () => {
-    setLoadingRecent(true);
+  const loadRecentVisits = useCallback(async (silent = false) => {
+    if (!silent) setLoadingRecent(true);
     // Antrean sederhana dari server: nomor, jam, dokter, status — tanpa identitas/keluhan pasien.
     const { data, error } = await supabase.rpc('queue_today');
     if (!error) setRecentVisits((data || []).slice(0, 5));
@@ -187,6 +187,15 @@ const AdminDashboard = () => {
   }, [loadStats, loadVisits, loadRevenue, loadTreatments, loadRecentVisits]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
+
+  // Antrean admin tidak membawa PII sehingga tidak ada langganan realtime: segarkan ringan tiap 30 dtk selama tab
+  // terlihat, dan seketika saat tab kembali aktif.
+  useEffect(() => {
+    const tick = () => { if (document.visibilityState === 'visible') loadRecentVisits(true); };
+    const timer = setInterval(tick, 30000);
+    document.addEventListener('visibilitychange', tick);
+    return () => { clearInterval(timer); document.removeEventListener('visibilitychange', tick); };
+  }, [loadRecentVisits]);
 
   const maxTreatment = Math.max(...popularTreatments.map((t) => t.jumlah), 1);
 

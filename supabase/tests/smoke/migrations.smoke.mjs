@@ -111,8 +111,10 @@ for (const f of readdirSync(dir).filter((f) => f.endsWith(".sql") && !f.includes
 console.log("\n3. Isolasi tenant");
 await loginAs(uA);
 ok((await one("select public.get_user_clinic_id() as c")).c === A, "get_user_clinic_id() admin A = klinik A");
-ok((await one("select count(*)::int as n from public.patients")).n === 2, "admin A kini hanya melihat 2 pasien");
-ok((await one("select count(*)::int as n from public.visits")).n === 2, "visits terisolasi (policy 41 tertutup)");
+// Sejak tahap 2 (B06) admin klinik tidak membaca tabel pasien/kunjungan sama sekali (hanya antrean & laporan agregat via RPC);
+// yang penting: tidak pernah melihat data klinik lain (≤ jumlah milik sendiri, di sini 0).
+ok((await one("select count(*)::int as n from public.patients")).n === 0, "admin A tidak membaca data pasien (tahap 2) dan tidak melihat klinik lain");
+ok((await one("select count(*)::int as n from public.visits")).n === 0, "admin A tidak membaca kunjungan (tahap 2) dan tidak melihat klinik lain");
 ok((await one("select count(*)::int as n from public.clinics")).n === 1, "clinics: hanya klinik sendiri");
 ok((await one("select count(*)::int as n from public.informed_consents")).n === 0, "informed_consents klinik B tidak terlihat (kolom baru)");
 await expectError(`insert into public.clinic_settings (clinic_id, key, value) values ('${B}', 'x', 'y')`, /row-level security|42501/, "tidak bisa menulis ke klinik B");
@@ -124,7 +126,7 @@ ok((await one(`select value from public.clinic_settings where key = 'clinic_name
 await logout();
 
 await loginAs(uB);
-ok((await one("select count(*)::int as n from public.patients")).n === 1, "admin B hanya melihat 1 pasien");
+ok((await one("select count(*)::int as n from public.patients")).n === 0, "admin B tidak membaca data pasien (tahap 2)");
 await db.exec(`insert into public.treatments (kode_treatment, nama) values ('TRT-001', 'Tambal B')`);
 ok((await one("select count(*)::int as n from public.treatments")).n === 1, "klinik B bisa memakai kode TRT-001 sendiri (UNIQUE per klinik)");
 const visitA = await one(`select id from public.visits where clinic_id = '${A}' limit 1`);
@@ -240,7 +242,11 @@ ok(noRls.length === 0, "semua tabel ber-clinic_id punya RLS aktif", noRls);
 
 console.log("\n10. Bug & kondisi produksi");
 await loginAs(uA);
-await db.exec(`insert into public.patients (nama_lengkap) values ('Pasien setelah perbaikan')`);
+// Sejak tahap 2 admin tidak boleh menambah pasien (hanya resepsionis); penolakan RLS adalah perilaku yang benar.
+await expectError(`insert into public.patients (nama_lengkap) values ('Pasien setelah perbaikan')`, /row-level security|42501/, "admin klinik tidak bisa menambah pasien (tahap 2)");
+await logout();
+await db.exec(`insert into public.patients (nama_lengkap, clinic_id) values ('Pasien setelah perbaikan', '${A}')`);
+await loginAs(uA);
 ok((await one(`select count(*)::int as n from public.audit_logs where module = 'patients' and action = 'INSERT' and clinic_id = '${A}'`)).n >= 1,
   "SESUDAH migration: tambah pasien berhasil + audit tercatat dengan clinic_id");
 ok((await one(`select count(*)::int as n from public.users`)).n === 1,
@@ -259,7 +265,7 @@ await expectError("select * from public.v_patient_summary", /permission denied/,
 await db.exec("reset role");
 await loginAs(uB);
 const viewRows = (await q("select clinic_id from public.v_patient_summary")).map((r) => r.clinic_id);
-ok(viewRows.length === 1 && viewRows.every((c) => c === B), "v_patient_summary (security_invoker) hanya berisi pasien klinik sendiri", viewRows);
+ok(viewRows.every((c) => c === B), "v_patient_summary (security_invoker) tidak pernah memuat pasien klinik lain (admin: 0 baris sejak tahap 2)", viewRows);
 await logout();
 
 ok((await one(`select data_type from information_schema.columns where table_name = 'patients' and column_name = 'no_wa'`)).data_type === "text",
@@ -334,15 +340,26 @@ ok(objsB.length === 0, "admin B tidak melihat radiologi maupun file warisan", ob
 await logout();
 
 // Nomor RM per klinik
-await loginAs(uA);
-const rmA = await one(`insert into public.patients (nama_lengkap) values ('Pasien RM A') returning no_rm, clinic_id`);
+// Penomoran RM dites lewat superuser (admin tidak boleh menambah pasien sejak tahap 2); yang diuji adalah pemicu nomornya.
 await logout();
-await loginAs("d0000000-0000-4000-8000-0000000000d1");
-const rmNew = (await one(`insert into public.patients (nama_lengkap) values ('Pasien pertama') returning no_rm`)).no_rm;
-const rmNew2 = (await one(`insert into public.patients (nama_lengkap) values ('Pasien kedua') returning no_rm`)).no_rm;
-await logout();
+const rmA = await one(`insert into public.patients (nama_lengkap, clinic_id) values ('Pasien RM A', '${A}') returning no_rm, clinic_id`);
+const newClinic = (await one(`select clinic_id from public.users where id = 'd0000000-0000-4000-8000-0000000000d1'`)).clinic_id;
+const rmNew = (await one(`insert into public.patients (nama_lengkap, clinic_id) values ('Pasien pertama', '${newClinic}') returning no_rm`)).no_rm;
+const rmNew2 = (await one(`insert into public.patients (nama_lengkap, clinic_id) values ('Pasien kedua', '${newClinic}') returning no_rm`)).no_rm;
 ok(rmNew === "RM-000001" && rmNew2 === "RM-000002", `klinik baru mulai dari RM-000001 (${rmNew}, ${rmNew2})`);
 ok(/^RM-\d{6}$/.test(rmA.no_rm) && rmA.clinic_id === A, `klinik warisan melanjutkan nomornya (${rmA.no_rm})`);
+
+// L01: baris tindakan/obat kunjungan LUNAS tidak boleh diubah, dihapus, atau DIPINDAH ke kunjungan lain (superuser + klaim JWT: RLS dilewati, pemicu tetap jalan).
+await logout();
+const [vPaid] = (await q(`select id from public.visits where clinic_id = '${A}' limit 1`));
+const [vOther] = (await q(`select id from public.visits where clinic_id = '${A}' and id <> '${vPaid.id}' limit 1`));
+const obatRow = await one(`insert into public.visit_obat (clinic_id, visit_id, nama_obat, qty, harga_satuan) values ('${A}', '${vPaid.id}', 'Uji', 1, 1000) returning id`);
+await db.exec(`insert into public.payments (clinic_id, visit_id, total_bayar, jumlah_bayar, metode_pembayaran, status_pembayaran, invoice_number) values ('${A}', '${vPaid.id}', 1000, 1000, 'cash', 'paid', 'INV-UJI')`);
+await q("select set_config('request.jwt.claims', $1, false), set_config('request.jwt.claim.sub', $2, false)", [JSON.stringify({ sub: uA, role: "authenticated", app_metadata: { clinic_id: A } }), uA]);
+await expectError(`update public.visit_obat set qty = 9 where id = '${obatRow.id}'`, /lunas|42501/, "L01: ubah qty obat kunjungan lunas ditolak");
+await expectError(`update public.visit_obat set visit_id = '${vOther.id}' where id = '${obatRow.id}'`, /lunas|dipindahkan|42501/, "L01: PINDAH obat kunjungan lunas ke kunjungan lain ditolak");
+await expectError(`delete from public.visit_obat where id = '${obatRow.id}'`, /lunas|42501/, "L01: hapus obat kunjungan lunas ditolak");
+await q("select set_config('request.jwt.claims', '', false), set_config('request.jwt.claim.sub', '', false)");
 
 // Cron SATUSEHAT
 const cronCmd = (await one(`select command from cron.job where jobname = 'process-satusehat-outbox'`))?.command ?? "";

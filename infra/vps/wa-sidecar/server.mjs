@@ -26,7 +26,7 @@ import path from 'node:path'
 import { randomBytes } from 'node:crypto'
 import wweb from 'whatsapp-web.js'
 import QRCode from 'qrcode'
-import { normalizeTo, mask, safeEqual, createSender, cleanText } from './lib.mjs'
+import { normalizeTo, mask, safeEqual, createSender, createOnce, cleanKey, cleanText } from './lib.mjs'
 
 const { Client, LocalAuth } = wweb
 const PORT = Number(process.env.PORT || 3000)
@@ -43,7 +43,10 @@ const send = createSender({
   minGapMs: Number(process.env.WA_MIN_GAP_MS || 1500),
   jitterMs: Number(process.env.WA_JITTER_MS || 1500),
   perHour: Number(process.env.WA_PER_HOUR || 200),
+  maxQueue: Number(process.env.WA_MAX_QUEUE || 30),
+  maxWaitMs: Number(process.env.WA_MAX_WAIT_MS || 45_000),
 })
+const once = createOnce()
 
 const state = { status: 'starting', qr: null, code: null, me: null, since: new Date().toISOString(), lastError: null }
 let client = null
@@ -150,16 +153,17 @@ async function start({ fresh = false, pairDigits = null } = {}) {
     }
     if (qrPoll) return
     // Selama menunggu scan: tampilkan QR asli dari halaman WhatsApp Web, bukan susunan wwebjs.
-    qrPoll = setInterval(mine(async () => {
-      if (state.status !== 'qr') return stopQrPoll()
+    qrPoll = setInterval(async () => {
+      // Generasi lama / bukan lagi menunggu QR → hentikan interval (sebelumnya terbungkus `mine` sehingga tidak pernah berhenti).
+      if (myGen !== gen || state.status !== 'qr') return stopQrPoll()
       const dom = await readDomQr(c)
-      if (!dom) return
+      if (!dom || myGen !== gen) return
       if (!compared) {
         compared = true
         log('QR asli WA Web:', qrShape(dom), '| QR tampil:', qrShape(state.qr), dom === state.qr ? '(sama)' : '(BERBEDA — dipakai yang asli)')
       }
       if (dom !== state.qr) setStatus('qr', { qr: dom })
-    }), 1500)
+    }, 1500)
   }))
   c.on('code', mine((code) => { setStatus('pairing_code', { code, qr: null }); log('kode tautan siap') }))
   c.on('authenticated', mine(() => {
@@ -184,7 +188,8 @@ async function start({ fresh = false, pairDigits = null } = {}) {
     restartLater(3_000, { fresh: true })
   }))
   c.on('disconnected', mine((reason) => {
-    state.lastError = `terputus (${reason})`
+    // Status berubah SEGERA agar /ready dan /send tidak lagi menganggap sambungan sehat selama menunggu sambung ulang.
+    setStatus('reconnecting', { qr: null, code: null, lastError: `terputus (${reason})` })
     const loggedOut = ['LOGOUT', 'UNPAIRED', 'UNPAIRED_IDLE'].includes(String(reason))
     log(state.lastError, loggedOut ? '— dikeluarkan dari HP, sesi dihapus' : '— sambung ulang')
     restartLater(loggedOut ? 3_000 : undefined, { fresh: loggedOut })
@@ -315,15 +320,19 @@ const routes = {
     if (!text) return [400, { ok: false, error: 'Isi pesan kosong atau terlalu panjang' }]
     if (state.status !== 'connected' || !client) return [503, { ok: false, error: `WhatsApp belum tersambung (status: ${state.status})` }]
     const c = client
-    const id = await send(async () => {
-      const wid = await c.getNumberId(to)
-      if (!wid) throw Object.assign(new Error('Nomor tidak terdaftar di WhatsApp'), { status: 422 })
-      const chatId = wid._serialized || (wid.user && wid.server ? `${wid.user}@${wid.server}` : `${to}@c.us`)
-      const msg = await c.sendMessage(chatId, text, { linkPreview: false, sendSeen: false })
-      return msg?.id?.id ?? null
+    const key = cleanKey(body.key)
+    const out = await once(key, async () => {
+      const id = await send(async () => {
+        const wid = await c.getNumberId(to)
+        if (!wid) throw Object.assign(new Error('Nomor tidak terdaftar di WhatsApp'), { status: 422 })
+        const chatId = wid._serialized || (wid.user && wid.server ? `${wid.user}@${wid.server}` : `${to}@c.us`)
+        const msg = await c.sendMessage(chatId, text, { linkPreview: false, sendSeen: false })
+        return msg?.id?.id ?? null
+      })
+      return { ok: true, id }
     })
-    log('terkirim ke', mask(to))
-    return [200, { ok: true, id }]
+    log(out.duplicate ? 'permintaan ganda diabaikan (kunci sama) untuk' : 'terkirim ke', mask(to))
+    return [200, out]
   },
 
   'POST /logout': async () => {
@@ -340,6 +349,11 @@ const server = http.createServer(async (req, res) => {
     // Tidak sehat bila macet memulai/menyambung > 3 menit (mis. Chromium gagal start) — terlihat di Docker.
     const macet = ['starting', 'reconnecting'].includes(state.status) && Date.now() - Date.parse(state.since) > 180_000
     return reply(res, macet ? 503 : 200, { ok: !macet, status: state.status, since: state.since, lastError: macet ? state.lastError?.slice(0, 160) : null })
+  }
+  // Kesiapan (readiness): 200 hanya bila WhatsApp benar-benar tersambung. /health = hidup (liveness).
+  if (req.method === 'GET' && url.pathname === '/ready') {
+    const ok = state.status === 'connected'
+    return reply(res, ok ? 200 : 503, { ok, status: state.status, since: state.since })
   }
   if (req.method === 'GET' && pairRoutes[url.pathname]) {
     if (!pairTokenValid(url.searchParams.get('t'))) return reply(res, 403, { error: 'Token tidak berlaku — buat tautan baru' })
