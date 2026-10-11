@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Atur ulang kata sandi Dentiva Anda</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f6f8;color:#172b35;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;background-color:#f3f6f8;">
+    <tr><td align="center" style="padding:24px 12px;">
+      <!--[if mso]><table role="presentation" width="600" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;border-collapse:collapse;background-color:#ffffff;">
+        <tr><td style="padding:24px 24px 18px;border-top:4px solid #087b78;border-bottom:1px solid #e3eaed;">
+          <p style="margin:0;color:#086b68;font-size:26px;font-weight:bold;line-height:34px;">Dentiva</p>
+          <p style="margin:4px 0 0;color:#526570;font-size:14px;line-height:21px;">Layanan akun</p>
+        </td></tr>
+        <tr><td style="padding:28px 24px;">
+          <h1 style="margin:0 0 18px;font-size:24px;line-height:32px;color:#172b35;">Atur ulang kata sandi</h1>
+          <p style="margin:0 0 16px;font-size:16px;line-height:25px;">Halo,</p>
+          <p style="margin:0 0 20px;font-size:16px;line-height:25px;">Kami menerima permintaan untuk mengatur ulang kata sandi akun Dentiva Anda. Klik tombol berikut untuk memilih kata sandi baru.</p>
+          {{ if .Email }}<p style="margin:0 0 24px;font-size:14px;line-height:22px;overflow-wrap:anywhere;">Email akun: <strong>{{ .Email }}</strong></p>{{ end }}
+          <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 0 24px;">
+            <tr><td align="center" bgcolor="#086b68" style="background-color:#086b68;border-radius:6px;mso-padding-alt:14px 22px;">
+              <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:14px 22px;border:1px solid #086b68;border-radius:6px;background-color:#086b68;color:#ffffff;text-decoration:none;font-size:16px;font-weight:bold;line-height:22px;">Atur ulang kata sandi</a>
+            </td></tr>
+          </table>
+          <p style="margin:0 0 8px;color:#526570;font-size:14px;line-height:22px;">Jika tombol tidak berfungsi, salin tautan berikut ke browser Anda:</p>
+          <p style="margin:0 0 24px;font-size:13px;line-height:21px;word-break:break-all;overflow-wrap:anywhere;"><a href="{{ .ConfirmationURL }}" style="color:#086b68;text-decoration:underline;word-break:break-all;">{{ .ConfirmationURL }}</a></p>
+          {{ if .Token }}
+          <p style="margin:0 0 8px;font-size:14px;line-height:22px;">Jika halaman Dentiva meminta kode verifikasi untuk permintaan ini, gunakan:</p>
+          <p style="margin:0 0 20px;font-family:Consolas,monospace;font-size:24px;font-weight:bold;letter-spacing:3px;line-height:32px;">{{ .Token }}</p>
+          {{ end }}
+          <p style="margin:0 0 12px;font-size:14px;line-height:22px;">Jangan bagikan tautan atau kode verifikasi kepada siapa pun. Jika tautan kedaluwarsa, minta email baru melalui Dentiva.</p>
+          <p style="margin:0;font-size:14px;line-height:22px;"><strong>Abaikan email ini jika Anda tidak memintanya.</strong></p>
+        </td></tr>
+        <tr><td style="padding:20px 24px;border-top:1px solid #e3eaed;background-color:#f8fafb;">
+          <p style="margin:0;color:#526570;font-size:13px;line-height:21px;">Email otomatis dari Dentiva.</p>
+          <p style="margin:8px 0 0;font-size:13px;line-height:21px;"><a href="{{ .SiteURL }}" style="color:#086b68;text-decoration:underline;">Buka situs Dentiva</a></p>
+        </td></tr>
+      </table>
+      <!--[if mso]></td></tr></table><![endif]-->
+    </td></tr>
+  </table>
+</body>
+</html>
