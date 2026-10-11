@@ -210,46 +210,52 @@ const PaymentForm = () => {
     return { totalTreatment, totalObat, biayaTambahan, diskon, totalBayar };
   };
 
-  const validateForm = () => {
+  const validateForm = (pd = paymentData) => {
     const errors = {};
     const totals = calculateTotals();
 
     if (selectedTreatments.length === 0) {
       errors.treatments = 'Minimal 1 treatment harus dipilih';
     }
-    if (!paymentData.metode_pembayaran) {
+    if (!pd.metode_pembayaran) {
       errors.metode_pembayaran = 'Metode pembayaran wajib dipilih';
     }
-    if (!paymentData.status_pembayaran) {
+    if (!pd.status_pembayaran) {
       errors.status_pembayaran = 'Status pembayaran wajib dipilih';
     }
-    if (parseFloat(paymentData.diskon) < 0) {
+    if (parseFloat(pd.diskon) < 0) {
       errors.diskon = 'Diskon tidak boleh negatif';
     }
-    if (parseFloat(paymentData.biaya_tambahan) < 0) {
+    if (parseFloat(pd.biaya_tambahan) < 0) {
       errors.biaya_tambahan = 'Biaya tambahan tidak boleh negatif';
     }
     if (totals.totalBayar < 0) {
       errors.total = 'Total bayar tidak boleh negatif. Periksa diskon.';
     }
 
-    const paid = Number(paymentData.jumlah_bayar ?? 0);
+    const paid = Number(pd.jumlah_bayar ?? 0);
     if (!Number.isFinite(paid) || paid < 0) errors.jumlah_bayar = 'Jumlah bayar tidak valid';
-    if (paymentData.status_pembayaran === 'paid' && paid < totals.totalBayar) errors.jumlah_bayar = 'Pembayaran lunas harus mencukupi total tagihan';
-    if (paymentData.status_pembayaran === 'partial' && (paid <= 0 || paid >= totals.totalBayar)) errors.jumlah_bayar = 'Pembayaran sebagian harus lebih dari nol dan kurang dari total tagihan';
+    if (pd.status_pembayaran === 'paid' && paid < totals.totalBayar) errors.jumlah_bayar = 'Pembayaran lunas harus mencukupi total tagihan';
+    if (pd.status_pembayaran === 'partial' && (paid <= 0 || paid >= totals.totalBayar)) errors.jumlah_bayar = 'Pembayaran sebagian harus lebih dari nol dan kurang dari total tagihan';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSavePayment = async () => {
-    if (!validateForm()) {
+    // Lunas tanpa mengisi "Uang Diterima" → dianggap dibayar pas sesuai total.
+    let pdata = paymentData;
+    if (pdata.status_pembayaran === 'paid' && !(Number(pdata.jumlah_bayar) > 0)) {
+      pdata = { ...pdata, jumlah_bayar: calculateTotals().totalBayar };
+      setPaymentData(pdata);
+    }
+    if (!validateForm(pdata)) {
       toast.error('Mohon perbaiki error pada form sebelum menyimpan');
       return;
     }
 
     setSaving(true);
     try {
-      const result = await paymentService.saveVisitPayment(visitId, selectedTreatments, selectedObat, paymentData);
+      const result = await paymentService.saveVisitPayment(visitId, selectedTreatments, selectedObat, pdata);
       if (result.success) {
         if (paymentData.status_pembayaran === 'paid') {
           toast.success('Pembayaran lunas tersimpan!');
@@ -1145,8 +1151,9 @@ const PaymentForm = () => {
                 placeholder={String(totals.totalBayar)}
                 onChange={(e) => setPaymentData({...paymentData, jumlah_bayar: parseFloat(e.target.value) || 0})}
                 disabled={isLocked}
-                className="glass-input w-full px-4 py-2.5 rounded-xl disabled:opacity-50"
+                className={`glass-input w-full px-4 py-2.5 rounded-xl disabled:opacity-50 ${formErrors.jumlah_bayar ? 'border-red-500 ring-1 ring-red-500' : ''}`}
               />
+              <FieldError name="jumlah_bayar" />
               {paymentData.metode_pembayaran === 'cash' && paymentData.jumlah_bayar > 0 && (
                 <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-2 font-semibold bg-emerald-50 dark:bg-emerald-500/10 p-2 rounded-lg inline-block">
                   Kembalian: {formatCurrency(Math.max(0, paymentData.jumlah_bayar - totals.totalBayar))}
