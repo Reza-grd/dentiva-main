@@ -13,6 +13,9 @@ Konfigurasi Supabase self-host Dentiva. **Tanpa rahasia** — rahasia hanya ada 
 - Firewall ufw (aktif saat boot): hanya 22, 80, 443.
 - Docker 29 + Supabase self-host `self-hosted/v0.8.2` (PostgreSQL 17.6), 11 layanan sehat.
 - Port 3000 (Studio), 5432/6543 (database/pooler), 8000 (API) hanya `127.0.0.1`.
+- HTTPS: Caddy + Let's Encrypt di `https://api.dentiva.id` (perpanjang otomatis). `COMPOSE_FILE=docker-compose.yml:docker-compose.caddy.yml:docker-compose.dentiva.yml`.
+- Uji dari internet (11 Okt): `/` & Studio → 404, API tanpa kunci → 401, dengan kunci → 200 (±0,37 dtk), http → https 308,
+  port 3000/5432/8000 tertutup.
 
 ## Perintah harian (di server, `cd /opt/dentiva/supabase`)
 ```sh
