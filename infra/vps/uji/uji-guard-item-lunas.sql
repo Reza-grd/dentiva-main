@@ -8,10 +8,10 @@ select raw_app_meta_data::text as am from auth.users where id = :'dok' \gset
 select clinic_id as klinik from public.users where id = :'dok' \gset
 select patient_id as pat from public.visits where deleted_at is null and clinic_id = :'klinik' limit 1 \gset
 begin;
-insert into public.visits(patient_id, tanggal_kunjungan, status, clinic_id) values (:'pat', current_date, 'scheduled', :'klinik') returning id as va \gset
-insert into public.visits(patient_id, tanggal_kunjungan, status, clinic_id) values (:'pat', current_date, 'scheduled', :'klinik') returning id as vb \gset
+insert into public.visits(patient_id, tanggal_kunjungan, status, clinic_id, dokter_id) values (:'pat', current_date, 'scheduled', :'klinik', :'dok') returning id as va \gset
+insert into public.visits(patient_id, tanggal_kunjungan, status, clinic_id, dokter_id) values (:'pat', current_date, 'scheduled', :'klinik', :'dok') returning id as vb \gset
 insert into public.visit_obat(clinic_id, visit_id, nama_obat, qty, harga_satuan) values (:'klinik', :'va', 'Uji', 1, 1000) returning id as obat \gset
-insert into public.payments(clinic_id, visit_id, patient_id, total_bayar, status_pembayaran, metode_pembayaran) values (:'klinik', :'va', :'pat', 1000, 'paid', 'cash');
+insert into public.payments(clinic_id, visit_id, patient_id, invoice_number, total_bayar, jumlah_bayar, status_pembayaran, metode_pembayaran) values (:'klinik', :'va', :'pat', 'INV-UJI-L01', 1000, 1000, 'paid', 'cash');
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub', :'dok', 'role', 'authenticated', 'app_metadata', :'am'::jsonb)::text, true) is null;
 create or replace function pg_temp.coba(p text) returns text language plpgsql as $$
