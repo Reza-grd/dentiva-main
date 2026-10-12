@@ -40,7 +40,7 @@ select throws_ok(
 select pg_temp.logout();
 
 -- ─── Nomor RM per klinik ────────────────────────────────────────────────────
-select pg_temp.login_as('b0000000-0000-4000-8000-00000000000b');
+select pg_temp.login_as('b0000000-0000-4000-8000-00000000000e');
 insert into public.patients (nama_lengkap) values ('Pasien RM B');
 select matches(
   (select no_rm from public.patients where nama_lengkap = 'Pasien RM B'),

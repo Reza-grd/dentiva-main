@@ -56,6 +56,8 @@ insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, cr
   ('a0000000-0000-4000-8000-00000000000d', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'dokter-a@test.local', '{}', now(), now()),
   ('b0000000-0000-4000-8000-00000000000b', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-b@test.local', '{}', now(), now()),
   ('c0000000-0000-4000-8000-00000000000c', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-s@test.local', '{}', now(), now()),
+  ('a0000000-0000-4000-8000-00000000000e', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'resepsionis-a@test.local', '{}', now(), now()),
+  ('b0000000-0000-4000-8000-00000000000e', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'resepsionis-b@test.local', '{}', now(), now()),
   ('0e000000-0000-4000-8000-0000000000e0', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'operator@test.local', '{}', now(), now());
 
 -- Profil user klinik (trigger mengisi app_metadata.clinic_id)
@@ -63,7 +65,9 @@ insert into public.users (id, email, full_name, role, clinic_id, status) values
   ('a0000000-0000-4000-8000-00000000000a', 'admin-a@test.local',  'Admin A',  'admin',  'aaaaaaaa-0000-4000-8000-000000000001', 'active'),
   ('a0000000-0000-4000-8000-00000000000d', 'dokter-a@test.local', 'Dokter A', 'dokter', 'aaaaaaaa-0000-4000-8000-000000000001', 'active'),
   ('b0000000-0000-4000-8000-00000000000b', 'admin-b@test.local',  'Admin B',  'admin',  'bbbbbbbb-0000-4000-8000-000000000002', 'active'),
-  ('c0000000-0000-4000-8000-00000000000c', 'admin-s@test.local',  'Admin S',  'admin',  'cccccccc-0000-4000-8000-000000000003', 'active');
+  ('c0000000-0000-4000-8000-00000000000c', 'admin-s@test.local',  'Admin S',  'admin',  'cccccccc-0000-4000-8000-000000000003', 'active'),
+  ('a0000000-0000-4000-8000-00000000000e', 'resepsionis-a@test.local', 'Resepsionis A', 'resepsionis', 'aaaaaaaa-0000-4000-8000-000000000001', 'active'),
+  ('b0000000-0000-4000-8000-00000000000e', 'resepsionis-b@test.local', 'Resepsionis B', 'resepsionis', 'bbbbbbbb-0000-4000-8000-000000000002', 'active');
 
 -- Operator Console
 insert into platform.operators (user_id, full_name, role) values
