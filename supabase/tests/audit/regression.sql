@@ -9,6 +9,13 @@ begin
   exception when others then if sqlstate=expected_state then return; end if; raise; end;
   raise exception 'Expected SQLSTATE %, operation succeeded: %',expected_state,statement;
 end $$;
+create or replace function pg_temp.expect_blocked(statement text) returns void language plpgsql as $$
+declare n bigint;
+begin
+  begin execute statement; get diagnostics n = row_count;
+  exception when others then if sqlstate='42501' then return; end if; raise; end;
+  if n > 0 then raise exception 'Expected the operation to be blocked (error 42501 or 0 rows), but % row(s) changed: %',n,statement; end if;
+end $$;
 create or replace function pg_temp.login_as(uid uuid,cid uuid) returns void language plpgsql as $$
 begin
  perform set_config('request.jwt.claims',jsonb_build_object('sub',uid,'role','authenticated','app_metadata',jsonb_build_object('clinic_id',cid))::text,true);
@@ -20,10 +27,12 @@ insert into public.clinics(id,name,slug,status) values
  ('eebbbbbb-0000-4000-8000-000000000002','Audit fixture B','audit-fixture-b','active');
 insert into auth.users(id,email,raw_app_meta_data) values
  ('ee000000-0000-4000-8000-00000000000a','audit-admin@example.test','{}'),
- ('ee000000-0000-4000-8000-00000000000d','audit-doctor@example.test','{}');
+ ('ee000000-0000-4000-8000-00000000000d','audit-doctor@example.test','{}'),
+ ('ee000000-0000-4000-8000-00000000000c','audit-reception@example.test','{}');
 insert into public.users(id,email,full_name,role,clinic_id,status) values
  ('ee000000-0000-4000-8000-00000000000a','audit-admin@example.test','Synthetic Admin','admin','eeaaaaaa-0000-4000-8000-000000000001','active'),
- ('ee000000-0000-4000-8000-00000000000d','audit-doctor@example.test','Synthetic Doctor','dokter','eeaaaaaa-0000-4000-8000-000000000001','active');
+ ('ee000000-0000-4000-8000-00000000000d','audit-doctor@example.test','Synthetic Doctor','dokter','eeaaaaaa-0000-4000-8000-000000000001','active'),
+ ('ee000000-0000-4000-8000-00000000000c','audit-reception@example.test','Synthetic Receptionist','resepsionis','eeaaaaaa-0000-4000-8000-000000000001','active');
 insert into public.patients(id,no_rm,nama_lengkap,clinic_id) values
  ('ee100000-0000-4000-8000-000000000001','AUDIT-1',private.encrypt_envelope('Synthetic patient A','eeaaaaaa-0000-4000-8000-000000000001',false),'eeaaaaaa-0000-4000-8000-000000000001'),
  ('ee100000-0000-4000-8000-000000000002','AUDIT-2','Synthetic patient B','eebbbbbb-0000-4000-8000-000000000002');
@@ -51,7 +60,7 @@ select pg_temp.assert_ok((select public.decrypt_field(medical)='[Terbatas: hanya
 select pg_temp.expect_error($q$select public.decrypt_field(replace(medical,'PGPM:','PGP:')) from audit_cipher$q$,'22023');
 select pg_temp.expect_error($q$select public.decrypt_field(foreign_cipher) from audit_cipher$q$,'42501');
 select pg_temp.expect_error($q$insert into public.visits(patient_id,clinic_id,status) values('ee100000-0000-4000-8000-000000000002','eeaaaaaa-0000-4000-8000-000000000001','ongoing')$q$,'42501');
-select pg_temp.expect_error($q$update public.visits set patient_id='ee100000-0000-4000-8000-000000000002' where id='ee200000-0000-4000-8000-000000000001'$q$,'42501');
+select pg_temp.expect_blocked($q$update public.visits set patient_id='ee100000-0000-4000-8000-000000000002' where id='ee200000-0000-4000-8000-000000000001'$q$);
 select pg_temp.assert_ok((select count(*)=0 from storage.objects where name='eeaaaaaa-0000-4000-8000-000000000001/audit/xray.png'),'admin cannot access radiology');
 reset role;
 select set_config('request.jwt.claims','',true),set_config('request.jwt.claim.sub','',true);
@@ -64,13 +73,20 @@ insert into public.overhead_monthly_target(clinic_id,periode,total_overhead_bula
  ('eeaaaaaa-0000-4000-8000-000000000001',date_trunc('month',now() at time zone 'Asia/Jakarta')::date,100,10),
  ('eebbbbbb-0000-4000-8000-000000000002',date_trunc('month',now() at time zone 'Asia/Jakarta')::date,99900,1);
 insert into public.treatment_materials(clinic_id,treatment_id,material_id,qty_rata2,wajib) values('eeaaaaaa-0000-4000-8000-000000000001','ee300000-0000-4000-8000-000000000001','ee400000-0000-4000-8000-000000000001',2,true);
-select pg_temp.login_as('ee000000-0000-4000-8000-00000000000a','eeaaaaaa-0000-4000-8000-000000000001');
+select pg_temp.login_as('ee000000-0000-4000-8000-00000000000c','eeaaaaaa-0000-4000-8000-000000000001');
 select pg_temp.expect_error($q$select public.save_visit_payment('ee200000-0000-4000-8000-000000000001','[{"treatment_id":"ee300000-0000-4000-8000-000000000001","quantity":2,"harga_satuan":100}]','[]','{"status_pembayaran":"paid","metode_pembayaran":"cash","jumlah_bayar":0}')$q$,'22023');
 select pg_temp.assert_ok((select count(*)=0 from public.visit_treatments where visit_id='ee200000-0000-4000-8000-000000000001'),'failed payment rolls back details');
 select public.save_visit_payment('ee200000-0000-4000-8000-000000000001','[{"treatment_id":"ee300000-0000-4000-8000-000000000001","quantity":2,"harga_satuan":100}]','[{"obat_id":"ee400000-0000-4000-8000-000000000001","qty":1,"harga_satuan":10}]','{"status_pembayaran":"partial","metode_pembayaran":"cash","jumlah_bayar":50}') is not null as partial_ok;
 select public.save_visit_payment('ee200000-0000-4000-8000-000000000001','[{"treatment_id":"ee300000-0000-4000-8000-000000000001","quantity":2,"harga_satuan":100}]','[{"obat_id":"ee400000-0000-4000-8000-000000000001","qty":1,"harga_satuan":10}]','{"status_pembayaran":"paid","metode_pembayaran":"cash","jumlah_bayar":210}') is not null as paid_ok;
-select pg_temp.assert_ok((select status='completed' from public.visits where id='ee200000-0000-4000-8000-000000000001'),'payment atomically completes visit');
+select pg_temp.assert_ok((select status='ongoing' from public.visits where id='ee200000-0000-4000-8000-000000000001'),'paid payment does not close the visit (only the doctor does)');
 select pg_temp.assert_ok((select count(*)=1 from public.visit_treatments where visit_id='ee200000-0000-4000-8000-000000000001'),'preserves treatment IDs');
+reset role;
+select set_config('request.jwt.claims','',true),set_config('request.jwt.claim.sub','',true);
+select pg_temp.login_as('ee000000-0000-4000-8000-00000000000d','eeaaaaaa-0000-4000-8000-000000000001');
+update public.visits set status='completed' where id='ee200000-0000-4000-8000-000000000001';
+reset role;
+select set_config('request.jwt.claims','',true),set_config('request.jwt.claim.sub','',true);
+select pg_temp.login_as('ee000000-0000-4000-8000-00000000000c','eeaaaaaa-0000-4000-8000-000000000001');
 select pg_temp.expect_error($q$select public.replace_visit_treatments('ee200000-0000-4000-8000-000000000001','[]')$q$,'42501');
 reset role;
 select set_config('request.jwt.claims','',true),set_config('request.jwt.claim.sub','',true);
