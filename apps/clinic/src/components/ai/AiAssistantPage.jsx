@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import AnswerFeedback from './AnswerFeedback';
 import KnowledgePanel from './KnowledgePanel';
+import AgentActions from './AgentActions';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
 import { aiService } from '../../services/aiService';
 import { miniMarkdown } from '../../utils/miniMarkdown';
@@ -37,6 +38,13 @@ const SUGGESTION_GROUPS = [
     'Bagaimana cara mengaktifkan booking online untuk pasien?',
     'Apa saja yang perlu diisi agar HPP dan margin tindakan terhitung?',
   ] },
+  { label: 'Denti Agen (bisa bertindak)', items: [
+    'Catat pengeluaran listrik bulan ini Rp 1.250.000',
+    'Bahan apa yang perlu dipesan ulang?',
+    'Tambahkan bahan baru: sarung tangan nitril M, satuan pcs, stok awal 100, harga 2000, stok minimum 20',
+    'Naikkan harga semua tindakan 5%, dibulatkan ke 5.000',
+    'Atur biaya overhead sewa ruko Rp 8.000.000 per bulan',
+  ] },
   { label: 'Manajemen', items: [
     'Ringkas kondisi klinik hari ini.',
     'Beri saran jadwal dokter berdasarkan pola kunjungan.',
@@ -58,6 +66,14 @@ const TOOL_LABEL = {
   ringkasan_hari_ini: 'Hari ini',
   beban_jadwal_dokter: 'Jadwal dokter',
   statistik_recall: 'Recall',
+  cari_bahan: 'Cari bahan',
+  kartu_stok: 'Kartu stok',
+  saran_pemesanan: 'Saran pemesanan',
+  cari_pengeluaran: 'Cari pengeluaran',
+  daftar_overhead: 'Overhead',
+  cari_tindakan: 'Cari tindakan',
+  resep_tindakan: 'Resep bahan',
+  riwayat_agen: 'Riwayat agen',
 };
 /** Bank saran saat mengetik (dicocokkan per kata). */
 const SUGGEST_BANK = [
@@ -269,8 +285,15 @@ export default function AiAssistantPage() {
 
   const toAssistant = (data, question, extra = {}) => ({
     role: 'assistant', content: data.answer, tools: data.tools || [], question, topic: topicOf(question), fresh: true,
-    usageId: data.usage_id || null, cached: Boolean(data.cached), fast: Boolean(data.fast), references: data.references || 0, ...extra,
+    usageId: data.usage_id || null, cached: Boolean(data.cached), fast: Boolean(data.fast), references: data.references || 0,
+    actions: (data.actions || []).map((a) => ({ ...a, state: 'pending', at: Date.now(), error: '' })), ...extra,
   });
+
+  const setActions = (idx, next) => setMessages((list) => list.map((m, i) => (i === idx ? { ...m, actions: next } : m)));
+  const onActionsApplied = (applied) => {
+    toast.success(applied.length > 1 ? `${applied.length} tindakan dijalankan.` : 'Tindakan dijalankan.');
+    react('celebrate', 'Beres! Sudah saya jalankan. Cek hasilnya lewat tombol di kartu.', 3200);
+  };
 
   const ask = async (q) => {
     const question = (q ?? input).trim();
@@ -475,7 +498,7 @@ export default function AiAssistantPage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Aktifkan Asisten Keuangan</h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              Asisten menjawab pertanyaan seperti pendapatan, pengeluaran, tindakan paling menguntungkan, kinerja dokter, dan stok bahan, memakai data klinik Anda.
+              Asisten menjawab pertanyaan seperti pendapatan, pengeluaran, tindakan paling menguntungkan, kinerja dokter, dan stok bahan, memakai data klinik Anda. Sebagai Denti Agen, ia juga bisa mengusulkan pencatatan pengeluaran, stok masuk, bahan baru, opname, overhead, tarif, dan resep bahan — tetapi data baru berubah hanya setelah Anda menekan Setujui.
             </p>
           </div>
           <ul className="space-y-3 text-sm text-gray-700 dark:text-gray-200">
@@ -560,6 +583,9 @@ export default function AiAssistantPage() {
                     <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-accent)]">Jawaban diperbaiki</p>
                   )}
                   {m.error ? m.content : <Answer text={m.content} fresh={m.fresh} />}
+                  {!m.error && m.actions?.length > 0 && (
+                    <AgentActions actions={m.actions} onChange={(next) => setActions(i, next)} onApplied={onActionsApplied} />
+                  )}
                   {(m.action?.type === 'navigate' || m.action?.type === 'offer') && (
                     <button type="button" onClick={() => navigate(m.action.to)} className="ai-chip ai-chip--action mt-3">
                       Buka {m.action.label} <ArrowRight size={14} />
@@ -575,7 +601,7 @@ export default function AiAssistantPage() {
                       ) : (
                         <>
                           Dibuat AI, periksa kembali angka penting
-                          {m.tools?.length ? ` · data: ${m.tools.map((t) => TOOL_LABEL[t] || t).join(', ')}` : ''}
+                          {m.tools?.length ? ` · data: ${[...new Set(m.tools.map((t) => TOOL_LABEL[t] || (t.startsWith('usulkan_') ? 'Usulan tindakan' : t)))].join(', ')}` : ''}
                           {m.references ? ` · mengacu ${m.references} jawaban terverifikasi` : ''}
                         </>
                       )}

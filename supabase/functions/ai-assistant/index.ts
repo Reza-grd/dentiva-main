@@ -2,7 +2,9 @@
  * ai-assistant — Asisten AI untuk admin klinik.
  *
  * Mode (body.mode):
- *   "chat"    (bawaan) Tanya keuangan & manajemen: Claude + alat baca-saja (RPC ai_* agregat).
+ *   "chat"    (bawaan) Tanya keuangan & manajemen + DENTI AGEN: alat baca (RPC ai_*) dan alat usulan (usulkan_*) untuk mengelola
+ *             pengeluaran, bahan/stok, overhead, tarif & resep. Model hanya MENGUSULKAN; data berubah setelah admin menyetujui.
+ *   "agent_apply" | "agent_reject" | "agent_undo"  Keputusan admin atas usulan (tanpa model AI, tanpa kuota; lihat agent.ts & ai_agent_* di database).
  *   "receipt" Foto nota → draf pengeluaran (vision + structured output). Tidak menyimpan apa pun;
  *             admin memeriksa & menyetujui draf di aplikasi.
  *   "recall_template" Draf template pesan WA recall dengan placeholder {nama} (tanpa data pasien).
@@ -39,11 +41,12 @@ import { GroqError, groqChat, readCompletion, toGroqTools } from "./groq.ts";
 import { DENTIVA_GUIDE } from "./guide.ts";
 import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.ts";
 import { fastAnswer } from "./fast.ts";
+import { AGENT_PROMPT, AGENT_TOOLS, AGENT_TOOL_NAMES, isAgentIntent, pendingText, runAgentTool, type AgentCtx } from "./agent.ts";
 
 const MODEL = "claude-opus-5-5";
 // USD per 1 juta token (Claude Opus 5.5): masuk, keluar, baca cache, tulis cache (5 menit = 1,25× masuk)
 const PRICE = { input: 4, output: 20, cacheRead: 0.2, cacheWrite: 5 };
-const MAX_TOOL_ROUNDS = 6;
+const MAX_TOOL_ROUNDS = 10;
 const MAX_QUESTION = 1000;
 const MAX_HISTORY_TURNS = 10;
 const MAX_IMAGE_B64 = 5_000_000; // ± 3,7 MB biner; aplikasi mengecilkan foto lebih dulu
@@ -147,6 +150,9 @@ const TOOLS: Anthropic.Tool[] = [
     "bulan", "Batas bulan sejak kunjungan terakhir, 1–36 (bawaan 6)"),
 ];
 
+// Alat bacaan data + alat agen (usulan tindakan). Model hanya dapat MENGUSULKAN perubahan; admin yang menyetujui di aplikasi.
+const ALL_TOOLS = [...TOOLS, ...AGENT_TOOLS] as Anthropic.Tool[];
+
 const RPC: Record<string, (i: Record<string, unknown>) => [string, Record<string, unknown>]> = {
   ringkasan_pendapatan: (i) => ["ai_revenue_summary", { p_from: i.dari, p_to: i.sampai }],
   kinerja_tindakan: (i) => ["ai_treatment_performance", { p_from: i.dari, p_to: i.sampai }],
@@ -164,7 +170,10 @@ const RPC: Record<string, (i: Record<string, unknown>) => [string, Record<string
 };
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-async function runTool(db: SupabaseClient, name: string, input: unknown): Promise<{ content: string; isError: boolean }> {
+async function runTool(db: SupabaseClient, name: string, input: unknown, ctx?: AgentCtx): Promise<{ content: string; isError: boolean }> {
+  if (AGENT_TOOL_NAMES.has(name)) {
+    return (await runAgentTool(db, ctx ?? { group: crypto.randomUUID(), actions: [] }, name, input)) ?? { content: `Alat tidak dikenal: ${name}`, isError: true };
+  }
   const build = RPC[name];
   if (!build || typeof input !== "object" || input === null) return { content: `Alat tidak dikenal: ${name}`, isError: true };
   const args = input as Record<string, unknown>;
@@ -215,6 +224,8 @@ Contoh nada (contoh saja — angka WAJIB dari data):
   ✓ "Pendapatan bulan ini **Rp 12.400.000** — naik 8% dari bulan lalu, setara ±Rp 620.000 per hari praktik. Scaling penyumbang terbesar. Saran: tambah slot pagi di hari Sabtu yang paling ramai. 💡"
   ✗ "Mohon maaf, saya tidak dapat menemukan data pengeluaran untuk periode yang diminta."
   ✓ "Pengeluaran bulan ini belum tercatat, jadi labanya belum bisa dihitung. Catat dulu di menu **Pengeluaran** — 2 menit saja, nanti saya hitungkan. 🙂"
+
+${AGENT_PROMPT}
 
 ${DENTIVA_GUIDE}`;
 
@@ -475,7 +486,7 @@ const anthropicCommon = {
   fallbacks: "default",
 };
 
-async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>): Promise<ChatResult> {
+async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx): Promise<ChatResult> {
   const client = new Anthropic({ apiKey: p.key });
   const messages: Anthropic.Beta.BetaMessageParam[] = turns.map((t) => ({ role: t.role, content: t.content }));
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
@@ -485,7 +496,7 @@ async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[],
       max_tokens: 16000,
       output_config: { effort: "medium" },
       system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
-      tools: TOOLS,
+      tools: ALL_TOOLS,
       messages,
     // deno-lint-ignore no-explicit-any
     } as any);
@@ -504,7 +515,7 @@ async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[],
     messages.push({ role: "assistant", content: response.content });
     const results = await Promise.all(toolUses.map(async (t: { id: string; name: string; input: unknown }) => {
       toolsUsed.add(t.name);
-      const r = await runTool(db, t.name, t.input);
+      const r = await runTool(db, t.name, t.input, ctx);
       return { type: "tool_result" as const, tool_use_id: t.id, content: r.content, is_error: r.isError };
     }));
     messages.push({ role: "user", content: results });
@@ -535,7 +546,7 @@ async function geminiCall(p: Provider, body: Record<string, unknown>): Promise<a
   throw lastErr;
 }
 
-const GEMINI_TOOLS = TOOLS.map((t) => {
+const GEMINI_TOOLS = ALL_TOOLS.map((t) => {
   const schema = t.input_schema as { properties?: Record<string, unknown> };
   const hasArgs = Object.keys(schema.properties ?? {}).length > 0;
   return {
@@ -552,7 +563,7 @@ function addGeminiUsage(u: Usage, r: ReturnType<typeof readInteraction>) {
   u.cacheRead += r.usage.cacheRead;
 }
 
-async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>): Promise<ChatResult> {
+async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx): Promise<ChatResult> {
   // Riwayat stateless: giliran pengguna = user_input, jawaban sebelumnya = model_output.
   // deno-lint-ignore no-explicit-any
   const history: any[] = turns.map((t) => t.role === "user"
@@ -573,7 +584,7 @@ async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], us
     history.push(...r.modelSteps);
     const results = await Promise.all(r.calls.map(async (c) => {
       toolsUsed.add(c.name);
-      const res = await runTool(db, c.name, c.args ?? {});
+      const res = await runTool(db, c.name, c.args ?? {}, ctx);
       return {
         type: "function_result", name: c.name, ...(c.id ? { call_id: c.id } : {}),
         result: [{ type: "text", text: res.isError ? `ERROR: ${res.content}` : res.content }],
@@ -584,9 +595,9 @@ async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], us
   return { answer: TOO_MANY_STEPS, refused: false };
 }
 
-const GROQ_TOOLS = toGroqTools(TOOLS as Array<{ name: string; description?: string; input_schema: unknown }>);
+const GROQ_TOOLS = toGroqTools(ALL_TOOLS as Array<{ name: string; description?: string; input_schema: unknown }>);
 
-async function chatGroq(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>): Promise<ChatResult> {
+async function chatGroq(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx): Promise<ChatResult> {
   // deno-lint-ignore no-explicit-any
   const messages: any[] = [{ role: "system", content: SYSTEM }, ...turns.map((t) => ({ role: t.role, content: t.content }))];
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
@@ -602,7 +613,7 @@ async function chatGroq(p: Provider, db: SupabaseClient, turns: ChatTurn[], usag
       toolsUsed.add(c.name);
       const res = c.args === null
         ? { content: "Argumen alat bukan JSON yang valid", isError: true }
-        : await runTool(db, c.name, c.args);
+        : await runTool(db, c.name, c.args, ctx);
       return { role: "tool", tool_call_id: c.id, content: res.isError ? `ERROR: ${res.content}` : res.content };
     }));
     messages.push(...results);
@@ -737,6 +748,33 @@ async function runScheduledBriefs(p: Provider, admin: any) {
   }
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Setujui / tolak / batalkan usulan Denti Agen. Tanpa model AI & tanpa kuota; database memeriksa admin, klinik, pemilik usulan, dan kedaluwarsa. */
+// deno-lint-ignore no-explicit-any
+async function agentDecision(req: Request, db: SupabaseClient, mode: string, body: any): Promise<Response> {
+  const fail = (e: { code?: string; message: string }) => {
+    if (e.code === "AG001") return json(req, 422, { error: e.message });
+    if (e.code === "42501") return json(req, 403, { error: "Hanya admin klinik yang dapat menjalankan tindakan Denti Agen." });
+    console.error("agent decision:", e.code, e.message);
+    return json(req, 500, { error: "Tindakan gagal diproses. Coba lagi." });
+  };
+  if (mode === "agent_undo") {
+    const id = typeof body.id === "string" && UUID_RE.test(body.id) ? body.id : "";
+    if (!id) return json(req, 400, { error: "Id tindakan tidak valid" });
+    const { data, error } = await db.rpc("ai_agent_undo", { p_id: id });
+    return error ? fail(error) : json(req, 200, data);
+  }
+  const ids: string[] = Array.isArray(body.ids) ? body.ids.filter((x: unknown) => typeof x === "string" && UUID_RE.test(x)).slice(0, 60) : [];
+  if (ids.length === 0) return json(req, 400, { error: "Pilih minimal satu usulan." });
+  if (mode === "agent_reject") {
+    const { data, error } = await db.rpc("ai_agent_reject", { p_ids: ids });
+    return error ? fail(error) : json(req, 200, { ok: true, ditolak: data });
+  }
+  const { data, error } = await db.rpc("ai_agent_apply", { p_ids: ids });
+  return error ? fail(error) : json(req, 200, data);
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
   if (req.method !== "POST") return json(req, 405, { error: "Metode tidak didukung" });
@@ -774,7 +812,7 @@ Deno.serve(async (req) => {
   let body: any;
   try { body = await req.json(); } catch { return json(req, 400, { error: "Permintaan tidak valid" }); }
   const mode = body?.mode ?? "chat";
-  if (!["chat", "receipt", "recall_template", "brief", "staff_brief", "info"].includes(mode)) return json(req, 400, { error: "Mode tidak dikenal" });
+  if (!["chat", "receipt", "recall_template", "brief", "staff_brief", "info", "agent_apply", "agent_reject", "agent_undo"].includes(mode)) return json(req, 400, { error: "Mode tidak dikenal" });
 
   // Info penyedia untuk teks persetujuan di aplikasi (tidak memakai kuota)
   if (mode === "info") {
@@ -782,6 +820,8 @@ Deno.serve(async (req) => {
       ? { configured: true, provider: provider.name, label: provider.label, model: provider.model, free_tier: provider.freeTier }
       : { configured: false });
   }
+  // Keputusan atas usulan agen tidak memanggil model AI: tidak butuh penyedia & tidak memakai kuota.
+  if (mode === "agent_apply" || mode === "agent_reject" || mode === "agent_undo") return await agentDecision(req, db, mode, body);
   if (!provider) return json(req, 503, { error: "Asisten AI belum dikonfigurasi oleh pengelola Dentiva." });
 
   // Validasi masukan sebelum memakai kuota
@@ -846,6 +886,7 @@ Deno.serve(async (req) => {
   const today = todayJakarta();
   const usage: Usage = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
   const toolsUsed = new Set<string>();
+  const agentCtx: AgentCtx = { group: crypto.randomUUID(), actions: [] };
   let outcome: Outcome = "ok";
   let logQuestion = question;
   let feature = "finance_chat";
@@ -878,12 +919,14 @@ Deno.serve(async (req) => {
       const { data: snapshot } = await db.rpc("ai_snapshot");
       questionNorm = normalizeQuestion(question);
       fingerprint = await dataFingerprint(snapshot);
+      // Permintaan bertindak (catat/ubah/tambah …) tidak boleh dijawab dari jawaban cepat atau basis pengetahuan.
+      const agentIntent = isAgentIntent(questionNorm);
       const isRetry = body.retry === true;
 
       // Basis pengetahuan: jawaban yang dinilai tepat oleh admin.
       // deno-lint-ignore no-explicit-any
       let matches: any[] = [];
-      if (questionNorm) {
+      if (questionNorm && !agentIntent) {
         const { data: m } = await db.rpc("ai_knowledge_match", { p_norm: questionNorm, p_limit: 3 });
         matches = Array.isArray(m) ? m : [];
       }
@@ -895,7 +938,7 @@ Deno.serve(async (req) => {
         answerText = exact.answer;
         payload = { answer: exact.answer, tools: [], cached: true };
         await admin.rpc("ai_knowledge_hit", { p_id: exact.id });
-      } else if (!isRetry && clean.length === 0 && (fast = fastAnswer(questionNorm, snapshot))) {
+      } else if (!isRetry && !agentIntent && clean.length === 0 && (fast = fastAnswer(questionNorm, snapshot))) {
         // Jalur cepat: pertanyaan umum dijawab dari data terbaru / pelajaran panduan, tanpa model AI.
         outcome = "cached";
         answerText = fast.answer;
@@ -908,17 +951,19 @@ Deno.serve(async (req) => {
         const retryNote = isRetry
           ? `\n\nPERHATIAN: jawaban Anda sebelumnya untuk pertanyaan ini dinilai KURANG TEPAT oleh admin${note ? ` dengan catatan: "${note}"` : ""}. Periksa ulang dengan teliti (panggil alat data bila perlu), perbaiki kesalahannya, dan jangan mengulang jawaban yang sama.`
           : "";
-        const snapText = snapshot ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snapshot)}` : "";
+        const { data: pending } = await db.from("ai_actions").select("kind, preview").eq("status", "pending")
+          .gt("expires_at", new Date().toISOString()).order("created_at", { ascending: false }).limit(12);
+        const snapText = (snapshot ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snapshot)}` : "") + pendingText(pending ?? []);
         const turns: ChatTurn[] = [
           ...clean,
           { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).${snapText}${referenceText(refs)}${retryNote}\n\nPertanyaan: ${question}` },
         ];
-        const r = provider.name === "gemini" ? await chatGemini(provider, db, turns, usage, toolsUsed)
-          : provider.name === "groq" ? await chatGroq(provider, db, turns, usage, toolsUsed)
-          : await chatAnthropic(provider, db, turns, usage, toolsUsed);
+        const r = provider.name === "gemini" ? await chatGemini(provider, db, turns, usage, toolsUsed, agentCtx)
+          : provider.name === "groq" ? await chatGroq(provider, db, turns, usage, toolsUsed, agentCtx)
+          : await chatAnthropic(provider, db, turns, usage, toolsUsed, agentCtx);
         if (r.refused) outcome = "refused";
         answerText = r.answer;
-        payload = { answer: r.answer, tools: [...toolsUsed], references: refs.length };
+        payload = { answer: r.answer, tools: [...toolsUsed], references: refs.length, actions: agentCtx.actions };
       }
     } else if (mode === "receipt") {
       feature = "receipt_scan";

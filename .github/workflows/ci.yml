@@ -41,6 +41,9 @@ jobs:
       - name: Migration smoke test (PGlite, tanpa Docker)
         run: npm run db:smoke
 
+      - name: Denti Agen — uji fungsi database pada skema produksi (PGlite)
+        run: npm run db:agent
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x

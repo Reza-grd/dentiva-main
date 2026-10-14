@@ -1,0 +1,327 @@
+/**
+ * Uji fungsi database Denti Agen terhadap skema produksi ASLI (PGlite, tanpa Docker).
+ *   npm run db:agent
+ * Mencakup: usulan → persetujuan → pembatalan untuk semua jenis tindakan, validasi, peringatan duplikat,
+ * keamanan antar-klinik & peran, kedaluwarsa usulan, persetujuan massal yang atomik, dan alat baca.
+ */
+import test, { before } from "node:test";
+import assert from "node:assert/strict";
+import { buildDb } from "./schema.mjs";
+
+const A = "aaaaaaaa-0000-4000-8000-000000000001";
+const B = "bbbbbbbb-0000-4000-8000-000000000002";
+const ADMIN_A = "a0000000-0000-4000-8000-00000000000a";
+const RECEP_A = "a0000000-0000-4000-8000-00000000000e";
+const ADMIN_B = "b0000000-0000-4000-8000-00000000000b";
+
+let db;
+const asUser = async (uid, fn) => {
+  await db.exec("reset role");
+  const clinic = (await db.query("select clinic_id from public.users where id = $1", [uid])).rows[0]?.clinic_id;
+  await db.query("select set_config('request.jwt.claims', $1, false), set_config('request.jwt.claim.sub', $2, false)",
+    [JSON.stringify({ sub: uid, role: "authenticated", app_metadata: { clinic_id: clinic } }), uid]);
+  await db.exec("set role authenticated");
+  try { return await fn(); } finally { await db.exec("reset role"); }
+};
+const q = async (sql, params) => (await db.query(sql, params)).rows;
+const one = async (sql, params) => (await q(sql, params))[0];
+
+const propose = (uid, kind, args) => asUser(uid, async () => (await one("select public.ai_agent_propose($1, $2::jsonb) r", [kind, JSON.stringify(args)])).r);
+const apply = (uid, ids) => asUser(uid, async () => (await one("select public.ai_agent_apply($1::uuid[]) r", [ids])).r);
+const undo = (uid, id) => asUser(uid, async () => (await one("select public.ai_agent_undo($1::uuid) r", [id])).r);
+const read = (uid, sql, params) => asUser(uid, async () => (await one(sql, params)).r);
+const ok = async (kind, args, uid = ADMIN_A) => {
+  const r = await propose(uid, kind, args);
+  assert.equal(r.ok, true, `${kind}: ${r.error}`);
+  return r;
+};
+const run = async (kind, args, uid = ADMIN_A) => {
+  const r = await ok(kind, args, uid);
+  return { proposal: r, applied: await apply(uid, [r.action_id]) };
+};
+const rejects = (p, re) => assert.rejects(p, (e) => re.test(e.message));
+
+before(async () => {
+  db = await buildDb();
+  await db.exec(`
+    insert into public.clinics (id, name, slug, status) values ('${A}', 'Klinik A', 'klinik-a', 'active'), ('${B}', 'Klinik B', 'klinik-b', 'active');
+    insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data) values
+      ('${ADMIN_A}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-a@test.local', '{}'),
+      ('${RECEP_A}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'resep-a@test.local', '{}'),
+      ('${ADMIN_B}', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'admin-b@test.local', '{}');
+    insert into public.users (id, email, full_name, role, clinic_id, status) values
+      ('${ADMIN_A}', 'admin-a@test.local', 'Admin A', 'admin', '${A}', 'active'),
+      ('${RECEP_A}', 'resep-a@test.local', 'Resepsionis A', 'resepsionis', '${A}', 'active'),
+      ('${ADMIN_B}', 'admin-b@test.local', 'Admin B', 'admin', '${B}', 'active');
+    insert into public.treatments (clinic_id, kode_treatment, nama_treatment, kategori, harga_dasar, tier) values
+      ('${A}', 'T-1', 'Scaling', 'Periodonsia', 300000, 'ringan'),
+      ('${A}', 'T-2', 'Tambal Komposit', 'Konservasi', 450000, 'sedang'),
+      ('${B}', 'T-1', 'Scaling B', 'Periodonsia', 111000, 'ringan');
+  `);
+});
+
+test("peran: resepsionis tidak boleh mengusulkan/membaca; klinik lain tidak melihat data", async () => {
+  await rejects(propose(RECEP_A, "pengeluaran_catat", { kategori: "Lainnya", deskripsi: "x", jumlah: 1000 }), /hanya untuk admin/i);
+  await rejects(read(RECEP_A, "select public.ai_cari_bahan('') r"), /hanya untuk admin/i);
+  await assert.rejects(db.exec("set role anon; select public.ai_agent_propose('pengeluaran_catat', '{}'::jsonb)"));
+  await db.exec("reset role");
+});
+
+test("jenis tidak dikenal & argumen tidak valid ditolak dengan pesan jelas", async () => {
+  assert.equal((await propose(ADMIN_A, "hapus_semua", {})).ok, false);
+  const r1 = await propose(ADMIN_A, "pengeluaran_catat", { kategori: "Lainnya", deskripsi: "Listrik", jumlah: "1.250.000" });
+  assert.equal(r1.ok, false); assert.match(r1.error, /angka polos/);
+  const r2 = await propose(ADMIN_A, "pengeluaran_catat", { kategori: "Lainnya", deskripsi: "Listrik", jumlah: -5 });
+  assert.equal(r2.ok, false);
+  const r3 = await propose(ADMIN_A, "pengeluaran_catat", { kategori: "Lainnya", jumlah: 5000 });
+  assert.match(r3.error, /deskripsi/);
+  const r4 = await propose(ADMIN_A, "pengeluaran_catat", { kategori: "Lainnya", deskripsi: "x", jumlah: 5000, tanggal: "2999-01-01" });
+  assert.equal(r4.ok, false);
+});
+
+test("pengeluaran: catat → duplikat diperingatkan → ubah → hapus → undo", async () => {
+  const { proposal, applied } = await run("pengeluaran_catat", { tanggal: "2026-10-01", kategori: "Utilitas", deskripsi: "Listrik Oktober", jumlah: 1250000, pemasok: "PLN", nomor_nota: "PLN-001" });
+  assert.equal(applied.dijalankan, 1);
+  const exp = await one("select * from public.expenses where clinic_id = $1 and nomor_nota = 'PLN-001'", [A]);
+  assert.equal(exp.sumber, "ai_agen"); assert.equal(Number(exp.jumlah), 1250000); assert.equal(exp.recorded_by, ADMIN_A);
+  // duplikat
+  const dup = await ok("pengeluaran_catat", { tanggal: "2026-10-02", kategori: "Utilitas", deskripsi: "Listrik lagi", jumlah: 1250000 });
+  assert.ok(dup.pratinjau.peringatan.some((w) => /dua kali/.test(w)));
+  await asUser(ADMIN_A, () => q("select public.ai_agent_reject($1::uuid[])", [[dup.action_id]]));
+  assert.equal((await one("select status from public.ai_actions where id = $1", [dup.action_id])).status, "rejected");
+  // kategori tak dikenal → Lainnya + peringatan
+  const odd = await ok("pengeluaran_catat", { kategori: "Aneh", deskripsi: "Lain", jumlah: 5000 });
+  assert.ok(odd.pratinjau.peringatan.some((w) => /Lainnya/.test(w)));
+  // ubah
+  const id = exp.id;
+  const up = await run("pengeluaran_ubah", { id, jumlah: 1300000, pemasok: "PLN Persero" });
+  assert.equal(Number((await one("select jumlah from public.expenses where id = $1", [id])).jumlah), 1300000);
+  await undo(ADMIN_A, up.proposal.action_id);
+  assert.equal(Number((await one("select jumlah from public.expenses where id = $1", [id])).jumlah), 1250000);
+  assert.equal((await one("select pemasok from public.expenses where id = $1", [id])).pemasok, "PLN");
+  // hapus lalu kembalikan
+  const del = await run("pengeluaran_hapus", { id });
+  assert.equal(await one("select 1 x from public.expenses where id = $1", [id]), undefined);
+  await undo(ADMIN_A, del.proposal.action_id);
+  assert.equal(Number((await one("select jumlah from public.expenses where id = $1", [id])).jumlah), 1250000);
+  // batalkan pencatatan
+  await undo(ADMIN_A, proposal.action_id);
+  assert.equal(await one("select 1 x from public.expenses where id = $1", [id]), undefined);
+  // tidak bisa dibatalkan dua kali
+  await rejects(undo(ADMIN_A, proposal.action_id), /tidak dapat dibatalkan/);
+});
+
+test("bahan: tambah dengan stok awal → ubah → undo (hapus bersih)", async () => {
+  const { proposal, applied } = await run("bahan_tambah", { nama: "Sarung Tangan Nitril M", satuan_dasar: "pcs", kategori: "APD", stok_awal: 100, harga_per_satuan: 2000, stok_minimum: 20, supplier: "Medika" });
+  const b = await one("select * from public.master_bahan where clinic_id = $1 and nama_bahan = 'Sarung Tangan Nitril M'", [A]);
+  assert.equal(b.kode_bahan, "BHN-0001"); assert.equal(Number(b.stok_saat_ini), 100); assert.equal(Number(b.harga_rata2), 2000);
+  assert.equal(Number((await one("select count(*) c from public.stok_movements where material_id = $1", [b.id])).c), 1);
+  assert.equal(applied.tindakan[0].bisa_batal, true);
+  // nama sama → ditolak
+  const dup = await propose(ADMIN_A, "bahan_tambah", { nama: "  sarung tangan nitril m ", satuan_dasar: "pcs" });
+  assert.equal(dup.ok, false); assert.match(dup.error, /sudah ada/);
+  // ubah
+  const ch = await run("bahan_ubah", { bahan: "Sarung Tangan Nitril M", stok_minimum: 50, supplier: "Dental Mart" });
+  assert.equal(Number((await one("select stok_minimum from public.master_bahan where id = $1", [b.id])).stok_minimum), 50);
+  await undo(ADMIN_A, ch.proposal.action_id);
+  const back = await one("select stok_minimum, supplier from public.master_bahan where id = $1", [b.id]);
+  assert.equal(Number(back.stok_minimum), 20); assert.equal(back.supplier, "Medika");
+  assert.equal((await propose(ADMIN_A, "bahan_ubah", { bahan: "Sarung Tangan Nitril M", stok_minimum: 20 })).ok, false);
+  // undo tambah → hilang total (belum ada pergerakan lain)
+  await undo(ADMIN_A, proposal.action_id);
+  assert.equal(await one("select 1 x from public.master_bahan where id = $1", [b.id]), undefined);
+  assert.equal(Number((await one("select count(*) c from public.stok_movements where material_id = $1", [b.id])).c), 0);
+});
+
+test("stok masuk menghitung harga rata-rata tertimbang + batch kadaluarsa + peringatan harga/duplikat", async () => {
+  await run("bahan_tambah", { nama: "Anestesi Lidocaine", satuan_dasar: "ampul", stok_awal: 10, harga_per_satuan: 5000, stok_minimum: 5, satuan_beli: "box", faktor_konversi: 10 });
+  const b = await one("select * from public.master_bahan where clinic_id = $1 and nama_bahan = 'Anestesi Lidocaine'", [A]);
+  // 2 box = 20 ampul @ 6000/box → harga per ampul 600? (harga_satuan_beli per box 60000 → 6000/ampul)
+  const r = await run("stok_masuk", { bahan: "lidocaine", jumlah_beli: 2, harga_satuan_beli: 60000, tanggal: "2026-10-10", no_faktur: "F-77", tanggal_kadaluarsa: "2027-12-31" });
+  const after = await one("select * from public.master_bahan where id = $1", [b.id]);
+  assert.equal(Number(after.stok_saat_ini), 30);
+  assert.equal(Math.round(Number(after.harga_rata2)), Math.round((10 * 5000 + 20 * 6000) / 30));
+  const batch = await one("select * from public.material_batches where material_id = $1", [b.id]);
+  assert.equal(Number(batch.qty_awal), 20); assert.equal(String(batch.tanggal_kadaluarsa).slice(0, 10) === "2027-12-31" || batch.tanggal_kadaluarsa instanceof Date, true);
+  assert.equal(r.applied.tindakan[0].bisa_batal, false);
+  await rejects(undo(ADMIN_A, r.proposal.action_id), /tidak dapat dibatalkan/);
+  // faktur sama → peringatan duplikat; harga janggal → peringatan harga
+  const w = await ok("stok_masuk", { bahan: b.id, jumlah_beli: 1, harga_satuan_beli: 400000, no_faktur: "F-77" });
+  assert.ok(w.pratinjau.peringatan.some((x) => /Faktur/.test(x)));
+  assert.ok(w.pratinjau.peringatan.some((x) => /berbeda jauh/.test(x)));
+  // kadaluarsa sebelum tanggal masuk → ditolak
+  assert.equal((await propose(ADMIN_A, "stok_masuk", { bahan: b.id, jumlah_beli: 1, harga_satuan_beli: 1, tanggal: "2026-10-10", tanggal_kadaluarsa: "2026-01-01" })).ok, false);
+});
+
+test("opname: sesuaikan stok, catat kartu stok, undo hanya bila belum ada pergerakan lain", async () => {
+  const b = await one("select * from public.master_bahan where clinic_id = $1 and nama_bahan = 'Anestesi Lidocaine'", [A]);
+  assert.equal((await propose(ADMIN_A, "stok_opname", { bahan: b.id, stok_fisik: 30 })).ok, false); // tanpa selisih
+  const op = await run("stok_opname", { bahan: "Anestesi Lidocaine", stok_fisik: 24, catatan: "Hitung ulang rak" });
+  assert.equal(Number((await one("select stok_saat_ini from public.master_bahan where id = $1", [b.id])).stok_saat_ini), 24);
+  const mv = await one("select * from public.stok_movements where material_id = $1 and tipe = 'opname'", [b.id]);
+  assert.equal(Number(mv.jumlah), -6); assert.equal(Number(mv.stok_sebelum), 30);
+  assert.equal(Number((await one("select selisih from public.stok_opname where material_id = $1", [b.id])).selisih), -6);
+  await undo(ADMIN_A, op.proposal.action_id);
+  assert.equal(Number((await one("select stok_saat_ini from public.master_bahan where id = $1", [b.id])).stok_saat_ini), 30);
+  assert.equal(Number((await one("select count(*) c from public.stok_movements where material_id = $1 and tipe = 'opname'", [b.id])).c), 0);
+  // opname lalu ada pergerakan lain → undo ditolak
+  const op2 = await run("stok_opname", { bahan: b.id, stok_fisik: 28 });
+  await run("stok_masuk", { bahan: b.id, jumlah_beli: 1, harga_satuan_beli: 60000 });
+  await rejects(undo(ADMIN_A, op2.proposal.action_id), /pergerakan stok sesudah/);
+});
+
+test("overhead & target bulanan: atur, ubah, undo", async () => {
+  const n = await run("overhead_atur", { nama_biaya: "Sewa Ruko", jumlah_bulanan: 8000000, kategori: "Sewa" });
+  assert.equal(n.applied.tindakan[0].hasil.baru, true);
+  const o = await one("select * from public.overhead_costs where clinic_id = $1", [A]);
+  assert.equal(Number(o.jumlah_bulanan), 8000000);
+  const up = await run("overhead_atur", { nama_biaya: "sewa ruko", jumlah_bulanan: 9000000 });
+  assert.equal(Number((await one("select jumlah_bulanan from public.overhead_costs where id = $1", [o.id])).jumlah_bulanan), 9000000);
+  await undo(ADMIN_A, up.proposal.action_id);
+  assert.equal(Number((await one("select jumlah_bulanan from public.overhead_costs where id = $1", [o.id])).jumlah_bulanan), 8000000);
+  await run("overhead_atur", { nama_biaya: "Internet", jumlah_bulanan: 500000 });
+  // target bulan ini: total default = jumlah overhead aktif
+  assert.equal((await propose(ADMIN_A, "overhead_target", {})).ok, false); // bobot wajib bila target belum ada
+  const tg = await run("overhead_target", { total_bobot_estimasi: 200 });
+  const t = await one("select * from public.overhead_monthly_target where clinic_id = $1", [A]);
+  assert.equal(Number(t.total_overhead_bulanan), 8500000); assert.equal(Number(t.total_bobot_estimasi), 200);
+  assert.equal(Number(t.overhead_per_unit_bobot), 42500);
+  await undo(ADMIN_A, tg.proposal.action_id);
+  assert.equal(await one("select 1 x from public.overhead_monthly_target where clinic_id = $1", [A]), undefined);
+  const list = await read(ADMIN_A, "select public.ai_daftar_overhead() r");
+  assert.equal(Number(list.total_aktif_per_bulan), 8500000);
+});
+
+test("harga tindakan: ubah, tolak harga basi, massal, undo", async () => {
+  const t = await one("select * from public.treatments where clinic_id = $1 and nama_treatment = 'Scaling'", [A]);
+  const p = await run("tindakan_harga", { tindakan: "scaling", perubahan_persen: 10, pembulatan: 5000 });
+  assert.equal(Number((await one("select harga_dasar from public.treatments where id = $1", [t.id])).harga_dasar), 330000);
+  await undo(ADMIN_A, p.proposal.action_id);
+  assert.equal(Number((await one("select harga_dasar from public.treatments where id = $1", [t.id])).harga_dasar), 300000);
+  // basi: harga berubah antara usulan dan persetujuan
+  const stale = await ok("tindakan_harga", { tindakan: t.id, harga_baru: 350000 });
+  await db.exec(`update public.treatments set harga_dasar = 310000 where id = '${t.id}'`);
+  await rejects(apply(ADMIN_A, [stale.action_id]), /sudah berubah/);
+  await db.exec(`update public.treatments set harga_dasar = 300000 where id = '${t.id}'`);
+  assert.equal((await propose(ADMIN_A, "tindakan_harga", { tindakan: t.id })).ok, false);
+  assert.equal((await propose(ADMIN_A, "tindakan_harga", { tindakan: t.id, harga_baru: 1, perubahan_persen: 5 })).ok, false);
+  // massal
+  const m = await run("tindakan_harga_massal", { perubahan_persen: 5, pembulatan: 1000 });
+  const prices = (await q("select nama_treatment, harga_dasar from public.treatments where clinic_id = $1 order by 1", [A])).map((r) => Number(r.harga_dasar));
+  assert.deepEqual(prices, [315000, 473000]);
+  assert.equal(Number((await one("select harga_dasar from public.treatments where clinic_id = $1 and nama_treatment = 'Scaling B'", [B])).harga_dasar ?? 111000), 111000);
+  await undo(ADMIN_A, m.proposal.action_id);
+  assert.deepEqual((await q("select harga_dasar from public.treatments where clinic_id = $1 order by nama_treatment", [A])).map((r) => Number(r.harga_dasar)), [300000, 450000]);
+});
+
+test("tindakan baru/ubah + resep bahan (HPP) + undo", async () => {
+  const add = await run("tindakan_tambah", { nama: "Bleaching", harga_dasar: 1500000, tier: "berat", kategori: "Estetik", durasi_menit: 60 });
+  const t = await one("select * from public.treatments where clinic_id = $1 and nama_treatment = 'Bleaching'", [A]);
+  assert.match(t.kode_treatment, /^TND-0001$/); assert.equal(t.tier, "berat");
+  assert.equal((await propose(ADMIN_A, "tindakan_tambah", { nama: "bleaching", harga_dasar: 1 })).ok, false);
+  const ub = await run("tindakan_ubah", { tindakan: "Bleaching", durasi_menit: 90, is_active: false });
+  assert.equal((await one("select is_active from public.treatments where id = $1", [t.id])).is_active, false);
+  await undo(ADMIN_A, ub.proposal.action_id);
+  assert.equal((await one("select is_active from public.treatments where id = $1", [t.id])).is_active, true);
+  // resep
+  const rs = await run("resep_atur", { tindakan: "Bleaching", bahan: "Anestesi Lidocaine", qty_rata2: 2, wastage_percent: 10 });
+  const mat = await one("select * from public.treatment_materials where treatment_id = $1", [t.id]);
+  assert.equal(Number(mat.qty_rata2), 2); assert.equal(Number(mat.wastage_percent), 10);
+  const resep = await read(ADMIN_A, "select public.ai_resep_tindakan('Bleaching') r");
+  assert.equal(resep.resep.length, 1); assert.ok(Number(resep.total_biaya_bahan) > 0);
+  const up = await run("resep_atur", { tindakan: "Bleaching", bahan: "Anestesi Lidocaine", qty_rata2: 3 });
+  await undo(ADMIN_A, up.proposal.action_id);
+  assert.equal(Number((await one("select qty_rata2 from public.treatment_materials where treatment_id = $1", [t.id])).qty_rata2), 2);
+  const hp = await ok("tindakan_harga", { tindakan: "Bleaching", harga_baru: 1000 });
+  assert.ok(hp.pratinjau.peringatan.some((w) => /rugi bahan/.test(w)));
+  const del = await run("resep_hapus", { tindakan: "Bleaching", bahan: "Anestesi Lidocaine" });
+  assert.equal(await one("select 1 x from public.treatment_materials where treatment_id = $1", [t.id]), undefined);
+  await undo(ADMIN_A, del.proposal.action_id);
+  assert.equal(Number((await one("select qty_rata2 from public.treatment_materials where treatment_id = $1", [t.id])).qty_rata2), 2);
+  await undo(ADMIN_A, rs.proposal.action_id);
+  assert.equal(await one("select 1 x from public.treatment_materials where treatment_id = $1", [t.id]), undefined);
+  // undo tindakan baru: belum dipakai → terhapus
+  await undo(ADMIN_A, add.proposal.action_id);
+  assert.equal(await one("select 1 x from public.treatments where id = $1", [t.id]), undefined);
+});
+
+test("nama ambigu → kandidat; salah ketik ringan tetap dikenali", async () => {
+  await run("bahan_tambah", { nama: "Masker Bedah Earloop", satuan_dasar: "pcs", stok_awal: 50, harga_per_satuan: 1000 });
+  await run("bahan_tambah", { nama: "Masker Bedah Headloop", satuan_dasar: "pcs", stok_awal: 50, harga_per_satuan: 1200 });
+  const amb = await propose(ADMIN_A, "stok_masuk", { bahan: "masker bedah", jumlah_beli: 5, harga_satuan_beli: 1000 });
+  assert.equal(amb.ok, false); assert.match(amb.error, /ambigu/); assert.ok(amb.kandidat.length >= 2);
+  const typo = await propose(ADMIN_A, "stok_masuk", { bahan: "Masker Bedah Earlop", jumlah_beli: 5, harga_satuan_beli: 1000 });
+  assert.equal(typo.ok, true, typo.error);
+  assert.equal((await propose(ADMIN_A, "stok_masuk", { bahan: "semen gigi xyz", jumlah_beli: 1, harga_satuan_beli: 1 })).ok, false);
+});
+
+test("persetujuan massal atomik: satu gagal → tidak ada yang berubah", async () => {
+  const p1 = await ok("pengeluaran_catat", { kategori: "Marketing", deskripsi: "Brosur", jumlah: 300000, tanggal: "2026-10-05" });
+  const p2 = await ok("tindakan_harga", { tindakan: "Scaling", harga_baru: 320000 });
+  await db.exec(`update public.treatments set harga_dasar = 301000 where clinic_id = '${A}' and nama_treatment = 'Scaling'`); // p2 jadi basi
+  await rejects(apply(ADMIN_A, [p1.action_id, p2.action_id]), /sudah berubah/);
+  assert.equal(await one("select 1 x from public.expenses where clinic_id = $1 and deskripsi = 'Brosur'", [A]), undefined);
+  assert.equal((await one("select status from public.ai_actions where id = $1", [p1.action_id])).status, "pending");
+  await db.exec(`update public.treatments set harga_dasar = 300000 where clinic_id = '${A}' and nama_treatment = 'Scaling'`);
+  const good = await apply(ADMIN_A, [p1.action_id]);
+  assert.equal(good.dijalankan, 1);
+  await rejects(apply(ADMIN_A, [p1.action_id]), /sudah applied/);
+});
+
+test("kedaluwarsa & kepemilikan usulan", async () => {
+  const p = await ok("pengeluaran_catat", { kategori: "Lainnya", deskripsi: "Parkir", jumlah: 10000 });
+  await rejects(apply(ADMIN_B, [p.action_id]), /Sebagian usulan tidak ditemukan|bukan milik/);
+  await db.exec(`update public.ai_actions set expires_at = now() - interval '1 minute' where id = '${p.action_id}'`);
+  await rejects(apply(ADMIN_A, [p.action_id]), /kedaluwarsa/);
+  assert.equal(await one("select 1 x from public.expenses where clinic_id = $1 and deskripsi = 'Parkir'", [A]), undefined);
+});
+
+test("isolasi klinik: admin B tidak menemukan/memakai data klinik A", async () => {
+  const bahan = (await one("select id from public.master_bahan where clinic_id = $1 limit 1", [A])).id;
+  const r = await propose(ADMIN_B, "stok_masuk", { bahan, jumlah_beli: 1, harga_satuan_beli: 1 });
+  assert.equal(r.ok, false);
+  const cari = await read(ADMIN_B, "select public.ai_cari_bahan('') r");
+  assert.equal(cari.jumlah, 0);
+  const seed = await run("pengeluaran_catat", { kategori: "Lainnya", deskripsi: "Biaya uji isolasi", jumlah: 7000 });
+  const exp = seed.applied.tindakan[0].hasil.expense_id;
+  assert.equal((await propose(ADMIN_B, "pengeluaran_hapus", { id: exp })).ok, false);
+  const t = (await one("select id from public.treatments where clinic_id = $1 limit 1", [A])).id;
+  assert.equal((await propose(ADMIN_B, "tindakan_harga", { tindakan: t, harga_baru: 1 })).ok, false);
+  const riwayat = await read(ADMIN_B, "select public.ai_riwayat_agen(50) r");
+  assert.equal(riwayat.tindakan.length, 0);
+});
+
+test("tabel ai_actions: baca oleh admin klinik sendiri saja; tulis langsung ditolak", async () => {
+  const mine = await asUser(ADMIN_A, () => q("select count(*)::int c from public.ai_actions"));
+  assert.ok(mine[0].c > 5);
+  const theirs = await asUser(ADMIN_B, () => q("select count(*)::int c from public.ai_actions"));
+  assert.equal(theirs[0].c, 0);
+  const recep = await asUser(RECEP_A, () => q("select count(*)::int c from public.ai_actions"));
+  assert.equal(recep[0].c, 0);
+  await assert.rejects(asUser(ADMIN_A, () => db.exec("update public.ai_actions set status = 'applied'")));
+  await assert.rejects(asUser(ADMIN_A, () => db.exec("delete from public.ai_actions")));
+  await assert.rejects(asUser(ADMIN_A, () => db.exec(`insert into public.ai_actions (clinic_id, user_id, kind, args, preview) values ('${A}', '${ADMIN_A}', 'x', '{}', '{}')`)));
+});
+
+test("alat baca: cari bahan, kartu stok, saran pemesanan, cari pengeluaran, cari tindakan", async () => {
+  const lid = await one("select id from public.master_bahan where clinic_id = $1 and nama_bahan = 'Anestesi Lidocaine'", [A]);
+  // pemakaian 30 hari: 3 ampul/hari → habis dalam ±10 hari
+  await db.exec(`update public.master_bahan set stok_saat_ini = 30, stok_minimum = 5 where id = '${lid.id}'`);
+  await db.exec(`insert into public.stok_movements (clinic_id, material_id, tipe, jumlah, stok_sebelum, stok_sesudah, created_at)
+                 select '${A}', '${lid.id}', 'keluar', -3, 100, 97, now() - (g || ' days')::interval from generate_series(0, 29) g`);
+  const cari = await read(ADMIN_A, "select public.ai_cari_bahan('lidocaine') r");
+  assert.equal(cari.jumlah, 1); assert.equal(cari.bahan[0].status, "aman");
+  const kartu = await read(ADMIN_A, "select public.ai_kartu_stok('lidocaine', 45) r");
+  assert.ok(Number(kartu.total_keluar) >= 90);
+  const saran = await read(ADMIN_A, "select public.ai_saran_pemesanan(30, 14) r");
+  const s = saran.bahan.find((b) => b.nama === "Anestesi Lidocaine");
+  assert.ok(s, "lidocaine perlu dipesan"); assert.equal(Number(s.pakai_per_hari), 3); assert.equal(Number(s.hari_tersisa), 10);
+  assert.ok(Number(s.saran_beli) >= 12);
+  await run("pengeluaran_catat", { kategori: "Utilitas", deskripsi: "Listrik November", jumlah: 1250000 });
+  const pe = await read(ADMIN_A, "select public.ai_cari_pengeluaran(null, null, 'listrik') r");
+  assert.equal(pe.jumlah, 1); assert.equal(Number(pe.total), 1250000);
+  const td = await read(ADMIN_A, "select public.ai_cari_tindakan('scal') r");
+  assert.equal(td.jumlah, 1);
+  const hist = await read(ADMIN_A, "select public.ai_riwayat_agen(5) r");
+  assert.equal(hist.tindakan.length, 5);
+});

@@ -48,3 +48,30 @@
 .ai-mic--on { color: #ef4444 !important; border-color: #ef4444 !important; animation: ai-mic-pulse 1.2s ease-in-out infinite; }
 @keyframes ai-mic-pulse { 50% { box-shadow: 0 0 0 6px rgb(239 68 68 / .15); } }
 @media (prefers-reduced-motion: reduce) { .ai-typeahead, .ai-mic--on { animation: none; } }
+
+/* Denti Agen: kartu usulan tindakan */
+.ai-acts { display: grid; gap: .6rem; margin-top: .85rem; }
+.ai-acts__lead { display: flex; align-items: center; gap: .35rem; font-size: .72rem; letter-spacing: .02em; color: var(--color-text-muted, #6b7280); }
+.ai-act { border: 1px solid var(--color-border, #e5e7eb); border-radius: .85rem; padding: .75rem .9rem; background: color-mix(in srgb, var(--color-accent) 3%, transparent); }
+.ai-act--applied { border-color: color-mix(in srgb, #16a34a 45%, transparent); background: color-mix(in srgb, #16a34a 6%, transparent); }
+.ai-act--rejected, .ai-act--undone, .ai-act--expired { opacity: .7; }
+.ai-act__head { display: flex; align-items: flex-start; justify-content: space-between; gap: .6rem; }
+.ai-act__head h4 { font-size: .88rem; font-weight: 600; margin: 0; }
+.ai-act__risk, .ai-act__badge { flex-shrink: 0; display: inline-flex; align-items: center; gap: .25rem; font-size: .68rem; font-weight: 600; padding: .12rem .5rem; border-radius: 999px; border: 1px solid currentColor; }
+.ai-act__risk--low { color: #15803d; } .ai-act__risk--mid { color: #b45309; } .ai-act__risk--high { color: #b91c1c; }
+.ai-act__badge { color: var(--color-text-muted, #6b7280); }
+.ai-act__badge--ok { color: #15803d; }
+.ai-act__lines { margin: .45rem 0 0; padding-left: 1.05rem; font-size: .8rem; line-height: 1.5; color: var(--color-text, inherit); }
+.ai-act__warn { display: flex; gap: .35rem; align-items: flex-start; margin: .45rem 0 0; padding: .4rem .55rem; border-radius: .55rem; font-size: .75rem; color: #92400e; background: rgb(245 158 11 / .12); }
+.ai-act__warn svg { flex-shrink: 0; margin-top: .12rem; }
+.ai-act__error { margin: .45rem 0 0; padding: .4rem .55rem; border-radius: .55rem; font-size: .76rem; color: #b91c1c; background: rgb(239 68 68 / .1); }
+.ai-act__foot, .ai-acts__all { display: flex; flex-wrap: wrap; gap: .45rem; align-items: center; margin-top: .6rem; }
+.ai-acts__all { padding-top: .15rem; }
+.ai-act__btn { display: inline-flex; align-items: center; gap: .3rem; padding: .32rem .75rem; border-radius: 999px; font-size: .78rem; font-weight: 600;
+  color: var(--color-text, inherit); border: 1px solid var(--color-border, #d1d5db); background: transparent; transition: background .2s, border-color .2s, transform .2s; }
+.ai-act__btn:hover:not(:disabled) { border-color: color-mix(in srgb, var(--color-accent) 50%, transparent); transform: translateY(-1px); }
+.ai-act__btn:disabled { opacity: .55; cursor: not-allowed; }
+.ai-act__btn--ok { color: #fff; background: var(--color-accent); border-color: var(--color-accent); }
+.ai-act__btn--ok:hover:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 88%, #000); }
+.ai-act__hint { font-size: .72rem; color: var(--color-text-muted, #6b7280); }
+@media (prefers-reduced-motion: reduce) { .ai-act__btn { transition: none; } .ai-act__btn:hover:not(:disabled) { transform: none; } }

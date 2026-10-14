@@ -29,6 +29,7 @@
     "db:new": "supabase migration new",
     "storybook": "npm run storybook -w @dentiva/clinic",
     "db:smoke": "node supabase/tests/smoke/migrations.smoke.mjs",
+    "db:agent": "node --test supabase/tests/agent/agent.test.mjs",
     "check:functions": "bash scripts/check-edge-functions.sh"
   },
   "devDependencies": {

@@ -9,6 +9,15 @@ async function invokeError(error) {
   return { message: error?.message || 'Asisten AI tidak dapat dihubungi.' };
 }
 
+async function callAgent(body) {
+  const { data, error } = await supabase.functions.invoke('ai-assistant', { body });
+  if (error) {
+    const e = await invokeError(error);
+    return { success: false, error: e.message, status: e.status };
+  }
+  return { success: true, data };
+}
+
 export const aiService = {
   /** { paket, tersedia_di_paket, aktif, kuota_bulanan, terpakai_bulan_ini } */
   async getStatus() {
@@ -95,6 +104,23 @@ export const aiService = {
       return { success: false, error: e.message, status: e.status, httpStatus: error?.context?.status };
     }
     return { success: true, data };
+  },
+
+  /**
+   * Denti Agen — keputusan admin atas usulan (tanpa model AI & tanpa kuota; database memeriksa admin, pemilik, kedaluwarsa).
+   * applyActions: satu paket (atomik) → { ok, dijalankan, tindakan: [{ id, judul, hasil, bisa_batal }] }.
+   */
+  async applyActions(ids) { return callAgent({ mode: 'agent_apply', ids }); },
+  async rejectActions(ids) { return callAgent({ mode: 'agent_reject', ids }); },
+  async undoAction(id) { return callAgent({ mode: 'agent_undo', id }); },
+
+  /** Riwayat usulan/tindakan Denti Agen klinik ini (admin). */
+  async listActions(limit = 30) {
+    const { data, error } = await supabase.from('ai_actions')
+      .select('id, kind, preview, status, created_at, decided_at, undoable')
+      .order('created_at', { ascending: false }).limit(limit);
+    if (error) return { success: false, error: error.message };
+    return { success: true, data: data || [] };
   },
 
   /** Draf template WA recall dengan placeholder {nama} → { template, status }. */
