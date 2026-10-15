@@ -30,6 +30,9 @@
     "storybook": "npm run storybook -w @dentiva/clinic",
     "db:smoke": "node supabase/tests/smoke/migrations.smoke.mjs",
     "db:agent": "node --test supabase/tests/agent/agent.test.mjs",
+    "eval:agen": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs",
+    "eval:agen:selftest": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs --selftest",
+    "eval:agen:negative": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs --negative",
     "check:functions": "bash scripts/check-edge-functions.sh"
   },
   "devDependencies": {

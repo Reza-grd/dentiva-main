@@ -64,6 +64,29 @@ Admin ──Batalkan─▶ mode agent_undo  ──▶ ai_agent_undo()  ──▶
 Berkas: `supabase/migrations/20261014090000_ai_agen.sql` (tabel, validasi, eksekusi, pembatalan, alat baca) dan `20261015090000_ai_agen_lanjutan.sql` (tindakan massal, buang stok, analitik),
 `supabase/functions/ai-assistant/agent.ts` (definisi alat), `apps/clinic/src/components/ai/AgentActions.jsx` (kartu).
 
+## Melatih agen — evaluasi berbasis data
+
+Kualitas agen ditentukan model yang dipakai. **Penyedia produksi saat ini Gemini flash** (lihat `ai_usage.model`), bukan Claude — model kecil
+lebih mudah salah memilih alat, mengarang angka, atau mengklaim "sudah dicatat". Karena itu "melatih" = menyetel **prompt, skema alat, dan
+penjaga deterministik** dengan ukuran yang jelas, bukan menebak.
+
+```bash
+npm run eval:agen:selftest     # CI: skrip ideal vs alat & data nyata (tanpa jaringan) — bukti skenario konsisten
+npm run eval:agen:negative     # CI: skrip dirusak sengaja; penilai harus menandai ≥ 90% skenario gagal
+GEMINI_API_KEY=… npm run eval:agen -- --provider gemini --repeat 3 --json hasil.json   # model SUNGGUHAN
+```
+
+Harness (`supabase/tests/agent/eval/`) memakai **instruksi sistem, alat, dan pelaksana alat yang sama dengan produksi** (`core.ts`, `agent.ts`) di atas
+database skema produksi (PGlite) berisi klinik contoh yang realistis, lalu menilai: alat yang dipanggil, usulan (jenis + argumen), isi jawaban,
+dan invarian *"data bisnis tidak berubah tanpa persetujuan"*. 32 skenario awal mencakup briefing, analitik, pengeluaran, bahan (ambigu, daftar, nota),
+kadaluarsa, tarif/overhead/resep, konfirmasi lanjutan, di luar cakupan, dan injeksi prompt.
+
+Alur menyetel: jalankan dengan kunci penyedia → lihat skenario gagal (jejak alat + jawaban dicetak) → ubah `AGENT_PROMPT` / deskripsi alat / penjaga →
+ulangi sampai ≥ 85% (`--min`) → tambahkan skenario baru untuk setiap kegagalan nyata dari produksi. Lapisan penjaga yang tidak bergantung model:
+koersi argumen ("Rp 1.250.000", "60rb", "14/10/2026", "10%"), alat usulan hanya disodorkan bila relevan (`needsWriteTools`), `briefing_agen`
+(prioritas dihitung di database), dan `guardAgentAnswer` (koreksi klaim palsu "sudah dicatat", jawaban kosong → ringkasan usulan).
+Panduan membuat skenario tambahan dengan bantuan GPT: `docs/briefing-gpt-agen.md`.
+
 ## Menambah kemampuan baru (satu jenis tindakan)
 
 1. Database: tambah `ai_agent_p_<jenis>` (validasi + pratinjau), `ai_agent_x_<jenis>` (eksekusi, kembalikan `{hasil, sebelum, bisa_batal}`),

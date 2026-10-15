@@ -454,3 +454,31 @@ test("lanjutan: alat analitik hanya admin & terisolasi per klinik", async () => 
   const m = await read(ADMIN_B, "select public.ai_analisis_margin(10) r");
   assert.ok(m.tindakan.every((x) => x.nama === "Scaling B"));
 });
+
+test("briefing agen: prioritas terurut dari berbagai sinyal, tanpa skor mentah, ada petunjuk lanjut", async () => {
+  // bahan yang biasa dipakai tapi sudah habis → prioritas tertinggi
+  await db.exec(`insert into public.master_bahan (clinic_id, kode_bahan, nama_bahan, satuan_dasar, stok_saat_ini, stok_minimum, harga_rata2, is_active)
+                 values ('${A}', 'BJ-1', 'Benang Jahit', 'pcs', 0, 5, 12000, true)`);
+  const bj = (await one("select id from public.master_bahan where kode_bahan = 'BJ-1'")).id;
+  await db.exec(`insert into public.stok_movements (clinic_id, material_id, tipe, jumlah, stok_sebelum, stok_sesudah, created_at)
+                 select '${A}', '${bj}', 'keluar', -1, 30, 29, now() - (g || ' days')::interval from generate_series(1, 20) g`);
+  const b = await read(ADMIN_A, "select public.ai_briefing_agen() r");
+  const tipe = b.prioritas.map((x) => x.tipe);
+  assert.equal(tipe[0], "stok_habis", JSON.stringify(tipe));
+  for (const must of ["tindakan_rugi", "kadaluarsa_lewat", "biaya_rutin_belum", "lonjakan_pengeluaran"]) assert.ok(tipe.includes(must), `${must} ∈ ${tipe}`);
+  assert.deepEqual(b.prioritas.map((x) => x.peringkat), b.prioritas.map((_, i) => i + 1));
+  assert.ok(b.prioritas.length <= 6);
+  assert.ok(b.prioritas.every((x) => !("skor" in x) && x.judul && x.lanjut));
+  assert.match(b.prioritas[0].judul, /Benang Jahit/);
+  assert.ok(Number(b.gudang.habis) >= 1);
+  // klinik B hanya punya satu tindakan tanpa resep → satu-satunya temuan; data klinik A tidak bocor
+  const b2 = await read(ADMIN_B, "select public.ai_briefing_agen() r");
+  assert.deepEqual(b2.prioritas.map((x) => x.tipe), ["resep_kosong"]);
+  assert.equal(b2.gudang.bahan_aktif, 0);
+  await db.exec(`delete from public.treatments where clinic_id = '${B}'`);
+  const kosong = await read(ADMIN_B, "select public.ai_briefing_agen() r");
+  assert.equal(kosong.jumlah_temuan, 0); assert.match(kosong.catatan, /Tidak ada temuan mendesak/);
+  await rejects(read(RECEP_A, "select public.ai_briefing_agen() r"), /hanya untuk admin/i);
+  await assert.rejects(db.exec("set role anon; select public.ai_briefing_agen()"));
+  await db.exec("reset role");
+});

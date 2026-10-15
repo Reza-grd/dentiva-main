@@ -1,6 +1,6 @@
 // deno test --config supabase/functions/ai-assistant/deno.json supabase/functions/ai-assistant/agent.test.ts
 import { assert, assertEquals, assertStringIncludes } from "jsr:@std/assert@1";
-import { AGENT_PROMPT, AGENT_READ_TOOLS, AGENT_TOOL_NAMES, AGENT_TOOLS, AGENT_WRITE_TOOLS, isAgentIntent, pendingText, runAgentTool, susunPesanPemasok, type AgentCtx } from "./agent.ts";
+import { AGENT_PROMPT, AGENT_READ_TOOLS, AGENT_TOOL_NAMES, AGENT_TOOLS, AGENT_WRITE_TOOLS, coerceArgs, guardAgentAnswer, isAgentIntent, needsWriteTools, parseAngkaIndonesia, pendingText, runAgentTool, susunPesanPemasok, type AgentCtx } from "./agent.ts";
 import { normalizeQuestion } from "./knowledge.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -32,7 +32,7 @@ Deno.test("skema alat: nama unik, objek bertipe, wajib ⊆ properti, deskripsi t
       assert(p.description, `${t.name}.${k} tanpa deskripsi`);
     }
   }
-  assertEquals(AGENT_READ_TOOLS.length, 14);
+  assertEquals(AGENT_READ_TOOLS.length, 15);
   assertEquals(AGENT_WRITE_TOOLS.length, 18);
   for (const t of AGENT_WRITE_TOOLS) assert(t.name.startsWith("usulkan_"), t.name);
 });
@@ -191,4 +191,71 @@ Deno.test("niat agen: perintah buang/musnahkan stok terdeteksi", () => {
 Deno.test("prompt agen memuat protokol situasi & contoh nada, tanpa karakter terlarang", () => {
   for (const w of ["PROTOKOL SITUASI UMUM", "GAYA JAWABAN", "CONTOH NADA", "Briefing", "draf_pesan_pemasok", "analisis_margin", "stok_masuk_banyak", "REKAN KERJA"]) assertStringIncludes(AGENT_PROMPT, w);
   assert(AGENT_PROMPT.length > 3000 && AGENT_PROMPT.length < 12000, String(AGENT_PROMPT.length));
+});
+
+Deno.test("parseAngkaIndonesia: format uang/angka gaya Indonesia", () => {
+  const ok: Array<[string, number]> = [
+    ["1250000", 1250000], ["Rp 1.250.000", 1250000], ["rp1.250.000", 1250000], ["1.250.000,50", 1250000.5], ["1,5 juta", 1500000], ["1.5jt", 1500000],
+    ["60rb", 60000], ["60 ribu", 60000], ["60k", 60000], ["2 juta", 2000000], ["8jt", 8000000], ["10%", 10], ["12.5", 12.5], ["0,25", 0.25], ["-5", -5], ["1 miliar", 1e9],
+  ];
+  for (const [raw, want] of ok) assertEquals(parseAngkaIndonesia(raw), want, raw);
+  for (const bad of ["abc", "", "dua puluh", "1.2.3", "Rp", "12 box"]) assertEquals(parseAngkaIndonesia(bad), null, bad);
+});
+
+Deno.test("coerceArgs: angka & tanggal & boolean diperbaiki hanya pada properti bertipe sesuai; item array ikut", () => {
+  const stok = AGENT_TOOLS.find((t) => t.name === "usulkan_stok_masuk")!.input_schema;
+  const out = coerceArgs(stok, { bahan: "lidocaine", jumlah_beli: "2", harga_satuan_beli: "Rp 60.000", tanggal: "12/10/2026", tanggal_kadaluarsa: "2027-12" }) as Record<string, unknown>;
+  assertEquals(out, { bahan: "lidocaine", jumlah_beli: 2, harga_satuan_beli: 60000, tanggal: "2026-10-12", tanggal_kadaluarsa: "2027-12-01" });
+  const banyak = AGENT_TOOLS.find((t) => t.name === "usulkan_stok_masuk_banyak")!.input_schema;
+  const b = coerceArgs(banyak, { supplier: 123, items: [{ bahan: "kapas", jumlah_beli: "5", harga_satuan_beli: "1,5rb" }] }) as { supplier: string; items: Array<Record<string, unknown>> };
+  assertEquals(b.supplier, "123");
+  assertEquals(b.items[0], { bahan: "kapas", jumlah_beli: 5, harga_satuan_beli: 1500 });
+  const bahan = AGENT_TOOLS.find((t) => t.name === "usulkan_bahan_ubah")!.input_schema;
+  assertEquals((coerceArgs(bahan, { bahan: "x", is_active: "ya", stok_minimum: "20" }) as Record<string, unknown>), { bahan: "x", is_active: true, stok_minimum: 20 });
+  // tidak dikenali → dibiarkan agar database yang menolak dengan pesan jelas; properti asing tidak disentuh
+  assertEquals((coerceArgs(stok, { jumlah_beli: "banyak", lain: "1.000" }) as Record<string, unknown>), { jumlah_beli: "banyak", lain: "1.000" });
+});
+
+Deno.test("alat usulan memakai argumen yang sudah dikoersi", async () => {
+  const { db, calls } = fakeDb((_fn, p) => ({ data: { ok: true, action_id: "a", jenis: p.p_kind, pratinjau: {} } }));
+  await runAgentTool(db, newCtx(), "usulkan_pengeluaran_catat", { kategori: "Utilitas", deskripsi: "Listrik", jumlah: "Rp 1.250.000", tanggal: "14/10/2026" });
+  assertEquals(calls[0].params.p_args, { kategori: "Utilitas", deskripsi: "Listrik", jumlah: 1250000, tanggal: "2026-10-14" });
+});
+
+Deno.test("briefing_agen memanggil ai_briefing_agen", async () => {
+  const { db, calls } = fakeDb(() => ({ data: { prioritas: [] } }));
+  assertEquals((await runAgentTool(db, newCtx(), "briefing_agen", {}))?.isError, false);
+  assertEquals(calls[0].fn, "ai_briefing_agen");
+  assert(AGENT_PROMPT.includes("briefing_agen"));
+});
+
+const A1 = { id: "1", jenis: "pengeluaran_catat", pratinjau: { judul: "Catat pengeluaran Rp 1.250.000" } };
+Deno.test("guardAgentAnswer: jawaban kosong + usulan → ringkasan; klaim 'sudah dicatat' dikoreksi", () => {
+  const empty = guardAgentAnswer("", [A1, { ...A1, id: "2", pratinjau: { judul: "Stok masuk: Kapas" } }], true);
+  assertStringIncludes(empty, "2 usulan");
+  assertStringIncludes(empty, "• Stok masuk: Kapas");
+  assertStringIncludes(empty, "Setujui");
+  assertStringIncludes(guardAgentAnswer("Maaf, Asisten AI tidak memberi jawaban. Coba ulangi pertanyaan.", [A1], true), "1 usulan");
+  const claim = guardAgentAnswer("Sudah saya catat pengeluaran listriknya ya.", [A1], true);
+  assertStringIncludes(claim, "belum dijalankan");
+  assertStringIncludes(guardAgentAnswer("Pengeluaran sudah dicatat.", [A1], true), "belum dijalankan");
+  assertEquals(guardAgentAnswer("Saya siapkan usulannya, silakan setujui.", [A1], true), "Saya siapkan usulannya, silakan setujui.");
+  assertEquals(guardAgentAnswer("Belum dicatat, menunggu persetujuan Anda.", [A1], true), "Belum dicatat, menunggu persetujuan Anda.");
+});
+
+Deno.test("guardAgentAnswer: tanpa usulan tetapi klaim berhasil pada permintaan bertindak → koreksi; selain itu apa adanya", () => {
+  assertStringIncludes(guardAgentAnswer("Sudah saya tambahkan bahan barunya.", [], true), "belum membuat usulan");
+  assertEquals(guardAgentAnswer("Pendapatan bulan ini Rp 12 juta.", [], false), "Pendapatan bulan ini Rp 12 juta.");
+  assertEquals(guardAgentAnswer("Bahan itu sudah ada di gudang.", [], true), "Bahan itu sudah ada di gudang.");
+});
+
+Deno.test("needsWriteTools: alat tulis hanya bila relevan (perintah, briefing, atau konfirmasi atas tawaran)", () => {
+  assert(needsWriteTools(normalizeQuestion("catat pengeluaran listrik 1 juta")));
+  assert(needsWriteTools(normalizeQuestion("briefing hari ini")));
+  assert(!needsWriteTools(normalizeQuestion("berapa pendapatan bulan ini")));
+  assert(!needsWriteTools(normalizeQuestion("apa itu hpp")));
+  const hist = [{ role: "user", content: "briefing" }, { role: "assistant", content: "Ada 3 hal. Mau saya siapkan usulan buang stoknya?" }];
+  assert(needsWriteTools(normalizeQuestion("ya, tolong"), hist));
+  assert(needsWriteTools(normalizeQuestion("yang pertama saja"), hist));
+  assert(!needsWriteTools(normalizeQuestion("ya"), [{ role: "assistant", content: "Pendapatan bulan ini Rp 12 juta." }]));
 });

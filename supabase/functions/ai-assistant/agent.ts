@@ -12,7 +12,7 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.8
 
 export type ToolDef = { name: string; description: string; input_schema: Record<string, unknown> };
 export type ProposedAction = { id: string; jenis: string; pratinjau: Record<string, unknown> };
-export type AgentCtx = { group: string; actions: ProposedAction[] };
+export type AgentCtx = { group: string; actions: ProposedAction[]; writeTools?: boolean };
 
 const str = (description: string) => ({ type: "string", description });
 const num = (description: string) => ({ type: "number", description });
@@ -40,6 +40,7 @@ export const AGENT_READ_TOOLS: ToolDef[] = [
   { name: "cari_tindakan", description: "Cari tindakan/treatment: id, kode, harga, tier, aktif, jumlah bahan di resep, dan biaya bahan per tindakan. Dipakai sebelum mengubah harga atau resep.",
     input_schema: obj({ kata: str("Bagian nama/kategori/kode; kosong = semua"), limit: num("Maks 60 (bawaan 30)") }) },
   { name: "resep_tindakan", description: "Resep bahan (BOM) satu tindakan: bahan, jumlah, susut, biaya per bahan, total biaya bahan.", input_schema: obj({ tindakan: TINDAKAN }, ["tindakan"]) },
+  { name: "briefing_agen", description: "BRIEFING TERURUT dalam satu panggilan: gabungan semua sinyal (stok habis/menipis, kadaluarsa, biaya rutin belum tercatat, lonjakan & duplikat pengeluaran, tindakan rugi/margin tipis, resep kosong, tagihan belum dibayar, bahan tanpa harga), sudah diberi peringkat berdasarkan dampak, lengkap dengan petunjuk langkah lanjut. PAKAI INI untuk \"briefing / ada apa hari ini / apa yang perlu diurus\" — jangan memanggil alat-alat lain satu per satu.", input_schema: obj({}) },
   { name: "ringkasan_gudang", description: "Potret gudang: jumlah bahan aktif, nilai stok total, jumlah habis/menipis, bahan tanpa harga, batch kadaluarsa (sudah lewat & 30 hari ke depan, beserta nilainya), 5 bahan bernilai terbesar, nilai per kategori. Titik awal untuk briefing gudang.", input_schema: obj({}) },
   { name: "bahan_kadaluarsa", description: "Batch bahan yang sudah/akan kadaluarsa dalam N hari (bahan, no batch, tanggal, sisa, nilai, status sudah lewat/segera/mendekati) + total nilai yang sudah lewat. Dasar untuk usulkan_buang_stok.",
     input_schema: obj({ hari: num("Rentang ke depan, 1–730 (bawaan 90)") }) },
@@ -120,6 +121,7 @@ const READ_RPC: Record<string, (i: Record<string, unknown>) => [string, Record<s
   daftar_overhead: () => ["ai_daftar_overhead", {}],
   cari_tindakan: (i) => ["ai_cari_tindakan", { p_kata: i.kata ?? "", p_limit: i.limit ?? 30 }],
   resep_tindakan: (i) => ["ai_resep_tindakan", { p_tindakan: i.tindakan }],
+  briefing_agen: () => ["ai_briefing_agen", {}],
   ringkasan_gudang: () => ["ai_ringkasan_gudang", {}],
   bahan_kadaluarsa: (i) => ["ai_bahan_kadaluarsa", { p_hari: i.hari ?? 90 }],
   riwayat_harga_bahan: (i) => ["ai_riwayat_harga_bahan", { p_bahan: i.bahan, p_bulan: i.bulan ?? 12 }],
@@ -132,6 +134,57 @@ type RpcError = { code?: string; message: string } | null;
 /** Galat AG001 = pesan yang sengaja dibuat untuk dibaca model/admin; lainnya disamarkan. */
 const toolError = (e: NonNullable<RpcError>): string =>
   e.code === "AG001" ? e.message : e.code === "42501" ? "Tindakan ini hanya untuk admin klinik." : "Gagal memproses permintaan ke database.";
+
+/** "Rp 1.250.000" / "1,5 juta" / "60rb" / "2jt" / "10%" → angka. null bila tidak dikenali (biarkan database yang menolak). */
+export function parseAngkaIndonesia(raw: string): number | null {
+  let t = raw.toLowerCase().replace(/rp\.?/g, "").replace(/%/g, "").replace(/\s+/g, " ").trim();
+  let mult = 1;
+  const unit = t.match(/^(.*?)\s*(miliar|milyar|juta|jt|ribu|rb|k)$/);
+  if (unit) {
+    t = unit[1].trim();
+    mult = { miliar: 1e9, milyar: 1e9, juta: 1e6, jt: 1e6, ribu: 1e3, rb: 1e3, k: 1e3 }[unit[2] as "k"] ?? 1;
+  }
+  let n: number;
+  if (/^-?\d{1,3}(\.\d{3})+(,\d+)?$/.test(t)) n = Number(t.replace(/\./g, "").replace(",", "."));
+  else if (/^-?\d+,\d+$/.test(t)) n = Number(t.replace(",", "."));
+  else if (/^-?\d+(\.\d+)?$/.test(t)) n = Number(t);
+  else return null;
+  const out = n * mult;
+  return Number.isFinite(out) ? Math.round(out * 1e6) / 1e6 : null;
+}
+
+const DATE_KEYS = new Set(["tanggal", "dari", "sampai", "periode", "tanggal_kadaluarsa"]);
+function parseTanggal(raw: string): string | null {
+  const t = raw.trim();
+  const dmy = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, "0")}-${dmy[1].padStart(2, "0")}`;
+  if (/^\d{4}-\d{2}$/.test(t)) return `${t}-01`;
+  return null;
+}
+
+/** Perbaiki bentuk argumen yang sering meleset dari model kecil: angka bertulisan Indonesia → angka, tanggal DD/MM/YYYY → ISO, "true"/"false" → boolean. Aman: hanya menyentuh properti bertipe sesuai skema. */
+export function coerceArgs(schema: Record<string, unknown> | undefined, value: unknown): unknown {
+  if (!schema || typeof schema !== "object") return value;
+  const type = schema.type;
+  if (type === "object" && isObj(value)) {
+    const props = (schema.properties ?? {}) as Record<string, Record<string, unknown>>;
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      const ps = props[k];
+      if (ps?.type === "string" && DATE_KEYS.has(k) && typeof v === "string") out[k] = parseTanggal(v) ?? v;
+      else out[k] = ps ? coerceArgs(ps, v) : v;
+    }
+    return out;
+  }
+  if (type === "array" && Array.isArray(value)) return value.map((x) => coerceArgs(schema.items as Record<string, unknown>, x));
+  if (type === "number" && typeof value === "string") return parseAngkaIndonesia(value) ?? value;
+  if (type === "boolean" && typeof value === "string") {
+    const l = value.trim().toLowerCase();
+    return ["true", "ya", "yes"].includes(l) ? true : ["false", "tidak", "no"].includes(l) ? false : value;
+  }
+  if (type === "string" && typeof value === "number") return String(value);
+  return value;
+}
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
@@ -157,10 +210,11 @@ export function susunPesanPemasok(bahan: Reorder[], klinik: string, filter = "")
 
 /** Jalankan satu alat agen. Mengembalikan null bila bukan alat agen. */
 export async function runAgentTool(
-  db: SupabaseClient, ctx: AgentCtx, name: string, input: unknown,
+  db: SupabaseClient, ctx: AgentCtx, name: string, rawInput: unknown,
 ): Promise<{ content: string; isError: boolean } | null> {
   if (!AGENT_TOOL_NAMES.has(name)) return null;
-  if (!isObj(input)) return { content: "Argumen alat harus berupa objek", isError: true };
+  if (!isObj(rawInput)) return { content: "Argumen alat harus berupa objek", isError: true };
+  const input = coerceArgs(AGENT_TOOLS.find((t) => t.name === name)?.input_schema, rawInput) as Record<string, unknown>;
   if (name === "draf_pesan_pemasok") {
     const { data, error } = await db.rpc("ai_saran_pemesanan", { p_hari_riwayat: 30, p_hari_cakupan: typeof input.hari_cakupan === "number" ? input.hari_cakupan : 14 });
     if (error) return { content: toolError(error), isError: true };
@@ -204,7 +258,7 @@ export const AGENT_PROMPT = `DENTI AGEN — PERAN, CARA BERPIKIR, DAN GAYA
 Anda bukan sekadar penjawab, melainkan REKAN KERJA OPERASIONAL klinik yang cekatan: bisa membaca kondisi gudang & keuangan, menemukan masalah sebelum admin bertanya, lalu menyiapkan pekerjaan (usulan) yang tinggal disetujui. Anda tidak pernah mengubah data langsung: setiap alat usulkan_* hanya membuat USULAN yang tampil sebagai kartu bagi admin, dan data baru berubah setelah admin menekan "Setujui".
 
 KEMAMPUAN
-- Baca: cari_bahan, kartu_stok, saran_pemesanan, ringkasan_gudang, bahan_kadaluarsa, riwayat_harga_bahan (bandingkan pemasok), cari_pengeluaran, anomali_pengeluaran, daftar_overhead, cari_tindakan, resep_tindakan, analisis_margin, riwayat_agen, draf_pesan_pemasok, plus semua alat keuangan (pendapatan, BEP, arus kas, simulasi harga, dst.).
+- Baca: briefing_agen, cari_bahan, kartu_stok, saran_pemesanan, ringkasan_gudang, bahan_kadaluarsa, riwayat_harga_bahan (bandingkan pemasok), cari_pengeluaran, anomali_pengeluaran, daftar_overhead, cari_tindakan, resep_tindakan, analisis_margin, riwayat_agen, draf_pesan_pemasok, plus semua alat keuangan (pendapatan, BEP, arus kas, simulasi harga, dst.).
 - Usul tindakan: bahan baru (satuan atau banyak sekaligus), ubah bahan, stok masuk (satuan atau seluruh isi satu nota), opname, buang stok kadaluarsa/rusak, catat/ubah/hapus pengeluaran, overhead & targetnya, tarif tindakan (satu/massal), tindakan baru, resep bahan (HPP).
 - Di luar itu (pembayaran pasien, rekam medis, data pasien, pengguna, pengaturan) Anda TIDAK bisa bertindak — arahkan ke menu yang tepat.
 
@@ -217,7 +271,7 @@ CARA KERJA
 6. Bertindak hanya atas permintaan jelas. Hapus/ubah massal harus disebut eksplisit oleh admin. Pertanyaan analisis ("bagaimana kalau…") dijawab dengan alat simulasi/data, tanpa membuat usulan. Usulan yang sudah menunggu (daftar di bawah, bila ada) jangan dibuat ulang.
 
 PROTOKOL SITUASI UMUM
-- "Briefing / ada apa hari ini / apa yang perlu dikerjakan": panggil ringkasan_hari_ini, ringkasan_gudang, saran_pemesanan, bahan_kadaluarsa, anomali_pengeluaran, dan kunjungan_belum_dibayar (paralel). Pilih maksimal 3 prioritas paling berdampak (rupiah/risiko), urut dari yang terpenting, masing-masing dengan angka kunci dan tindakan yang bisa Anda siapkan. Tutup dengan tawaran mulai dari yang mana.
+- "Briefing / ada apa hari ini / apa yang perlu dikerjakan": panggil briefing_agen SATU kali (sudah terurut berdasarkan dampak; jangan memanggil alat lain dulu). Sampaikan 3 temuan teratas dengan angka kuncinya, urut sesuai peringkat, dan untuk tiap temuan sebut tindakan yang bisa Anda siapkan (lihat petunjuk "lanjut"). Tutup dengan tawaran mulai dari yang mana. Panggil alat rincian (bahan_kadaluarsa, saran_pemesanan, …) HANYA setelah admin memilih temuan.
 - Pembelian ulang: saran_pemesanan → untuk bahan penting cek riwayat_harga_bahan (pemasok termurah/kenaikan harga) → tawarkan draf_pesan_pemasok. Setelah barang datang, admin bisa minta "catat stok masuk dari nota ini".
 - Nota/faktur/daftar yang ditempel admin: urai menjadi baris; sebut berapa baris terbaca; baris yang meragukan (jumlah/harga hilang) tanyakan, jangan ditebak. Barang habis pakai/bahan → stok_masuk_banyak (atau bahan_banyak bila belum ada di gudang); totalnya → pengeluaran_catat bila admin belum mencatat pembelian itu sebagai pengeluaran (tanyakan bila ragu agar tidak tercatat dua kali).
 - Kadaluarsa: bahan_kadaluarsa → tawarkan usulkan_buang_stok untuk batch yang sudah lewat (sebut nilai kerugian persediaan).
@@ -242,6 +296,36 @@ Admin: tambah stok masker bedah 5 box
 Denti: "Masker bedah" ada dua: **Earloop** dan **Headloop**. Yang mana? Dan harga per box berapa, supaya sekalian saya hitung totalnya?
 Admin: (menempel nota 6 baris, satu baris tanpa jumlah)
 Denti: Saya baca **6 baris**; 5 sudah jelas dan siap dimasukkan ke stok. Baris "kapas" tidak ada jumlahnya — berapa? Begitu dijawab, semuanya saya jadikan satu kartu.`;
+
+const CLAIM_DONE = /\b(?<!belum )(sudah|telah|berhasil)\s+(?:(?:saya|kami|pun|juga)\s+)?(di)?(catat|ubah|tambah|tambahkan|hapus|simpan|masukkan|perbarui|buang|jalankan|ganti|naikkan|turunkan|update)/i;
+const NO_ANSWER = /^Maaf, Asisten AI tidak memberi jawaban/;
+
+/**
+ * Penjaga kejujuran jawaban agen (berguna untuk model kecil):
+ *  • usulan ada tetapi jawaban kosong → susun ringkasan dari judul usulan;
+ *  • jawaban mengklaim "sudah dicatat/diubah" padahal baru usulan (atau tak ada usulan sama sekali) → tambahkan catatan koreksi.
+ */
+export function guardAgentAnswer(answer: string, actions: ProposedAction[], agentIntent: boolean): string {
+  const text = (answer ?? "").trim();
+  const titles = actions.map((a) => `• ${(a.pratinjau as { judul?: string })?.judul ?? a.jenis}`).slice(0, 8).join("\n");
+  if (actions.length > 0) {
+    if (!text || NO_ANSWER.test(text)) {
+      return `Saya siapkan **${actions.length} usulan** untuk Anda:\n${titles}\n\nSilakan periksa kartunya, lalu tekan **Setujui** bila sudah sesuai.`;
+    }
+    if (CLAIM_DONE.test(text)) return `${text}\n\n_Catatan: usulan di atas belum dijalankan — data baru berubah setelah Anda menekan **Setujui**._`;
+    return text;
+  }
+  if (agentIntent && CLAIM_DONE.test(text)) return `${text}\n\n_Catatan: saya belum membuat usulan apa pun, jadi belum ada data yang berubah._`;
+  return text;
+}
+
+/** Alat usulan (tulis) hanya disodorkan ke model bila relevan — mengurangi salah pilih alat pada model kecil & mencegah usulan tak sengaja. */
+export function needsWriteTools(normalizedQuestion: string, history: Array<{ role: string; content: string }> = []): boolean {
+  if (isAgentIntent(normalizedQuestion) || /(^| )(briefing|rapikan|bereskan|urus)( |$)/.test(normalizedQuestion)) return true;
+  const lastAssistant = [...history].reverse().find((h) => h.role === "assistant")?.content ?? "";
+  const confirming = normalizedQuestion.split(" ").length <= 12 && /(siapkan|usulan|kartu|mau saya|bisa saya|tawar)/i.test(lastAssistant);
+  return confirming;
+}
 
 /** Ringkasan usulan yang masih menunggu, agar model tidak menggandakannya. */
 export function pendingText(rows: Array<{ kind: string; preview?: { judul?: string } }>): string {

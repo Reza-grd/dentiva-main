@@ -97,7 +97,7 @@ console.log("\n2. Menjalankan 7 migration Console");
 const dir = join(REPO, "supabase/migrations");
 // Baseline produksi (jika sudah dibuat) dilewati: skema sintetis di atas menggantikannya.
 // Migrasi yang butuh skema produksi lengkap diuji terpisah di skema ASLI (npm run db:agent), bukan di baseline sintetis ini.
-const REAL_SCHEMA_ONLY = new Set(["20261014090000_ai_agen.sql", "20261015090000_ai_agen_lanjutan.sql"]);
+const REAL_SCHEMA_ONLY = new Set(["20261014090000_ai_agen.sql", "20261015090000_ai_agen_lanjutan.sql", "20261015120000_ai_briefing_agen.sql"]);
 for (const f of readdirSync(dir).filter((f) => f.endsWith(".sql") && !f.includes("_baseline")).sort()) {
   if (REAL_SCHEMA_ONLY.has(f)) { console.log("  ↷", f, "(diuji di db:agent pada skema produksi asli)"); continue; }
   let sql = readFileSync(join(dir, f), "utf8");

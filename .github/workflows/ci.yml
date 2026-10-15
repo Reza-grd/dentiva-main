@@ -44,6 +44,11 @@ jobs:
       - name: Denti Agen — uji fungsi database pada skema produksi (PGlite)
         run: npm run db:agent
 
+      - name: Denti Agen — evaluasi percakapan (skrip, tanpa jaringan) + uji penilai
+        run: |
+          npm run eval:agen:selftest
+          npm run eval:agen:negative
+
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
