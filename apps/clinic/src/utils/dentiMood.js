@@ -709,12 +709,12 @@ const EXAMPLES = ['Berapa pendapatan bulan ini?', 'Bahan apa yang hampir kadalua
 /** Saran pertanyaan lanjutan — per topik jawaban AI atau per intent obrolan. Instan, tanpa AI. */
 const FOLLOW = {
   'data pendapatan': ['Bandingkan dengan bulan lalu', 'Tindakan apa yang paling menguntungkan?', 'Proyeksikan arus kas 3 bulan ke depan'],
-  'data pengeluaran': ['Kategori pengeluaran terbesar apa?', 'Bandingkan pendapatan dan pengeluaran bulan ini'],
-  'margin tindakan': ['Berapa titik impas (BEP) klinik?', 'Kalau harga tindakan teratas naik 10%, dampaknya?'],
+  'data pengeluaran': ['Ada pengeluaran yang janggal bulan ini?', 'Kategori pengeluaran terbesar apa?', 'Bandingkan pendapatan dan pengeluaran bulan ini'],
+  'margin tindakan': ['Tindakan mana yang margin-nya tipis atau rugi?', 'Berapa titik impas (BEP) klinik?', 'Kalau harga tindakan teratas naik 10%, dampaknya?'],
   'titik impas': ['Proyeksikan arus kas 3 bulan ke depan', 'Tindakan apa yang paling menguntungkan?'],
   'arus kas': ['Berapa titik impas (BEP) klinik?', 'Ada tagihan yang belum dibayar?'],
   'simulasi harga': ['Berapa titik impas (BEP) klinik?', 'Tindakan apa yang paling menguntungkan?'],
-  'stok bahan': ['Bahan apa yang hampir kadaluarsa?', 'Berapa pengeluaran bahan bulan ini?'],
+  'stok bahan': ['Bahan apa yang perlu dipesan ulang?', 'Bahan apa yang sudah kadaluarsa dan berapa nilainya?', 'Berapa pengeluaran bahan bulan ini?'],
   tagihan: ['Kunjungan mana yang belum dibayar?', 'Ringkas kondisi klinik hari ini'],
   'jadwal & kinerja dokter': ['Beri saran jadwal dokter berdasarkan pola kunjungan', 'Dokter mana dengan pendapatan tertinggi?'],
   'data kunjungan': ['Berapa pasien yang perlu di-recall?', 'Hari apa kunjungan paling ramai?'],

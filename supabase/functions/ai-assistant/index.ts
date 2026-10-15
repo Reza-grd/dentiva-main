@@ -486,7 +486,7 @@ const anthropicCommon = {
   fallbacks: "default",
 };
 
-async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx): Promise<ChatResult> {
+async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx, effort: "medium" | "high" = "medium"): Promise<ChatResult> {
   const client = new Anthropic({ apiKey: p.key });
   const messages: Anthropic.Beta.BetaMessageParam[] = turns.map((t) => ({ role: t.role, content: t.content }));
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
@@ -494,7 +494,7 @@ async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[],
     const response: any = await client.beta.messages.create({
       ...anthropicCommon,
       max_tokens: 16000,
-      output_config: { effort: "medium" },
+      output_config: { effort },
       system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
       tools: ALL_TOOLS,
       messages,
@@ -563,7 +563,7 @@ function addGeminiUsage(u: Usage, r: ReturnType<typeof readInteraction>) {
   u.cacheRead += r.usage.cacheRead;
 }
 
-async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx): Promise<ChatResult> {
+async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx, thinking?: string): Promise<ChatResult> {
   // Riwayat stateless: giliran pengguna = user_input, jawaban sebelumnya = model_output.
   // deno-lint-ignore no-explicit-any
   const history: any[] = turns.map((t) => t.role === "user"
@@ -572,7 +572,7 @@ async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], us
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     const r = readInteraction(await geminiCall(p, {
       system_instruction: SYSTEM,
-      generation_config: { thinking_level: p.thinking ?? "low" },
+      generation_config: { thinking_level: thinking ?? p.thinking ?? "low" },
       input: history,
       tools: GEMINI_TOOLS,
     }));
@@ -958,9 +958,9 @@ Deno.serve(async (req) => {
           ...clean,
           { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).${snapText}${referenceText(refs)}${retryNote}\n\nPertanyaan: ${question}` },
         ];
-        const r = provider.name === "gemini" ? await chatGemini(provider, db, turns, usage, toolsUsed, agentCtx)
+        const r = provider.name === "gemini" ? await chatGemini(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "medium" : undefined)
           : provider.name === "groq" ? await chatGroq(provider, db, turns, usage, toolsUsed, agentCtx)
-          : await chatAnthropic(provider, db, turns, usage, toolsUsed, agentCtx);
+          : await chatAnthropic(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "high" : "medium");
         if (r.refused) outcome = "refused";
         answerText = r.answer;
         payload = { answer: r.answer, tools: [...toolsUsed], references: refs.length, actions: agentCtx.actions };

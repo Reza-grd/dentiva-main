@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import {
-  Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle, BookCheck, Zap, ArrowRight, Volume2, Square, Copy, Mic, MicOff,
+  Sparkles, Send, RotateCcw, ShieldCheck, Lock, Database, Power, AlertTriangle, BookCheck, Zap, ArrowRight, Volume2, Square, Copy, Mic, MicOff, Camera,
 } from 'lucide-react';
 import AnswerFeedback from './AnswerFeedback';
 import KnowledgePanel from './KnowledgePanel';
@@ -10,6 +10,8 @@ import AgentActions from './AgentActions';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
 import { aiService } from '../../services/aiService';
 import { miniMarkdown } from '../../utils/miniMarkdown';
+import { resizeImageToJpeg } from '../../utils/imageResize';
+import { notaMessage } from '../../utils/notaMessage';
 import { providerNotice } from '../../utils/aiProvider';
 import { useToast } from '../common/ToastNotification';
 import { useAuth } from '../../contexts/AuthContext';
@@ -39,8 +41,12 @@ const SUGGESTION_GROUPS = [
     'Apa saja yang perlu diisi agar HPP dan margin tindakan terhitung?',
   ] },
   { label: 'Denti Agen (bisa bertindak)', items: [
+    'Briefing hari ini: apa yang perlu saya urus?',
     'Catat pengeluaran listrik bulan ini Rp 1.250.000',
-    'Bahan apa yang perlu dipesan ulang?',
+    'Bahan apa yang perlu dipesan ulang? Buatkan draf pesan ke pemasoknya.',
+    'Bahan apa yang sudah kadaluarsa dan berapa nilainya?',
+    'Tindakan mana yang margin-nya tipis atau rugi?',
+    'Ada pengeluaran yang janggal bulan ini?',
     'Tambahkan bahan baru: sarung tangan nitril M, satuan pcs, stok awal 100, harga 2000, stok minimum 20',
     'Naikkan harga semua tindakan 5%, dibulatkan ke 5.000',
     'Atur biaya overhead sewa ruko Rp 8.000.000 per bulan',
@@ -74,6 +80,12 @@ const TOOL_LABEL = {
   cari_tindakan: 'Cari tindakan',
   resep_tindakan: 'Resep bahan',
   riwayat_agen: 'Riwayat agen',
+  ringkasan_gudang: 'Gudang',
+  bahan_kadaluarsa: 'Kadaluarsa',
+  riwayat_harga_bahan: 'Harga pemasok',
+  analisis_margin: 'Margin tindakan',
+  anomali_pengeluaran: 'Anomali biaya',
+  draf_pesan_pemasok: 'Draf pesan pemasok',
 };
 /** Bank saran saat mengetik (dicocokkan per kata). */
 const SUGGEST_BANK = [
@@ -289,15 +301,35 @@ export default function AiAssistantPage() {
     actions: (data.actions || []).map((a) => ({ ...a, state: 'pending', at: Date.now(), error: '' })), ...extra,
   });
 
+  // Pindai nota → Denti memeriksa duplikat lalu menyiapkan usulan pengeluaran + stok masuk
+  const notaRef = useRef(null);
+  const onNotaPhoto = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || busy) return;
+    touch();
+    let img;
+    try { img = await resizeImageToJpeg(file); } catch (err) { toast.error(err.message); return; }
+    setBusy(true);
+    setDentiLine('Membaca nota Anda…');
+    const res = await aiService.scanReceipt(img.base64, img.mediaType);
+    setBusy(false);
+    if (!res.success) { toast.error(res.error); return; }
+    if (res.data?.status) setStatus(res.data.status);
+    const d = res.data?.draft;
+    if (!d?.adalah_nota) { toast.error('Foto ini sepertinya bukan nota. Coba foto ulang yang lebih jelas.'); return; }
+    ask(notaMessage(d), { force: true });
+  };
+
   const setActions = (idx, next) => setMessages((list) => list.map((m, i) => (i === idx ? { ...m, actions: next } : m)));
   const onActionsApplied = (applied) => {
     toast.success(applied.length > 1 ? `${applied.length} tindakan dijalankan.` : 'Tindakan dijalankan.');
     react('celebrate', 'Beres! Sudah saya jalankan. Cek hasilnya lewat tombol di kartu.', 3200);
   };
 
-  const ask = async (q) => {
+  const ask = async (q, opts = {}) => {
     const question = (q ?? input).trim();
-    if (!question || busy) return;
+    if (!question || (busy && !opts.force)) return;
     touch();
     // Obrolan ringan dijawab Denti langsung — tidak memakai kuota AI
     const replies = [...messages].reverse().filter((m) => m.role === 'assistant');
@@ -685,6 +717,11 @@ export default function AiAssistantPage() {
               placeholder={left === 0 ? 'Kuota bulan ini sudah habis.' : 'Tulis pertanyaan… (Enter untuk kirim, Shift+Enter baris baru)'}
               className="flex-1 resize-none rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]"
             />
+            <input ref={notaRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" data-testid="nota-input" onChange={onNotaPhoto} />
+            <Button type="button" variant="outline" className="h-11" disabled={busy || left === 0} onClick={() => notaRef.current?.click()}
+              aria-label="Pindai nota agar Denti mencatatnya" title="Pindai nota: Denti membaca lalu menyiapkan usulan pengeluaran & stok masuk">
+              <Camera size={16} />
+            </Button>
             {dictation.supported && (
               <Button type="button" variant="outline" className={`h-11 ${dictation.listening ? 'ai-mic--on' : ''}`} disabled={busy || left === 0}
                 onClick={toggleMic} aria-label={dictation.listening ? 'Berhenti mendengarkan' : 'Tanya dengan suara'}>

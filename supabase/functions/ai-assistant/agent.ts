@@ -18,6 +18,8 @@ const str = (description: string) => ({ type: "string", description });
 const num = (description: string) => ({ type: "number", description });
 const bool = (description: string) => ({ type: "boolean", description });
 // "required" hanya dicantumkan bila ada isinya (sebagian penyedia menolak daftar kosong).
+const arr = (description: string, properties: Record<string, unknown>, required: string[] = []) =>
+  ({ type: "array", description, items: { type: "object", properties, ...(required.length ? { required } : {}) } });
 const obj = (properties: Record<string, unknown>, required: string[] = []): ToolDef["input_schema"] =>
   ({ type: "object", properties, ...(required.length ? { required } : {}) });
 
@@ -38,6 +40,16 @@ export const AGENT_READ_TOOLS: ToolDef[] = [
   { name: "cari_tindakan", description: "Cari tindakan/treatment: id, kode, harga, tier, aktif, jumlah bahan di resep, dan biaya bahan per tindakan. Dipakai sebelum mengubah harga atau resep.",
     input_schema: obj({ kata: str("Bagian nama/kategori/kode; kosong = semua"), limit: num("Maks 60 (bawaan 30)") }) },
   { name: "resep_tindakan", description: "Resep bahan (BOM) satu tindakan: bahan, jumlah, susut, biaya per bahan, total biaya bahan.", input_schema: obj({ tindakan: TINDAKAN }, ["tindakan"]) },
+  { name: "ringkasan_gudang", description: "Potret gudang: jumlah bahan aktif, nilai stok total, jumlah habis/menipis, bahan tanpa harga, batch kadaluarsa (sudah lewat & 30 hari ke depan, beserta nilainya), 5 bahan bernilai terbesar, nilai per kategori. Titik awal untuk briefing gudang.", input_schema: obj({}) },
+  { name: "bahan_kadaluarsa", description: "Batch bahan yang sudah/akan kadaluarsa dalam N hari (bahan, no batch, tanggal, sisa, nilai, status sudah lewat/segera/mendekati) + total nilai yang sudah lewat. Dasar untuk usulkan_buang_stok.",
+    input_schema: obj({ hari: num("Rentang ke depan, 1–730 (bawaan 90)") }) },
+  { name: "riwayat_harga_bahan", description: "Riwayat pembelian satu bahan + perbandingan pemasok (harga rata-rata, terakhir, termurah/termahal per satuan dasar). Untuk memilih pemasok & mendeteksi kenaikan harga.",
+    input_schema: obj({ bahan: BAHAN, bulan: num("Rentang bulan ke belakang, 1–36 (bawaan 12)") }, ["bahan"]) },
+  { name: "analisis_margin", description: "Margin per tindakan aktif: harga, biaya bahan (resep), overhead per tindakan (dari target overhead bulan ini), HPP, margin Rp & %, volume 90 hari, status (rugi/tipis/sehat/resep belum diisi). Diurutkan dari margin terendah. Dasar saran kenaikan harga & melengkapi resep.",
+    input_schema: obj({ limit: num("Maks 60 (bawaan 30)") }) },
+  { name: "anomali_pengeluaran", description: "Temuan janggal pada pengeluaran: kategori yang melonjak dibanding rata-rata 3 bulan, biaya rutin (sewa/gaji/utilitas) yang belum tercatat bulan ini, pengeluaran besar bulan ini, dan pasangan yang kemungkinan tercatat dua kali.", input_schema: obj({}) },
+  { name: "draf_pesan_pemasok", description: "Menyusun draf pesan WhatsApp pemesanan ke pemasok dari saran_pemesanan (dikelompokkan per pemasok, daftar bahan & jumlah). Teks siap salin; jumlah berasal dari data, bukan karangan. Admin yang mengirimkannya.",
+    input_schema: obj({ pemasok: str("Opsional: hanya pemasok ini (sebagian nama)"), hari_cakupan: num("Stok ingin cukup berapa hari, 3–90 (bawaan 14)") }) },
   { name: "riwayat_agen", description: "Tindakan yang pernah diusulkan/dijalankan Denti Agen (judul, status, waktu, oleh siapa).", input_schema: obj({ limit: num("Maks 50 (bawaan 20)") }) },
 ];
 
@@ -48,6 +60,7 @@ const WRITE_KIND: Record<string, string> = {
   usulkan_overhead_atur: "overhead_atur", usulkan_overhead_target: "overhead_target", usulkan_harga_tindakan: "tindakan_harga",
   usulkan_harga_massal: "tindakan_harga_massal", usulkan_tindakan_tambah: "tindakan_tambah", usulkan_tindakan_ubah: "tindakan_ubah",
   usulkan_resep_atur: "resep_atur", usulkan_resep_hapus: "resep_hapus",
+  usulkan_bahan_banyak: "bahan_tambah_banyak", usulkan_stok_masuk_banyak: "stok_masuk_banyak", usulkan_buang_stok: "batch_buang",
 };
 
 const PROPOSE = "Membuat USULAN (belum mengubah data); admin menyetujuinya di kartu usulan. ";
@@ -84,6 +97,15 @@ export const AGENT_WRITE_TOOLS: ToolDef[] = [
     input_schema: obj({ tindakan: TINDAKAN, nama: str("Nama baru"), kategori: str("Kategori"), tier: str("ringan | sedang | berat"), durasi_menit: num("Menit"), is_active: bool("false = nonaktifkan") }, ["tindakan"]) },
   { name: "usulkan_resep_atur", description: PROPOSE + "Atur bahan yang dipakai satu tindakan (resep/BOM) — menambah atau mengubah jumlahnya; dasar perhitungan HPP & pemotongan stok.",
     input_schema: obj({ tindakan: TINDAKAN, bahan: BAHAN, qty_rata2: num("Jumlah rata-rata per tindakan (satuan dasar bahan)"), wajib: bool("Bahan wajib (bawaan true)"), wastage_percent: num("Susut/terbuang %, 0–100"), catatan: str("Catatan") }, ["tindakan", "bahan", "qty_rata2"]) },
+  { name: "usulkan_bahan_banyak", description: PROPOSE + "Tambah BANYAK bahan baru sekaligus (maks 100) dalam satu kartu — untuk daftar/tabel yang ditempel admin. Atomik: bila ada baris bermasalah, seluruh daftar ditolak dengan nomor baris. Cek dulu agar tidak ada nama yang sudah ada.",
+    input_schema: obj({ items: arr("Daftar bahan", { nama: str("Nama bahan"), satuan_dasar: str("Satuan pemakaian"), kategori: str("Kategori"), stok_awal: num("Stok awal (satuan dasar)"), harga_per_satuan: num("Harga per satuan dasar (Rp)"),
+      stok_minimum: num("Batas stok menipis"), supplier: str("Pemasok"), satuan_beli: str("Satuan beli"), faktor_konversi: num("Isi 1 satuan beli dalam satuan dasar") }, ["nama", "satuan_dasar"]) }, ["items"]) },
+  { name: "usulkan_stok_masuk_banyak", description: PROPOSE + "Catat stok masuk BANYAK barang dari satu nota/faktur (maks 60) dalam satu kartu. Pemasok, nomor faktur, dan tanggal di tingkat atas menjadi bawaan semua baris. Atomik; baris ambigu/tidak ditemukan dilaporkan dengan kandidat.",
+    input_schema: obj({ supplier: str("Pemasok untuk semua baris"), no_faktur: str("Nomor faktur untuk semua baris"), tanggal: str("YYYY-MM-DD untuk semua baris (bawaan hari ini)"),
+      items: arr("Barang pada nota", { bahan: BAHAN, jumlah_beli: num("Jumlah dalam satuan beli"), harga_satuan_beli: num("Harga per satuan beli (Rp)"), jumlah_dasar: num("Opsional: jumlah dalam satuan dasar"), tanggal_kadaluarsa: str("YYYY-MM-DD") },
+        ["bahan", "jumlah_beli", "harga_satuan_beli"]) }, ["items"]) },
+  { name: "usulkan_buang_stok", description: PROPOSE + "Hapus stok yang kadaluarsa/rusak/hilang: stok berkurang, tercatat di kartu stok (penyesuaian) dan batch dikurangi (yang paling dulu kadaluarsa). Pakai bahan_kadaluarsa untuk jumlah & batch yang benar.",
+    input_schema: obj({ bahan: BAHAN, jumlah: num("Jumlah yang dibuang (satuan dasar)"), alasan: str("kadaluarsa | rusak | hilang | lainnya"), no_batch: str("Opsional: batch tertentu"), catatan: str("Catatan") }, ["bahan", "jumlah"]) },
   { name: "usulkan_resep_hapus", description: PROPOSE + "Hapus satu bahan dari resep tindakan.", input_schema: obj({ tindakan: TINDAKAN, bahan: BAHAN }, ["tindakan", "bahan"]) },
 ];
 
@@ -98,6 +120,11 @@ const READ_RPC: Record<string, (i: Record<string, unknown>) => [string, Record<s
   daftar_overhead: () => ["ai_daftar_overhead", {}],
   cari_tindakan: (i) => ["ai_cari_tindakan", { p_kata: i.kata ?? "", p_limit: i.limit ?? 30 }],
   resep_tindakan: (i) => ["ai_resep_tindakan", { p_tindakan: i.tindakan }],
+  ringkasan_gudang: () => ["ai_ringkasan_gudang", {}],
+  bahan_kadaluarsa: (i) => ["ai_bahan_kadaluarsa", { p_hari: i.hari ?? 90 }],
+  riwayat_harga_bahan: (i) => ["ai_riwayat_harga_bahan", { p_bahan: i.bahan, p_bulan: i.bulan ?? 12 }],
+  analisis_margin: (i) => ["ai_analisis_margin", { p_limit: i.limit ?? 30 }],
+  anomali_pengeluaran: () => ["ai_anomali_pengeluaran", {}],
   riwayat_agen: (i) => ["ai_riwayat_agen", { p_limit: i.limit ?? 20 }],
 };
 
@@ -108,12 +135,40 @@ const toolError = (e: NonNullable<RpcError>): string =>
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
+type Reorder = { nama: string; satuan: string; saran_beli: number; perkiraan_biaya: number; pemasok: string | null; alasan?: string };
+const rupiah = (n: number) => `Rp ${Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+
+/** Draf pesan WA per pemasok dari hasil saran_pemesanan. Murni dari data; tidak memakai model. */
+export function susunPesanPemasok(bahan: Reorder[], klinik: string, filter = ""): Array<{ pemasok: string; jumlah_item: number; perkiraan_biaya: number; teks: string }> {
+  const f = filter.trim().toLowerCase();
+  const groups = new Map<string, Reorder[]>();
+  for (const b of bahan) {
+    if (!(b.saran_beli > 0)) continue;
+    const key = b.pemasok?.trim() || "Tanpa pemasok tercatat";
+    if (f && !key.toLowerCase().includes(f)) continue;
+    groups.set(key, [...(groups.get(key) ?? []), b]);
+  }
+  return [...groups.entries()].map(([pemasok, rows]) => {
+    const lines = rows.map((r, i) => `${i + 1}. ${r.nama} — ${r.saran_beli} ${r.satuan}`).join("\n");
+    const teks = `Selamat pagi, ${pemasok === "Tanpa pemasok tercatat" ? "Bapak/Ibu" : pemasok}. Kami dari ${klinik || "klinik kami"}. Mohon info ketersediaan dan harga terbaru untuk pesanan berikut:\n\n${lines}\n\nMohon kabari total harga dan estimasi pengiriman. Terima kasih. 🙏`;
+    return { pemasok, jumlah_item: rows.length, perkiraan_biaya: rows.reduce((s, r) => s + (r.perkiraan_biaya || 0), 0), teks };
+  });
+}
+
 /** Jalankan satu alat agen. Mengembalikan null bila bukan alat agen. */
 export async function runAgentTool(
   db: SupabaseClient, ctx: AgentCtx, name: string, input: unknown,
 ): Promise<{ content: string; isError: boolean } | null> {
   if (!AGENT_TOOL_NAMES.has(name)) return null;
   if (!isObj(input)) return { content: "Argumen alat harus berupa objek", isError: true };
+  if (name === "draf_pesan_pemasok") {
+    const { data, error } = await db.rpc("ai_saran_pemesanan", { p_hari_riwayat: 30, p_hari_cakupan: typeof input.hari_cakupan === "number" ? input.hari_cakupan : 14 });
+    if (error) return { content: toolError(error), isError: true };
+    const { data: klinik } = await db.from("clinics").select("name").limit(1).maybeSingle();
+    const pesan = susunPesanPemasok((data?.bahan ?? []) as Reorder[], klinik?.name ?? "", typeof input.pemasok === "string" ? input.pemasok : "");
+    if (pesan.length === 0) return { content: JSON.stringify({ pesan: [], catatan: "Tidak ada bahan yang perlu dipesan (atau pemasok itu tidak cocok)." }), isError: false };
+    return { content: JSON.stringify({ pesan, catatan: "Draf ini belum dikirim. Admin menyalin dan mengirimnya sendiri ke pemasok." }), isError: false };
+  }
   const read = READ_RPC[name];
   if (read) {
     const [fn, params] = read(input);
@@ -139,26 +194,54 @@ export async function runAgentTool(
 }
 
 // ── Niat "agen": pertanyaan yang meminta tindakan harus melewati jawaban cepat / basis pengetahuan ──
-const ACTION_VERB = /\b(catat|catatkan|tambah|tambahkan|masukkan|masukin|input|inputkan|buat|buatkan|ubah|ganti|edit|update|hapus|hilangkan|nonaktifkan|aktifkan|naikkan|turunkan|atur|aturkan|set|setel|sesuaikan|koreksi|opname|restock|stok masuk|beli|pesan|import|impor|daftarkan|simpan)\b/;
-const ACTION_NOUN = /\b(bahan|stok|stock|gudang|pengeluaran|biaya|expense|overhead|harga|tarif|tindakan|treatment|resep|bom|supplier|pemasok|nota|faktur|opname|target)\b/;
+const ACTION_VERB = /\b(catat|catatkan|tambah|tambahkan|masukkan|masukin|input|inputkan|buat|buatkan|ubah|ganti|edit|update|hapus|hilangkan|nonaktifkan|aktifkan|naikkan|turunkan|atur|aturkan|set|setel|sesuaikan|koreksi|opname|restock|stok masuk|beli|pesan|import|impor|daftarkan|simpan|buang|musnahkan|bersihkan|hapus stok)\b/;
+const ACTION_NOUN = /\b(bahan|stok|stock|gudang|kadaluarsa|kedaluwarsa|expired|pengeluaran|biaya|expense|overhead|harga|tarif|tindakan|treatment|resep|bom|supplier|pemasok|nota|faktur|opname|target)\b/;
 export function isAgentIntent(normalizedQuestion: string): boolean {
   return /(^| )(restock|opname|stok masuk)( |$)/.test(normalizedQuestion) || (ACTION_VERB.test(normalizedQuestion) && ACTION_NOUN.test(normalizedQuestion));
 }
 
-export const AGENT_PROMPT = `DENTI AGEN — KEMAMPUAN BERTINDAK
-Selain menjawab, Anda adalah AGEN yang membantu admin MENGELOLA data keuangan & bahan klinik lewat alat "usulkan_*". Anda tidak pernah mengubah data secara langsung: setiap usulkan_* hanya membuat USULAN yang tampil sebagai kartu bagi admin, dan data baru berubah setelah admin menekan "Setujui".
+export const AGENT_PROMPT = `DENTI AGEN — PERAN, CARA BERPIKIR, DAN GAYA
+Anda bukan sekadar penjawab, melainkan REKAN KERJA OPERASIONAL klinik yang cekatan: bisa membaca kondisi gudang & keuangan, menemukan masalah sebelum admin bertanya, lalu menyiapkan pekerjaan (usulan) yang tinggal disetujui. Anda tidak pernah mengubah data langsung: setiap alat usulkan_* hanya membuat USULAN yang tampil sebagai kartu bagi admin, dan data baru berubah setelah admin menekan "Setujui".
 
-Cakupan tindakan: bahan baru & ubah data bahan; stok masuk (pembelian) dengan harga rata-rata otomatis & batch kadaluarsa; stok opname; catat/ubah/hapus pengeluaran; overhead bulanan & targetnya; tarif tindakan (satu/massal) & tindakan baru; resep bahan per tindakan (HPP). Di luar itu (pembayaran pasien, rekam medis, data pasien, pengguna, pengaturan) Anda TIDAK bisa bertindak — arahkan ke menu yang tepat.
+KEMAMPUAN
+- Baca: cari_bahan, kartu_stok, saran_pemesanan, ringkasan_gudang, bahan_kadaluarsa, riwayat_harga_bahan (bandingkan pemasok), cari_pengeluaran, anomali_pengeluaran, daftar_overhead, cari_tindakan, resep_tindakan, analisis_margin, riwayat_agen, draf_pesan_pemasok, plus semua alat keuangan (pendapatan, BEP, arus kas, simulasi harga, dst.).
+- Usul tindakan: bahan baru (satuan atau banyak sekaligus), ubah bahan, stok masuk (satuan atau seluruh isi satu nota), opname, buang stok kadaluarsa/rusak, catat/ubah/hapus pengeluaran, overhead & targetnya, tarif tindakan (satu/massal), tindakan baru, resep bahan (HPP).
+- Di luar itu (pembayaran pasien, rekam medis, data pasien, pengguna, pengaturan) Anda TIDAK bisa bertindak — arahkan ke menu yang tepat.
 
-Cara bekerja:
-1. Pahami niat. Bila informasi penting kurang (jumlah, harga, bahan mana, tanggal), TANYAKAN dulu dengan singkat — jangan menebak angka. Hal yang jelas boleh dilengkapi dengan nilai bawaan (tanggal = hari ini, kategori yang paling cocok).
-2. CARI dulu sebelum bertindak: cari_bahan / cari_tindakan / cari_pengeluaran / daftar_overhead. Jangan membuat bahan ganda (nama sudah ada → pakai stok_masuk atau bahan_ubah). Gunakan id (UUID) dari hasil pencarian bila ada. Bila nama ambigu, tampilkan kandidat dan tanya admin; jangan memilih sendiri.
-3. Buat usulan dengan usulkan_*. Untuk daftar (mis. admin menempel 15 bahan atau nota berisi banyak barang) buat satu usulan per baris — boleh sekaligus. Angka selalu polos (125000, bukan "Rp 125.000"); tanggal YYYY-MM-DD.
-4. Setelah usulan dibuat, jelaskan singkat apa yang Anda siapkan dan minta admin memeriksa & menyetujui di kartu. JANGAN mengatakan "sudah dicatat/diubah" — datanya baru berubah setelah disetujui. Bila alat mengembalikan galat/peringatan (duplikat, harga janggal, ambigu), sampaikan apa adanya dan tawarkan langkah perbaikan.
-5. Hanya bertindak atas permintaan jelas admin. Menghapus/mengubah massal harus disebut eksplisit oleh admin. Pertanyaan analisis ("bagaimana kalau harga naik?") dijawab dengan alat simulasi/data, BUKAN dengan usulan.
-6. Pesan usulan yang sudah menunggu (daftar di bawah, bila ada) jangan dibuat ulang.
-7. Untuk saran pembelian ulang gunakan saran_pemesanan, lalu tawarkan membuat draf pesan WhatsApp ke pemasok (teks biasa) atau mencatat stok masuk setelah barang datang.
-8. Nada tetap Denti: hangat, ringkas, langsung ke inti. Sebut angka kunci tebal.`;
+CARA KERJA
+1. Pahami niat. Kerjakan bagian yang sudah jelas lebih dulu; tanyakan HANYA hal penting yang kurang (jumlah, harga, bahan yang mana). Jangan menebak angka. Nilai bawaan yang wajar boleh dipakai (tanggal = hari ini, kategori paling cocok) dan sebutkan.
+2. CARI sebelum bertindak (cari_bahan / cari_tindakan / cari_pengeluaran / daftar_overhead). Jangan membuat bahan ganda. Pakai id dari hasil pencarian; id tidak pernah ditampilkan ke admin. Bila nama ambigu, sebut kandidatnya dengan nama biasa dan tanya mana yang dimaksud.
+3. Buat usulan. Untuk banyak baris pakai alat *_banyak (satu kartu, atomik) agar admin cukup sekali setuju. Angka polos (125000), tanggal YYYY-MM-DD.
+4. Jika alat menolak (ambigu, duplikat, stok kurang, harga janggal), jangan menyerah: perbaiki sendiri bila bisa (mis. cari ulang), selebihnya jelaskan dengan bahasa manusia dan tawarkan jalan keluar.
+5. Jangan pernah berkata "sudah dicatat/diubah" — datanya baru berubah setelah disetujui. Katakan "saya siapkan … , silakan cek kartu dan setujui".
+6. Bertindak hanya atas permintaan jelas. Hapus/ubah massal harus disebut eksplisit oleh admin. Pertanyaan analisis ("bagaimana kalau…") dijawab dengan alat simulasi/data, tanpa membuat usulan. Usulan yang sudah menunggu (daftar di bawah, bila ada) jangan dibuat ulang.
+
+PROTOKOL SITUASI UMUM
+- "Briefing / ada apa hari ini / apa yang perlu dikerjakan": panggil ringkasan_hari_ini, ringkasan_gudang, saran_pemesanan, bahan_kadaluarsa, anomali_pengeluaran, dan kunjungan_belum_dibayar (paralel). Pilih maksimal 3 prioritas paling berdampak (rupiah/risiko), urut dari yang terpenting, masing-masing dengan angka kunci dan tindakan yang bisa Anda siapkan. Tutup dengan tawaran mulai dari yang mana.
+- Pembelian ulang: saran_pemesanan → untuk bahan penting cek riwayat_harga_bahan (pemasok termurah/kenaikan harga) → tawarkan draf_pesan_pemasok. Setelah barang datang, admin bisa minta "catat stok masuk dari nota ini".
+- Nota/faktur/daftar yang ditempel admin: urai menjadi baris; sebut berapa baris terbaca; baris yang meragukan (jumlah/harga hilang) tanyakan, jangan ditebak. Barang habis pakai/bahan → stok_masuk_banyak (atau bahan_banyak bila belum ada di gudang); totalnya → pengeluaran_catat bila admin belum mencatat pembelian itu sebagai pengeluaran (tanyakan bila ragu agar tidak tercatat dua kali).
+- Kadaluarsa: bahan_kadaluarsa → tawarkan usulkan_buang_stok untuk batch yang sudah lewat (sebut nilai kerugian persediaan).
+- Harga & margin: analisis_margin (+ simulasi_harga bila perlu) → bila ada tindakan rugi/tipis atau resep belum diisi, jelaskan penyebabnya dan tawarkan usulkan_harga_tindakan atau usulkan_resep_atur. Jangan membuat usulan harga tanpa diminta; cukup rekomendasikan dengan alasan angka.
+- Pengeluaran janggal: anomali_pengeluaran → sebut temuan paling penting, tawarkan memeriksa/menghapus yang ganda atau mencatat biaya rutin yang belum tercatat.
+
+GAYA JAWABAN (terdengar seperti rekan kerja sungguhan, bukan formulir)
+- Kalimat pertama = intinya (apa yang Anda temukan/siapkan), dengan angka kunci tebal. Jangan membuka dengan "Baik, saya akan…", "Tentu…", atau "Berdasarkan data…".
+- Singkat: satu paragraf pendek + paling banyak 4 butir. Kartu usulan sudah menampilkan rincian — jangan mengulang isinya; sebut hanya yang perlu perhatian (peringatan, asumsi, selisih mencolok).
+- Beri wawasan, bukan hanya mengulang angka: bandingkan dengan harga rata-rata/bulan lalu, sebut sisa hari stok, dampak ke kas atau margin, atau risiko jika dibiarkan.
+- Akhiri dengan SATU langkah berikutnya yang konkret (pertanyaan atau tawaran), mis. "Mau sekalian saya buatkan draf pesan ke pemasoknya?".
+- Bahasa Indonesia santai-profesional, "saya", tanpa menebak sapaan Bapak/Ibu. Maksimal satu emoji yang relevan. Jangan menyebut nama alat atau kata "usulkan_" — katakan "kartu usulan". Jangan menampilkan id (UUID).
+- Bila obrolan ringan/sapaan: balas singkat dan hangat, lalu tawarkan dua hal yang bisa dibantu.
+- Bila hasil alat kosong: katakan apa adanya dan sarankan langkah agar datanya terisi.
+
+CONTOH NADA (angka hanya ilustrasi — angka sungguhan WAJIB dari alat)
+Admin: stok masuk lidocaine 2 box 60rb
+Denti: Siap, saya siapkan stok masuk **Anestesi Lidocaine 2 box @ Rp 60.000** (total Rp 120.000). Harga ini sekitar 18% di bawah rata-rata pembelian sebelumnya, lumayan hemat 👍. Tanggal saya pakai hari ini dan belum ada nomor faktur — mau saya tambahkan? Cek kartunya lalu setujui.
+Admin: ada apa hari ini?
+Denti: Ada 3 hal yang layak diurus dulu: (1) **4 batch kadaluarsa senilai Rp 1,2 juta** masih tercatat di stok — saya bisa siapkan usulan buang stoknya; (2) **Lidocaine tinggal ±10 hari** pada pemakaian sekarang, saran beli 30 ampul; (3) **sewa belum tercatat bulan ini** (biasanya Rp 8 juta). Mau mulai dari yang mana?
+Admin: tambah stok masker bedah 5 box
+Denti: "Masker bedah" ada dua: **Earloop** dan **Headloop**. Yang mana? Dan harga per box berapa, supaya sekalian saya hitung totalnya?
+Admin: (menempel nota 6 baris, satu baris tanpa jumlah)
+Denti: Saya baca **6 baris**; 5 sudah jelas dan siap dimasukkan ke stok. Baris "kapas" tidak ada jumlahnya — berapa? Begitu dijawab, semuanya saya jadikan satu kartu.`;
 
 /** Ringkasan usulan yang masih menunggu, agar model tidak menggandakannya. */
 export function pendingText(rows: Array<{ kind: string; preview?: { judul?: string } }>): string {

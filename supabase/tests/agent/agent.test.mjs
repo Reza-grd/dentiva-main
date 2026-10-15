@@ -325,3 +325,132 @@ test("alat baca: cari bahan, kartu stok, saran pemesanan, cari pengeluaran, cari
   const hist = await read(ADMIN_A, "select public.ai_riwayat_agen(5) r");
   assert.equal(hist.tindakan.length, 5);
 });
+
+test("lanjutan: tambah banyak bahan (impor daftar) — satu kartu, atomik, bisa dibatalkan; galat menyebut nomor baris", async () => {
+  const items = [
+    { nama: "Kapas Gulung", satuan_dasar: "roll", stok_awal: 20, harga_per_satuan: 8000, stok_minimum: 5 },
+    { nama: "Cotton Pellet", satuan_dasar: "pcs", stok_awal: 300, harga_per_satuan: 150 },
+    { nama: "Saliva Ejector", satuan_dasar: "pcs" },
+  ];
+  const r = await run("bahan_tambah_banyak", { items });
+  assert.match(r.proposal.pratinjau.judul, /3 bahan/);
+  assert.equal(r.applied.tindakan[0].hasil.jumlah, 3);
+  const rows = await q("select nama_bahan, stok_saat_ini from public.master_bahan where clinic_id = $1 and nama_bahan in ('Kapas Gulung','Cotton Pellet','Saliva Ejector') order by 1", [A]);
+  assert.deepEqual(rows.map((x) => Number(x.stok_saat_ini)), [300, 20, 0]);
+  await undo(ADMIN_A, r.proposal.action_id);
+  assert.equal(Number((await one("select count(*) c from public.master_bahan where clinic_id = $1 and nama_bahan in ('Kapas Gulung','Cotton Pellet','Saliva Ejector')", [A])).c), 0);
+  // galat: nama ganda di daftar & nilai buruk → pesan per baris, tidak ada usulan
+  const bad = await propose(ADMIN_A, "bahan_tambah_banyak", { items: [{ nama: "Bur Intan", satuan_dasar: "pcs" }, { nama: "bur intan", satuan_dasar: "pcs" }, { nama: "Bur Fisur", satuan_dasar: "pcs", stok_awal: -1 }] });
+  assert.equal(bad.ok, false); assert.match(bad.error, /Baris 2/); assert.match(bad.error, /Baris 3/); assert.match(bad.error, /2 dari 3/);
+  assert.equal((await propose(ADMIN_A, "bahan_tambah_banyak", { items: [] })).ok, false);
+  assert.equal((await propose(ADMIN_A, "bahan_tambah_banyak", { items: "x" })).ok, false);
+});
+
+test("lanjutan: stok masuk banyak dari satu nota — default faktur/pemasok, total, kandidat bila ambigu", async () => {
+  await run("bahan_tambah_banyak", { items: [{ nama: "Bur Intan Bulat", satuan_dasar: "pcs", stok_awal: 10, harga_per_satuan: 3000 }, { nama: "Gutta Percha", satuan_dasar: "pcs", stok_awal: 10, harga_per_satuan: 1000 }] });
+  const nota = { supplier: "CV Medika Jaya", no_faktur: "MJ-2026-088", tanggal: "2026-10-12",
+    items: [{ bahan: "Bur Intan Bulat", jumlah_beli: 5, harga_satuan_beli: 3200 }, { bahan: "gutta percha", jumlah_beli: 20, harga_satuan_beli: 1100, tanggal_kadaluarsa: "2028-01-01" }] };
+  const r = await run("stok_masuk_banyak", nota);
+  assert.match(r.proposal.pratinjau.judul, /2 barang \(Rp 38\.000\)/);
+  const rows = await q("select nama_bahan, stok_saat_ini from public.master_bahan where clinic_id = $1 and nama_bahan in ('Bur Intan Bulat','Gutta Percha') order by 1", [A]);
+  assert.deepEqual(rows.map((x) => Number(x.stok_saat_ini)), [15, 30]);
+  const buys = await q("select supplier, no_faktur from public.material_purchases where no_faktur = 'MJ-2026-088'");
+  assert.equal(buys.length, 2); assert.ok(buys.every((x) => x.supplier === "CV Medika Jaya"));
+  assert.equal(Number((await one("select count(*) c from public.material_batches where clinic_id = $1 and tanggal_kadaluarsa = '2028-01-01'", [A])).c), 1);
+  assert.equal(r.applied.tindakan[0].bisa_batal, false);
+  // ambigu & tidak ditemukan → galat per baris, dengan kandidat
+  const bad = await propose(ADMIN_A, "stok_masuk_banyak", { items: [{ bahan: "masker bedah", jumlah_beli: 1, harga_satuan_beli: 100 }, { bahan: "tidak ada barang ini xyz", jumlah_beli: 1, harga_satuan_beli: 100 }] });
+  assert.equal(bad.ok, false); assert.match(bad.error, /Baris 1/); assert.match(bad.error, /Kandidat: .*Masker/); assert.match(bad.error, /Baris 2/);
+});
+
+test("lanjutan: buang stok kadaluarsa — kartu stok, batch FEFO, undo; tolak bila melebihi stok", async () => {
+  await run("bahan_tambah", { nama: "Etsa Gel", satuan_dasar: "tube", stok_awal: 10, harga_per_satuan: 20000 });
+  const b = await one("select * from public.master_bahan where clinic_id = $1 and nama_bahan = 'Etsa Gel'", [A]);
+  await run("stok_masuk", { bahan: b.id, jumlah_beli: 5, harga_satuan_beli: 20000, tanggal: "2026-01-05", no_faktur: "ETS-1", tanggal_kadaluarsa: "2026-02-01" });
+  await db.exec(`update public.material_batches set tanggal_kadaluarsa = '2026-02-01' where material_id = '${b.id}'`);
+  const tooMuch = await propose(ADMIN_A, "batch_buang", { bahan: b.id, jumlah: 99, alasan: "kadaluarsa" });
+  assert.equal(tooMuch.ok, false); assert.match(tooMuch.error, /hanya/);
+  assert.equal((await propose(ADMIN_A, "batch_buang", { bahan: b.id, jumlah: 1, alasan: "iseng" })).ok, false);
+  const p = await ok("batch_buang", { bahan: "Etsa Gel", jumlah: 4, alasan: "kadaluarsa", catatan: "Batch ETS-1 lewat tanggal" });
+  assert.ok(p.pratinjau.rincian.some((x) => /Kerugian persediaan ± Rp 80\.000/.test(x)));
+  const ap = await apply(ADMIN_A, [p.action_id]);
+  assert.equal(Number(ap.tindakan[0].hasil.kerugian), 80000);
+  assert.equal(Number((await one("select stok_saat_ini from public.master_bahan where id = $1", [b.id])).stok_saat_ini), 11);
+  assert.equal(Number((await one("select qty_sisa from public.material_batches where material_id = $1", [b.id])).qty_sisa), 1);
+  const mv = await one("select * from public.stok_movements where material_id = $1 and tipe = 'penyesuaian'", [b.id]);
+  assert.equal(Number(mv.jumlah), -4); assert.match(mv.catatan, /kadaluarsa/);
+  await undo(ADMIN_A, p.action_id);
+  assert.equal(Number((await one("select stok_saat_ini from public.master_bahan where id = $1", [b.id])).stok_saat_ini), 15);
+  assert.equal(Number((await one("select qty_sisa from public.material_batches where material_id = $1", [b.id])).qty_sisa), 5);
+  assert.equal(await one("select 1 x from public.stok_movements where material_id = $1 and tipe = 'penyesuaian'", [b.id]), undefined);
+});
+
+test("lanjutan: analitik gudang — ringkasan, kadaluarsa, riwayat harga & pemasok", async () => {
+  const g = await read(ADMIN_A, "select public.ai_ringkasan_gudang() r");
+  assert.ok(g.bahan_aktif >= 5); assert.ok(Number(g.nilai_stok_total) > 0);
+  assert.ok(g.batch_kadaluarsa.sudah_lewat >= 1); assert.ok(Number(g.batch_kadaluarsa.nilai_sudah_lewat) > 0);
+  assert.ok(g.nilai_terbesar.length > 0 && g.per_kategori.length > 0);
+  const k = await read(ADMIN_A, "select public.ai_bahan_kadaluarsa(60) r");
+  const etsa = k.batch.find((x) => x.bahan === "Etsa Gel");
+  assert.ok(etsa); assert.equal(etsa.status, "sudah lewat"); assert.ok(etsa.hari_lagi < 0);
+  // riwayat harga: dua pemasok untuk bahan yang sama
+  const b = await one("select id from public.master_bahan where clinic_id = $1 and nama_bahan = 'Gutta Percha'", [A]);
+  await run("stok_masuk", { bahan: b.id, jumlah_beli: 10, harga_satuan_beli: 900, supplier: "Toko Murah", no_faktur: "TM-1" });
+  const h = await read(ADMIN_A, "select public.ai_riwayat_harga_bahan('gutta', 12) r");
+  assert.ok(h.per_pemasok.length >= 2);
+  assert.equal(h.per_pemasok[0].pemasok, "Toko Murah"); // diurut dari harga rata-rata termurah
+  assert.ok(Number(h.per_pemasok[0].harga_rata2) < Number(h.per_pemasok[1].harga_rata2));
+  assert.ok(h.pembelian.length >= 3);
+});
+
+test("lanjutan: analisis margin memakai biaya bahan + overhead; status rugi/tipis/sehat/resep kosong", async () => {
+  await run("tindakan_tambah", { nama: "Tambal Glass Ionomer", harga_dasar: 250000, tier: "ringan" });
+  await run("resep_atur", { tindakan: "Tambal Glass Ionomer", bahan: "Etsa Gel", qty_rata2: 1 }); // 20.000
+  await run("overhead_atur", { nama_biaya: "Listrik & Air", jumlah_bulanan: 2000000 });
+  await run("overhead_target", { total_overhead_bulanan: 10000000, total_bobot_estimasi: 100 }); // 100.000 per bobot
+  await db.exec(`insert into public.tier_weights (clinic_id, tier, label, bobot) values ('${A}', 'ringan', 'Ringan', 1) on conflict do nothing`);
+  const m = await read(ADMIN_A, "select public.ai_analisis_margin(50) r");
+  const gi = m.tindakan.find((x) => x.nama === "Tambal Glass Ionomer");
+  assert.equal(Number(gi.biaya_bahan), 20000);
+  assert.equal(Number(gi.overhead_per_tindakan), 100000);
+  assert.equal(Number(gi.hpp), 120000);
+  assert.equal(Number(gi.margin_rp), 130000);
+  assert.equal(Number(gi.margin_persen), 52);
+  assert.equal(gi.status, "sehat");
+  assert.equal(m.tindakan.find((x) => x.nama === "Scaling").status, "resep belum diisi");
+  await run("tindakan_harga", { tindakan: "Tambal Glass Ionomer", harga_baru: 110000 });
+  const m2 = await read(ADMIN_A, "select public.ai_analisis_margin(50) r");
+  assert.equal(m2.tindakan.find((x) => x.nama === "Tambal Glass Ionomer").status, "rugi");
+  assert.ok(Number(m2.overhead_per_bobot) === 100000);
+});
+
+test("lanjutan: anomali pengeluaran — lonjakan, biaya rutin belum tercatat, besar, kemungkinan ganda", async () => {
+  // data historis 3 bulan penuh sebelum bulan berjalan: Sewa/Utilitas rutin, Marketing kecil
+  await db.exec(`
+    insert into public.expenses (clinic_id, tanggal_expense, kategori, deskripsi, jumlah, sumber)
+    select '${A}', (date_trunc('month', public.ai_agent_today()) - make_interval(months => m) + interval '4 days')::date, k.kat, k.kat || ' bulan -' || m, k.jml, 'manual'
+      from generate_series(1, 3) m, (values ('Sewa', 8000000), ('Utilitas', 1200000), ('Marketing', 200000)) k(kat, jml);
+    insert into public.expenses (clinic_id, tanggal_expense, kategori, deskripsi, jumlah, sumber) values
+      ('${A}', date_trunc('month', public.ai_agent_today())::date, 'Marketing', 'Iklan sosial media', 1000000, 'manual'),
+      ('${A}', date_trunc('month', public.ai_agent_today())::date, 'Alat Medis', 'Autoclave baru', 6500000, 'manual'),
+      ('${A}', public.ai_agent_today() - 2, 'Administrasi', 'ATK fotokopi', 150000, 'manual'),
+      ('${A}', public.ai_agent_today() - 1, 'Administrasi', 'ATK fotokopi lagi', 150000, 'manual');`);
+  // pengeluaran 'Utilitas' bulan ini sudah ada dari tes sebelumnya (Listrik November) → bukan "belum tercatat"; Sewa belum
+  const an = await read(ADMIN_A, "select public.ai_anomali_pengeluaran() r");
+  assert.ok(an.lonjakan_kategori.some((x) => x.kategori === "Marketing" && Number(x.rasio) >= 5), JSON.stringify(an.lonjakan_kategori));
+  assert.ok(an.biaya_rutin_belum_tercatat.some((x) => x.kategori === "Sewa" && Number(x.rata_rata_per_bulan) === 8000000));
+  assert.ok(an.pengeluaran_besar_bulan_ini.some((x) => x.deskripsi === "Autoclave baru"));
+  assert.ok(an.kemungkinan_ganda_60_hari.some((x) => Number(x.jumlah) === 150000));
+});
+
+test("lanjutan: alat analitik hanya admin & terisolasi per klinik", async () => {
+  for (const fn of ["ai_ringkasan_gudang()", "ai_bahan_kadaluarsa(30)", "ai_analisis_margin(10)", "ai_anomali_pengeluaran()"]) {
+    await rejects(read(RECEP_A, `select public.${fn} r`), /hanya untuk admin/i);
+  }
+  const g = await read(ADMIN_B, "select public.ai_ringkasan_gudang() r");
+  assert.equal(g.bahan_aktif, 0);
+  const an = await read(ADMIN_B, "select public.ai_anomali_pengeluaran() r");
+  assert.equal(an.lonjakan_kategori.length + an.pengeluaran_besar_bulan_ini.length + an.kemungkinan_ganda_60_hari.length, 0);
+  const m = await read(ADMIN_B, "select public.ai_analisis_margin(10) r");
+  assert.ok(m.tindakan.every((x) => x.nama === "Scaling B"));
+});
