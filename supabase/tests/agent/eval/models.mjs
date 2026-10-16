@@ -38,7 +38,7 @@ async function geminiLoop({ key, model, turns, tools, client, ctx, trace, thinki
       }
     }
     const r = readInteraction(raw);
-    if (r.calls.length === 0 && !r.text && round > 0 && !nudged) {
+    if (r.calls.length === 0 && !r.text && !nudged) {
       nudged = true;
       history.push(userText("Tuliskan jawaban akhir untuk admin berdasarkan hasil alat di atas (ringkas, natural, sebut langkah berikutnya)."));
       continue;

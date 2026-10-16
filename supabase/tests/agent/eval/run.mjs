@@ -15,7 +15,7 @@ import { writeFileSync } from "node:fs";
 import { buildEvalDb, userClient, businessFingerprint } from "./db.mjs";
 import { SCENARIOS } from "./scenarios.mjs";
 import { converse, toolSet } from "./models.mjs";
-import { guardAgentAnswer, isAgentIntent, needsWriteTools, pendingText } from "../../../functions/ai-assistant/agent.ts";
+import { guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, pendingText } from "../../../functions/ai-assistant/agent.ts";
 import { normalizeQuestion } from "../../../functions/ai-assistant/knowledge.ts";
 
 const argv = process.argv.slice(2);
@@ -86,7 +86,9 @@ for (const sc of list) {
     try {
       const snap = await admin.rpc("ai_snapshot");
       const { data: pending } = await admin.from("ai_actions").select("kind, preview").eq("status", "pending").gt("expires_at", new Date().toISOString()).order("created_at", { ascending: false }).limit(12);
-      const content = `Tanggal hari ini: ${today} (Asia/Jakarta).${snap.data ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snap.data)}` : ""}${pendingText(pending ?? [])}\n\nPertanyaan: ${sc.say}`;
+      let briefText = "";
+      if (isBriefingRequest(qn)) { const br = await admin.rpc("ai_briefing_agen"); if (br.data) briefText = `\n\nHasil briefing_agen (sudah dihitung & terurut; gunakan ini, jangan memanggil alat yang sama lagi):\n${JSON.stringify(br.data)}`; }
+      const content = `Tanggal hari ini: ${today} (Asia/Jakarta).${snap.data ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snap.data)}` : ""}${briefText}${pendingText(pending ?? [])}\n\nPertanyaan: ${sc.say}`;
       out = await converse({
         provider, key, model, trace, client: admin, ctx, script: negative ? sc.script.filter((st) => !st.calls) : sc.script, tools: toolSet(writeTools),
         turns: [...history, { role: "user", content }], thinking: opt("thinking", isAgentIntent(qn) ? "medium" : "low"), effort: isAgentIntent(qn) ? "high" : "medium",

@@ -272,13 +272,13 @@ KEMAMPUAN
 CARA KERJA
 1. Pahami niat. Kerjakan bagian yang sudah jelas lebih dulu; tanyakan HANYA hal penting yang kurang (jumlah, harga, bahan yang mana). Jangan menebak angka. Nilai bawaan yang wajar boleh dipakai (tanggal = hari ini, kategori paling cocok) dan sebutkan.
 2. CARI sebelum bertindak (cari_bahan / cari_tindakan / cari_pengeluaran / daftar_overhead). Jangan membuat bahan ganda. Pakai kata-kata admin APA ADANYA untuk nama bahan/tindakan (mis. "kapas", "masker bedah") — jangan melengkapi nama lengkap sendiri; sistem yang mencocokkan dan akan menandai bila ambigu. Pakai id dari hasil pencarian; id tidak pernah ditampilkan ke admin. Bila nama ambigu, sebut kandidatnya dengan nama biasa dan tanya mana yang dimaksud.
-3. Buat usulan. Untuk banyak baris pakai alat *_banyak (satu kartu, atomik) agar admin cukup sekali setuju. Angka polos (125000), tanggal YYYY-MM-DD.
+3. Buat usulan. Untuk banyak baris pakai alat *_banyak (satu kartu, atomik) agar admin cukup sekali setuju. Angka polos (125000), tanggal YYYY-MM-DD. SATUAN stok masuk: jumlah_beli dihitung dalam satuan BELI bahan (mis. box) dan harga_satuan_beli per satuan beli; bila admin menyebut jumlah dalam satuan dasar (ampul/pcs), bagi dengan isi satuan beli (cari_bahan menampilkan faktor_konversi) atau isi jumlah_dasar — jangan mengalikan dua kali.
 4. Jika alat menolak (ambigu, duplikat, stok kurang, harga janggal), jangan menyerah: perbaiki sendiri bila bisa (mis. cari ulang), selebihnya jelaskan dengan bahasa manusia dan tawarkan jalan keluar.
 5. Jangan pernah berkata "sudah dicatat/diubah" — datanya baru berubah setelah disetujui. Katakan "saya siapkan … , silakan cek kartu dan setujui".
 6. Bertindak hanya atas permintaan jelas. Hapus/ubah massal harus disebut eksplisit oleh admin. Kata samar seperti "bersihkan", "rapikan", "yang tidak perlu", "yang lama" BUKAN perintah hapus: tampilkan kandidat dengan alat baca lalu tanyakan mana yang harus dihapus — jangan membuat usulan hapus. Pertanyaan analisis ("bagaimana kalau…") dijawab dengan alat simulasi/data, tanpa membuat usulan. Usulan yang sudah menunggu (daftar di bawah, bila ada) jangan dibuat ulang.
 
 PROTOKOL SITUASI UMUM
-- "Briefing / ada apa hari ini / apa yang perlu dikerjakan": panggil briefing_agen SATU kali (sudah terurut berdasarkan dampak; jangan memanggil alat lain dulu). Sampaikan 3 temuan teratas dengan angka kuncinya, urut sesuai peringkat, dan untuk tiap temuan sebut tindakan yang bisa Anda siapkan (lihat petunjuk "lanjut"). Tutup dengan tawaran mulai dari yang mana. Panggil alat rincian (bahan_kadaluarsa, saran_pemesanan, …) HANYA setelah admin memilih temuan.
+- "Briefing / ada apa hari ini / apa yang perlu dikerjakan": panggil briefing_agen SATU kali (bila hasilnya sudah ada di pesan, pakai itu tanpa memanggil lagi; sudah terurut berdasarkan dampak; jangan memanggil alat lain dulu). Sampaikan 3 temuan teratas dengan angka kuncinya, urut sesuai peringkat, dan untuk tiap temuan sebut tindakan yang bisa Anda siapkan (lihat petunjuk "lanjut"). Tutup dengan tawaran mulai dari yang mana. Panggil alat rincian (bahan_kadaluarsa, saran_pemesanan, …) HANYA setelah admin memilih temuan.
 - Pembelian ulang: saran_pemesanan → untuk bahan penting cek riwayat_harga_bahan (pemasok termurah/kenaikan harga) → tawarkan draf_pesan_pemasok. Setelah barang datang, admin bisa minta "catat stok masuk dari nota ini".
 - Nota/faktur/daftar yang ditempel admin: urai menjadi baris; sebut berapa baris terbaca; baris yang meragukan (jumlah/harga hilang) tanyakan, jangan ditebak. Barang habis pakai/bahan → stok_masuk_banyak (atau bahan_banyak bila belum ada di gudang); totalnya → pengeluaran_catat bila admin belum mencatat pembelian itu sebagai pengeluaran (tanyakan bila ragu agar tidak tercatat dua kali).
 - Kadaluarsa: bahan_kadaluarsa → tawarkan usulkan_buang_stok untuk batch yang sudah lewat (sebut nilai kerugian persediaan).
@@ -326,6 +326,11 @@ export function guardAgentAnswer(answer: string, actions: ProposedAction[], agen
   }
   if ((agentIntent && CLAIM_DONE.test(text)) || CLAIM_PREPARED.test(text)) return `${text}\n\n_Catatan: kartu usulan belum terbentuk, jadi belum ada data yang berubah. Coba ulangi permintaan dengan detail yang lebih lengkap (bahan, jumlah, harga)._`;
   return text;
+}
+
+/** Permintaan briefing: server menyuntikkan hasil briefing_agen ke konteks sehingga tidak bergantung pada model memanggil alat. */
+export function isBriefingRequest(normalizedQuestion: string): boolean {
+  return /(^| )(briefing|ada apa hari ini|apa yang perlu (diurus|dikerjakan|saya urus|saya kerjakan)|yang perlu diurus|prioritas hari ini)( |$)/.test(normalizedQuestion);
 }
 
 /** Pembuka pertanyaan murni (informasi/analisis) — tidak butuh alat usulan. */

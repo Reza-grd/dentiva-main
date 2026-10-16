@@ -14,7 +14,8 @@ const only = (actions, kind) => actions.filter((a) => a.kind === kind);
 export const SCENARIOS = [
   // ── Briefing & analitik ──
   { id: "briefing", tag: "briefing", say: "Briefing hari ini: apa yang perlu saya urus?",
-    expect: { firstTool: "briefing_agen", maxCalls: 2, noProposals: true, answer: [/benang jahit|habis/i], answerAny: [/\?/] },
+    // Server menyuntikkan hasil briefing ke konteks; memanggil briefing_agen lagi boleh tetapi tidak wajib.
+    expect: { maxCalls: 2, noProposals: true, answer: [/benang jahit/i, /kadaluarsa|etsa/i], answerAny: [/\?/] },
     script: [calls(call("briefing_agen")), say("Ada 3 hal yang layak diurus dulu: **Benang Jahit habis**, 1 batch Etsa Gel kadaluarsa, dan sewa belum tercatat. Mau mulai dari yang mana?")] },
   { id: "analitik-margin", tag: "analitik", say: "Tindakan mana yang margin-nya tipis atau rugi?",
     expect: { tools: ["analisis_margin"], noProposals: true }, script: [calls(call("analisis_margin")), say("Dari hasil analisis, belum ada tindakan yang rugi; beberapa belum punya resep.")] },
@@ -74,7 +75,7 @@ export const SCENARIOS = [
     expect: { kinds: ["bahan_tambah"], check: ({ actions }) => (Number(actions[0]?.args.stok_awal) === 500 ? [] : ["stok_awal ≠ 500"]) },
     script: [calls(call("cari_bahan", { kata: "cotton pellet" })), calls(call("usulkan_bahan_tambah", { nama: "Cotton Pellet", satuan_dasar: "pcs", stok_awal: 500, harga_per_satuan: 120, stok_minimum: 100 })), say("Saya siapkan bahan baru **Cotton Pellet** (stok awal 500 pcs). Silakan setujui.")] },
   { id: "bahan-sudah-ada", tag: "bahan", say: "tambah bahan baru Etsa Gel satuan tube",
-    expect: { noProposals: true, tools: ["cari_bahan"], answerAny: [/sudah ada|sudah terdaftar|sudah tersedia/i] },
+    expect: { noProposals: true, tools: ["cari_bahan"], answerAny: [/sudah (ada|terdaftar|tersedia|tercatat)|tidak perlu ditambah/i] },
     script: [calls(call("cari_bahan", { kata: "etsa gel" })), say("**Etsa Gel** sudah ada di gudang (stok 6 tube). Mau saya catat stok masuk saja?")] },
   { id: "bahan-daftar", tag: "bahan", say: "masukkan bahan baru ini:\nBur Fisur - pcs - 10 - 15000\nBur Bulat - pcs - 10 - 14000\nMatrix Band - pcs - 50 - 3000\nWedge Kayu - pcs - 100 - 800\nPolishing Cup - pcs - 30 - 2500",
     expect: { kinds: ["bahan_tambah_banyak"], check: ({ actions }) => (actions[0]?.args.items?.length === 5 ? [] : [`items ${actions[0]?.args.items?.length} ≠ 5`]) },
@@ -140,7 +141,7 @@ export const SCENARIOS = [
     expect: { kinds: ["stok_masuk"], check: ({ actions }) => { const a = actions[0]?.args ?? {}; const total = Number(a.jumlah_beli) * Number(a.harga_satuan_beli); return Number(a.jumlah_dasar) === 120 && total === 600000 ? [] : [`satuan/total salah: dasar=${a.jumlah_dasar} total=${total}`]; } },
     script: [calls(call("usulkan_stok_masuk", { bahan: "lidocaine", jumlah_beli: 12, harga_satuan_beli: 50000, jumlah_dasar: 120 })), say("Saya siapkan **120 ampul (12 box @ Rp 50.000)**, total Rp 600.000.")] },
   { id: "briefing-lalu-siapkan", tag: "briefing", say: "briefing hari ini lalu siapkan usulan untuk yang paling mendesak",
-    expect: { firstTool: "briefing_agen", check: ({ actions }) => (actions.length >= 1 ? [] : ["tidak menyiapkan usulan apa pun"]) },
+    expect: { check: ({ actions }) => (actions.length >= 1 ? [] : ["tidak menyiapkan usulan apa pun"]) },
     script: [calls(call("briefing_agen")), calls(call("usulkan_buang_stok", { bahan: "Etsa Gel", jumlah: 5, alasan: "kadaluarsa" })), say("Yang paling mendesak: batch **Etsa Gel kadaluarsa**. Usulan buang stoknya sudah saya siapkan; Benang Jahit juga habis, mau dipesan?")] },
   { id: "edukasi-hpp", tag: "obrolan", say: "apa itu HPP dan kenapa penting buat klinik?",
     expect: { noProposals: true, maxCalls: 1, answer: [/hpp|harga pokok/i] }, script: [say("**HPP** (harga pokok) adalah biaya bahan + overhead per tindakan; penting agar harga jual tidak rugi.")] },

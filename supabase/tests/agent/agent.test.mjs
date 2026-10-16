@@ -483,6 +483,21 @@ test("briefing agen: prioritas terurut dari berbagai sinyal, tanpa skor mentah, 
   await db.exec("reset role");
 });
 
+test("peringatan kewajaran jumlah: stok masuk jauh di atas pembelian biasa (salah satuan beli vs dasar)", async () => {
+  await run("bahan_tambah", { nama: "Ampul Bius Uji", satuan_dasar: "ampul", satuan_beli: "box", faktor_konversi: 10 });
+  const b = await one("select id from public.master_bahan where nama_bahan = 'Ampul Bius Uji'");
+  await run("stok_masuk", { bahan: b.id, jumlah_beli: 3, harga_satuan_beli: 50000 });
+  await run("stok_masuk", { bahan: b.id, jumlah_beli: 3, harga_satuan_beli: 50000, tanggal: "2026-09-01" });
+  const salah = await ok("stok_masuk", { bahan: b.id, jumlah_beli: 120, harga_satuan_beli: 5000 }); // admin: "120 ampul" → jumlah_dasar benar 120, bukan 1200
+  assert.ok(salah.pratinjau.peringatan.some((w) => /jauh di atas pembelian biasa/.test(w) && /per box/.test(w)), JSON.stringify(salah.pratinjau.peringatan));
+  const wajar = await ok("stok_masuk", { bahan: b.id, jumlah_beli: 4, harga_satuan_beli: 50000 });
+  assert.ok(!wajar.pratinjau.peringatan.some((w) => /jauh di atas pembelian biasa/.test(w)));
+  // bahan tanpa riwayat pembelian cukup: tidak ada peringatan palsu
+  await run("bahan_tambah", { nama: "Bahan Baru Uji", satuan_dasar: "pcs" });
+  const baru = await ok("stok_masuk", { bahan: "Bahan Baru Uji", jumlah_beli: 1000, harga_satuan_beli: 10 });
+  assert.ok(!baru.pratinjau.peringatan.some((w) => /jauh di atas pembelian biasa/.test(w)));
+});
+
 test("peringatan bahan mirip: kartu memperingatkan bila ada bahan lain bernama mirip (model menebak nama)", async () => {
   await run("bahan_tambah_banyak", { items: [{ nama: "Gunting Bedah", satuan_dasar: "pcs", stok_awal: 3, harga_per_satuan: 90000 }, { nama: "Gunting Bedah Kecil", satuan_dasar: "pcs", stok_awal: 2, harga_per_satuan: 70000 },
     { nama: "Pinset Anatomis", satuan_dasar: "pcs", stok_awal: 4, harga_per_satuan: 50000 }] });

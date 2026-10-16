@@ -40,7 +40,7 @@ import { GeminiError, geminiInteract, readInteraction, toGeminiSchema, userText 
 import { GroqError, groqChat, readCompletion, toGroqTools } from "./groq.ts";
 import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.ts";
 import { fastAnswer } from "./fast.ts";
-import { CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
+import { CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
 import { ALL_TOOLS, READ_TOOLS, runTool, SYSTEM, type Tool } from "./core.ts";
 
 const MODEL = "claude-opus-5-5";
@@ -380,14 +380,14 @@ async function geminiCall(p: Provider, body: Record<string, unknown>): Promise<a
   const models = [p.model, ...(p.fallbackModel && p.fallbackModel !== p.model ? [p.fallbackModel] : [])];
   let lastErr: unknown;
   for (const model of models) {
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       try {
         return await geminiInteract(p.key, { ...body, model });
       } catch (err) {
         lastErr = err;
         if (!(err instanceof GeminiError) || !RETRYABLE.has(err.status)) throw err;
         console.warn(`gemini ${model} ${err.status}, percobaan ${attempt + 1}`);
-        if (attempt === 0) await sleep(1200);
+        if (attempt < 2) await sleep(1500 * (attempt + 1));
       }
     }
   }
@@ -429,7 +429,7 @@ async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], us
     }));
     addGeminiUsage(usage, r);
     if (r.failed) throw new GeminiError(502, `interaction ${r.status}`);
-    if (r.calls.length === 0 && !r.text && round > 0 && !nudged) {
+    if (r.calls.length === 0 && !r.text && !nudged) {
       // Model kecil kadang diam setelah menerima hasil alat: minta sekali agar menulis jawaban akhir.
       nudged = true;
       history.push(userText("Tuliskan jawaban akhir untuk admin berdasarkan hasil alat di atas (ringkas, natural, sebut langkah berikutnya)."));
@@ -814,7 +814,13 @@ Deno.serve(async (req) => {
           : "";
         const { data: pending } = await db.from("ai_actions").select("kind, preview").eq("status", "pending")
           .gt("expires_at", new Date().toISOString()).order("created_at", { ascending: false }).limit(12);
-        const snapText = (snapshot ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snapshot)}` : "") + pendingText(pending ?? []);
+        // Briefing: hitung prioritas di database dan sertakan langsung (model kecil sering melewatkan pemanggilan alat).
+        let briefText = "";
+        if (isBriefingRequest(questionNorm)) {
+          const { data: br } = await db.rpc("ai_briefing_agen");
+          if (br) briefText = `\n\nHasil briefing_agen (sudah dihitung & terurut; gunakan ini, jangan memanggil alat yang sama lagi):\n${JSON.stringify(br)}`;
+        }
+        const snapText = (snapshot ? `\n\nData ringkasan klinik terbaru:\n${JSON.stringify(snapshot)}` : "") + briefText + pendingText(pending ?? []);
         const turns: ChatTurn[] = [
           ...clean,
           { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).${snapText}${referenceText(refs)}${retryNote}\n\nPertanyaan: ${question}` },

@@ -1,6 +1,6 @@
 // deno test --config supabase/functions/ai-assistant/deno.json supabase/functions/ai-assistant/agent.test.ts
 import { assert, assertEquals, assertStringIncludes } from "jsr:@std/assert@1";
-import { AGENT_PROMPT, AGENT_READ_TOOLS, AGENT_TOOL_NAMES, AGENT_TOOLS, AGENT_WRITE_TOOLS, coerceArgs, CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, needsWriteTools, parseAngkaIndonesia, pendingText, runAgentTool, susunPesanPemasok, type AgentCtx } from "./agent.ts";
+import { AGENT_PROMPT, AGENT_READ_TOOLS, AGENT_TOOL_NAMES, AGENT_TOOLS, AGENT_WRITE_TOOLS, coerceArgs, CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, parseAngkaIndonesia, pendingText, runAgentTool, susunPesanPemasok, type AgentCtx } from "./agent.ts";
 import { normalizeQuestion } from "./knowledge.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -119,6 +119,11 @@ Deno.test("niat agen: perintah bertindak terdeteksi, pertanyaan analisis/panduan
     if (q.startsWith("bagaimana cara") || q.startsWith("kalau")) continue;
     assert(!hit, q);
   }
+});
+
+Deno.test("isBriefingRequest: kalimat briefing terdeteksi, pertanyaan lain tidak", () => {
+  for (const q of ["briefing hari ini", "ada apa hari ini", "apa yang perlu saya urus hari ini", "Briefing hari ini: apa yang perlu saya urus?", "prioritas hari ini apa"]) assert(isBriefingRequest(normalizeQuestion(q)), q);
+  for (const q of ["berapa pendapatan hari ini", "catat pengeluaran hari ini", "halo"]) assert(!isBriefingRequest(normalizeQuestion(q)), q);
 });
 
 Deno.test("pendingText & prompt agen", () => {
