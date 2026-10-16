@@ -20,6 +20,16 @@ menambah ketergantungan baru tanpa mencantumkan alasan & lisensinya, mengirim da
 
 ## 2. Cabang & commit
 
+**Aturan folder kerja (WAJIB — lahir dari insiden 17 Okt 2026):** setiap anggota bekerja di **git worktree-nya sendiri**, bukan di folder utama `D:\dentiva\dentiva.co.id-main`
+(folder utama = milik Ketua; dua agen di satu folder saling memindahkan cabang aktif sehingga commit salah masuk cabang).
+```bash
+# dari folder utama, SEKALI per paket (ganti <kode>-<topik>); contoh Antigravity:
+git fetch origin
+git worktree add D:/dentiva/antigravity-<kode> -b antigravity/<kode>-<topik> origin/console
+cd D:/dentiva/antigravity-<kode>        # semua pekerjaan, npm install, tes, commit — di sini
+```
+Tambahan: jangan `git checkout/switch` di folder utama; jalankan `git branch --show-current` sebelum setiap commit dan pastikan cabangnya milik paketmu.
+
 - GPT tidak ber-commit (pengguna menyimpan hasilnya). Antigravity memakai cabang `antigravity/<kode>-<topik>` (mis. `antigravity/A1-denti-hd`), **satu cabang per paket tugas**, dibuat dari `console` terbaru.
 - Pesan commit Bahasa Indonesia, gaya `feat(ui): …`, `fix(mascot): …`, `test(e2e): …`, `chore(ci): …`. Satu tujuan per commit.
 - Jangan *force-push*, jangan menggabungkan cabang sendiri. Ketua yang meninjau dan menggabungkan.

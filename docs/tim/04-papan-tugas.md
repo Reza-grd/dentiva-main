@@ -54,7 +54,12 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 | 17 Okt 01.20 | GPT | Cabang remote `gpt/email-templates` (hasil T3 lama, 11 Okt) | ✔ Ditinjau & digabung (lihat `serah-terima/T3-email-templates.md`). Tidak ada commit GPT baru di luar itu |
 | 17 Okt 01.20 | GPT | `docs/tim/hasil-gpt/` | Kosong — paket G1–G6 belum diserahkan |
 | 17 Okt 01.20 | Antigravity | Cabang `antigravity/*`, `docs/tim/serah-terima/` | Belum ada cabang/serah terima — paket A1–A7 belum dimulai |
+| 17 Okt 01.30 | Antigravity | Folder kerja & cabang | ⚠ **Insiden:** Antigravity bekerja di folder utama dan memindahkan cabang aktif ke `antigravity/A1-denti-hd`; satu commit Ketua (`6292ecf`) tak sengaja masuk cabang itu (sudah disalin ke `console` sebagai `71d3fed`). **Tindakan:** aturan *worktree sendiri* ditambahkan (03 §2, aturan misi); Ketua kini memakai worktree `D:\dentiva\dentiva-ketua`. **Perbaikan untuk Antigravity:** pindah ke worktree sendiri & buang commit nyasar — lihat catatan di bawah tabel |
 | — | Pemilik | T1 (kunci Claude), T4 (SMTP), T5 (storage offsite) | Menunggu tindakan pemilik |
+
+> **Instruksi perbaikan untuk Antigravity (sekali):** (1) di folder utama pastikan tak ada perubahan tak ter-commit milik Anda (`git status`); jika ada, `git add -A && git commit -m "wip(A1): …"` dulu.
+> (2) `git switch --detach origin/console` di folder utama (melepas cabang A1 dari folder itu). (3) `git worktree add D:/dentiva/antigravity-A1 antigravity/A1-denti-hd` lalu `cd` ke sana.
+> (4) Buang commit nyasar Ketua: bila belum ada commit Anda di atasnya `git reset --hard 0ed757a`; bila sudah ada: `git rebase --onto 0ed757a 6292ecf antigravity/A1-denti-hd`. Selanjutnya bekerja hanya di worktree itu.
 
 ## Urutan yang disarankan (gelombang)
 

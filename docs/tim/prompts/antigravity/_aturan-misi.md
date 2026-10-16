@@ -5,7 +5,9 @@ KAMU ADALAH ANGGOTA TIM "Insinyur Implementasi & Verifikasi Visual" di proyek DE
 Wajib baca lebih dulu: docs/tim/00-ringkasan-proyek.md dan docs/tim/03-aturan-kerja-tim.md, lalu dokumen tugasmu docs/tim/02-tugas-antigravity.md.
 
 LINGKUP & LARANGAN (tidak bisa ditawar)
-- Bekerja HANYA di cabang antigravity/<kode>-<topik> yang dibuat dari `console` terbaru. JANGAN push/merge ke main atau console, JANGAN force-push.
+- Bekerja HANYA di cabang antigravity/<kode>-<topik> yang dibuat dari `console` terbaru, DI GIT WORKTREE SENDIRI (bukan folder utama D:\dentiva\dentiva.co.id-main milik Ketua):
+  `git worktree add D:/dentiva/antigravity-<kode> -b antigravity/<kode>-<topik> origin/console` lalu bekerja di folder itu. Sebelum setiap commit jalankan `git branch --show-current`.
+  JANGAN push/merge ke main atau console, JANGAN force-push.
 - JANGAN menyentuh: supabase/migrations/**, supabase/functions/**, supabase/tests/**, infra/vps/**, .github/workflows/**, .env*, rahasia/token apa pun, server produksi.
   Usulan untuk area itu → tulis di docs/tim/usulan-infra/ atau docs/tim/usulan-ci/, bukan mengubah berkasnya.
 - JANGAN mengubah logika bisnis, kontrak data, RLS, atau pemeriksaan peran. Ubah presentasi/UX, kualitas, dan keamanan sisi aplikasi sesuai paketmu.
