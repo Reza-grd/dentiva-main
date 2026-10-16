@@ -108,3 +108,59 @@ describe('Maskot Denti — kelengkapan state', () => {
     }
   });
 });
+
+describe('Maskot Denti — sistem LOD & render HD (A1)', () => {
+  it('memilih LOD otomatis berdasarkan size (<=72 mini, <=160 standar, >160 hero) dan menghormati prop lod eksplisit', () => {
+    const { container, rerender } = render(<DentiMascot size={58} />);
+    const svg = container.querySelector('svg.denti');
+    expect(svg).toHaveAttribute('data-lod', 'mini');
+    expect(svg).toHaveAttribute('shape-rendering', 'geometricPrecision');
+    // Dimensi piksel dibulatkan ke bilangan bulat (58 * 480 / 400 = 69.6 -> 70)
+    expect(svg).toHaveAttribute('width', '58');
+    expect(svg).toHaveAttribute('height', '70');
+
+    rerender(<DentiMascot size={68} />);
+    expect(container.querySelector('svg.denti')).toHaveAttribute('data-lod', 'mini');
+
+    rerender(<DentiMascot size={96} />);
+    expect(container.querySelector('svg.denti')).toHaveAttribute('data-lod', 'standar');
+
+    rerender(<DentiMascot size={160} />);
+    expect(container.querySelector('svg.denti')).toHaveAttribute('data-lod', 'standar');
+
+    rerender(<DentiMascot size={220} />);
+    expect(container.querySelector('svg.denti')).toHaveAttribute('data-lod', 'hero');
+
+    // Prop lod eksplisit mengesampingkan ukuran otomatis
+    rerender(<DentiMascot size={220} lod="mini" />);
+    expect(container.querySelector('svg.denti')).toHaveAttribute('data-lod', 'mini');
+
+    rerender(<DentiMascot size={58} lod="hero" />);
+    expect(container.querySelector('svg.denti')).toHaveAttribute('data-lod', 'hero');
+  });
+
+  it('LOD mini bebas dari elemen <filter> dan atribut filter="url(...)" serta mempertebal garis utama', () => {
+    const { container: miniContainer } = render(<DentiMascot size={58} />);
+    expect(miniContainer.querySelectorAll('filter').length).toBe(0);
+    expect(miniContainer.querySelectorAll('[filter]').length).toBe(0);
+
+    const { container: heroContainer } = render(<DentiMascot size={220} />);
+    const miniBodyStroke = Number(miniContainer.querySelector('.d-body > path').getAttribute('stroke-width'));
+    const heroBodyStroke = Number(heroContainer.querySelector('.d-body > path').getAttribute('stroke-width'));
+    expect(miniBodyStroke).toBeGreaterThan(heroBodyStroke);
+    expect(miniBodyStroke).toBeGreaterThanOrEqual(5);
+  });
+
+  it('semua 93 state tetap valid pada setiap tingkat LOD (mini, standar, hero)', () => {
+    expect(DENTI_STATES.length).toBe(93);
+    for (const lod of ['mini', 'standar', 'hero']) {
+      for (const st of ['idle', 'happy', 'talk', 'scan', 'call', 'celebrate', 'party', 'shield', 'money']) {
+        const { container, unmount } = render(<DentiMascot state={st} lod={lod} />);
+        const svg = container.querySelector('svg.denti');
+        expect(svg).toHaveAttribute('data-state', st);
+        expect(svg).toHaveAttribute('data-lod', lod);
+        unmount();
+      }
+    }
+  });
+});
