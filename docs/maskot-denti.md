@@ -70,8 +70,14 @@ import DentiMascot, { useDentiDirector } from '../mascot/DentiMascot';
 const { state, play, sequence } = useDentiDirector('idle');
 play('call');                         // 1 putaran 6 dtk lalu kembali 'idle'
 sequence([['wake'], ['wave', 3000]]); // pagi: bangun → menyapa → idle
-<DentiMascot state={state} kid={kategoriUsia === 'anak'} size={260} />
+<DentiMascot state={state} kid={kategoriUsia === 'anak'} size={260} lod="auto" />
 ```
+
+### Sistem Level of Detail (LOD) · Denti HD
+`<DentiMascot>` menerima prop `lod="auto|mini|standar|hero"` (bawaan `"auto"`):
+- **`mini` (`size ≤ 72`)**: dipakai pada tombol apung Pemandu (`58 px`), header panel Pemandu (`64 px`), dan kartu catatan Dashboard (`68 px`). Bebas elemen `<filter>`, garis tepi (`stroke-width`) dipertebal proporsional agar selalu ≥ 1–1,5 piksel fisik, dan partikel latar mikro (`orbit`/`sparks` idle) disembunyikan agar siluet tajam di DPR 1×/2×/3×.
+- **`standar` (`72 < size ≤ 160`)**: dipakai pada pendamping kompak (`96–120 px`). Vektor murni dengan ketebalan garis menengah.
+- **`hero` (`size > 160`)**: dipakai di halaman Asisten AI (`220 px`) dan layar antrean TV (`220–300 px`). Detail penuh HD dengan pencahayaan gradien radial tanpa rasterisasi bitmap pada grup beranimasi.
 
 ## Integrasi layar antrean (aktif)
 
