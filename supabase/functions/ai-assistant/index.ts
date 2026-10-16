@@ -40,7 +40,7 @@ import { GeminiError, geminiInteract, readInteraction, toGeminiSchema, userText 
 import { GroqError, groqChat, readCompletion, toGroqTools } from "./groq.ts";
 import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.ts";
 import { fastAnswer } from "./fast.ts";
-import { guardAgentAnswer, isAgentIntent, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
+import { CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
 import { ALL_TOOLS, READ_TOOLS, runTool, SYSTEM, type Tool } from "./core.ts";
 
 const MODEL = "claude-opus-5-5";
@@ -819,9 +819,15 @@ Deno.serve(async (req) => {
           ...clean,
           { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).${snapText}${referenceText(refs)}${retryNote}\n\nPertanyaan: ${question}` },
         ];
-        const r = provider.name === "gemini" ? await chatGemini(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "medium" : undefined)
-          : provider.name === "groq" ? await chatGroq(provider, db, turns, usage, toolsUsed, agentCtx)
-          : await chatAnthropic(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "high" : "medium");
+        const runChat = () => provider.name === "gemini" ? chatGemini(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "medium" : undefined)
+          : provider.name === "groq" ? chatGroq(provider, db, turns, usage, toolsUsed, agentCtx)
+          : chatAnthropic(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "high" : "medium");
+        let r = await runChat();
+        // Model mengaku sudah menyiapkan kartu padahal tidak punya/tidak memakai alat usulan → ulangi sekali dengan alat usulan tersedia.
+        if (agentCtx.actions.length === 0 && agentCtx.writeTools === false && CLAIM_PREPARED.test(r.answer)) {
+          agentCtx.writeTools = true;
+          r = await runChat();
+        }
         if (r.refused) outcome = "refused";
         answerText = guardAgentAnswer(r.answer, agentCtx.actions, agentIntent);
         payload = { answer: answerText, tools: [...toolsUsed], references: refs.length, actions: agentCtx.actions };

@@ -306,6 +306,8 @@ Denti: Saya baca **6 baris**; 5 sudah jelas dan siap dimasukkan ke stok. Baris "
 
 const CLAIM_DONE = /\b(?<!belum )(sudah|telah|berhasil)\s+(?:(?:saya|kami|pun|juga)\s+)?(di)?(catat|ubah|tambah|tambahkan|hapus|simpan|masukkan|perbarui|buang|jalankan|ganti|naikkan|turunkan|update)/i;
 const NO_ANSWER = /^Maaf, Asisten AI tidak memberi jawaban/;
+/** Jawaban mengaku sudah menyiapkan kartu usulan. */
+export const CLAIM_PREPARED = /(saya\s+(sudah\s+)?siapkan\s+(usulan|kartu|pencatatan|stok|perubahan|opname|pengeluaran)|kartu\s+usulan|silakan\s+(cek|periksa|tinjau)\s+(kartu|usulan)|tekan\s+\*{0,2}setujui)/i;
 
 /**
  * Penjaga kejujuran jawaban agen (berguna untuk model kecil):
@@ -322,16 +324,25 @@ export function guardAgentAnswer(answer: string, actions: ProposedAction[], agen
     if (CLAIM_DONE.test(text)) return `${text}\n\n_Catatan: usulan di atas belum dijalankan — data baru berubah setelah Anda menekan **Setujui**._`;
     return text;
   }
-  if (agentIntent && CLAIM_DONE.test(text)) return `${text}\n\n_Catatan: saya belum membuat usulan apa pun, jadi belum ada data yang berubah._`;
+  if ((agentIntent && CLAIM_DONE.test(text)) || CLAIM_PREPARED.test(text)) return `${text}\n\n_Catatan: kartu usulan belum terbentuk, jadi belum ada data yang berubah. Coba ulangi permintaan dengan detail yang lebih lengkap (bahan, jumlah, harga)._`;
   return text;
 }
 
-/** Alat usulan (tulis) hanya disodorkan ke model bila relevan — mengurangi salah pilih alat pada model kecil & mencegah usulan tak sengaja. */
+/** Pembuka pertanyaan murni (informasi/analisis) — tidak butuh alat usulan. */
+const INFO_START = /^(berapa|apa|apakah|siapa|kenapa|mengapa|bagaimana|gimana|kapan|dimana|di mana|mana|ada|jelaskan|kalau|jika|andai|seandainya|bandingkan|tampilkan|lihat|cek|tunjukkan)( |$)/;
+
+/**
+ * Alat usulan (tulis) disodorkan KECUALI pertanyaan jelas bersifat informasi. Dulu gerbangnya terlalu ketat: pada "lidocain masuk 3 box 55rb"
+ * model tak punya alat lalu BERPURA-PURA sudah menyiapkan usulan (ditemukan lewat evaluasi model nyata). Default sekarang: sediakan alat.
+ */
 export function needsWriteTools(normalizedQuestion: string, history: Array<{ role: string; content: string }> = []): boolean {
-  if (isAgentIntent(normalizedQuestion) || /(^| )(briefing|rapikan|bereskan|urus)( |$)/.test(normalizedQuestion)) return true;
+  const q = normalizedQuestion;
+  if (isAgentIntent(q) || /(^| )(briefing|rapikan|bereskan|urus|siapkan)( |$)/.test(q)) return true;
   const lastAssistant = [...history].reverse().find((h) => h.role === "assistant")?.content ?? "";
-  const confirming = normalizedQuestion.split(" ").length <= 12 && /(siapkan|usulan|kartu|mau saya|bisa saya|tawar)/i.test(lastAssistant);
-  return confirming;
+  if (q.split(" ").length <= 12 && /(siapkan|usulan|kartu|mau saya|bisa saya|tawar)/i.test(lastAssistant)) return true;
+  if (q.split(" ").length <= 2) return false; // sapaan/basa-basi: "halo", "ya", "terima kasih"
+  if (INFO_START.test(q)) return false;
+  return true;
 }
 
 /** Ringkasan usulan yang masih menunggu, agar model tidak menggandakannya. */

@@ -1,6 +1,6 @@
 // deno test --config supabase/functions/ai-assistant/deno.json supabase/functions/ai-assistant/agent.test.ts
 import { assert, assertEquals, assertStringIncludes } from "jsr:@std/assert@1";
-import { AGENT_PROMPT, AGENT_READ_TOOLS, AGENT_TOOL_NAMES, AGENT_TOOLS, AGENT_WRITE_TOOLS, coerceArgs, guardAgentAnswer, isAgentIntent, needsWriteTools, parseAngkaIndonesia, pendingText, runAgentTool, susunPesanPemasok, type AgentCtx } from "./agent.ts";
+import { AGENT_PROMPT, AGENT_READ_TOOLS, AGENT_TOOL_NAMES, AGENT_TOOLS, AGENT_WRITE_TOOLS, coerceArgs, CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, needsWriteTools, parseAngkaIndonesia, pendingText, runAgentTool, susunPesanPemasok, type AgentCtx } from "./agent.ts";
 import { normalizeQuestion } from "./knowledge.ts";
 
 // deno-lint-ignore no-explicit-any
@@ -260,8 +260,17 @@ Deno.test("guardAgentAnswer: jawaban kosong + usulan → ringkasan; klaim 'sudah
   assertEquals(guardAgentAnswer("Belum dicatat, menunggu persetujuan Anda.", [A1], true), "Belum dicatat, menunggu persetujuan Anda.");
 });
 
+Deno.test("guardAgentAnswer: mengaku sudah menyiapkan kartu padahal tidak ada usulan → koreksi", () => {
+  for (const t of ["Siap, saya siapkan usulan stok masuk Lidocaine 3 box.", "Silakan cek kartu usulan dan setujui ya.", "Saya siapkan pencatatan pengeluaran Rp 8.000.000, tekan Setujui."]) {
+    assertStringIncludes(guardAgentAnswer(t, [], true), "kartu usulan belum terbentuk");
+  }
+  assert(CLAIM_PREPARED.test("Saya siapkan opname Kapas Gulung"));
+  assert(!CLAIM_PREPARED.test("Stok Lidocaine 28 ampul, cukup 11 hari."));
+  assertEquals(guardAgentAnswer("Stok Lidocaine 28 ampul.", [], true), "Stok Lidocaine 28 ampul.");
+});
+
 Deno.test("guardAgentAnswer: tanpa usulan tetapi klaim berhasil pada permintaan bertindak → koreksi; selain itu apa adanya", () => {
-  assertStringIncludes(guardAgentAnswer("Sudah saya tambahkan bahan barunya.", [], true), "belum membuat usulan");
+  assertStringIncludes(guardAgentAnswer("Sudah saya tambahkan bahan barunya.", [], true), "belum terbentuk");
   assertEquals(guardAgentAnswer("Pendapatan bulan ini Rp 12 juta.", [], false), "Pendapatan bulan ini Rp 12 juta.");
   assertEquals(guardAgentAnswer("Bahan itu sudah ada di gudang.", [], true), "Bahan itu sudah ada di gudang.");
 });
@@ -271,8 +280,15 @@ Deno.test("needsWriteTools: alat tulis hanya bila relevan (perintah, briefing, a
   assert(needsWriteTools(normalizeQuestion("briefing hari ini")));
   assert(!needsWriteTools(normalizeQuestion("berapa pendapatan bulan ini")));
   assert(!needsWriteTools(normalizeQuestion("apa itu hpp")));
+  assert(!needsWriteTools(normalizeQuestion("kalau harga scaling naik 10% dampaknya berapa")));
+  assert(!needsWriteTools(normalizeQuestion("halo denti")));
+  // temuan evaluasi model nyata: kalimat data-entry tanpa kata kerja baku HARUS tetap mendapat alat usulan
+  for (const q of ["eh lidocain masuk 3 box ya 55rb per box", "sarung tngan nitril m masuk 2 box @80rb", "sewa ruko bulan ini 8 jt", "lidocaine 120 ampul harga 5000"]) {
+    assert(needsWriteTools(normalizeQuestion(q)), q);
+  }
   const hist = [{ role: "user", content: "briefing" }, { role: "assistant", content: "Ada 3 hal. Mau saya siapkan usulan buang stoknya?" }];
   assert(needsWriteTools(normalizeQuestion("ya, tolong"), hist));
   assert(needsWriteTools(normalizeQuestion("yang pertama saja"), hist));
   assert(!needsWriteTools(normalizeQuestion("ya"), [{ role: "assistant", content: "Pendapatan bulan ini Rp 12 juta." }]));
+  assert(!needsWriteTools(normalizeQuestion("terima kasih")));
 });
