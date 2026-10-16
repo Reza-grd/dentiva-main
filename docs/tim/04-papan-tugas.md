@@ -40,7 +40,7 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 | **L2** | **Backup & DR**: backup offsite terenkripsi, uji pemulihan terjadwal, target RPO/RTO terukur, (opsional) WAL/PITR | 🟦 sebagian: ✔ runbook `docs/backup-dr.md`, ✔ skrip offsite teruji (stub) & terpasang; menunggu T5. Sisa: gladi pemulihan bulanan, WAL |
 | **L3** | **SMTP/email bermerek**, template email (verifikasi/reset/undangan) | ⬜ |
 | **L4** | **Hardening VPS**: ufw/fail2ban, SSH, pembaruan otomatis, reboot kernel, pemantauan & peringatan (uptime/disk/error), log terpusat | 🟦 sebagian: audit 17 Okt — ✔ ufw (22/80/443), ✔ fail2ban, ✔ SSH hanya kunci & root off, ✔ unattended-upgrades, ✔ port internal hanya 127.0.0.1; ✔ `pantau.sh` aktif tiap 5 menit (peringatan WA menunggu `pantau.env`). Sisa: reboot kernel (T3), log terpusat |
-| **L5** | **Audit log tak-dapat-diubah** (rantai hash) + ekspor; tinjauan enkripsi bidang & rotasi kunci | ⬜ |
+| **L5** | **Audit log tak-dapat-diubah** (rantai hash) + ekspor; tinjauan enkripsi bidang & rotasi kunci | 🟦 sebagian: ✔ rantai hash SHA-256 per klinik + blokir ubah/hapus/truncate untuk semua peran + `audit_verify_chain()` (admin) — **live 17 Okt, 104 baris terverifikasi**; ✔ purge pasien tak lagi menghapus jejak. Sisa: UI "Verifikasi integritas log" + ekspor (A3/Antigravity), jangkar eksternal mingguan (kepala rantai ke email/WA pemilik), tinjauan rotasi kunci enkripsi |
 | **L6** | Pasang usulan CI dari A4/A5 (E2E, CodeQL, gitleaks, SBOM, Dependabot) setelah ditinjau | ⬜ |
 | **L7** | Rilis AI Claude (T1) + evaluasi + penyetelan; perluas skenario dari G6 | ⏸ |
 | **L8** | Tinjau & integrasi semua hasil GPT/Antigravity; deploy produksi; pembaruan dokumen | berjalan |
@@ -55,6 +55,7 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 | 17 Okt 01.20 | GPT | `docs/tim/hasil-gpt/` | Kosong — paket G1–G6 belum diserahkan |
 | 17 Okt 01.20 | Antigravity | Cabang `antigravity/*`, `docs/tim/serah-terima/` | Belum ada cabang/serah terima — paket A1–A7 belum dimulai |
 | 17 Okt 01.30 | Antigravity | Folder kerja & cabang | ⚠ **Insiden:** Antigravity bekerja di folder utama dan memindahkan cabang aktif ke `antigravity/A1-denti-hd`; satu commit Ketua (`6292ecf`) tak sengaja masuk cabang itu (sudah disalin ke `console` sebagai `71d3fed`). **Tindakan:** aturan *worktree sendiri* ditambahkan (03 §2, aturan misi); Ketua kini memakai worktree `D:\dentiva\dentiva-ketua`. **Perbaikan untuk Antigravity:** pindah ke worktree sendiri & buang commit nyasar — lihat catatan di bawah tabel |
+| 17 Okt 02.00 | Antigravity | A1 berjalan (diff belum di-commit, dibaca read-only) | ✔ Arah benar: `resolveDentiLod()` (mini ≤72, standar ≤160, hero), `data-lod`, `shapeRendering="geometricPrecision"`, ukuran piksel dibulatkan, folder bukti `serah-terima/A1/sebelum/`. Menunggu `dentiSvg.js` per-LOD, tes, bukti sesudah. Catatan: masih memakai folder utama (belum pindah worktree) |
 | — | Pemilik | T1 (kunci Claude), T4 (SMTP), T5 (storage offsite) | Menunggu tindakan pemilik |
 
 > **Instruksi perbaikan untuk Antigravity (sekali):** (1) di folder utama pastikan tak ada perubahan tak ter-commit milik Anda (`git status`); jika ada, `git add -A && git commit -m "wip(A1): …"` dulu.
