@@ -87,6 +87,19 @@ koersi argumen ("Rp 1.250.000", "60rb", "14/10/2026", "10%"), alat usulan hanya 
 (prioritas dihitung di database), dan `guardAgentAnswer` (koreksi klaim palsu "sudah dicatat", jawaban kosong → ringkasan usulan).
 Panduan membuat skenario tambahan dengan bantuan GPT: `docs/briefing-gpt-agen.md`.
 
+### Hasil evaluasi model nyata (16 Okt 2026, `gemini-3.5-flash-lite` = model cadangan produksi, 45 skenario)
+
+| Putaran | Lulus | Temuan → perbaikan |
+|---|---|---|
+| Awal (33 skenario) | 85% | Usulan **hapus** dari permintaan samar ("bersihkan yang tidak perlu") → gerbang hapus eksplisit; model menebak nama bahan → peringatan *bahan mirip* di kartu; jawaban kosong setelah alat → dorongan jawaban akhir |
+| Putaran 2 | 43% (14 skenario baru) | Gerbang alat tulis terlalu ketat → model **berpura-pura** "sudah menyiapkan kartu" tanpa alat. Kini alat usulan tersedia kecuali pertanyaan jelas informasi; bila model tetap mengaku, diulang sekali; `guardAgentAnswer` menandai klaim tanpa kartu |
+| Putaran 3 | 80% | Briefing tak memanggil alat → hasil `briefing_agen` **disuntik server**; jumlah stok masuk salah satuan (120 ampul → 1.200) → peringatan kewajaran jumlah; Gemini 503 → retry 3×; panduan satuan di prompt |
+| Akhir | **84% (95% bila 503 dikecualikan)** | 5 dari 7 kegagalan terakhir adalah `503 high demand` Gemini (infrastruktur, bukan logika agen) |
+
+**Catatan penting — kuota:** kunci Gemini di server berstatus **paket gratis (20 permintaan/hari untuk model utama)**. Satu chat agen memakai beberapa
+permintaan (satu per putaran alat), jadi paket gratis hanya cukup untuk beberapa percakapan per hari. Untuk produksi: aktifkan penagihan Gemini
+(`GEMINI_PAID=true`) atau pasang kunci Anthropic/Groq. Evaluasi ini memakai model cadangan agar kuota model utama tidak habis.
+
 ## Menambah kemampuan baru (satu jenis tindakan)
 
 1. Database: tambah `ai_agent_p_<jenis>` (validasi + pratinjau), `ai_agent_x_<jenis>` (eksekusi, kembalikan `{hasil, sebelum, bisa_batal}`),

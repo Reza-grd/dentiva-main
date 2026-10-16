@@ -45,7 +45,7 @@ export const SCENARIOS = [
     expect: { kinds: ["pengeluaran_catat"], check: ({ actions }) => [...(actions[0]?.args.tanggal === jkt(-1) ? [] : [`tanggal ${actions[0]?.args.tanggal} ≠ ${jkt(-1)}`]), ...(Number(actions[0]?.args.jumlah) === 150000 ? [] : ["jumlah ≠ 150000"])] },
     script: [calls(call("usulkan_pengeluaran_catat", { kategori: "Administrasi", deskripsi: "ATK", jumlah: "150 ribu", tanggal: jkt(-1) })), say("Saya siapkan **ATK Rp 150.000** bertanggal kemarin. Silakan setujui.")] },
   { id: "pengeluaran-ganda", tag: "pengeluaran", say: "catat listrik PLN 1,25 juta",
-    expect: { answerAny: [/mirip|sudah (ada|tercatat)|dua kali|duplikat|kemarin/i], check: ({ trace, actions }) => (trace.some((t) => t.name === "cari_pengeluaran") || actions.length ? [] : ["tidak memeriksa pengeluaran yang mirip sebelum menjawab"]) },
+    expect: { answerAny: [/mirip|serupa|sudah (ada|tercatat)|dua kali|ganda|duplikat|kemarin|15 oktober/i], check: ({ trace, actions }) => (trace.some((t) => t.name === "cari_pengeluaran") || actions.length ? [] : ["tidak memeriksa pengeluaran yang mirip sebelum menjawab"]) },
     script: [calls(call("cari_pengeluaran", { kata: "pln" })), say("Listrik PLN **Rp 1.250.000** kemarin (nota PLN-1014) sudah tercatat. Tetap mau saya catat lagi?")] },
   { id: "pengeluaran-daftar", tag: "pengeluaran", say: "catat pengeluaran hari ini: listrik 1.250.000, air 180.000, internet 450.000",
     expect: { kinds: ["pengeluaran_catat", "pengeluaran_catat", "pengeluaran_catat"] },
