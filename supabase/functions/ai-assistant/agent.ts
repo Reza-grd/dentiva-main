@@ -12,7 +12,7 @@ import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.39.8
 
 export type ToolDef = { name: string; description: string; input_schema: Record<string, unknown> };
 export type ProposedAction = { id: string; jenis: string; pratinjau: Record<string, unknown> };
-export type AgentCtx = { group: string; actions: ProposedAction[]; writeTools?: boolean };
+export type AgentCtx = { group: string; actions: ProposedAction[]; writeTools?: boolean; userTexts?: string[] };
 
 const str = (description: string) => ({ type: "string", description });
 const num = (description: string) => ({ type: "number", description });
@@ -186,6 +186,9 @@ export function coerceArgs(schema: Record<string, unknown> | undefined, value: u
   return value;
 }
 
+/** Kata yang cukup jelas untuk meminta penghapusan. */
+export const EXPLICIT_DELETE = /(^| )(hapus|hapuskan|hilangkan|buang|singkirkan|delete|coret|batalkan pengeluaran)( |$)/;
+
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 type Reorder = { nama: string; satuan: string; saran_beli: number; perkiraan_biaya: number; pemasok: string | null; alasan?: string };
@@ -231,6 +234,10 @@ export async function runAgentTool(
     return { content: JSON.stringify(data), isError: false };
   }
   const kind = WRITE_KIND[name];
+  // Penghapusan hanya atas permintaan eksplisit admin ("hapus/hilangkan/buang…"); kata samar ("bersihkan", "yang tidak perlu") tidak cukup.
+  if (kind === "pengeluaran_hapus" && ctx.userTexts && !ctx.userTexts.some((t) => EXPLICIT_DELETE.test(t))) {
+    return { content: JSON.stringify({ ok: false, error: "Admin belum meminta penghapusan secara eksplisit. Tampilkan kandidat (cari_pengeluaran / anomali_pengeluaran) lalu TANYAKAN pengeluaran mana yang harus dihapus; jangan membuat usulan hapus." }), isError: true };
+  }
   const { data, error } = await db.rpc("ai_agent_propose", { p_kind: kind, p_args: input, p_group: ctx.group });
   if (error) return { content: toolError(error), isError: true };
   if (!data?.ok) {
@@ -264,11 +271,11 @@ KEMAMPUAN
 
 CARA KERJA
 1. Pahami niat. Kerjakan bagian yang sudah jelas lebih dulu; tanyakan HANYA hal penting yang kurang (jumlah, harga, bahan yang mana). Jangan menebak angka. Nilai bawaan yang wajar boleh dipakai (tanggal = hari ini, kategori paling cocok) dan sebutkan.
-2. CARI sebelum bertindak (cari_bahan / cari_tindakan / cari_pengeluaran / daftar_overhead). Jangan membuat bahan ganda. Pakai id dari hasil pencarian; id tidak pernah ditampilkan ke admin. Bila nama ambigu, sebut kandidatnya dengan nama biasa dan tanya mana yang dimaksud.
+2. CARI sebelum bertindak (cari_bahan / cari_tindakan / cari_pengeluaran / daftar_overhead). Jangan membuat bahan ganda. Pakai kata-kata admin APA ADANYA untuk nama bahan/tindakan (mis. "kapas", "masker bedah") — jangan melengkapi nama lengkap sendiri; sistem yang mencocokkan dan akan menandai bila ambigu. Pakai id dari hasil pencarian; id tidak pernah ditampilkan ke admin. Bila nama ambigu, sebut kandidatnya dengan nama biasa dan tanya mana yang dimaksud.
 3. Buat usulan. Untuk banyak baris pakai alat *_banyak (satu kartu, atomik) agar admin cukup sekali setuju. Angka polos (125000), tanggal YYYY-MM-DD.
 4. Jika alat menolak (ambigu, duplikat, stok kurang, harga janggal), jangan menyerah: perbaiki sendiri bila bisa (mis. cari ulang), selebihnya jelaskan dengan bahasa manusia dan tawarkan jalan keluar.
 5. Jangan pernah berkata "sudah dicatat/diubah" — datanya baru berubah setelah disetujui. Katakan "saya siapkan … , silakan cek kartu dan setujui".
-6. Bertindak hanya atas permintaan jelas. Hapus/ubah massal harus disebut eksplisit oleh admin. Pertanyaan analisis ("bagaimana kalau…") dijawab dengan alat simulasi/data, tanpa membuat usulan. Usulan yang sudah menunggu (daftar di bawah, bila ada) jangan dibuat ulang.
+6. Bertindak hanya atas permintaan jelas. Hapus/ubah massal harus disebut eksplisit oleh admin. Kata samar seperti "bersihkan", "rapikan", "yang tidak perlu", "yang lama" BUKAN perintah hapus: tampilkan kandidat dengan alat baca lalu tanyakan mana yang harus dihapus — jangan membuat usulan hapus. Pertanyaan analisis ("bagaimana kalau…") dijawab dengan alat simulasi/data, tanpa membuat usulan. Usulan yang sudah menunggu (daftar di bawah, bila ada) jangan dibuat ulang.
 
 PROTOKOL SITUASI UMUM
 - "Briefing / ada apa hari ini / apa yang perlu dikerjakan": panggil briefing_agen SATU kali (sudah terurut berdasarkan dampak; jangan memanggil alat lain dulu). Sampaikan 3 temuan teratas dengan angka kuncinya, urut sesuai peringkat, dan untuk tiap temuan sebut tindakan yang bisa Anda siapkan (lihat petunjuk "lanjut"). Tutup dengan tawaran mulai dari yang mana. Panggil alat rincian (bahan_kadaluarsa, saran_pemesanan, …) HANYA setelah admin memilih temuan.

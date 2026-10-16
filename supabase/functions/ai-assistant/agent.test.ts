@@ -222,6 +222,23 @@ Deno.test("alat usulan memakai argumen yang sudah dikoersi", async () => {
   assertEquals(calls[0].params.p_args, { kategori: "Utilitas", deskripsi: "Listrik", jumlah: 1250000, tanggal: "2026-10-14" });
 });
 
+Deno.test("gerbang hapus: usulkan_pengeluaran_hapus ditolak bila admin tidak meminta penghapusan eksplisit", async () => {
+  const { db, calls } = fakeDb((_f, p) => ({ data: { ok: true, action_id: "a", jenis: p.p_kind, pratinjau: {} } }));
+  const vague = { ...newCtx(), userTexts: [normalizeQuestion("bersihkan data pengeluaran yang tidak perlu")] };
+  const r = await runAgentTool(db, vague, "usulkan_pengeluaran_hapus", { id: "11111111-1111-4111-8111-111111111111" });
+  assertEquals(r?.isError, true);
+  assertStringIncludes(r!.content, "TANYAKAN");
+  assertEquals(calls.length, 0);
+  assertEquals(vague.actions.length, 0);
+  for (const q of ["hapus pengeluaran parkir", "tolong buang catatan listrik yang dobel", "ya hapus saja"]) {
+    const ok = await runAgentTool(db, { ...newCtx(), userTexts: [normalizeQuestion(q)] }, "usulkan_pengeluaran_hapus", { id: "11111111-1111-4111-8111-111111111111" });
+    assertEquals(ok?.isError, false, q);
+  }
+  // konfirmasi singkat ("ya") di giliran berikutnya memakai pesan admin sebelumnya
+  const confirm = { ...newCtx(), userTexts: [normalizeQuestion("ya"), normalizeQuestion("hapus pengeluaran ganda itu")] };
+  assertEquals((await runAgentTool(db, confirm, "usulkan_pengeluaran_hapus", { id: "11111111-1111-4111-8111-111111111111" }))?.isError, false);
+});
+
 Deno.test("briefing_agen memanggil ai_briefing_agen", async () => {
   const { db, calls } = fakeDb(() => ({ data: { prioritas: [] } }));
   assertEquals((await runAgentTool(db, newCtx(), "briefing_agen", {}))?.isError, false);

@@ -25,6 +25,7 @@ async function geminiLoop({ key, model, turns, tools, client, ctx, trace, thinki
     ...(Object.keys(t.input_schema.properties ?? {}).length ? { parameters: toGeminiSchema(t.input_schema) } : {}),
   }));
   const history = turns.map((t) => (t.role === "user" ? userText(t.content) : { type: "model_output", content: [{ type: "text", text: t.content }] }));
+  let nudged = false;
   for (let round = 0; round <= MAX_ROUNDS; round++) {
     let raw;
     for (let attempt = 0; ; attempt++) {
@@ -37,6 +38,11 @@ async function geminiLoop({ key, model, turns, tools, client, ctx, trace, thinki
       }
     }
     const r = readInteraction(raw);
+    if (r.calls.length === 0 && !r.text && round > 0 && !nudged) {
+      nudged = true;
+      history.push(userText("Tuliskan jawaban akhir untuk admin berdasarkan hasil alat di atas (ringkas, natural, sebut langkah berikutnya)."));
+      continue;
+    }
     if (r.calls.length === 0) return { answer: r.text, rounds: round + 1 };
     history.push(...r.modelSteps);
     for (const c of r.calls) {

@@ -482,3 +482,17 @@ test("briefing agen: prioritas terurut dari berbagai sinyal, tanpa skor mentah, 
   await assert.rejects(db.exec("set role anon; select public.ai_briefing_agen()"));
   await db.exec("reset role");
 });
+
+test("peringatan bahan mirip: kartu memperingatkan bila ada bahan lain bernama mirip (model menebak nama)", async () => {
+  await run("bahan_tambah_banyak", { items: [{ nama: "Gunting Bedah", satuan_dasar: "pcs", stok_awal: 3, harga_per_satuan: 90000 }, { nama: "Gunting Bedah Kecil", satuan_dasar: "pcs", stok_awal: 2, harga_per_satuan: 70000 },
+    { nama: "Pinset Anatomis", satuan_dasar: "pcs", stok_awal: 4, harga_per_satuan: 50000 }] });
+  const mirip = await ok("stok_opname", { bahan: "Gunting Bedah", stok_fisik: 5 });
+  assert.ok(mirip.pratinjau.peringatan.some((w) => /bernama mirip: Gunting Bedah Kecil/.test(w)), JSON.stringify(mirip.pratinjau.peringatan));
+  const kecil = await ok("stok_opname", { bahan: "Gunting Bedah Kecil", stok_fisik: 5 });
+  assert.ok(kecil.pratinjau.peringatan.some((w) => /bernama mirip: Gunting Bedah\b/.test(w)));
+  const unik = await ok("stok_opname", { bahan: "Pinset Anatomis", stok_fisik: 6 });
+  assert.ok(!unik.pratinjau.peringatan.some((w) => /bernama mirip/.test(w)));
+  // peringatan tersimpan di kartu (ai_actions.preview) dan ikut terbawa ke persetujuan
+  const saved = await one("select preview from public.ai_actions where id = $1", [mirip.action_id]);
+  assert.ok(saved.preview.peringatan.some((w) => /mirip/.test(w)));
+});

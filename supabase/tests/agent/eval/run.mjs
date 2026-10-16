@@ -56,7 +56,7 @@ function evaluate(sc, r) {
   for (const re of e.answer ?? []) if (!re.test(r.answer)) fails.push(`jawaban tidak memuat ${re}`);
   if (e.answerAny?.length && !e.answerAny.some((re) => re.test(r.answer))) fails.push(`jawaban tidak memuat salah satu dari ${e.answerAny.join(" | ")}`);
   for (const re of e.notAnswer ?? []) if (re.test(r.answer)) fails.push(`jawaban tidak boleh memuat ${re}`);
-  if (!r.answer.trim()) fails.push("jawaban kosong");
+  if (!r.answer.trim() && !r.actions.length) fails.push("jawaban kosong");
   if (r.exhausted) fails.push("putaran alat habis tanpa jawaban");
   if (e.check) fails.push(...(e.check(r) ?? []));
   if (r.fingerprintBefore !== r.fingerprintAfter) fails.push("DATA BISNIS BERUBAH tanpa persetujuan (pelanggaran invarian!)");
@@ -81,7 +81,7 @@ for (const sc of list) {
     const history = sc.history ?? [];
     const qn = normalizeQuestion(sc.say);
     const writeTools = needsWriteTools(qn, history);
-    const ctx = { group: randomUUID(), actions: [], writeTools };
+    const ctx = { group: randomUUID(), actions: [], writeTools, userTexts: [qn, ...history.filter((h) => h.role === "user").slice(-2).map((h) => normalizeQuestion(h.content))] };
     const before = await businessFingerprint(db);
     try {
       const snap = await admin.rpc("ai_snapshot");
@@ -98,6 +98,7 @@ for (const sc of list) {
     const r = { ...out, trace, actions: actionsFull, fingerprintBefore: before, fingerprintAfter: after };
     const fails = error ? [`galat: ${error}`] : evaluate(sc, r);
     const warns = [];
+    if (!r.answer.trim() && r.actions.length) warns.push("jawaban kosong walau ada usulan (ditutup oleh guardAgentAnswer di produksi)");
     if (r.actions.length && CLAIM.test(r.answer)) warns.push("jawaban mengklaim 'sudah dicatat/diubah' padahal baru usulan (ditutup oleh guardAgentAnswer di produksi)");
     results.push({ id: sc.id, tag: sc.tag, run, pass: fails.length === 0, fails, warns, ms: Date.now() - t0, rounds: out.rounds, tools: trace.map((t) => t.name), kinds: actionsFull.map((a) => a.kind),
       answer: r.answer, guarded: guardAgentAnswer(r.answer, ctx.actions, isAgentIntent(qn)), trace });

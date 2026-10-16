@@ -419,6 +419,7 @@ async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], us
   const history: any[] = turns.map((t) => t.role === "user"
     ? userText(t.content)
     : { type: "model_output", content: [{ type: "text", text: t.content }] });
+  let nudged = false;
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     const r = readInteraction(await geminiCall(p, {
       system_instruction: SYSTEM,
@@ -428,6 +429,12 @@ async function chatGemini(p: Provider, db: SupabaseClient, turns: ChatTurn[], us
     }));
     addGeminiUsage(usage, r);
     if (r.failed) throw new GeminiError(502, `interaction ${r.status}`);
+    if (r.calls.length === 0 && !r.text && round > 0 && !nudged) {
+      // Model kecil kadang diam setelah menerima hasil alat: minta sekali agar menulis jawaban akhir.
+      nudged = true;
+      history.push(userText("Tuliskan jawaban akhir untuk admin berdasarkan hasil alat di atas (ringkas, natural, sebut langkah berikutnya)."));
+      continue;
+    }
     if (r.calls.length === 0) return { answer: r.text || GEMINI_NO_ANSWER, refused: false };
     if (round === MAX_TOOL_ROUNDS) break;
     // Langkah model (thought + function_call) dikirim balik apa adanya, lalu hasil fungsi.
@@ -774,6 +781,7 @@ Deno.serve(async (req) => {
       // Permintaan bertindak (catat/ubah/tambah …) tidak boleh dijawab dari jawaban cepat atau basis pengetahuan.
       const agentIntent = isAgentIntent(questionNorm);
       agentCtx.writeTools = needsWriteTools(questionNorm, clean);
+      agentCtx.userTexts = [questionNorm, ...clean.filter((t) => t.role === "user").slice(-2).map((t) => normalizeQuestion(t.content))];
       const isRetry = body.retry === true;
 
       // Basis pengetahuan: jawaban yang dinilai tepat oleh admin.
