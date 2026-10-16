@@ -1,0 +1,16 @@
+{
+  "sampleSeconds": 5.012,
+  "cpuTaskPercent": 3.24,
+  "layoutCountDelta": 10,
+  "recalcStyleCountDelta": 10,
+  "miniSvgBytes": 33186,
+  "heroSvgBytes": 33169,
+  "jsGzipBytes": 12261,
+  "miniFilterCount": 0,
+  "standarFilterCount": 0,
+  "heroFilterCount": 0,
+  "singleIdleSampleSeconds": 10.019,
+  "singleIdleCpuPercent": 0.18,
+  "singleIdleLayoutDelta": 2,
+  "reducedMotionAnimationName": "none"
+}
