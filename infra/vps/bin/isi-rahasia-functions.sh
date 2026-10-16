@@ -39,6 +39,11 @@ cek() {
              "$base/v2/dentiva-cek-kunci/status") || kode=000
       [ "$kode" = 401 ] || [ "$kode" = 000 ] && { echo "ditolak Midtrans $(nilai MIDTRANS_ENVIRONMENT) (HTTP $kode)"; return 1; }
       echo "diterima Midtrans $(nilai MIDTRANS_ENVIRONMENT)"; return 0 ;;
+    ANTHROPIC_API_KEY)
+      kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -H @<(printf 'x-api-key: %s\nanthropic-version: 2023-06-01\n' "$v") \
+             "https://api.anthropic.com/v1/models?limit=1") || kode=000
+      [ "$kode" = 200 ] && { echo "diterima Anthropic"; return 0; }
+      echo "ditolak Anthropic (HTTP $kode)"; return 1 ;;
     WHAPI_TOKEN)
       kode=$(curl -sS -m 20 -o /dev/null -w '%{http_code}' -H @<(printf 'Authorization: Bearer %s\n' "$v") \
              "https://gate.whapi.cloud/health") || kode=000
@@ -93,7 +98,7 @@ rahasia WHATSAPP_APP_SECRET "App Secret Meta (jika dipakai; Enter untuk lewati)"
 rahasia SATUSEHAT_CLIENT_ID "Client ID SATUSEHAT (jika diset sebagai secret; Enter untuk lewati)"
 rahasia SATUSEHAT_CLIENT_SECRET "Client Secret SATUSEHAT (jika diset sebagai secret; Enter untuk lewati)"
 rahasia GROQ_API_KEY "cadangan AI Groq (opsional; Enter untuk lewati)"
-rahasia ANTHROPIC_API_KEY "cadangan AI Anthropic (opsional; Enter untuk lewati)"
+rahasia ANTHROPIC_API_KEY "AI utama Claude (disarankan): Sonnet 5.5 untuk chat/agen, Haiku 5.5 untuk catatan dashboard — platform.claude.com → API Keys"
 
 printf '\n\033[1;36m— Opsional lain —\033[0m\n'
 printf 'Nama secret lain di dashboard yang belum ditanyakan (pisah spasi, Enter jika tidak ada): '

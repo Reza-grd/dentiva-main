@@ -24,6 +24,8 @@
  * Penyedia AI dipilih lewat Supabase secrets (tanpa ubah kode):
  *   AI_PROVIDER        "anthropic" | "gemini" | "groq" (opsional; bila kosong: Anthropic, lalu Groq, lalu Gemini)
  *   ANTHROPIC_API_KEY  kunci Claude
+ *   ANTHROPIC_MODEL    opsional, bawaan "claude-sonnet-5-5" (chat/agen & pindai nota)
+ *   ANTHROPIC_BRIEF_MODEL opsional, bawaan "claude-haiku-5-5" (catatan dashboard & template recall)
  *   GEMINI_API_KEY     kunci Google AI Studio
  *   GEMINI_MODEL       opsional, bawaan "gemini-flash-latest"
  *   GEMINI_PAID        "true" bila proyek Google sudah berbayar (data tidak dipakai Google untuk pelatihan)
@@ -42,10 +44,8 @@ import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.t
 import { fastAnswer } from "./fast.ts";
 import { CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
 import { ALL_TOOLS, READ_TOOLS, runTool, SYSTEM, type Tool } from "./core.ts";
+import { anthropicModels, costUsd, supportsServerFallback } from "./pricing.ts";
 
-const MODEL = "claude-opus-5-5";
-// USD per 1 juta token (Claude Opus 5.5): masuk, keluar, baca cache, tulis cache (5 menit = 1,25× masuk)
-const PRICE = { input: 4, output: 20, cacheRead: 0.2, cacheWrite: 5 };
 const MAX_TOOL_ROUNDS = 10;
 const MAX_QUESTION = 1000;
 const MAX_HISTORY_TURNS = 10;
@@ -287,6 +287,7 @@ function sanitizeReceipt(raw: any, today: string) {
 type Provider = {
   name: "anthropic" | "gemini" | "groq"; label: string; model: string; key: string; freeTier: boolean;
   visionModel?: string;
+  lightModel?: string; // Anthropic: model murah untuk catatan dashboard & template (lihat pricing.ts)
   thinking?: string;
   fallbackModel?: string;
 };
@@ -304,7 +305,10 @@ function resolveProvider(): Provider | null {
     visionModel: Deno.env.get("GROQ_VISION_MODEL")?.trim() || "qwen/qwen3.8-27b",
   } : null;
   const anthropic = (): Provider | null =>
-    ak ? { name: "anthropic", label: "Anthropic Claude", model: MODEL, key: ak, freeTier: false } : null;
+    ak ? (() => {
+      const m = anthropicModels(Deno.env.get("ANTHROPIC_MODEL"), Deno.env.get("ANTHROPIC_BRIEF_MODEL"));
+      return { name: "anthropic", label: "Anthropic Claude", model: m.chat, lightModel: m.light, key: ak, freeTier: false } as Provider;
+    })() : null;
   const gemini = (): Provider | null => {
     if (!gk) return null;
     const free = (Deno.env.get("GEMINI_PAID") ?? "").trim().toLowerCase() !== "true";
@@ -327,12 +331,14 @@ type ChatResult = { answer: string; refused: boolean };
 const TRUNCATED = "\n\n_(Jawaban terpotong. Coba persempit pertanyaan.)_";
 const TOO_MANY_STEPS = "Maaf, pertanyaan ini membutuhkan terlalu banyak langkah. Coba pecah menjadi pertanyaan yang lebih spesifik.";
 const REFUSED_CHAT = "Maaf, pertanyaan ini tidak dapat dijawab oleh Asisten AI.";
-const anthropicCommon = {
-  model: MODEL,
-  betas: ["server-side-fallback-2026-07-01"],
-  // Bila model utama menolak karena klasifikasi keamanan, server mengalihkan ke model cadangan.
-  fallbacks: "default",
-};
+// Bila model utama menolak karena klasifikasi keamanan, server mengalihkan ke model cadangan (tidak tersedia untuk Haiku 5.5).
+const anthropicCommon = (model: string) => ({
+  model,
+  ...(supportsServerFallback(model) ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
+});
+
+/** Model yang dipakai untuk satu tugas: tugas ringan (catatan dashboard, template) memakai model murah bila tersedia. */
+const lightOf = (p: Provider) => p.lightModel ?? p.model;
 
 async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx, effort: "medium" | "high" = "medium"): Promise<ChatResult> {
   const client = new Anthropic({ apiKey: p.key });
@@ -340,7 +346,7 @@ async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[],
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     // deno-lint-ignore no-explicit-any
     const response: any = await client.beta.messages.create({
-      ...anthropicCommon,
+      ...anthropicCommon(p.model),
       max_tokens: 16000,
       output_config: { effort },
       system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
@@ -482,6 +488,7 @@ async function chatGroq(p: Provider, db: SupabaseClient, turns: ChatTurn[], usag
 
 type StructuredInput = {
   system: string; text: string; schema: object; maxTokens: number; effort: "low" | "medium";
+  light?: boolean; // tugas ringan → model murah (Anthropic)
   image?: { data: string; media_type: string };
 };
 
@@ -526,7 +533,7 @@ async function structured(p: Provider, input: StructuredInput, usage: Usage): Pr
   const client = new Anthropic({ apiKey: p.key });
   // deno-lint-ignore no-explicit-any
   const response: any = await client.beta.messages.create({
-    ...anthropicCommon,
+    ...anthropicCommon(input.light ? lightOf(p) : p.model),
     max_tokens: input.maxTokens,
     output_config: { effort: input.effort, format: { type: "json_schema", schema: input.schema } },
     system: [{ type: "text", text: input.system, cache_control: { type: "ephemeral" } }],
@@ -559,7 +566,7 @@ async function composeBrief(p: Provider, kind: BriefKind, snapshot: unknown, tod
   const r = await structured(p, {
     system: staff ? STAFF_BRIEF_SYSTEM : BRIEF_SYSTEM,
     schema: staff ? STAFF_BRIEF_SCHEMA : BRIEF_SCHEMA,
-    maxTokens: 4000, effort: "low",
+    maxTokens: 4000, effort: "low", light: true,
     text: `Tanggal hari ini: ${today} (Asia/Jakarta).\n\nData ${staff ? "operasional" : "ringkasan"} klinik:\n${JSON.stringify(snapshot)}\n\nTulis ${staff ? "catatan tugasnya" : "laporan singkatnya"}.`,
   }, usage);
   const brief = r.refused ? null : sanitizeBrief(parseJson(r.text));
@@ -586,7 +593,7 @@ async function runScheduledBriefs(p: Provider, admin: any) {
         if (!brief) status = "error";
         else {
           const { error: saveErr } = await admin.from("ai_insights").upsert({
-            clinic_id: clinicId, kind, content: brief, model: p.model,
+            clinic_id: clinicId, kind, content: brief, model: lightOf(p),
             generated_by: null, generated_at: new Date().toISOString(),
           }, { onConflict: "clinic_id,kind" });
           if (saveErr) { status = "error"; console.error("ai_insights upsert:", saveErr.message); }
@@ -596,11 +603,11 @@ async function runScheduledBriefs(p: Provider, admin: any) {
         console.error("cron brief:", clinicId, kind, err instanceof Error ? err.message : err);
       }
       await admin.from("ai_usage").update({
-        clinic_id: clinicId, user_id: snap.admin_user, feature: kind, model: p.model,
+        clinic_id: clinicId, user_id: snap.admin_user, feature: kind, model: lightOf(p),
         question: "Pembaruan terjadwal", tools_used: [],
         input_tokens: usage.input, output_tokens: usage.output,
         cache_read_tokens: usage.cacheRead, cache_write_tokens: usage.cacheWrite,
-        cost_usd: 0, status,
+        cost_usd: p.name === "anthropic" ? Number(costUsd(lightOf(p), usage).toFixed(5)) : 0, status,
       }).eq("id", reservationId).eq("status", "reserved");
       await sleep(1500); // beri jeda agar tidak membebani kuota penyedia AI
     }
@@ -862,7 +869,7 @@ Deno.serve(async (req) => {
       } else {
         const generatedAt = new Date().toISOString();
         const { error: saveErr } = await admin.from("ai_insights").upsert({
-          clinic_id: clinicId, kind: briefKind, content: brief, model: provider.model,
+          clinic_id: clinicId, kind: briefKind, content: brief, model: lightOf(provider),
           generated_by: userData.user.id, generated_at: generatedAt,
         }, { onConflict: "clinic_id,kind" });
         if (saveErr) console.error("ai_insights upsert:", saveErr.message);
@@ -872,7 +879,7 @@ Deno.serve(async (req) => {
       feature = "recall_template";
       logQuestion = style ? `Template recall: ${style}` : "Template recall";
       const r = await structured(provider, {
-        system: RECALL_SYSTEM, schema: RECALL_SCHEMA, maxTokens: 4000, effort: "low",
+        system: RECALL_SYSTEM, schema: RECALL_SCHEMA, maxTokens: 4000, effort: "low", light: true,
         text: `Buat satu template pesan recall.${style ? `\nPreferensi gaya: ${style}` : ""}`,
       }, usage);
       const template = clip((parseJson(r.text) as { template?: unknown } | null)?.template, 600);
@@ -886,11 +893,13 @@ Deno.serve(async (req) => {
   }
 
   // Biaya dihitung untuk Claude; Gemini dicatat 0 (gratis; versi berbayar dipantau di Google AI Studio).
-  const cost = provider.name !== "anthropic" ? 0 : (usage.input * PRICE.input + usage.output * PRICE.output + usage.cacheRead * PRICE.cacheRead + usage.cacheWrite * PRICE.cacheWrite) / 1_000_000;
+  // Catatan dashboard & template recall memakai model ringan; chat/agen & pindai nota memakai model utama.
+  const usedModel = (isBrief || mode === "recall_template") ? lightOf(provider) : provider.model;
+  const cost = provider.name !== "anthropic" ? 0 : costUsd(usedModel, usage);
   if (clinicId) {
     const { data: logRow, error: logErr } = await admin.from("ai_usage").update({
       clinic_id: clinicId, user_id: userData.user.id, feature,
-      model: fast ? `jawaban-cepat:${fast.intent}` : outcome === "cached" ? "basis-pengetahuan" : mode === "receipt" && provider.visionModel ? provider.visionModel : provider.model,
+      model: fast ? `jawaban-cepat:${fast.intent}` : outcome === "cached" ? "basis-pengetahuan" : mode === "receipt" && provider.visionModel ? provider.visionModel : usedModel,
       question: logQuestion.slice(0, 1000), tools_used: [...toolsUsed],
       input_tokens: usage.input, output_tokens: usage.output,
       cache_read_tokens: usage.cacheRead, cache_write_tokens: usage.cacheWrite,

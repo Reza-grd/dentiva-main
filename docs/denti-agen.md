@@ -64,6 +64,21 @@ Admin ──Batalkan─▶ mode agent_undo  ──▶ ai_agent_undo()  ──▶
 Berkas: `supabase/migrations/20261014090000_ai_agen.sql` (tabel, validasi, eksekusi, pembatalan, alat baca) dan `20261015090000_ai_agen_lanjutan.sql` (tindakan massal, buang stok, analitik),
 `supabase/functions/ai-assistant/agent.ts` (definisi alat), `apps/clinic/src/components/ai/AgentActions.jsx` (kartu).
 
+## Penyedia AI & biaya (keputusan 17 Okt 2026)
+
+Pilihan pemilik: **Claude Sonnet 5.5** untuk percakapan/agen & pindai nota, **Claude Haiku 5.5** untuk catatan otomatis dashboard & template recall
+(`pricing.ts`; ganti lewat secret `ANTHROPIC_MODEL` / `ANTHROPIC_BRIEF_MODEL`). Penyedia dipilih otomatis: bila `ANTHROPIC_API_KEY` terisi, Claude dipakai lebih dulu
+(urutan: Anthropic → Groq → Gemini; `AI_PROVIDER` bisa memaksa). Haiku 5.5 tidak punya fallback refusal sisi-server, jadi parameter itu tidak dikirim untuk Haiku.
+
+Perkiraan biaya (harga per 1 juta token, kurs Rp 16.500): satu percakapan agen ≈ 38K token masuk + 1,2K keluar → Sonnet 5.5 **±Rp 750 (cache) – 1.450**;
+Haiku 5.5 ±Rp 75; catatan dashboard (2×/hari × 2 jenis) ≈ Rp 11 ribu/bulan di Sonnet atau < Rp 1 ribu di Haiku. Biaya tiap panggilan dicatat di `ai_usage.cost_usd`
+sesuai model yang dipakai (chat memakai harga Sonnet, catatan dashboard harga Haiku).
+
+Memasang kunci (pemilik, rahasia tidak tampil & diuji ke Anthropic sebelum disimpan):
+```bash
+ssh -t -i ~/.ssh/dentiva_vps dentiva@202.74.74.163 /opt/dentiva/bin/isi-rahasia-functions.sh   # Enter untuk melewati yang lain; isi ANTHROPIC_API_KEY
+```
+
 ## Melatih agen — evaluasi berbasis data
 
 Kualitas agen ditentukan model yang dipakai. **Penyedia produksi saat ini Gemini flash** (lihat `ai_usage.model`), bukan Claude — model kecil
