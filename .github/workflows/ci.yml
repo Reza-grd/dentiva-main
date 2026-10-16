@@ -44,6 +44,9 @@ jobs:
       - name: Denti Agen — uji fungsi database pada skema produksi (PGlite)
         run: npm run db:agent
 
+      - name: Audit log tambah-saja & berantai hash — uji pada skema produksi (PGlite)
+        run: npm run db:audit
+
       - name: Denti Agen — evaluasi percakapan (skrip, tanpa jaringan) + uji penilai
         run: |
           npm run eval:agen:selftest
