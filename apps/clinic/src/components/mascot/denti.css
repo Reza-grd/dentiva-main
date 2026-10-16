@@ -157,12 +157,12 @@
 .denti[data-state="call"] .d-wave-3 { animation-delay: .4s; }
 .denti[data-state="call"] .d-chest-core { animation: d-flash 6s linear infinite; }
 .denti[data-state="call"] .d-brackets { animation: d-flash 6s linear infinite; }
-@keyframes d-call-root  { 0% { transform: none; } 10%, 82% { transform: translateY(-14px) scale(1.07); } 46% { transform: translateY(-20px) scale(1.08); } 100% { transform: none; } }
+@keyframes d-call-root  { 0% { transform: none; } 10%, 82% { transform: translateY(-14px); } 46% { transform: translateY(-20px); } 100% { transform: none; } }
 @keyframes d-call-arm   { 0%, 6% { transform: rotate(0); } 14%, 78% { transform: rotate(-66deg); } 30%, 54% { transform: rotate(-74deg); } 42%, 66% { transform: rotate(-64deg); } 90%, 100% { transform: rotate(0); } }
 @keyframes d-call-head  { 0%, 8% { transform: rotate(0); } 18%, 38%, 58%, 78% { transform: rotate(3deg) translateY(3px); } 28%, 48%, 68% { transform: rotate(0); } 100% { transform: rotate(0); } }
 @keyframes d-call-waves { 0%, 10% { opacity: 0; } 14%, 80% { opacity: 1; } 88%, 100% { opacity: 0; } }
-@keyframes d-wave-out   { 0% { opacity: 0; transform: scale(.7); } 30% { opacity: 1; } 100% { opacity: 0; transform: scale(1.15); } }
-@keyframes d-flash      { 0%, 8% { opacity: .7; } 12% { opacity: 1; filter: brightness(1.6); } 18% { opacity: .7; } 32% { opacity: 1; filter: brightness(1.6); } 38%, 100% { opacity: .85; filter: none; } }
+@keyframes d-wave-out   { 0% { opacity: 0; transform: translateX(-4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateX(6px); } }
+@keyframes d-flash      { 0%, 8% { opacity: .65; } 12% { opacity: 1; } 18% { opacity: .65; } 32% { opacity: 1; } 38%, 100% { opacity: .88; } }
 
 /* CELEBRATE — merayakan (2,4 dtk): melompat, dua tangan ke atas, bintang */
 .denti[data-state="celebrate"] .d-eye-open { opacity: 0; }
@@ -181,9 +181,9 @@
 .denti[data-state="celebrate"] .d-arm-r { animation: d-cheer-r .6s ease-in-out infinite alternate; }
 .denti[data-state="celebrate"] .d-head { animation: d-sway .6s ease-in-out infinite alternate; }
 .denti[data-state="celebrate"] .d-chest-core { animation: d-pulse .6s ease-in-out infinite; }
-@keyframes d-burst { 0% { opacity: 0; transform: scale(.3) rotate(0); } 35% { opacity: 1; transform: scale(1.2) rotate(30deg); } 100% { opacity: 0; transform: scale(.7) rotate(60deg); } }
-@keyframes d-jump  { 0%, 100% { transform: translateY(0) scale(1.03, .97); } 15% { transform: translateY(0) scale(.97, 1.03); } 45% { transform: translateY(-40px) scale(1); } 75% { transform: translateY(-4px); } }
-@keyframes d-jump-shadow { 0%, 100% { transform: scale(1); opacity: 1; } 45% { transform: scale(.75); opacity: .5; } }
+@keyframes d-burst { 0% { opacity: 0; transform: rotate(0); } 35% { opacity: 1; transform: rotate(30deg); } 100% { opacity: 0; transform: rotate(60deg); } }
+@keyframes d-jump  { 0%, 100% { transform: translateY(0); } 15% { transform: translateY(4px); } 45% { transform: translateY(-40px); } 75% { transform: translateY(-4px); } }
+@keyframes d-jump-shadow { 0%, 100% { opacity: 1; } 45% { opacity: .45; } }
 @keyframes d-cheer-l { from { transform: rotate(118deg); } to { transform: rotate(140deg); } }
 @keyframes d-cheer-r { from { transform: rotate(-118deg); } to { transform: rotate(-140deg); } }
 
@@ -206,11 +206,11 @@
 @keyframes d-wk-eye-open  { 0%, 43% { opacity: 0; } 45%, 56% { opacity: 1; } 58%, 100% { opacity: 0; } }
 @keyframes d-wk-eye-happy { 0%, 57% { opacity: 0; } 59%, 96% { opacity: 1; } 100% { opacity: 0; } }
 @keyframes d-wk-zzz       { 0%, 26% { opacity: 1; } 30%, 100% { opacity: 0; } }
-@keyframes d-wk-root      { 0%, 30% { transform: translateY(8px); } 34% { transform: translateY(-26px) scale(1.04); } 40% { transform: translateY(-6px); } 48% { transform: translateY(-14px) scale(1, 1.03); } 58%, 100% { transform: translateY(-6px); } }
+@keyframes d-wk-root      { 0%, 30% { transform: translateY(8px); } 34% { transform: translateY(-26px); } 40% { transform: translateY(-6px); } 48% { transform: translateY(-14px); } 58%, 100% { transform: translateY(-6px); } }
 @keyframes d-wk-head      { 0%, 30% { transform: rotate(6deg) translateY(8px); } 34% { transform: rotate(0) translateY(-3px); } 40%, 56% { transform: rotate(0); } 64%, 80% { transform: rotate(5deg); } 72%, 92% { transform: rotate(2deg); } 100% { transform: rotate(6deg) translateY(8px); } }
 @keyframes d-wk-arm-l     { 0%, 30% { transform: rotate(-14deg); } 36% { transform: rotate(20deg); } 44%, 52% { transform: rotate(140deg); } 58%, 96% { transform: rotate(0); } 100% { transform: rotate(-14deg); } }
 @keyframes d-wk-arm-r     { 0%, 30% { transform: rotate(14deg); } 36% { transform: rotate(-20deg); } 44%, 52% { transform: rotate(-140deg); } 60% { transform: rotate(-110deg); } 66% { transform: rotate(-134deg); } 72% { transform: rotate(-110deg); } 78% { transform: rotate(-134deg); } 84% { transform: rotate(-110deg); } 92% { transform: rotate(-20deg); } 100% { transform: rotate(14deg); } }
-@keyframes d-wk-chest     { 0%, 30% { opacity: .3; } 34% { opacity: 1; filter: brightness(1.7); } 40%, 100% { opacity: 1; filter: none; } }
+@keyframes d-wk-chest     { 0%, 30% { opacity: .3; } 34% { opacity: 1; } 40%, 100% { opacity: .92; } }
 
 /* ═════ AKSI TAMBAHAN ═════
    brush · tooth · dance · laugh · love · shy · sorry · scan · point (berulang)
@@ -730,7 +730,7 @@
 .denti .d-brows-w, .denti .d-xeyes, .denti .d-eye-star, .denti .d-eye-coin, .denti .d-mouth-flat, .denti .d-mouth-wavy, .denti .d-mouth-grin, .denti .d-mask, .denti .d-hat, .denti .d-finger, .denti .d-whisper, .denti .d-earhand, .denti .d-facepalm, .denti .d-clip, .denti .d-book, .denti .d-thumb, .denti .d-mic, .denti .d-flag, .denti .d-cloud, .denti .d-snow, .denti .d-sun, .denti .d-thermo, .denti .d-hourglass, .denti .d-spinner, .denti .d-check, .denti .d-warn, .denti .d-lock, .denti .d-shield, .denti .d-chart, .denti .d-cake, .denti .d-gift, .denti .d-aura, .denti .d-growl, .denti .d-heartbig, .denti .d-pray, .denti .d-glitch { opacity: 0; transition: opacity .3s ease; }
 .denti .d-rain, .denti .d-flake, .denti .d-flame, .denti .d-spin-arc, .denti .d-flagcloth { transform-box: fill-box; transform-origin: center; }
 @keyframes d-v-arm { 0%, 100% { transform: rotate(var(--a0, 0deg)); } 50% { transform: rotate(var(--a1, var(--a0, 0deg))); } }
-@keyframes d-v-body { 0%, 100% { transform: translate(var(--x0, 0px), var(--y0, 0px)) rotate(var(--r0, 0deg)) scale(var(--s0, 1)); } 50% { transform: translate(var(--x1, var(--x0, 0px)), var(--y1, var(--y0, 0px))) rotate(var(--r1, var(--r0, 0deg))) scale(var(--s1, var(--s0, 1))); } }
+@keyframes d-v-body { 0%, 100% { transform: translate(var(--x0, 0px), var(--y0, 0px)) rotate(var(--r0, 0deg)); } 50% { transform: translate(var(--x1, var(--x0, 0px)), var(--y1, var(--y0, 0px))) rotate(var(--r1, var(--r0, 0deg))); } }
 @keyframes d-v-head { 0%, 100% { transform: translateY(var(--hy0, 0px)) rotate(var(--hr0, 0deg)); } 50% { transform: translateY(var(--hy1, var(--hy0, 0px))) rotate(var(--hr1, var(--hr0, 0deg))); } }
 @keyframes d-v-fall { 0% { opacity: 0; transform: translateY(-6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(34px); } }
 @keyframes d-v-flicker { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(.88, 1.14); } }
@@ -1134,6 +1134,15 @@
 .denti[data-state="grateful"] .d-tear-1, .denti[data-state="grateful"] .d-tear-2 { animation-duration: 1.8s; }
 .denti[data-state="goodbye"] .d-tear-3, .denti[data-state="goodbye"] .d-tear-4, .denti[data-state="goodbye"] .d-tear-2, .denti[data-state="grateful"] .d-tear-3, .denti[data-state="grateful"] .d-tear-4 { display: none; }
 .denti[data-state="goodbye"] .d-tear, .denti[data-state="grateful"] .d-tear { animation: d-tear-fall 1.8s ease-in infinite; }
+
+/* ═════ SISTEM LOD · Optimasi Ketajaman & Performa ═════ */
+.denti .d-orbit-dot { animation: d-pulse 3.6s ease-in-out infinite; }
+.denti .d-orbit-dot-2 { animation-delay: 1.8s; }
+
+/* Pada LOD mini (≤ 72px), sembunyikan partikel latar mikro (.d-orbit, .d-sparks saat idle) agar siluet tajam & bebas artefak sub-piksel */
+.denti[data-lod="mini"] .d-orbit { opacity: 0; pointer-events: none; }
+.denti[data-lod="mini"][data-state="idle"] .d-sparks { opacity: 0; }
+.denti[data-lod="mini"] .d-spark { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .denti, .denti * { animation: none !important; transition: none !important; }

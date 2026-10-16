@@ -23,16 +23,33 @@ const clamp = (v) => Math.max(-1, Math.min(1, v));
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 /**
+ * Tentukan tingkat detail (LOD) maskot berdasarkan prop `lod` dan `size` (piksel CSS):
+ * - `mini`    : size <= 72 (widget mengambang 58/64 px, kartu briefing 68 px) — tanpa <filter>, garis dipertebal
+ * - `standar` : 72 < size <= 160 (pendamping kompak 96–120 px) — detail menengah, vektor murni
+ * - `hero`    : size > 160 (halaman Asisten AI 220 px, layar antrean TV 220–300 px) — detail penuh HD
+ */
+export function resolveDentiLod(lod = 'auto', size = 220) {
+  if (lod === 'mini' || lod === 'standar' || lod === 'hero') return lod;
+  const numSize = Number(size) || 220;
+  if (numSize <= 72) return 'mini';
+  if (numSize <= 160) return 'standar';
+  return 'hero';
+}
+
+/**
  * Denti — maskot AI Dentiva.
- *   <DentiMascot state="idle|happy|wave|…|thanks" (lihat DENTI_STATES) kid={false} size={220} />
+ *   <DentiMascot state="idle|happy|wave|…|thanks" (lihat DENTI_STATES) kid={false} size={220} lod="auto|mini|standar|hero" />
  * Markup SVG berasal dari konstanta internal (bukan input pengguna), jadi aman disisipkan.
  */
 export default function DentiMascot({
-  state = 'idle', kid = false, size = 220, className = '', title = 'Denti, asisten AI Dentiva', track = false, look = null,
+  state = 'idle', kid = false, size = 220, lod = 'auto', className = '', title = 'Denti, asisten AI Dentiva', track = false, look = null,
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const markup = useMemo(() => dentiSvg(`denti${uid}`), [uid]);
+  const resolvedLod = resolveDentiLod(lod, size);
+  const markup = useMemo(() => dentiSvg(`denti${uid}`, resolvedLod), [uid, resolvedLod]);
   const safeState = DENTI_STATES.includes(state) ? state : 'idle';
+  const pixelWidth = Math.max(1, Math.round(Number(size) || 220));
+  const pixelHeight = Math.max(1, Math.round((pixelWidth * 480) / 400));
   const ref = useRef(null);
   // Kedip alami: tempo & jeda acak per Denti, kadang kedip dua kali
   const life = useMemo(() => ({
@@ -67,9 +84,11 @@ export default function DentiMascot({
       data-blink={life.blink}
       className={`denti ${className}`}
       viewBox="0 0 400 480"
-      width={size}
-      height={(size * 480) / 400}
+      width={pixelWidth}
+      height={pixelHeight}
+      shapeRendering="geometricPrecision"
       data-state={safeState}
+      data-lod={resolvedLod}
       data-kid={kid ? 'true' : 'false'}
       role="img"
       aria-label={title}

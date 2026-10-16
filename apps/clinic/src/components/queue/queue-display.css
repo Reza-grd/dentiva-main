@@ -190,7 +190,7 @@
 @keyframes qd-fade-out { to { opacity: 0; visibility: hidden; } }
 
 /* ── Denti (maskot) ── */
-.qd-denti { display: block; pointer-events: none; filter: drop-shadow(0 2vh 3vh rgb(0 0 0 / 0.45)); }
+.qd-denti { display: block; pointer-events: none; }
 .qd-denti--stage { position: relative; width: 26vh; height: auto; margin-bottom: 1vh; animation: qd-rise 1s .2s cubic-bezier(.2,.8,.2,1) both; }
 .qd-footer--host { position: relative; padding-left: 13vh; }
 .qd-denti--host { position: absolute; left: 1.6vw; bottom: 0.4vh; width: 10.5vh; height: auto; }
