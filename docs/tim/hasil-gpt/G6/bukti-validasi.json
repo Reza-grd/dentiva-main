@@ -15,5 +15,6 @@
   "microcopySituations": 32,
   "microcopyVariations": 160,
   "maximumCharacters": 95,
+  "svgDoubleInstanceNamespaceCases": 18,
   "scope": "Struktur dan oracle skrip; jalankan harness untuk alat/database, evaluasi model belum dijalankan."
 }

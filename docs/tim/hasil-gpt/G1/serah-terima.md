@@ -50,7 +50,7 @@ lain memerlukan pengukuran garis efektif tersendiri.
 - Siapa yang menyetujui matriks regresi 93×3 dan batas ukuran di bawah 58 px?
 
 ## Daftar centang gerbang mutu (1–7)
-- [ ] 1. Gerbang aplikasi penuh: dicatat pada ringkasan akhir lint/typecheck/test/build; bukan bukti integrasi SVG.
+- [x] 1. Lint/typecheck/build lulus, 590 tes lulus dengan konfigurasi uji sintetis; bukti pada ringkasan akhir. Bukan bukti integrasi SVG.
 - [x] 2. Pemeriksaan aset baru: parse XML, namespace referensi, inventaris kelas, stroke, gradien.
 - [x] 3. Bukti visual statis 375/1440, terang/gelap, DPR 1/2. Gerak masih tugas integrasi.
 - [ ] 4. Aksesibilitas aplikasi/keyboard/axe belum diuji; title, role, reduced motion tersedia pada aset.

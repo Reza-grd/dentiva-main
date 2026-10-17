@@ -1,4 +1,9 @@
 # Serah Terima G4 — Keamanan dan kepatuhan — draf
+
+**DRAF — perlu ditinjau advokat/DPO/auditor**
+
+Versi 1.0 · Pemilik: Ketua dan fungsi privasi · Tinjau: tahunan/sebelum pengesahan.
+
 - Pembuat: GPT · Tanggal: 2026-10-17 · Cabang: gpt/g1-g6-paket
 
 ## Ringkasan (≤ 5 kalimat)
@@ -54,7 +59,7 @@ Bukan audit atau nasihat hukum final. Kontrol produksi tidak diperiksa langsung.
 Tetapkan entitas hukum, kontak privasi, DPO, tujuan offsite, dan pemilik insiden; advokat meninjau dasar pemrosesan dan kanal pemberitahuan.
 
 ## Daftar centang gerbang mutu (1–7)
-- [ ] 1. Hasil gerbang proyek dicatat di ringkasan akhir; tidak membuktikan implementasi spesifikasi.
+- [x] 1. Lint/typecheck/build lulus dan 590 tes aplikasi lulus dengan konfigurasi uji sintetis; bukti di ringkasan akhir. Ini tidak membuktikan implementasi spesifikasi.
 - [x] 2. Validasi artefak sesuai paket dilakukan; tanpa perubahan perilaku aplikasi.
 - [ ] 3. Uji visual aplikasi tidak berlaku bagi dokumen; G1 memiliki bukti aset statis tersendiri.
 - [ ] 4. Audit axe/keyboard implementasi belum dilakukan; kebutuhan dicantumkan untuk Antigravity.

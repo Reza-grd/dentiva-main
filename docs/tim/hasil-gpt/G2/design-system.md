@@ -25,6 +25,9 @@ mencegah dua sumber kebenaran. Preset Tailwind yang ada tetap digunakan.
 
 ## 3. Kontras dan warna
 tokens.json menyimpan nilai DTCG eksplisit untuk terang/gelap dan 12 netral.
+Mengacu [Format Module 2025.10](https://www.designtokens.org/tr/2025.10/format/),
+laporan Community Group DTCG, bukan W3C Recommendation. Alias dan metadata CSS
+berada pada $extensions; mode tema berupa grup eksplisit light/dark.
 kontras.json dihitung oleh susun.py; tabel di bawah adalah seluruh pasangan yang
 diizinkan untuk teks/kontrol. Pasangan lain memerlukan perhitungan baru.
 Teks utama menargetkan AAA; teks lain minimal AA. Translucency pada teks dilarang.

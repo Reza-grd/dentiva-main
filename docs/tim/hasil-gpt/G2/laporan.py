@@ -40,7 +40,7 @@ token G2, dan batas agen dipertahankan konsisten pada paket ini.
 {questions}
 
 ## Daftar centang gerbang mutu (1–7)
-- [ ] 1. Hasil gerbang proyek dicatat di ringkasan akhir; tidak membuktikan implementasi spesifikasi.
+- [x] 1. Lint/typecheck/build lulus dan 590 tes aplikasi lulus dengan konfigurasi uji sintetis; bukti di ringkasan akhir. Ini tidak membuktikan implementasi spesifikasi.
 - [x] 2. Validasi artefak sesuai paket dilakukan; tanpa perubahan perilaku aplikasi.
 - [ ] 3. Uji visual aplikasi tidak berlaku bagi dokumen; G1 memiliki bukti aset statis tersendiri.
 - [ ] 4. Audit axe/keyboard implementasi belum dilakukan; kebutuhan dicantumkan untuk Antigravity.
@@ -48,4 +48,5 @@ token G2, dan batas agen dipertahankan konsisten pada paket ini.
 - [x] 6. Tidak menambah dependency atau kode ke bundel runtime aplikasi.
 - [x] 7. Dokumen, batas klaim, sumber dan langkah verifikasi disediakan.
 '''
+if code=='G4':text=text.replace('\n- Pembuat:', '\n\n**DRAF — perlu ditinjau advokat/DPO/auditor**\n\nVersi 1.0 · Pemilik: Ketua dan fungsi privasi · Tinjau: tahunan/sebelum pengesahan.\n\n- Pembuat:',1)
 (P/'serah-terima.md').write_text(text,encoding='utf-8');(ROOT/'docs/tim/serah-terima'/f'{code}.md').write_text(text,encoding='utf-8')

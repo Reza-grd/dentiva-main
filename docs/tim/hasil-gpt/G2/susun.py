@@ -20,6 +20,15 @@ for n in [0,1,2,3,4,6,8,12,16]:tokens['space'][f's{n}']={'$type':'dimension','$v
 for n,v in [('sm',8),('md',12),('lg',16),('xl',20),('2xl',24),('full',9999)]:tokens['radius'][n]={'$type':'dimension','$value':{'value':v,'unit':'px'},'$extensions':{'id.dentiva':{'cssVariable':'--radius-'+n}}}
 for n,v in [('control',44),('control-compact',36),('row',52),('row-compact',40),('sidebar',240),('dialog',560),('icon',20),('stroke',2),('focus-ring',2)]:tokens['size'][n]={'$type':'dimension','$value':{'value':v,'unit':'px'}}
 for n,v in [('display',40),('h1',32),('h2',24),('h3',20),('body',16),('small',14),('caption',12)]:tokens['font']['size'][n]={'$type':'dimension','$value':{'value':v,'unit':'px'}}
+tokens['font']['lineHeight']={n:{'$type':'dimension','$value':{'value':v,'unit':'px'}} for n,v in [('display',48),('h1',40),('h2',32),('h3',28),('body',24),('small',20),('caption',16)]}
+tokens['font']['weight']={n:{'$type':'fontWeight','$value':v} for n,v in [('regular',400),('medium',500),('semibold',600),('bold',700)]}
+for n,v in [('focus-offset',2),('border',1)]:tokens['size'][n]={'$type':'dimension','$value':{'value':v,'unit':'px'}}
+tokens['breakpoint']={n:{'$type':'dimension','$value':{'value':v,'unit':'px'}} for n,v in [('sm',640),('md',768),('lg',1024),('xl',1280)]}
+tokens['color']['shadow']={'light':color('#163047'),'dark':color('#000000')}
+tokens['color']['shadow']['light']['$value']['alpha']=.08
+tokens['color']['shadow']['dark']['$value']['alpha']=.32
+tokens['shadow']['card']['$value']['color']='{color.shadow.light}'
+tokens['shadow']['dialog']={'$type':'shadow','$value':{'color':'{color.shadow.dark}','offsetX':{'value':0,'unit':'px'},'offsetY':{'value':12,'unit':'px'},'blur':{'value':32,'unit':'px'},'spread':{'value':0,'unit':'px'}}}
 tokens['color']['chart']['sequential']={f's{i}':color(v) for i,v in enumerate(['#CCFBF1','#99F6E4','#5EEAD4','#2DD4BF','#0F766E','#115E59'])}
 put('tokens.json',json.dumps(tokens,ensure_ascii=False,indent=2))
 pairs=[]
@@ -62,6 +71,9 @@ mencegah dua sumber kebenaran. Preset Tailwind yang ada tetap digunakan.
 
 ## 3. Kontras dan warna
 tokens.json menyimpan nilai DTCG eksplisit untuk terang/gelap dan 12 netral.
+Mengacu [Format Module 2025.10](https://www.designtokens.org/tr/2025.10/format/),
+laporan Community Group DTCG, bukan W3C Recommendation. Alias dan metadata CSS
+berada pada $extensions; mode tema berupa grup eksplisit light/dark.
 kontras.json dihitung oleh susun.py; tabel di bawah adalah seluruh pasangan yang
 diizinkan untuk teks/kontrol. Pasangan lain memerlukan perhitungan baru.
 Teks utama menargetkan AAA; teks lain minimal AA. Translucency pada teks dilarang.

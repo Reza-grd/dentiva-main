@@ -2,6 +2,7 @@ import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import ts from 'typescript';
 import {ALL_TOOLS} from '../../../../supabase/functions/ai-assistant/core.ts';
+import {instansSvg} from '../G1/instans-svg.mjs';
 const P=new URL('./',import.meta.url),B=new URL('./bukti/',P);mkdirSync(B,{recursive:true});
 const source=readFileSync(new URL('skenario.js',P),'utf8');
 const ast=ts.createSourceFile('skenario.js',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
@@ -20,6 +21,15 @@ for(const s of SCENARIOS){
 }
 const micro=JSON.parse(readFileSync(new URL('mikrocopy.json',P),'utf8'));
 for(const [k,v]of Object.entries(micro))if(v.length<5||new Set(v).size!==v.length||v.some(s=>[...s].length>220))throw new Error('Mikrocopy '+k);
+let namespaceCases=0;
+for(const lod of ['mini','standar','hero'])for(const state of ['idle','happy','talk','think','wave','sorry']){
+ const text=readFileSync(new URL(`../G1/svg/${state}.${lod}.svg`,P),'utf8');
+ const a=instansSvg(text,n=>'first-'+n),b=instansSvg(text,n=>'second-'+n);
+ const first=new Set([...a.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
+ const second=new Set([...b.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
+ if([...first].some(id=>second.has(id)))throw new Error('Benturan ID '+state+'/'+lod);
+ namespaceCases++;
+}
 // Salinan harness hanya di docs; import sumber produksi tetap menunjuk worktree sendiri.
 const original=new URL('../../../../supabase/tests/agent/eval/run.mjs',P);
 let harness=readFileSync(original,'utf8').replace(/^import .*? from "(.+?)";/gm,(line,spec)=>{
@@ -27,5 +37,5 @@ let harness=readFileSync(original,'utf8').replace(/^import .*? from "(.+?)";/gm,
  return resolved?line.replace('"'+spec+'"','"'+resolved.href+'"'):line;
 });
 writeFileSync(new URL('harness.mjs',B),harness);
-const stats={syntax:'TypeScript AST parse sungguhan; satu array',scenarios:SCENARIOS.length,uniqueIds:ids.size,composition:JSON.parse(readFileSync(new URL('komposisi.json',P),'utf8')).groups,toolsValid:true,proposalKindsValid:true,injectionScenarios:SCENARIOS.filter(s=>s.setup).length,microcopySituations:Object.keys(micro).length,microcopyVariations:Object.values(micro).reduce((n,v)=>n+v.length,0),maximumCharacters:Math.max(...Object.values(micro).flat().map(s=>[...s].length)),scope:'Struktur dan oracle skrip; jalankan harness untuk alat/database, evaluasi model belum dijalankan.'};
+const stats={syntax:'TypeScript AST parse sungguhan; satu array',scenarios:SCENARIOS.length,uniqueIds:ids.size,composition:JSON.parse(readFileSync(new URL('komposisi.json',P),'utf8')).groups,toolsValid:true,proposalKindsValid:true,injectionScenarios:SCENARIOS.filter(s=>s.setup).length,microcopySituations:Object.keys(micro).length,microcopyVariations:Object.values(micro).reduce((n,v)=>n+v.length,0),maximumCharacters:Math.max(...Object.values(micro).flat().map(s=>[...s].length)),svgDoubleInstanceNamespaceCases:namespaceCases,scope:'Struktur dan oracle skrip; jalankan harness untuk alat/database, evaluasi model belum dijalankan.'};
 writeFileSync(new URL('bukti-validasi.json',P),JSON.stringify(stats,null,2));console.log(JSON.stringify(stats,null,2));

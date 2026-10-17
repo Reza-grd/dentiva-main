@@ -37,7 +37,7 @@ Harga merupakan usulan, bukan konfigurasi billing aktif. Tidak menjanjikan SLA k
 Setujui harga/kuota, biaya dukungan, pajak, kapasitas onboarding dan SLA sebelum penawaran.
 
 ## Daftar centang gerbang mutu (1–7)
-- [ ] 1. Hasil gerbang proyek dicatat di ringkasan akhir; tidak membuktikan implementasi spesifikasi.
+- [x] 1. Lint/typecheck/build lulus dan 590 tes aplikasi lulus dengan konfigurasi uji sintetis; bukti di ringkasan akhir. Ini tidak membuktikan implementasi spesifikasi.
 - [x] 2. Validasi artefak sesuai paket dilakukan; tanpa perubahan perilaku aplikasi.
 - [ ] 3. Uji visual aplikasi tidak berlaku bagi dokumen; G1 memiliki bukti aset statis tersendiri.
 - [ ] 4. Audit axe/keyboard implementasi belum dilakukan; kebutuhan dicantumkan untuk Antigravity.
