@@ -1,0 +1,226 @@
+{
+  "penutup-usulan": [
+    "Kartu usulan siap. Periksa rinciannya sebelum menyetujui.",
+    "Saya menyiapkan usulannya. Data belum berubah; silakan tinjau kartunya.",
+    "Periksa nilai dan satuannya, lalu pilih Setujui bila sudah sesuai.",
+    "Usulan tersedia untuk ditinjau. Anda yang menentukan apakah perubahan dijalankan.",
+    "Cek peringatannya terlebih dahulu. Setujui hanya jika rinciannya benar."
+  ],
+  "usulan-berhasil": [
+    "Usulan berhasil dijalankan. Silakan periksa hasilnya.",
+    "Perubahan sudah dikonfirmasi server. Anda dapat membuka rinciannya.",
+    "Usulan selesai dijalankan sesuai hasil server.",
+    "Data diperbarui. Tinjau rincian hasil perubahan bila diperlukan.",
+    "Proses selesai dan hasilnya terkonfirmasi. Silakan cek catatannya."
+  ],
+  "usulan-ditolak": [
+    "Usulan ditolak. Perubahan dari kartu ini tidak dijalankan.",
+    "Kartu ini ditolak; data tidak berubah melalui usulan tersebut.",
+    "Penolakan usulan terkonfirmasi. Anda dapat meminta usulan baru bila perlu.",
+    "Usulan tidak diteruskan. Rincian lama tetap tersedia untuk diperiksa.",
+    "Pilihan menolak sudah tersimpan. Kartu ini tidak dijalankan."
+  ],
+  "usulan-dibatalkan": [
+    "Pembatalan dikonfirmasi server. Silakan periksa kondisi akhirnya.",
+    "Tindakan yang mendukung pembatalan sudah dibatalkan. Tinjau hasilnya.",
+    "Proses pembatalan selesai sesuai hasil server.",
+    "Pembatalan berhasil. Periksa rincian untuk memastikan hasilnya sesuai.",
+    "Server mengonfirmasi pembatalan tindakan ini."
+  ],
+  "usulan-kedaluwarsa": [
+    "Usulan ini kedaluwarsa. Minta Denti menyiapkan versi baru.",
+    "Masa persetujuan kartu sudah berakhir. Periksa data terbaru sebelum membuat usulan lagi.",
+    "Kartu ini tidak dapat disetujui lagi. Silakan buat usulan baru.",
+    "Usulan sudah melewati masa berlaku. Data perlu diperiksa kembali.",
+    "Persetujuan tidak tersedia karena kartu kedaluwarsa. Minta usulan yang diperbarui."
+  ],
+  "peringatan-duplikat": [
+    "Ada transaksi yang mirip. Periksa tanggal, nominal, dan nomor nota sebelum melanjutkan.",
+    "Catatan serupa ditemukan. Pastikan transaksi ini memang berbeda.",
+    "Transaksi ini mungkin sudah tercatat. Bandingkan rinciannya terlebih dahulu.",
+    "Periksa catatan yang mirip agar transaksi tidak masuk dua kali.",
+    "Nominal dan rincian menyerupai catatan lain. Tinjau sebelum menyetujui."
+  ],
+  "peringatan-harga": [
+    "Harga berbeda dari catatan sebelumnya. Pastikan nominal dan satuannya benar.",
+    "Perubahan harga cukup besar. Periksa nota sebelum melanjutkan.",
+    "Tinjau harga per satuan dan totalnya agar tidak tertukar.",
+    "Nilai harga perlu diperiksa kembali. Gunakan angka pada bukti pembelian.",
+    "Harga terlihat tidak biasa dibanding riwayat. Pastikan tidak ada salah ketik."
+  ],
+  "peringatan-satuan": [
+    "Satuan beli berbeda dari satuan stok. Periksa konversinya sebelum menyetujui.",
+    "Pastikan jumlah ini dalam box atau satuan dasar yang dimaksud.",
+    "Tinjau isi per kemasan agar jumlah stok tidak dikalikan dua kali.",
+    "Jumlah dan harga harus memakai satuan beli yang sesuai. Silakan periksa.",
+    "Periksa jumlah per box dan total satuan dasarnya terlebih dahulu."
+  ],
+  "peringatan-bahan-mirip": [
+    "Ada nama bahan yang mirip. Pilih bahan yang benar sebelum melanjutkan.",
+    "Bahan yang dimaksud belum jelas. Sebutkan nama lengkapnya.",
+    "Saya menemukan beberapa kandidat. Bahan mana yang ingin dipakai?",
+    "Periksa varian bahan agar stok tidak masuk ke item yang salah.",
+    "Nama ini cocok dengan lebih dari satu bahan. Pilih salah satunya terlebih dahulu."
+  ],
+  "di-luar-cakupan": [
+    "Permintaan ini di luar kemampuan agen. Gunakan menu terkait sesuai peran Anda.",
+    "Saya tidak dapat menjalankan tindakan tersebut. Buka halaman yang berwenang untuk melanjutkan.",
+    "Tindakan ini perlu dilakukan melalui alur aplikasi yang sesuai, bukan chat agen.",
+    "Saya dapat membantu gudang dan keuangan sesuai izin; permintaan ini memerlukan menu lain.",
+    "Untuk tindakan ini, gunakan alur resmi dan akun yang berwenang."
+  ],
+  "data-kosong": [
+    "Belum ada data untuk ditampilkan. Periksa periode atau lengkapi catatan yang diperlukan.",
+    "Tidak ada hasil pada pilihan ini. Coba ubah filter.",
+    "Data yang diperlukan belum tersedia. Lengkapi melalui menu terkait.",
+    "Belum ada catatan yang cocok. Periksa kata pencarian dan periodenya.",
+    "Ringkasan belum dapat dihitung karena datanya belum tersedia."
+  ],
+  "kuota-habis": [
+    "Kuota AI periode ini sudah habis. Periksa rincian paket atau hubungi pengelola klinik.",
+    "Permintaan AI belum dapat diproses karena kuota habis. Lihat status langganan.",
+    "Kuota AI tidak tersedia saat ini. Periksa periode pemakaian dan pilihan tambahan yang tersedia.",
+    "Batas pemakaian AI tercapai. Pengelola klinik dapat meninjau kuota paket.",
+    "Permintaan ini memerlukan kuota AI. Silakan periksa pemakaian pada langganan."
+  ],
+  "ai-sibuk": [
+    "Layanan AI sedang sibuk. Tunggu sebentar, lalu coba lagi.",
+    "Jawaban belum dapat diproses saat ini. Silakan ulangi beberapa saat lagi.",
+    "Layanan belum merespons. Coba kembali setelah beberapa saat.",
+    "AI sementara tidak tersedia. Anda dapat melanjutkan pekerjaan melalui menu aplikasi.",
+    "Permintaan belum selesai karena layanan sibuk. Silakan coba lagi nanti."
+  ],
+  "sesi-berakhir": [
+    "Sesi Anda berakhir. Masuk kembali untuk melanjutkan.",
+    "Silakan masuk kembali agar akses dapat diverifikasi.",
+    "Sesi tidak lagi berlaku. Data sensitif ditutup sampai Anda masuk kembali.",
+    "Akses perlu diverifikasi ulang. Masuk kembali melalui halaman resmi.",
+    "Untuk melanjutkan dengan aman, silakan masuk kembali."
+  ],
+  "offline": [
+    "Koneksi terputus. Periksa jaringan sebelum menyimpan perubahan.",
+    "Anda sedang offline. Perubahan belum dapat dikirim ke server.",
+    "Jaringan belum tersambung. Tunggu koneksi pulih untuk melanjutkan.",
+    "Data terbaru belum dapat diambil. Periksa koneksi dan coba lagi.",
+    "Server belum terjangkau. Jangan mengulangi transaksi sebelum memeriksa statusnya."
+  ],
+  "konfirmasi-berisiko": [
+    "Perubahan ini berdampak pada data yang ditampilkan. Periksa rincian sebelum menyetujui.",
+    "Pastikan pilihan dan nilainya benar. Lanjutkan hanya jika Anda memahami dampaknya.",
+    "Tinjau kondisi sebelum dan sesudah. Apakah perubahan ini sudah sesuai?",
+    "Periksa peringatan serta lingkup perubahan sebelum memberikan persetujuan.",
+    "Tindakan ini memerlukan perhatian tambahan. Pastikan data dan alasannya tepat."
+  ],
+  "terima-kasih": [
+    "Terima kasih. Saya siap membantu langkah berikutnya.",
+    "Sama-sama. Silakan lanjutkan pekerjaan Anda.",
+    "Terima kasih sudah memeriksa rinciannya.",
+    "Sama-sama. Jika perlu, kita bisa meninjau bagian lain.",
+    "Terima kasih. Semoga pekerjaan berikutnya lebih tertata."
+  ],
+  "perpisahan": [
+    "Sampai jumpa. Pastikan keluar dari akun bila perangkat dipakai bersama.",
+    "Sampai bertemu lagi. Jangan lupa mengamankan sesi Anda.",
+    "Terima kasih. Silakan keluar dari akun setelah pekerjaan selesai.",
+    "Sampai jumpa kembali. Pastikan perubahan penting sudah terkonfirmasi.",
+    "Sampai nanti. Amankan perangkat sebelum meninggalkannya."
+  ],
+  "berpikir": [
+    "Saya sedang memeriksa data yang diperlukan.",
+    "Sebentar, saya cocokkan informasi yang tersedia.",
+    "Saya sedang meninjau rincian permintaan ini.",
+    "Saya periksa datanya terlebih dahulu agar tidak menebak.",
+    "Sedang memproses permintaan. Hasilnya akan ditampilkan setelah tersedia."
+  ],
+  "galat-status-tidak-pasti": [
+    "Hasil proses belum terkonfirmasi. Periksa status sebelum mencoba lagi.",
+    "Koneksi terputus saat proses berlangsung. Baca ulang status agar tindakan tidak terulang.",
+    "Saya belum dapat memastikan hasilnya. Tinjau catatan terbaru terlebih dahulu.",
+    "Proses mungkin sudah diterima server. Periksa hasilnya sebelum mengirim ulang.",
+    "Status akhir belum tersedia. Muat ulang rincian sebelum melanjutkan."
+  ],
+  "sapaan-pagi-admin": [
+    "Selamat pagi. Saya bisa membantu ringkasan bisnis, bahan, atau pengeluaran.",
+    "Selamat pagi. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat pagi. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat pagi. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga pagi ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-pagi-dokter": [
+    "Selamat pagi. Saya bisa membantu panduan alur pelayanan dan rekam medis.",
+    "Selamat pagi. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat pagi. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat pagi. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga pagi ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-pagi-resepsionis": [
+    "Selamat pagi. Saya bisa membantu panduan jadwal dan administrasi.",
+    "Selamat pagi. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat pagi. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat pagi. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga pagi ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-siang-admin": [
+    "Selamat siang. Saya bisa membantu ringkasan bisnis, bahan, atau pengeluaran.",
+    "Selamat siang. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat siang. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat siang. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga siang ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-siang-dokter": [
+    "Selamat siang. Saya bisa membantu panduan alur pelayanan dan rekam medis.",
+    "Selamat siang. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat siang. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat siang. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga siang ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-siang-resepsionis": [
+    "Selamat siang. Saya bisa membantu panduan jadwal dan administrasi.",
+    "Selamat siang. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat siang. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat siang. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga siang ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-sore-admin": [
+    "Selamat sore. Saya bisa membantu ringkasan bisnis, bahan, atau pengeluaran.",
+    "Selamat sore. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat sore. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat sore. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga sore ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-sore-dokter": [
+    "Selamat sore. Saya bisa membantu panduan alur pelayanan dan rekam medis.",
+    "Selamat sore. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat sore. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat sore. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga sore ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-sore-resepsionis": [
+    "Selamat sore. Saya bisa membantu panduan jadwal dan administrasi.",
+    "Selamat sore. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat sore. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat sore. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga sore ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-malam-admin": [
+    "Selamat malam. Saya bisa membantu ringkasan bisnis, bahan, atau pengeluaran.",
+    "Selamat malam. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat malam. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat malam. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga malam ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-malam-dokter": [
+    "Selamat malam. Saya bisa membantu panduan alur pelayanan dan rekam medis.",
+    "Selamat malam. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat malam. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat malam. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga malam ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ],
+  "sapaan-malam-resepsionis": [
+    "Selamat malam. Saya bisa membantu panduan jadwal dan administrasi.",
+    "Selamat malam. Ada bagian pekerjaan yang ingin Anda tinjau?",
+    "Halo, selamat malam. Mau mulai dari panduan yang sesuai tugas Anda?",
+    "Selamat malam. Silakan pilih bantuan yang diperlukan untuk pekerjaan hari ini.",
+    "Halo. Semoga malam ini berjalan lancar. Apa yang ingin Anda periksa?"
+  ]
+}

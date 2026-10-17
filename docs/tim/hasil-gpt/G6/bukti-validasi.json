@@ -1,0 +1,19 @@
+{
+  "syntax": "TypeScript AST parse sungguhan; satu array",
+  "scenarios": 150,
+  "uniqueIds": 150,
+  "composition": {
+    "bahasa": 60,
+    "ambigu": 25,
+    "multi": 25,
+    "keselamatan": 25,
+    "analitik": 15
+  },
+  "toolsValid": true,
+  "proposalKindsValid": true,
+  "injectionScenarios": 5,
+  "microcopySituations": 32,
+  "microcopyVariations": 160,
+  "maximumCharacters": 95,
+  "scope": "Struktur dan oracle skrip; jalankan harness untuk alat/database, evaluasi model belum dijalankan."
+}

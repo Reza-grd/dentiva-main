@@ -1,0 +1,16 @@
+{
+  "jsonFilesParsed": 15,
+  "svgXML": 18,
+  "expressionSketchXML": 12,
+  "sourceRigClasses": 188,
+  "registeredSourceStates": 93,
+  "tokens": 125,
+  "contrastPairsG1": 6,
+  "contrastPairsG2": 58,
+  "components": 25,
+  "screens": 10,
+  "isoControlRows": 93,
+  "agentScriptedPass": 150,
+  "negativeFailuresDetected": 119,
+  "scope": "Artefak dokumentasi dan selftest sintetis; bukan sertifikasi, pengujian 93 animasi, atau evaluasi model."
+}

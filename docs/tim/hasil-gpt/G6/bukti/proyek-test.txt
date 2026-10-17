@@ -1,0 +1,101 @@
+
+> dentiva@1.11.0 test
+> npm run test --workspaces --if-present && npm run test:api
+
+
+> @dentiva/clinic@1.11.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.js:46:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10.40.24 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+10.40.24 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
+
+ RUN  v4.1.11 D:/dentiva/gpt-g1-g6/apps/clinic
+
+ ❯ src/test/dentiMood.test.jsx (0 test)
+ ❯ src/test/aiAgentActions.test.jsx (0 test)
+ ❯ src/test/aiDentiGuide.test.jsx (0 test)
+ ❯ src/test/dentiWidget.test.jsx (0 test)
+ ❯ src/test/aiAgentNota.test.jsx (0 test)
+ ❯ src/test/aiKnowledge.test.jsx (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/test/aiAgentActions.test.jsx [ src/test/aiAgentActions.test.jsx ]
+ FAIL  src/test/aiAgentNota.test.jsx [ src/test/aiAgentNota.test.jsx ]
+ FAIL  src/test/aiDentiGuide.test.jsx [ src/test/aiDentiGuide.test.jsx ]
+ FAIL  src/test/aiKnowledge.test.jsx [ src/test/aiKnowledge.test.jsx ]
+ FAIL  src/test/dentiMood.test.jsx [ src/test/dentiMood.test.jsx ]
+Error: Missing Supabase environment variables. Please check your .env file.
+ ❯ src/services/supabase.js:7:9
+      5|
+      6| if (!supabaseUrl || !supabaseAnonKey) {
+      7|   throw new Error('Missing Supabase environment variables. Please chec…
+       |         ^
+      8| }
+      9|
+ ❯ src/contexts/AuthContext.jsx:2:1
+ ❯ src/components/ai/AiAssistantPage.jsx:17:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/test/dentiWidget.test.jsx [ src/test/dentiWidget.test.jsx ]
+Error: Missing Supabase environment variables. Please check your .env file.
+ ❯ src/services/supabase.js:7:9
+      5|
+      6| if (!supabaseUrl || !supabaseAnonKey) {
+      7|   throw new Error('Missing Supabase environment variables. Please chec…
+       |         ^
+      8| }
+      9|
+ ❯ src/contexts/ThemeContext.jsx:3:1
+ ❯ src/components/ai/DentiGuideWidget.jsx:12:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+
+ Test Files  6 failed | 18 passed (24)
+      Tests  485 passed (485)
+   Start at  10:40:25
+   Duration  156.40s (transform 9.22s, setup 34.30s, import 36.01s, tests 51.51s, environment 220.39s)
+
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path D:\dentiva\gpt-g1-g6\apps\clinic
+npm error workspace @dentiva/clinic@1.11.0
+npm error location D:\dentiva\gpt-g1-g6\apps\clinic
+npm error command failed
+npm error command C:\Windows\system32\cmd.exe /d /s /c vitest run
+
+
+> @dentiva/console@0.1.0 test
+> vitest run
+
+10.43.02 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+10.43.02 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
+
+ RUN  v4.1.11 D:/dentiva/gpt-g1-g6/apps/console
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  10:43:02
+   Duration  3.24s (transform 138ms, setup 202ms, import 253ms, tests 19ms, environment 2.38s)
+
+
+> @dentiva/shared@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 D:/dentiva/gpt-g1-g6/packages/shared
+
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  10:43:06
+   Duration  591ms (transform 97ms, setup 0ms, import 263ms, tests 28ms, environment 0ms)
+

@@ -1,0 +1,100 @@
+
+> dentiva@1.11.0 build:clinic
+> npm run build -w @dentiva/clinic
+
+
+> @dentiva/clinic@1.11.0 build
+> vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 5305 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/registerSW.js                               0.13 kB
+dist/manifest.webmanifest                        0.36 kB
+dist/index.html                                  1.90 kB │ gzip:   0.81 kB
+dist/assets/DesktopUpdater-KKiTUQX4.css          2.15 kB │ gzip:   0.91 kB
+dist/assets/AiAssistantPage-C9UFRuAd.css         2.21 kB │ gzip:   0.85 kB
+dist/assets/AiBriefCard-C4exG4dp.css             3.37 kB │ gzip:   1.09 kB
+dist/assets/QueueDisplay-BvzqQXJw.css           14.05 kB │ gzip:   3.84 kB
+dist/assets/MedicalRecordForm-BDdezMW6.css      25.51 kB │ gzip:   3.91 kB
+dist/assets/index-D7CLdvbX.css                 200.72 kB │ gzip:  31.57 kB
+dist/assets/index-DW4oZmw5.js                    0.13 kB │ gzip:   0.14 kB
+dist/assets/index-Cg_zlgkt.js                    0.18 kB │ gzip:   0.15 kB
+dist/assets/sanitize-7wMHduXA.js                 0.29 kB │ gzip:   0.22 kB
+dist/assets/PageTransition-DGCPCe2S.js           0.48 kB │ gzip:   0.31 kB
+dist/assets/index-t7Wo23Jn.js                    1.08 kB │ gzip:   0.51 kB
+dist/assets/Badge-CGRjEluT.js                    1.11 kB │ gzip:   0.49 kB
+dist/assets/imageResize-CPADqtZw.js              1.23 kB │ gzip:   0.71 kB
+dist/assets/consentService-DraLf2bW.js           1.55 kB │ gzip:   0.53 kB
+dist/assets/core-D2Ebf996.js                     1.65 kB │ gzip:   0.73 kB
+dist/assets/QrisPanel-DjWk1MAj.js                2.19 kB │ gzip:   1.07 kB
+dist/assets/satusehatService-C80V0Kkf.js         2.39 kB │ gzip:   0.60 kB
+dist/assets/doctorScheduleService-CX4RJDAl.js    3.00 kB │ gzip:   0.90 kB
+dist/assets/DesktopUpdater-2o8gd52F.js           3.02 kB │ gzip:   1.32 kB
+dist/assets/treatmentService-BpsaIDI7.js         3.07 kB │ gzip:   0.76 kB
+dist/assets/aiService-BP5gWvVp.js                3.10 kB │ gzip:   1.01 kB
+dist/assets/ConfirmDialog-S0xMdnPo.js            3.37 kB │ gzip:   1.29 kB
+dist/assets/PatientAvatar-C9-I0jUQ.js            3.47 kB │ gzip:   1.65 kB
+dist/assets/dashboardService-DSlKgrAK.js         3.95 kB │ gzip:   1.30 kB
+dist/assets/paymentService-Bu1eXFMW.js           4.39 kB │ gzip:   1.35 kB
+dist/assets/QueueDisplayPage-Cz03b3IV.js         5.36 kB │ gzip:   2.15 kB
+dist/assets/ProfilePage-BSGxMdYy.js              5.40 kB │ gzip:   1.88 kB
+dist/assets/financialService-BH96zyl0.js         5.86 kB │ gzip:   1.78 kB
+dist/assets/BookingRequests-CRq8t-iv.js          5.89 kB │ gzip:   2.54 kB
+dist/assets/AiBriefCard-DxlxyZh-.js              6.74 kB │ gzip:   2.59 kB
+dist/assets/BookingPage-BnJfZqvk.js              7.61 kB │ gzip:   2.95 kB
+dist/assets/visitService-BXRrcurW.js             7.82 kB │ gzip:   2.18 kB
+dist/assets/AuditLogPage-gp2x-HCN.js             7.90 kB │ gzip:   2.35 kB
+dist/assets/MedicalRecordList-C2tqYyeV.js        8.02 kB │ gzip:   2.23 kB
+dist/assets/PricingPage-Dx2mDUUs.js              8.07 kB │ gzip:   3.05 kB
+dist/assets/QueueDisplay-SJGhjgcc.js            10.53 kB │ gzip:   3.70 kB
+dist/assets/DoctorDashboard-DDYC-of9.js         10.58 kB │ gzip:   3.21 kB
+dist/assets/RecallPage-JddWblxl.js              11.73 kB │ gzip:   4.25 kB
+dist/assets/PaymentList-ihXNyDy7.js             12.23 kB │ gzip:   3.22 kB
+dist/assets/DoctorSchedulePage-CqzGuRaO.js      12.41 kB │ gzip:   3.69 kB
+dist/assets/icd10Dental-DmPbK0n_.js             12.62 kB │ gzip:   2.53 kB
+dist/assets/FinancialDashboard-BqH1aDPb.js      12.65 kB │ gzip:   3.00 kB
+dist/assets/UserManagementPage-Bj16RFOQ.js      13.71 kB │ gzip:   4.27 kB
+dist/assets/wilayahIndonesia-DKRt3buj.js        13.93 kB │ gzip:   4.83 kB
+dist/assets/ReceptionistDashboard-DK8E37v2.js   14.80 kB │ gzip:   4.14 kB
+dist/assets/DoctorProfilePage-R-kmE-Dc.js       15.24 kB │ gzip:   4.08 kB
+dist/assets/AdminDashboard-D_UxI_5w.js          15.27 kB │ gzip:   5.09 kB
+dist/assets/ReportsPage-BSX1PhTS.js             16.13 kB │ gzip:   4.40 kB
+dist/assets/ExpensesPage-DjNQ51wY.js            20.02 kB │ gzip:   6.59 kB
+dist/assets/SchedulePage-CEeV3KXv.js            23.77 kB │ gzip:   5.80 kB
+dist/assets/TreatmentMaster-DC3wcS1V.js         24.03 kB │ gzip:   6.13 kB
+dist/assets/PatientList-DS5epuRs.js             24.28 kB │ gzip:   6.97 kB
+dist/assets/VisitHistory-DOTedLHU.js            28.09 kB │ gzip:   6.55 kB
+dist/assets/AiAssistantPage-qZrcEUeG.js         41.41 kB │ gzip:  14.63 kB
+dist/assets/PaymentForm-B4VnpP3p.js             42.76 kB │ gzip:   9.29 kB
+dist/assets/PatientRegistration-D5lGVg4a.js     43.24 kB │ gzip:   8.73 kB
+dist/assets/PatientDetail-DYAbiHEu.js           43.83 kB │ gzip:   9.87 kB
+dist/assets/SettingsPage-v_d3ALmu.js            73.87 kB │ gzip:  15.57 kB
+dist/assets/CostingDashboard-DP_eG3VF.js        81.76 kB │ gzip:  15.23 kB
+dist/assets/vendor-utils-BfA-RD6N.js           112.75 kB │ gzip:  33.85 kB
+dist/assets/index.es-B06a1yLn.js               150.74 kB │ gzip:  51.57 kB
+dist/assets/MedicalRecordForm-BRHsBxrb.js      162.50 kB │ gzip:  38.61 kB
+dist/assets/vendor-ui-BCpNQlKn.js              177.51 kB │ gzip:  51.66 kB
+dist/assets/vendor-react-CbhMVq6m.js           180.18 kB │ gzip:  59.19 kB
+dist/assets/html2canvas.esm-CBrSDip1.js        201.42 kB │ gzip:  48.03 kB
+dist/assets/vendor-quill-CB6Qb6W3.js           209.55 kB │ gzip:  62.80 kB
+dist/assets/vendor-supabase-DFM6Pj3g.js        215.97 kB │ gzip:  56.00 kB
+dist/assets/vendor-charts-gyNuY_d8.js          422.02 kB │ gzip: 112.59 kB
+dist/assets/vendor-pdf-B9yT9wUc.js             422.02 kB │ gzip: 138.65 kB
+dist/assets/vendor-excel-CyIgH-Tr.js           491.83 kB │ gzip: 160.63 kB
+dist/assets/index-D1WRm98Y.js                  594.37 kB │ gzip: 182.20 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1m 39s
+
+PWA v1.3.0
+mode      generateSW
+precache  84 entries (4343.96 KiB)
+files generated
+  dist/sw.js
+  dist/workbox-9c191d2f.js

@@ -1,0 +1,12 @@
+
+> dentiva@1.11.0 lint
+> npm run lint --workspaces --if-present
+
+
+> @dentiva/clinic@1.11.0 lint
+> eslint .
+
+
+> @dentiva/console@0.1.0 lint
+> eslint src --ext .ts,.tsx
+
