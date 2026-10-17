@@ -46,7 +46,6 @@
       "reset email",
       "MFA",
       "2FA",
-      "TOTP",
       "autentikator"
     ]
   },
@@ -308,7 +307,6 @@
     "kata_kunci": [
       "TV",
       "antrean",
-      "token",
       "layar ruang tunggu",
       "tautan",
       "cabut"
@@ -380,7 +378,6 @@
       "data pasien",
       "akses",
       "backup",
-      "offsite",
       "pemulihan",
       "permintaan data"
     ]
@@ -403,6 +400,25 @@
       "reset",
       "backup",
       "dukungan"
+    ]
+  },
+  {
+    "slug": "status-layanan",
+    "judul": "Fitur yang sedang disiapkan",
+    "peran": [
+      "admin",
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "status layanan",
+      "bantuan sandi",
+      "MFA",
+      "cadangan data",
+      "pemulihan",
+      "desktop",
+      "akun dokter",
+      "koreksi pembayaran"
     ]
   }
 ]
