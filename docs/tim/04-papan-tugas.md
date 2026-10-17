@@ -24,10 +24,10 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 | **G4** | Dokumen keamanan & kepatuhan | GPT | ⬜ | — | `hasil-gpt/G4/` |
 | **G5** | Produk, paket & harga | GPT | ⬜ | G4 (whitepaper) | `hasil-gpt/G5/` |
 | **G6** | Skenario uji agen & mikrocopy | GPT | ⬜ | — | `hasil-gpt/G6/` |
-| **A1** | Denti HD (render) | Antigravity | ⬜ | G1 (opsional di awal) | `serah-terima/A1.md` |
+| **A1** | Denti HD (render) + A1b poles | Antigravity | 🟩 live (A1b menunggu deploy) | G1 (opsional di awal) | `serah-terima/A1.md` |
 | **A2** | Fondasi sistem desain | Antigravity | ⬜ | G2 | cabang A2 |
 | **A3** | Layar premium (bertahap) | Antigravity | ⬜ | G3, A2 | cabang A3-* |
-| **A4** | Mutu otomatis (E2E/visual/axe) | Antigravity | ⬜ | — | `usulan-ci/e2e.yml` |
+| **A4** | Mutu otomatis (E2E/visual/axe) | Antigravity | 🟦 dimulai | — | `usulan-ci/e2e.yml` |
 | **A5** | Hardening aplikasi & rantai pasok | Antigravity | ⬜ | L1 (MFA server) | `usulan-ci/*`, cabang A5 |
 | **A6** | Desktop premium & penandatanganan | Antigravity | ⬜ | pemilik (sertifikat) | cabang A6 |
 | **A7** | Performa & pengalaman | Antigravity | ⬜ | — | cabang A7 |
@@ -58,6 +58,8 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 | 17 Okt 02.00 | Antigravity | A1 berjalan (diff belum di-commit, dibaca read-only) | ✔ Arah benar: `resolveDentiLod()` (mini ≤72, standar ≤160, hero), `data-lod`, `shapeRendering="geometricPrecision"`, ukuran piksel dibulatkan, folder bukti `serah-terima/A1/sebelum/`. Menunggu `dentiSvg.js` per-LOD, tes, bukti sesudah. Catatan: masih memakai folder utama (belum pindah worktree) |
 | 17 Okt | GPT | G1 serahan parsial 1 (art-direction.md + serah-terima.md; tanpa aset) | 🟦 Arah DITERIMA dengan syarat. Kontras diukur Ketua: enamel vs putih hanya 1,05 (kontur wajib kontinu di tema terang); kontur vs latar gelap 1,38 (tepi luar harus terang). 58 px = LEBAR. GPT diminta menerima bundel sumber, lalu kritik berbasis sumber → lod-aturan → palet.json → catatan-rig → ekspresi → 18 SVG. Rinci: `serah-terima/G1-tinjauan.md` |
 | 17 Okt | Antigravity | A1 diserahkan (cabang `antigravity/A1-denti-hd`) | ✔ DITERIMA & digabung ke `console` (cherry-pick 4 commit; commit lama 6292ecf di cabang itu tidak ikut karena sudah ada). Gerbang Ketua: build, lint, typecheck, 545 tes (24 berkas) hijau; visual 58 px @1×/2×/3× jauh lebih tajam (kontur tegas, tanpa halo). Tindak lanjut A1b (minor): (1) partikel orbit kini diam+berdenyut, gerak mengitari hilang (SMIL dibuang) → kembalikan via offset-path/rotasi grup; (2) pegas lompat/celebrate hilang karena semua scale() dibuang → ganti rotasi anggota+overshoot kecil; (3) bandingkan glow visor/mata hero dengan versi lama (semua filter dibuang termasuk hero); (4) kontras tepi mini #7a9ec9 vs putih ≈2,7:1 (<3:1) → gelapkan sedikit. Belum deploy ke main |
+| 17 Okt 10.15 | Antigravity | A1b diserahkan (`antigravity/A1b-denti-poles`, worktree sendiri ✔) | ✔ DITERIMA, cherry-pick ke `console` (lokal; belum push agar build Vercel tak berulang). Keempat catatan Ketua dikerjakan: orbit `offset-path`, pegas celebrate tanpa scale() badan, glow radial hero/standar (visual: pendaran visor kembali tanpa filter), tepi mini 4,30:1. 18 tes + lint hijau (Ketua), 549 tes/build/typecheck (laporan A1b). A4 (mutu otomatis) worktree dibuat, belum ada commit |
+| 17 Okt 10.15 | GPT | Worktree `gpt-g1-g6` (Codex) dibuat 10.14 dari prompt tunggal | 🟦 Baru mulai: belum ada berkas baru di `hasil-gpt/` (hanya G1 lama). Git di worktree itu dimiliki akun `CodexSandboxOffline` (jalankan `git -c safe.directory=… ` untuk membaca). Cabang lama `gpt/denti-latih` sudah ada di `console` |
 | — | Pemilik | T1 (kunci Claude), T4 (SMTP), T5 (storage offsite) | Menunggu tindakan pemilik |
 
 > **Instruksi perbaikan untuk Antigravity (sekali):** (1) di folder utama pastikan tak ada perubahan tak ter-commit milik Anda (`git status`); jika ada, `git add -A && git commit -m "wip(A1): …"` dulu.
