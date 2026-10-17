@@ -18,12 +18,12 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 
 | Kode | Paket | Pemilik | Status | Bergantung | Hasil |
 |---|---|---|---|---|---|
-| **G1** | Art direction & aset Denti HD | GPT | ⬜ | — | `hasil-gpt/G1/` |
-| **G2** | Sistem desain premium | GPT | ⬜ | — | `hasil-gpt/G2/` |
-| **G3** | Spesifikasi 10 layar | GPT | ⬜ | G2 | `hasil-gpt/G3/` |
-| **G4** | Dokumen keamanan & kepatuhan | GPT | ⬜ | — | `hasil-gpt/G4/` |
-| **G5** | Produk, paket & harga | GPT | ⬜ | G4 (whitepaper) | `hasil-gpt/G5/` |
-| **G6** | Skenario uji agen & mikrocopy | GPT | ⬜ | — | `hasil-gpt/G6/` |
+| **G1** | Art direction & aset Denti HD | GPT | 🟩 diterima (aset = referensi; perlu A1c) | — | `hasil-gpt/G1/` |
+| **G2** | Sistem desain premium | GPT | 🟩 diterima (menunggu keputusan migrasi aksen) | — | `hasil-gpt/G2/` |
+| **G3** | Spesifikasi 10 layar | GPT | 🟩 diterima (implementasi A3) | G2 | `hasil-gpt/G3/` |
+| **G4** | Dokumen keamanan & kepatuhan | GPT | 🟩 diterima sbg DRAF (butuh data pemilik) | — | `hasil-gpt/G4/` |
+| **G5** | Produk, paket & harga | GPT | 🟩 diterima sbg USULAN (butuh keputusan harga) | G4 (whitepaper) | `hasil-gpt/G5/` |
+| **G6** | Skenario uji agen & mikrocopy | GPT | 🟩 diterima & terintegrasi (195/195) | — | `hasil-gpt/G6/` |
 | **A1** | Denti HD (render) + A1b poles | Antigravity | 🟩 live (A1b menunggu deploy) | G1 (opsional di awal) | `serah-terima/A1.md` |
 | **A2** | Fondasi sistem desain | Antigravity | ⬜ | G2 | cabang A2 |
 | **A3** | Layar premium (bertahap) | Antigravity | ⬜ | G3, A2 | cabang A3-* |
@@ -60,6 +60,7 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 | 17 Okt | Antigravity | A1 diserahkan (cabang `antigravity/A1-denti-hd`) | ✔ DITERIMA & digabung ke `console` (cherry-pick 4 commit; commit lama 6292ecf di cabang itu tidak ikut karena sudah ada). Gerbang Ketua: build, lint, typecheck, 545 tes (24 berkas) hijau; visual 58 px @1×/2×/3× jauh lebih tajam (kontur tegas, tanpa halo). Tindak lanjut A1b (minor): (1) partikel orbit kini diam+berdenyut, gerak mengitari hilang (SMIL dibuang) → kembalikan via offset-path/rotasi grup; (2) pegas lompat/celebrate hilang karena semua scale() dibuang → ganti rotasi anggota+overshoot kecil; (3) bandingkan glow visor/mata hero dengan versi lama (semua filter dibuang termasuk hero); (4) kontras tepi mini #7a9ec9 vs putih ≈2,7:1 (<3:1) → gelapkan sedikit. Belum deploy ke main |
 | 17 Okt 10.15 | Antigravity | A1b diserahkan (`antigravity/A1b-denti-poles`, worktree sendiri ✔) | ✔ DITERIMA, cherry-pick ke `console` (lokal; belum push agar build Vercel tak berulang). Keempat catatan Ketua dikerjakan: orbit `offset-path`, pegas celebrate tanpa scale() badan, glow radial hero/standar (visual: pendaran visor kembali tanpa filter), tepi mini 4,30:1. 18 tes + lint hijau (Ketua), 549 tes/build/typecheck (laporan A1b). A4 (mutu otomatis) worktree dibuat, belum ada commit |
 | 17 Okt 10.15 | GPT | Worktree `gpt-g1-g6` (Codex) dibuat 10.14 dari prompt tunggal | 🟦 Baru mulai: belum ada berkas baru di `hasil-gpt/` (hanya G1 lama). Git di worktree itu dimiliki akun `CodexSandboxOffline` (jalankan `git -c safe.directory=… ` untuk membaca). Cabang lama `gpt/denti-latih` sudah ada di `console` |
+| 17 Okt 11.10 | GPT | G1–G6 diserahkan (cabang `gpt/g1-g6-paket`, 7 commit, 10.21–10.51; 158 berkas, hanya `docs/tim/`) | ✔ DITERIMA & digabung ke `console`. Verifikasi Ketua independen: cakupan diff bersih (0 berkas di luar docs/tim); 16 JSON terurai; 18 SVG valid XML, viewBox benar, mini 0 filter/0 gradien/stroke 13, standar 1 gradien, hero 3; kontras G1 (6 pasangan) & G2 (42 dari 58 terselesaikan) dihitung ulang = sama; FAQ G5 jujur (ISO belum, MFA belum dipaksa, offsite belum); label DRAF ada di dokumen G4. **G6 diintegrasikan ke harness Ketua: selftest 195/195, uji negatif 155/156 skenario-tuntut-alat terdeteksi** (klaim GPT 150/150 & 119/119 terbukti). Catatan: tiap SVG ±135 KB karena 100 KB CSS snapshot tertanam → aset = RUJUKAN, bukan untuk disalin ke produksi (perlu A1c: ambil defs/rig+material teal). Alis `sorry` hero tampak balok gelap (artefak kecil). Harga G5 (Rp 1,49/2,99/6,49/14,9 jt) belum diselaraskan dengan tabel `platform.plans` & belum disahkan pemilik |
 | — | Pemilik | T1 (kunci Claude), T4 (SMTP), T5 (storage offsite) | Menunggu tindakan pemilik |
 
 > **Instruksi perbaikan untuk Antigravity (sekali):** (1) di folder utama pastikan tak ada perubahan tak ter-commit milik Anda (`git status`); jika ada, `git add -A && git commit -m "wip(A1): …"` dulu.
