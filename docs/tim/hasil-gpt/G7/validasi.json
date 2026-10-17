@@ -1,0 +1,33 @@
+{
+  "status": "lulus",
+  "commit_sumber": "df7f178c3ac8a9711f9a290e029fcfc5c14c9008",
+  "artikel": 25,
+  "langkah": 130,
+  "rujukan_langkah": 360,
+  "komponen_berhash": 41,
+  "tautan_lokal": 103,
+  "artikel_per_peran": {
+    "admin": 15,
+    "dokter": 11,
+    "resepsionis": 13
+  },
+  "pemeriksaan": [
+    "indeks JSON dan schema",
+    "slug unik dan artikel tepat sesuai indeks",
+    "judul, peran dan bagian wajib",
+    "130 langkah berurutan dan catatan kaki",
+    "teks langkah sama dengan manifest",
+    "setiap langkah memiliki rujukan komponen",
+    "baris dan penanda sumber cocok",
+    "SHA-256 komponen cocok",
+    "sumber sama dengan commit tercatat",
+    "tautan Markdown lokal ada",
+    "UTF-8 tanpa karakter pengganti",
+    "glosarium dan serah-terima tersedia"
+  ],
+  "batasan": [
+    "Pembacaan kode; belum uji klik runtime, axe, atau backend produksi.",
+    "Validasi rujukan bukan pembuktian otomatis ketepatan makna.",
+    "Lint/typecheck/test/build aplikasi tidak dijalankan untuk paket dokumentasi ini."
+  ]
+}
