@@ -34,10 +34,16 @@ env:
   VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
 
 jobs:
-  e2e-visual-a11y:
-    name: Playwright E2E, Visual & Axe-Core
+  # Dijalankan MANUAL (Actions → Mutu Otomatis → Run workflow → centang generate_linux_baselines):
+  # membuat baseline visual *-linux.png di runner Linux lalu meng-commit-nya ke cabang yang dipilih.
+  # Satu-satunya job dengan izin tulis; tidak berjalan pada push/PR.
+  baseline-linux:
+    name: Buat & commit baseline visual Linux
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_linux_baselines == true }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
     steps:
       - name: Checkout repositori
         uses: actions/checkout@v4
@@ -55,9 +61,39 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: apps/clinic
 
-      - name: Buat baseline *-linux.png (hanya bila generate_linux_baselines diaktifkan)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_linux_baselines == true }}
+      - name: Buat baseline *-linux.png
         run: npm run test:e2e:update-snapshots
+        working-directory: apps/clinic
+
+      - name: Commit baseline Linux
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/clinic/tests/e2e/__screenshots__/*-linux.png
+          if git diff --cached --quiet; then echo "Tidak ada baseline baru."; exit 0; fi
+          git commit -m "test(e2e): baseline visual Linux dari CI"
+          git push
+
+  e2e-visual-a11y:
+    name: Playwright E2E, Visual & Axe-Core
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.generate_linux_baselines == true) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Pasang browser Chromium untuk Playwright
+        run: npx playwright install --with-deps chromium
         working-directory: apps/clinic
 
       - name: Jalankan suite E2E, regresi visual, dan audit axe-core
@@ -96,5 +132,8 @@ jobs:
         run: npx vite build --mode desktop --outDir dist-e2e
         working-directory: apps/clinic
 
+      # Dijalankan dari apps/clinic: startServerCommand memanggil `npm run preview` milik workspace klinik
+      # (run pertama gagal "Missing script: preview" karena dijalankan dari akar repo).
       - name: Jalankan Lighthouse CI
-        run: npx @lhci/cli@0.14.0 autorun --config=apps/clinic/lighthouserc.cjs
+        run: npx @lhci/cli@0.14.0 autorun --config=lighthouserc.cjs
+        working-directory: apps/clinic
