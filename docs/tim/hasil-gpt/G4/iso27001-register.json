@@ -1,0 +1,746 @@
+[
+  {
+    "id": "5.1",
+    "tema": "Organisasi",
+    "labelTim": "Kebijakan disahkan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.2",
+    "tema": "Organisasi",
+    "labelTim": "Penanggung jawab",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.3",
+    "tema": "Organisasi",
+    "labelTim": "Pemisahan tugas",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.4",
+    "tema": "Organisasi",
+    "labelTim": "Akuntabilitas manajemen",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.5",
+    "tema": "Organisasi",
+    "labelTim": "Hubungan otoritas",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.6",
+    "tema": "Organisasi",
+    "labelTim": "Komunitas keamanan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.7",
+    "tema": "Organisasi",
+    "labelTim": "Intelijen ancaman",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.8",
+    "tema": "Organisasi",
+    "labelTim": "Keamanan proyek",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.9",
+    "tema": "Organisasi",
+    "labelTim": "Daftar aset",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.10",
+    "tema": "Organisasi",
+    "labelTim": "Pemakaian aset",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.11",
+    "tema": "Organisasi",
+    "labelTim": "Pengembalian aset",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.12",
+    "tema": "Organisasi",
+    "labelTim": "Klasifikasi data",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.13",
+    "tema": "Organisasi",
+    "labelTim": "Label data",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.14",
+    "tema": "Organisasi",
+    "labelTim": "Pengiriman informasi",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.15",
+    "tema": "Organisasi",
+    "labelTim": "Aturan akses",
+    "status": "Sebagian",
+    "bukti": "E01/E02",
+    "tindakan": "Uji hak berkala"
+  },
+  {
+    "id": "5.16",
+    "tema": "Organisasi",
+    "labelTim": "Siklus identitas",
+    "status": "Sebagian",
+    "bukti": "E03/E12",
+    "tindakan": "Joiner/mover/leaver terdokumentasi"
+  },
+  {
+    "id": "5.17",
+    "tema": "Organisasi",
+    "labelTim": "Informasi autentikasi",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.18",
+    "tema": "Organisasi",
+    "labelTim": "Tinjauan hak",
+    "status": "Sebagian",
+    "bukti": "E02",
+    "tindakan": "Persetujuan pemilik klinik"
+  },
+  {
+    "id": "5.19",
+    "tema": "Organisasi",
+    "labelTim": "Risiko pemasok",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.20",
+    "tema": "Organisasi",
+    "labelTim": "Kontrak pemasok",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.21",
+    "tema": "Organisasi",
+    "labelTim": "Rantai pasok TIK",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.22",
+    "tema": "Organisasi",
+    "labelTim": "Pemantauan pemasok",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.23",
+    "tema": "Organisasi",
+    "labelTim": "Layanan cloud",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.24",
+    "tema": "Organisasi",
+    "labelTim": "Persiapan insiden",
+    "status": "Sebagian",
+    "bukti": "respons-insiden.md draf",
+    "tindakan": "Latihan dan kontak"
+  },
+  {
+    "id": "5.25",
+    "tema": "Organisasi",
+    "labelTim": "Triase peristiwa",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.26",
+    "tema": "Organisasi",
+    "labelTim": "Penanganan insiden",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.27",
+    "tema": "Organisasi",
+    "labelTim": "Pelajaran insiden",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.28",
+    "tema": "Organisasi",
+    "labelTim": "Barang bukti",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.29",
+    "tema": "Organisasi",
+    "labelTim": "Keamanan saat gangguan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.30",
+    "tema": "Organisasi",
+    "labelTim": "Kesiapan TIK pulih",
+    "status": "Sebagian",
+    "bukti": "E05/E06",
+    "tindakan": "Offsite dan restore terukur"
+  },
+  {
+    "id": "5.31",
+    "tema": "Organisasi",
+    "labelTim": "Kewajiban hukum",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.32",
+    "tema": "Organisasi",
+    "labelTim": "Hak kekayaan intelektual",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.33",
+    "tema": "Organisasi",
+    "labelTim": "Perlindungan arsip",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.34",
+    "tema": "Organisasi",
+    "labelTim": "Privasi",
+    "status": "Sebagian",
+    "bukti": "kepatuhan-uu-pdp.md draf",
+    "tindakan": "DPIA dan proses hak"
+  },
+  {
+    "id": "5.35",
+    "tema": "Organisasi",
+    "labelTim": "Tinjauan independen",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.36",
+    "tema": "Organisasi",
+    "labelTim": "Kepatuhan kebijakan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "5.37",
+    "tema": "Organisasi",
+    "labelTim": "Prosedur operasional",
+    "status": "Sebagian",
+    "bukti": "E05/E08",
+    "tindakan": "Sahkan dan latihan runbook"
+  },
+  {
+    "id": "6.1",
+    "tema": "Personel",
+    "labelTim": "Penyaringan personel",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "6.2",
+    "tema": "Personel",
+    "labelTim": "Syarat hubungan kerja",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "6.3",
+    "tema": "Personel",
+    "labelTim": "Pelatihan keamanan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "6.4",
+    "tema": "Personel",
+    "labelTim": "Proses disiplin",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "6.5",
+    "tema": "Personel",
+    "labelTim": "Perubahan/akhir hubungan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "6.6",
+    "tema": "Personel",
+    "labelTim": "Kerahasiaan personel",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "6.7",
+    "tema": "Personel",
+    "labelTim": "Kerja jarak jauh",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "6.8",
+    "tema": "Personel",
+    "labelTim": "Laporan peristiwa",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.1",
+    "tema": "Fisik",
+    "labelTim": "Batas area fisik",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.2",
+    "tema": "Fisik",
+    "labelTim": "Masuk area",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.3",
+    "tema": "Fisik",
+    "labelTim": "Ruang aman",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.4",
+    "tema": "Fisik",
+    "labelTim": "Pemantauan fisik",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.5",
+    "tema": "Fisik",
+    "labelTim": "Ancaman lingkungan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.6",
+    "tema": "Fisik",
+    "labelTim": "Kerja di area aman",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.7",
+    "tema": "Fisik",
+    "labelTim": "Meja/layar bersih",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.8",
+    "tema": "Fisik",
+    "labelTim": "Penempatan perangkat",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.9",
+    "tema": "Fisik",
+    "labelTim": "Aset di luar lokasi",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.10",
+    "tema": "Fisik",
+    "labelTim": "Media penyimpanan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.11",
+    "tema": "Fisik",
+    "labelTim": "Utilitas pendukung",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.12",
+    "tema": "Fisik",
+    "labelTim": "Perlindungan kabel",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.13",
+    "tema": "Fisik",
+    "labelTim": "Perawatan perangkat",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "7.14",
+    "tema": "Fisik",
+    "labelTim": "Pembuangan perangkat",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.1",
+    "tema": "Teknologi",
+    "labelTim": "Perangkat pengguna",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.2",
+    "tema": "Teknologi",
+    "labelTim": "Hak istimewa",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.3",
+    "tema": "Teknologi",
+    "labelTim": "Pembatasan informasi",
+    "status": "Ada pada kode",
+    "bukti": "E01/E02",
+    "tindakan": "Regresi lintas tenant"
+  },
+  {
+    "id": "8.4",
+    "tema": "Teknologi",
+    "labelTim": "Akses kode sumber",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.5",
+    "tema": "Teknologi",
+    "labelTim": "Autentikasi aman",
+    "status": "Sebagian",
+    "bukti": "E03/E12",
+    "tindakan": "AAL2 klinik dan pemulihan"
+  },
+  {
+    "id": "8.6",
+    "tema": "Teknologi",
+    "labelTim": "Kapasitas",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.7",
+    "tema": "Teknologi",
+    "labelTim": "Malware",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.8",
+    "tema": "Teknologi",
+    "labelTim": "Kerentanan teknis",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.9",
+    "tema": "Teknologi",
+    "labelTim": "Konfigurasi",
+    "status": "Sebagian",
+    "bukti": "E08/E09",
+    "tindakan": "Audit drift runtime"
+  },
+  {
+    "id": "8.10",
+    "tema": "Teknologi",
+    "labelTim": "Penghapusan informasi",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.11",
+    "tema": "Teknologi",
+    "labelTim": "Penyamaran data",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.12",
+    "tema": "Teknologi",
+    "labelTim": "Pencegahan kebocoran",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.13",
+    "tema": "Teknologi",
+    "labelTim": "Cadangan informasi",
+    "status": "Sebagian",
+    "bukti": "E05/E06",
+    "tindakan": "Offsite + restore"
+  },
+  {
+    "id": "8.14",
+    "tema": "Teknologi",
+    "labelTim": "Redundansi",
+    "status": "Belum",
+    "bukti": "VPS tunggal",
+    "tindakan": "Rencana redundansi"
+  },
+  {
+    "id": "8.15",
+    "tema": "Teknologi",
+    "labelTim": "Pencatatan log",
+    "status": "Sebagian",
+    "bukti": "E04",
+    "tindakan": "Jangkar eksternal dan review"
+  },
+  {
+    "id": "8.16",
+    "tema": "Teknologi",
+    "labelTim": "Pemantauan aktivitas",
+    "status": "Sebagian",
+    "bukti": "E07",
+    "tindakan": "Alert luar host"
+  },
+  {
+    "id": "8.17",
+    "tema": "Teknologi",
+    "labelTim": "Sinkronisasi waktu",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.18",
+    "tema": "Teknologi",
+    "labelTim": "Utilitas berhak tinggi",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.19",
+    "tema": "Teknologi",
+    "labelTim": "Instalasi perangkat lunak",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.20",
+    "tema": "Teknologi",
+    "labelTim": "Keamanan jaringan",
+    "status": "Sebagian",
+    "bukti": "E08/E09",
+    "tindakan": "Uji rate-limit gateway"
+  },
+  {
+    "id": "8.21",
+    "tema": "Teknologi",
+    "labelTim": "Layanan jaringan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.22",
+    "tema": "Teknologi",
+    "labelTim": "Segmentasi",
+    "status": "Sebagian",
+    "bukti": "E08",
+    "tindakan": "Review jaringan Docker"
+  },
+  {
+    "id": "8.23",
+    "tema": "Teknologi",
+    "labelTim": "Penyaringan web",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.24",
+    "tema": "Teknologi",
+    "labelTim": "Kriptografi",
+    "status": "Sebagian",
+    "bukti": "E05 dan enkripsi menurut 00",
+    "tindakan": "Inventaris/rotasi kunci"
+  },
+  {
+    "id": "8.25",
+    "tema": "Teknologi",
+    "labelTim": "Siklus pengembangan",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.26",
+    "tema": "Teknologi",
+    "labelTim": "Kebutuhan keamanan aplikasi",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.27",
+    "tema": "Teknologi",
+    "labelTim": "Arsitektur aman",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.28",
+    "tema": "Teknologi",
+    "labelTim": "Pengodean aman",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.29",
+    "tema": "Teknologi",
+    "labelTim": "Uji keamanan",
+    "status": "Sebagian",
+    "bukti": "tes repo/CI",
+    "tindakan": "Pentest independen"
+  },
+  {
+    "id": "8.30",
+    "tema": "Teknologi",
+    "labelTim": "Pengembangan pihak ketiga",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.31",
+    "tema": "Teknologi",
+    "labelTim": "Pemisahan lingkungan",
+    "status": "Sebagian",
+    "bukti": "worktree dan lingkungan uji",
+    "tindakan": "Bukti pemisahan akses runtime"
+  },
+  {
+    "id": "8.32",
+    "tema": "Teknologi",
+    "labelTim": "Manajemen perubahan",
+    "status": "Sebagian",
+    "bukti": "03 aturan tim",
+    "tindakan": "Bukti approval rilis"
+  },
+  {
+    "id": "8.33",
+    "tema": "Teknologi",
+    "labelTim": "Informasi uji",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  },
+  {
+    "id": "8.34",
+    "tema": "Teknologi",
+    "labelTim": "Keamanan saat audit",
+    "status": "Belum bukti memadai",
+    "bukti": "Register G4 / belum bukti pelaksanaan",
+    "tindakan": "Tetapkan pemilik, bukti dan uji kontrol"
+  }
+]

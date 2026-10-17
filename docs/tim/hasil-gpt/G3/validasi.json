@@ -1,0 +1,162 @@
+[
+  {
+    "screen": "login",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Input",
+      "Tombol",
+      "Kartu",
+      "Error State",
+      "Dialog"
+    ]
+  },
+  {
+    "screen": "dashboard-admin",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Kartu KPI",
+      "Bagan Keuangan",
+      "Date Picker",
+      "Avatar Denti",
+      "Kartu",
+      "Skeleton"
+    ]
+  },
+  {
+    "screen": "asisten-ai",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Avatar Denti",
+      "Kartu Usulan Agen",
+      "Input",
+      "Tombol",
+      "Dialog",
+      "Banner Offline dan Sesi"
+    ]
+  },
+  {
+    "screen": "pasien",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Input",
+      "Tabel Data",
+      "Pagination",
+      "Drawer",
+      "Tombol",
+      "Empty State"
+    ]
+  },
+  {
+    "screen": "rekam-medis",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Tab",
+      "Input",
+      "Dialog",
+      "Tombol",
+      "Badge",
+      "Banner Offline dan Sesi"
+    ]
+  },
+  {
+    "screen": "jadwal",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Date Picker",
+      "Select",
+      "Tabel Data",
+      "Drawer",
+      "Badge",
+      "Dialog"
+    ]
+  },
+  {
+    "screen": "pembayaran",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Tabel Data",
+      "Input",
+      "Select",
+      "Kartu",
+      "Dialog",
+      "Tombol",
+      "Toast"
+    ]
+  },
+  {
+    "screen": "biaya-stok",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Tab",
+      "Select",
+      "Tabel Data",
+      "Input",
+      "Drawer",
+      "Dialog",
+      "Badge"
+    ]
+  },
+  {
+    "screen": "antrean-tv",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Kartu",
+      "Badge",
+      "Avatar Denti",
+      "Banner Offline dan Sesi"
+    ]
+  },
+  {
+    "screen": "pengaturan-keamanan",
+    "sections": 9,
+    "wireframes": [
+      "1440",
+      "375"
+    ],
+    "components": [
+      "Tab",
+      "Input",
+      "Dialog",
+      "Tabel Data",
+      "Pilihan",
+      "Tombol",
+      "Badge"
+    ]
+  }
+]

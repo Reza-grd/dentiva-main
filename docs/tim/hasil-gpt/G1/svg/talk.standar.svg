@@ -1,0 +1,1749 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" class="denti" data-state="talk" data-lod="standar" data-kid="false" role="img">
+  <title>Denti — talk</title>
+  <style>/* ─────────────────────────────────────────────────────────────
+   DENTI v3 — kerangka animasi (rig). Pasangan dari dentiSvg.js.
+   &lt;svg class="denti" data-state="..." data-kid="true|false"&gt;
+
+   Tingkat 1 · dasar (selalu): melayang, kedip, lampu dada, sirip, partikel orbit (SMIL)
+   Tingkat 2 · ekspresi     : idle, happy, wave, talk, think, sleep
+   Tingkat 3 · rangkaian    : call (6 dtk), celebrate (2,4 dtk), wake (6 dtk)
+   Aksi tambahan            : brush, tooth, dance, laugh, love, shy, sorry, scan, point, nod, clap,
+                              wink, cheer, jump, bow, shrug, cool, sigh, idea, confused, peek, excited, salute (v4),
+                              spin (2 dtk), surprise (2 dtk), thanks (3,2 dtk)
+   Pengubah                 : data-kid="true" (mode anak)
+   Sendi memakai koordinat viewBox (transform-box: view-box).
+   ───────────────────────────────────────────────────────────── */
+.denti { overflow: visible; display: block; }
+.denti * { transform-box: view-box; }
+
+/* Sendi */
+.denti .d-root    { transform-origin: 200px 360px; }
+.denti .d-head    { transform-origin: 200px 262px; }
+.denti .d-arm-l   { transform-origin: 90px 322px; }
+.denti .d-arm-r   { transform-origin: 310px 322px; }
+.denti .d-fin-l   { transform-origin: 64px 128px; }
+.denti .d-fin-r   { transform-origin: 336px 128px; }
+.denti .d-shadow  { transform-origin: 200px 464px; }
+.denti .d-chest   { transform-origin: 200px 336px; }
+.denti .d-eyes    { transform-origin: 200px 160px; }
+.denti .d-eye, .denti .d-mouth-talk, .denti .d-star, .denti .d-heart, .denti .d-spark, .denti .d-bdot, .denti .d-z, .denti .d-wave,
+.denti .d-eyeheart, .denti .d-bub, .denti .d-note, .denti .d-ha, .denti .d-exclaim, .denti .d-tooth-star, .denti .d-arrow
+  { transform-box: fill-box; transform-origin: center; }
+.denti .d-tooth       { transform-origin: 200px 6px; }
+.denti .d-chest-heart { transform-origin: 200px 334px; }
+
+/* Tampilan bawaan: mata bulat + senyum */
+.denti .d-eye-happy, .denti .d-eye-sleep, .denti .d-eye-wow,
+.denti .d-mouth-talk, .denti .d-mouth-o, .denti .d-cheeks,
+.denti .d-bubble, .denti .d-waves, .denti .d-stars, .denti .d-hearts, .denti .d-zzz,
+.denti .d-eye-heart, .denti .d-lids, .denti .d-mouth-sad, .denti .d-scan, .denti .d-brush, .denti .d-foam,
+.denti .d-tooth, .denti .d-chest-heart, .denti .d-notes, .denti .d-exclaim, .denti .d-haha, .denti .d-sweat,
+.denti .d-arrows { opacity: 0; }
+.denti .d-eye-open, .denti .d-eye-happy, .denti .d-eye-sleep, .denti .d-eye-wow, .denti .d-mouth-smile,
+.denti .d-mouth-talk, .denti .d-mouth-o, .denti .d-bubble, .denti .d-waves, .denti .d-stars,
+.denti .d-hearts, .denti .d-zzz, .denti .d-cheeks, .denti .d-eye-heart, .denti .d-lids, .denti .d-mouth-sad,
+.denti .d-brush, .denti .d-foam, .denti .d-tooth, .denti .d-chest-heart, .denti .d-notes, .denti .d-haha,
+.denti .d-sweat, .denti .d-arrows { transition: opacity .35s ease; }
+
+/* ═════ TINGKAT 1 · gerak dasar ═════ */
+.denti .d-root       { animation: d-float 4s ease-in-out infinite; }
+.denti .d-shadow     { animation: d-shadow 4s ease-in-out infinite; }
+.denti .d-eye        { animation: d-blink var(--blink, 5.4s) ease-in-out var(--blink-delay, 0s) infinite; }
+.denti .d-eye-r      { animation-delay: calc(var(--blink-delay, 0s) + .05s); }
+.denti[data-blink="2"] .d-eye { animation-name: d-blink2; }
+.denti .d-chest-core { animation: d-pulse 3s ease-in-out infinite; }
+.denti .d-brackets   { animation: d-pulse 4.5s ease-in-out infinite; }
+.denti .d-fin-l      { animation: d-fin-l 3.6s ease-in-out infinite; }
+.denti .d-fin-r      { animation: d-fin-r 3.6s ease-in-out infinite; }
+.denti .d-arm-l      { animation: d-arm-idle-l 4s ease-in-out infinite; }
+.denti .d-arm-r      { animation: d-arm-idle-r 4s ease-in-out infinite; }
+.denti .d-head       { animation: d-head-idle 8s ease-in-out infinite; }
+.denti .d-spark      { animation: d-twinkle 3.2s ease-in-out infinite; }
+.denti .d-spark-2    { animation-delay: .8s; }
+.denti .d-spark-3    { animation-delay: 1.6s; }
+.denti .d-spark-4    { animation-delay: 2.4s; }
+
+@keyframes d-float      { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes d-shadow     { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.9); opacity: .7; } }
+@keyframes d-blink      { 0%, 91%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.08); } 97% { transform: scaleY(1); } }
+@keyframes d-blink2     { 0%, 86%, 100% { transform: scaleY(1); } 88% { transform: scaleY(.08); } 90% { transform: scaleY(1); } 93% { transform: scaleY(.08); } 96% { transform: scaleY(1); } }
+
+/* ═════ HIDUP · mengikuti kursor (diisi DentiMascot track/look) ═════ */
+.denti .d-gaze      { transform: translate(calc(var(--look-x, 0) * 9px), calc(var(--look-y, 0) * 6px)); transition: transform .25s ease-out; }
+.denti .d-gaze-soft { transform: translate(calc(var(--look-x, 0) * 4px), calc(var(--look-y, 0) * 3px)); transition: transform .3s ease-out; }
+.denti .d-lean      { transform-origin: 200px 440px; transform: rotate(calc(var(--look-x, 0) * 2.5deg)); transition: transform .6s ease-out; }
+.denti[data-state="sleep"] .d-gaze, .denti[data-state="sleep"] .d-gaze-soft, .denti[data-state="sleep"] .d-lean,
+.denti[data-state="spin"] .d-lean { transform: none; }
+@keyframes d-pulse      { 0%, 100% { opacity: 1; } 50% { opacity: .62; } }
+@keyframes d-fin-l      { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-7deg); } }
+@keyframes d-fin-r      { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(7deg); } }
+@keyframes d-arm-idle-l { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(6deg); } }
+@keyframes d-arm-idle-r { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-6deg); } }
+@keyframes d-head-idle  { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-3deg); } 70% { transform: rotate(3deg); } }
+@keyframes d-twinkle    { 0%, 100% { opacity: .15; transform: scale(.6); } 50% { opacity: 1; transform: scale(1.15); } }
+
+/* ═════ TINGKAT 2 · ekspresi ═════ */
+
+/* HAPPY — senang */
+.denti[data-state="happy"] .d-eye-open { opacity: 0; }
+.denti[data-state="happy"] .d-eye-happy { opacity: 1; }
+.denti[data-state="happy"] .d-root { animation: d-bob 1.6s ease-in-out infinite; }
+.denti[data-state="happy"] .d-head { animation: d-sway 1.6s ease-in-out infinite; }
+@keyframes d-bob  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+@keyframes d-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+
+/* WAVE — menyapa */
+.denti[data-state="wave"] .d-eye-open { opacity: 0; }
+.denti[data-state="wave"] .d-eye-happy { opacity: 1; }
+.denti[data-state="wave"] .d-arm-r { animation: d-wave 1s ease-in-out infinite; }
+.denti[data-state="wave"] .d-head  { animation: d-tilt-r 2s ease-in-out infinite; }
+@keyframes d-wave   { 0%, 100% { transform: rotate(-108deg); } 50% { transform: rotate(-134deg); } }
+@keyframes d-tilt-r { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(7deg); } }
+
+/* TALK — berbicara (gelembung chat) */
+.denti[data-state="talk"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="talk"] .d-mouth-talk { opacity: 1; animation: d-talk .3s ease-in-out infinite alternate; }
+.denti[data-state="talk"] .d-bubble { opacity: 1; }
+.denti[data-state="talk"] .d-bdot { animation: d-hopdot .9s ease-in-out infinite; }
+.denti[data-state="talk"] .d-bdot-2 { animation-delay: .15s; }
+.denti[data-state="talk"] .d-bdot-3 { animation-delay: .3s; }
+.denti[data-state="talk"] .d-visor-rim { animation: d-pulse 1.1s ease-in-out infinite; }
+.denti[data-state="talk"] .d-head { animation: d-nod 1.4s ease-in-out infinite; }
+.denti[data-state="talk"] .d-arm-r { animation: d-explain 2.4s ease-in-out infinite; }
+@keyframes d-talk    { from { transform: scaleY(.35); } to { transform: scaleY(1.15); } }
+@keyframes d-hopdot  { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
+@keyframes d-nod     { 0%, 100% { transform: rotate(0) translateY(0); } 50% { transform: rotate(2deg) translateY(3px); } }
+@keyframes d-explain { 0%, 100% { transform: rotate(-30deg); } 50% { transform: rotate(-52deg); } }
+
+/* THINK — berpikir */
+.denti[data-state="think"] .d-eyes { transform: translate(8px, -7px); transition: transform .45s ease; }
+.denti[data-state="think"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="think"] .d-mouth-o { opacity: 1; transform: scale(.7); transform-box: fill-box; transform-origin: center; }
+.denti[data-state="think"] .d-bubble { opacity: 1; }
+.denti[data-state="think"] .d-bdot { animation: d-pulse 1.2s ease-in-out infinite; }
+.denti[data-state="think"] .d-bdot-2 { animation-delay: .2s; }
+.denti[data-state="think"] .d-bdot-3 { animation-delay: .4s; }
+.denti[data-state="think"] .d-head  { animation: d-tilt-l 3s ease-in-out infinite; }
+.denti[data-state="think"] .d-arm-l { animation: d-chin 3s ease-in-out infinite; }
+@keyframes d-tilt-l { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(-9deg); } }
+@keyframes d-chin   { 0%, 100% { transform: rotate(-146deg); } 50% { transform: rotate(-140deg); } }
+
+/* SLEEP — tidur */
+.denti[data-state="sleep"] .d-eye-open { opacity: 0; }
+.denti[data-state="sleep"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="sleep"] .d-zzz { opacity: 1; }
+.denti[data-state="sleep"] .d-z { animation: d-zfloat 3s ease-in-out infinite; }
+.denti[data-state="sleep"] .d-z-2 { animation-delay: 1s; }
+.denti[data-state="sleep"] .d-z-3 { animation-delay: 2s; }
+.denti[data-state="sleep"] .d-root, .denti[data-state="sleep"] .d-shadow { animation-duration: 7s; }
+.denti[data-state="sleep"] .d-head  { animation: d-doze 7s ease-in-out infinite; }
+.denti[data-state="sleep"] .d-arm-l { animation: none; transform: rotate(-14deg); }
+.denti[data-state="sleep"] .d-arm-r { animation: none; transform: rotate(14deg); }
+.denti[data-state="sleep"] .d-fin-l { animation: none; transform: rotate(14deg); }
+.denti[data-state="sleep"] .d-fin-r { animation: none; transform: rotate(-14deg); }
+.denti[data-state="sleep"] .d-chest-core, .denti[data-state="sleep"] .d-brackets { animation: none; opacity: .35; }
+@keyframes d-zfloat { 0% { opacity: 0; transform: translate(0, 8px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -14px); } }
+@keyframes d-doze   { 0%, 100% { transform: rotate(4deg) translateY(5px); } 50% { transform: rotate(6deg) translateY(8px); } }
+
+/* ═════ TINGKAT 3 · rangkaian ═════ */
+
+/* CALL — memanggil pasien (6 dtk): maju → menunjuk + gelombang suara → kembali */
+.denti[data-state="call"] .d-eye-open { opacity: 0; }
+.denti[data-state="call"] .d-eye-happy { opacity: 1; }
+.denti[data-state="call"] .d-root { animation: d-call-root 6s cubic-bezier(.3,.1,.3,1) infinite; }
+.denti[data-state="call"] .d-arm-r { animation: d-call-arm 6s ease-in-out infinite; }
+.denti[data-state="call"] .d-head { animation: d-call-head 6s ease-in-out infinite; }
+.denti[data-state="call"] .d-waves { animation: d-call-waves 6s linear infinite; }
+.denti[data-state="call"] .d-wave { animation: d-wave-out 1.2s ease-out infinite; }
+.denti[data-state="call"] .d-wave-2 { animation-delay: .2s; }
+.denti[data-state="call"] .d-wave-3 { animation-delay: .4s; }
+.denti[data-state="call"] .d-chest-core { animation: d-flash 6s linear infinite; }
+.denti[data-state="call"] .d-brackets { animation: d-flash 6s linear infinite; }
+@keyframes d-call-root  { 0% { transform: none; } 10%, 82% { transform: translateY(-14px); } 46% { transform: translateY(-20px); } 100% { transform: none; } }
+@keyframes d-call-arm   { 0%, 6% { transform: rotate(0); } 14%, 78% { transform: rotate(-66deg); } 30%, 54% { transform: rotate(-74deg); } 42%, 66% { transform: rotate(-64deg); } 90%, 100% { transform: rotate(0); } }
+@keyframes d-call-head  { 0%, 8% { transform: rotate(0); } 18%, 38%, 58%, 78% { transform: rotate(3deg) translateY(3px); } 28%, 48%, 68% { transform: rotate(0); } 100% { transform: rotate(0); } }
+@keyframes d-call-waves { 0%, 10% { opacity: 0; } 14%, 80% { opacity: 1; } 88%, 100% { opacity: 0; } }
+@keyframes d-wave-out   { 0% { opacity: 0; transform: translateX(-4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateX(6px); } }
+@keyframes d-flash      { 0%, 8% { opacity: .65; } 12% { opacity: 1; } 18% { opacity: .65; } 32% { opacity: 1; } 38%, 100% { opacity: .88; } }
+
+/* CELEBRATE — merayakan (2,4 dtk): melompat, dua tangan ke atas, bintang */
+.denti[data-state="celebrate"] .d-eye-open { opacity: 0; }
+.denti[data-state="celebrate"] .d-eye-happy { opacity: 1; }
+.denti[data-state="celebrate"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="celebrate"] .d-mouth-talk { opacity: 1; transform: scaleY(1.1); }
+.denti[data-state="celebrate"] .d-stars { opacity: 1; }
+.denti[data-state="celebrate"] .d-star { animation: d-burst 1.2s ease-out infinite; }
+.denti[data-state="celebrate"] .d-star-2 { animation-delay: .25s; }
+.denti[data-state="celebrate"] .d-star-3 { animation-delay: .5s; }
+.denti[data-state="celebrate"] .d-star-4 { animation-delay: .75s; }
+.denti[data-state="celebrate"] .d-star-5 { animation-delay: 1s; }
+.denti[data-state="celebrate"] .d-root { animation: d-jump 1.2s cubic-bezier(.3,0,.3,1) infinite; }
+.denti[data-state="celebrate"] .d-shadow { animation: d-jump-shadow 1.2s cubic-bezier(.3,0,.3,1) infinite; }
+.denti[data-state="celebrate"] .d-arm-l { animation: d-cheer-l .6s ease-in-out infinite alternate; }
+.denti[data-state="celebrate"] .d-arm-r { animation: d-cheer-r .6s ease-in-out infinite alternate; }
+.denti[data-state="celebrate"] .d-head { animation: d-sway .6s ease-in-out infinite alternate; }
+.denti[data-state="celebrate"] .d-chest-core { animation: d-pulse .6s ease-in-out infinite; }
+@keyframes d-burst { 0% { opacity: 0; transform: rotate(0); } 35% { opacity: 1; transform: rotate(30deg); } 100% { opacity: 0; transform: rotate(60deg); } }
+@keyframes d-jump  { 0%, 100% { transform: translateY(0); } 15% { transform: translateY(4px); } 45% { transform: translateY(-40px); } 75% { transform: translateY(-4px); } }
+@keyframes d-jump-shadow { 0%, 100% { opacity: 1; } 45% { opacity: .45; } }
+@keyframes d-cheer-l { from { transform: rotate(118deg); } to { transform: rotate(140deg); } }
+@keyframes d-cheer-r { from { transform: rotate(-118deg); } to { transform: rotate(-140deg); } }
+
+/* WAKE — bangun (6 dtk): tidur → terkejut → meregang → melambai */
+.denti[data-state="wake"] .d-eye-open  { opacity: 0; animation: d-wk-eye-open 6s linear infinite; }
+.denti[data-state="wake"] .d-eye-sleep { animation: d-wk-eye-sleep 6s linear infinite; }
+.denti[data-state="wake"] .d-eye-wow   { animation: d-wk-eye-wow 6s linear infinite; }
+.denti[data-state="wake"] .d-eye-happy { animation: d-wk-eye-happy 6s linear infinite; }
+.denti[data-state="wake"] .d-eye       { animation: none; }
+.denti[data-state="wake"] .d-zzz       { animation: d-wk-zzz 6s linear infinite; }
+.denti[data-state="wake"] .d-z         { animation: d-zfloat 2s ease-in-out infinite; }
+.denti[data-state="wake"] .d-z-2       { animation-delay: .7s; }
+.denti[data-state="wake"] .d-root      { animation: d-wk-root 6s ease-in-out infinite; }
+.denti[data-state="wake"] .d-head      { animation: d-wk-head 6s ease-in-out infinite; }
+.denti[data-state="wake"] .d-arm-l     { animation: d-wk-arm-l 6s ease-in-out infinite; }
+.denti[data-state="wake"] .d-arm-r     { animation: d-wk-arm-r 6s ease-in-out infinite; }
+.denti[data-state="wake"] .d-chest-core { animation: d-wk-chest 6s linear infinite; }
+@keyframes d-wk-eye-sleep { 0%, 30% { opacity: 1; } 32%, 100% { opacity: 0; } }
+@keyframes d-wk-eye-wow   { 0%, 31% { opacity: 0; } 33%, 42% { opacity: 1; } 44%, 100% { opacity: 0; } }
+@keyframes d-wk-eye-open  { 0%, 43% { opacity: 0; } 45%, 56% { opacity: 1; } 58%, 100% { opacity: 0; } }
+@keyframes d-wk-eye-happy { 0%, 57% { opacity: 0; } 59%, 96% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes d-wk-zzz       { 0%, 26% { opacity: 1; } 30%, 100% { opacity: 0; } }
+@keyframes d-wk-root      { 0%, 30% { transform: translateY(8px); } 34% { transform: translateY(-26px); } 40% { transform: translateY(-6px); } 48% { transform: translateY(-14px); } 58%, 100% { transform: translateY(-6px); } }
+@keyframes d-wk-head      { 0%, 30% { transform: rotate(6deg) translateY(8px); } 34% { transform: rotate(0) translateY(-3px); } 40%, 56% { transform: rotate(0); } 64%, 80% { transform: rotate(5deg); } 72%, 92% { transform: rotate(2deg); } 100% { transform: rotate(6deg) translateY(8px); } }
+@keyframes d-wk-arm-l     { 0%, 30% { transform: rotate(-14deg); } 36% { transform: rotate(20deg); } 44%, 52% { transform: rotate(140deg); } 58%, 96% { transform: rotate(0); } 100% { transform: rotate(-14deg); } }
+@keyframes d-wk-arm-r     { 0%, 30% { transform: rotate(14deg); } 36% { transform: rotate(-20deg); } 44%, 52% { transform: rotate(-140deg); } 60% { transform: rotate(-110deg); } 66% { transform: rotate(-134deg); } 72% { transform: rotate(-110deg); } 78% { transform: rotate(-134deg); } 84% { transform: rotate(-110deg); } 92% { transform: rotate(-20deg); } 100% { transform: rotate(14deg); } }
+@keyframes d-wk-chest     { 0%, 30% { opacity: .3; } 34% { opacity: 1; } 40%, 100% { opacity: .92; } }
+
+/* ═════ AKSI TAMBAHAN ═════
+   brush · tooth · dance · laugh · love · shy · sorry · scan · point (berulang)
+   spin (2 dtk) · surprise (2 dtk) · thanks (3,2 dtk) (rangkaian) */
+
+/* BRUSH — sikat gigi (tips kebersihan) */
+.denti[data-state="brush"] .d-eye-open { opacity: 0; }
+.denti[data-state="brush"] .d-eye-happy { opacity: 1; }
+.denti[data-state="brush"] .d-brush { opacity: 1; animation: d-brush .32s ease-in-out infinite alternate; }
+.denti[data-state="brush"] .d-arm-r { animation: d-brush-arm .32s ease-in-out infinite alternate; }
+.denti[data-state="brush"] .d-foam { opacity: 1; }
+.denti[data-state="brush"] .d-bub { animation: d-pop 1.2s ease-out infinite; }
+.denti[data-state="brush"] .d-bub-2 { animation-delay: .3s; }
+.denti[data-state="brush"] .d-bub-3 { animation-delay: .6s; }
+.denti[data-state="brush"] .d-bub-4 { animation-delay: .9s; }
+.denti[data-state="brush"] .d-head { animation: none; }
+.denti[data-state="brush"] .d-arm-l { animation: d-arm-idle-l 1.28s ease-in-out infinite; }
+@keyframes d-brush     { from { transform: translate(-7px, 6px); } to { transform: translate(7px, -5px); } }
+@keyframes d-brush-arm { from { transform: rotate(153deg); } to { transform: rotate(163deg); } }
+@keyframes d-pop       { 0% { opacity: 0; transform: scale(.3); } 30% { opacity: 1; transform: scale(1); } 80% { opacity: .9; transform: translateY(-8px) scale(1.15); } 100% { opacity: 0; transform: translateY(-12px) scale(1.4); } }
+
+/* TOOTH — "gigi sehat!": gigi berkilau melayang di atas kepala, tangan ta-da */
+.denti[data-state="tooth"] .d-eye-open { opacity: 0; }
+.denti[data-state="tooth"] .d-eye-happy { opacity: 1; }
+.denti[data-state="tooth"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="tooth"] .d-mouth-talk { opacity: 1; transform: scaleY(1.1); }
+.denti[data-state="tooth"] .d-tooth { opacity: 1; animation: d-tooth 2s ease-in-out infinite; }
+.denti[data-state="tooth"] .d-tooth-star { animation: d-twinkle 1.2s ease-in-out infinite; }
+.denti[data-state="tooth"] .d-tooth-star-2 { animation-delay: .6s; }
+.denti[data-state="tooth"] .d-arm-l { animation: d-present-l 2s ease-in-out infinite; }
+.denti[data-state="tooth"] .d-arm-r { animation: d-present-r 2s ease-in-out infinite; }
+.denti[data-state="tooth"] .d-root { animation: d-bob 2s ease-in-out infinite; }
+.denti[data-state="tooth"] .d-chest-core { animation: d-pulse 1s ease-in-out infinite; }
+@keyframes d-tooth     { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-10px) rotate(6deg); } }
+@keyframes d-present-l { 0%, 100% { transform: rotate(118deg); } 50% { transform: rotate(134deg); } }
+@keyframes d-present-r { 0%, 100% { transform: rotate(-118deg); } 50% { transform: rotate(-134deg); } }
+
+/* DANCE — joget dengan not musik */
+.denti[data-state="dance"] .d-eye-open { opacity: 0; }
+.denti[data-state="dance"] .d-eye-happy { opacity: 1; }
+.denti[data-state="dance"] .d-root { animation: d-dance 1.4s ease-in-out infinite; }
+.denti[data-state="dance"] .d-shadow { animation: d-dance-shadow 1.4s ease-in-out infinite; }
+.denti[data-state="dance"] .d-head { animation: d-dance-head 1.4s ease-in-out infinite; }
+.denti[data-state="dance"] .d-arm-l { animation: d-dance-l 1.4s ease-in-out infinite; }
+.denti[data-state="dance"] .d-arm-r { animation: d-dance-r 1.4s ease-in-out infinite; }
+.denti[data-state="dance"] .d-fin-l { animation-duration: .7s; }
+.denti[data-state="dance"] .d-fin-r { animation-duration: .7s; }
+.denti[data-state="dance"] .d-chest-core { animation: d-pulse .7s ease-in-out infinite; }
+.denti[data-state="dance"] .d-notes { opacity: 1; }
+.denti[data-state="dance"] .d-note { animation: d-note-rise 2.1s ease-out infinite; }
+.denti[data-state="dance"] .d-note-2 { animation-delay: .7s; }
+.denti[data-state="dance"] .d-note-3 { animation-delay: 1.4s; }
+@keyframes d-dance        { 0%, 100% { transform: translateX(-12px) rotate(-6deg); } 25%, 75% { transform: translateY(-14px); } 50% { transform: translateX(12px) rotate(6deg); } }
+@keyframes d-dance-shadow { 0%, 100% { transform: translateX(-12px); } 25%, 75% { transform: scale(.88); opacity: .7; } 50% { transform: translateX(12px); } }
+@keyframes d-dance-head   { 0%, 100% { transform: rotate(6deg); } 50% { transform: rotate(-6deg); } }
+@keyframes d-dance-l      { 0%, 100% { transform: rotate(130deg); } 50% { transform: rotate(10deg); } }
+@keyframes d-dance-r      { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(-130deg); } }
+@keyframes d-note-rise    { 0% { opacity: 0; transform: translateY(10px) scale(.7); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -32px) rotate(12deg) scale(1.05); } }
+
+/* LAUGH — tertawa, pegang perut */
+.denti[data-state="laugh"] .d-eye-open { opacity: 0; }
+.denti[data-state="laugh"] .d-eye-happy { opacity: 1; }
+.denti[data-state="laugh"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="laugh"] .d-mouth-talk { opacity: 1; animation: d-talk .18s ease-in-out infinite alternate; }
+.denti[data-state="laugh"] .d-cheeks { opacity: 1; }
+.denti[data-state="laugh"] .d-root { animation: d-laugh .36s ease-in-out infinite alternate; }
+.denti[data-state="laugh"] .d-head { animation: d-laugh-head .36s ease-in-out infinite alternate; }
+.denti[data-state="laugh"] .d-arm-l { animation: d-belly .36s ease-in-out infinite alternate; }
+.denti[data-state="laugh"] .d-arm-r { animation: d-slap .36s ease-in-out infinite alternate; }
+.denti[data-state="laugh"] .d-haha { opacity: 1; }
+.denti[data-state="laugh"] .d-ha { animation: d-ha-pop 1.2s ease-out infinite; }
+.denti[data-state="laugh"] .d-ha-2 { animation-delay: .4s; }
+.denti[data-state="laugh"] .d-ha-3 { animation-delay: .8s; }
+@keyframes d-laugh      { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-6px) rotate(2deg); } }
+@keyframes d-laugh-head { from { transform: rotate(-5deg); } to { transform: rotate(3deg) translateY(-3px); } }
+@keyframes d-belly      { from { transform: rotate(-46deg); } to { transform: rotate(-56deg); } }
+@keyframes d-slap       { from { transform: rotate(-40deg); } to { transform: rotate(-70deg); } }
+@keyframes d-ha-pop     { 0% { opacity: 0; transform: scale(.4); } 25% { opacity: 1; transform: scale(1.15); } 100% { opacity: 0; transform: translateY(-14px) scale(1); } }
+
+/* LOVE — mata hati, dada berdebar, memeluk */
+.denti[data-state="love"] .d-eye-open { opacity: 0; }
+.denti[data-state="love"] .d-eye-heart { opacity: 1; }
+.denti[data-state="love"] .d-eyeheart { animation: d-heartbeat .9s ease-in-out infinite; }
+.denti[data-state="love"] .d-cheeks { opacity: 1; }
+.denti[data-state="love"] .d-chest-heart { opacity: 1; animation: d-heartbeat .9s ease-in-out infinite; }
+.denti[data-state="love"] .d-chest-core { animation: none; opacity: .25; }
+.denti[data-state="love"] .d-hearts { opacity: 1; }
+.denti[data-state="love"] .d-heart { animation: d-heart-rise 2.2s ease-in-out infinite; }
+.denti[data-state="love"] .d-heart-2 { animation-delay: .55s; }
+.denti[data-state="love"] .d-heart-3 { animation-delay: 1.1s; }
+.denti[data-state="love"] .d-heart-4 { animation-delay: 1.65s; }
+.denti[data-state="love"] .d-arm-l { animation: d-hug-l 2.6s ease-in-out infinite; }
+.denti[data-state="love"] .d-arm-r { animation: d-hug-r 2.6s ease-in-out infinite; }
+.denti[data-state="love"] .d-head { animation: d-sway 2.6s ease-in-out infinite; }
+@keyframes d-heartbeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(.96); } 45% { transform: scale(1.1); } }
+@keyframes d-hug-l     { 0%, 100% { transform: rotate(-48deg); } 50% { transform: rotate(-58deg); } }
+@keyframes d-hug-r     { 0%, 100% { transform: rotate(48deg); } 50% { transform: rotate(58deg); } }
+
+/* SHY — malu-malu, tangan menutup mulut */
+.denti[data-state="shy"] .d-eye-open { opacity: 0; }
+.denti[data-state="shy"] .d-eye-happy { opacity: 1; }
+.denti[data-state="shy"] .d-eyes { transform: translate(-5px, 6px); transition: transform .45s ease; }
+.denti[data-state="shy"] .d-cheeks { opacity: 1; animation: d-pulse 1.6s ease-in-out infinite; }
+.denti[data-state="shy"] .d-arm-l { animation: d-shy-l 2.4s ease-in-out infinite; }
+.denti[data-state="shy"] .d-arm-r { animation: d-shy-r 2.4s ease-in-out infinite; }
+.denti[data-state="shy"] .d-head { animation: d-shy-head 2.4s ease-in-out infinite; }
+.denti[data-state="shy"] .d-root { animation: d-shy-root 2.4s ease-in-out infinite; }
+.denti[data-state="shy"] .d-fin-l { animation: none; transform: rotate(16deg); }
+.denti[data-state="shy"] .d-fin-r { animation: none; transform: rotate(-16deg); }
+@keyframes d-shy-l    { 0%, 100% { transform: rotate(-154deg); } 50% { transform: rotate(-162deg); } }
+@keyframes d-shy-r    { 0%, 100% { transform: rotate(154deg); } 50% { transform: rotate(162deg); } }
+@keyframes d-shy-head { 0%, 100% { transform: rotate(-7deg) translateY(4px); } 50% { transform: rotate(-3deg) translateY(2px); } }
+@keyframes d-shy-root { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg) translateY(-6px); } }
+
+/* SORRY — maaf (antrean tertunda / gangguan): mata sedih, keringat */
+.denti[data-state="sorry"] .d-lids { opacity: 1; }
+.denti[data-state="sorry"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="sorry"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="sorry"] .d-root, .denti[data-state="sorry"] .d-shadow { animation-duration: 6s; }
+.denti[data-state="sorry"] .d-head { animation: d-sorry-head 6s ease-in-out infinite; }
+.denti[data-state="sorry"] .d-arm-l { animation: none; transform: rotate(-10deg); }
+.denti[data-state="sorry"] .d-arm-r { animation: none; transform: rotate(10deg); }
+.denti[data-state="sorry"] .d-fin-l { animation: none; transform: rotate(20deg); }
+.denti[data-state="sorry"] .d-fin-r { animation: none; transform: rotate(-20deg); }
+.denti[data-state="sorry"] .d-sweat { opacity: 1; animation: d-sweat 2.4s ease-in infinite; }
+.denti[data-state="sorry"] .d-brackets { animation: none; opacity: .4; }
+.denti[data-state="sorry"] .d-chest-core { animation: d-pulse 6s ease-in-out infinite; }
+@keyframes d-sorry-head { 0%, 100% { transform: rotate(-4deg) translateY(6px); } 50% { transform: rotate(-6deg) translateY(9px); } }
+@keyframes d-sweat      { 0% { opacity: 0; transform: translateY(-4px); } 20%, 75% { opacity: 1; } 100% { opacity: 0; transform: translate(2px, 18px); } }
+
+/* SCAN — AI menganalisis: garis pindai di visor, tangan di headphone */
+.denti[data-state="scan"] .d-scan { opacity: 1; animation: d-scan 1.6s ease-in-out infinite alternate; }
+.denti[data-state="scan"] .d-eye { animation: none; transform: scaleY(.45); transition: transform .3s ease; }
+.denti[data-state="scan"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="scan"] .d-mouth-talk { opacity: 1; transform: scale(1.2, .3); }
+.denti[data-state="scan"] .d-brackets { animation: d-pulse .5s ease-in-out infinite; }
+.denti[data-state="scan"] .d-visor-rim { animation: d-pulse .8s ease-in-out infinite; }
+.denti[data-state="scan"] .d-ear-r .d-ear-face { animation: d-pulse .5s ease-in-out infinite; }
+.denti[data-state="scan"] .d-chest-core { animation: d-pulse .7s ease-in-out infinite; }
+.denti[data-state="scan"] .d-arm-r { animation: d-scan-arm 3.2s ease-in-out infinite; }
+.denti[data-state="scan"] .d-head { animation: none; transform: rotate(-3deg); }
+.denti[data-state="scan"] .d-spark { animation-duration: 1s; }
+@keyframes d-scan     { from { transform: translateY(0); } to { transform: translateY(152px); } }
+@keyframes d-scan-arm { 0%, 100% { transform: rotate(-144deg); } 50% { transform: rotate(-138deg); } }
+
+/* POINT — menunjuk arah (mis. "silakan ke ruang periksa") */
+.denti[data-state="point"] .d-eyes { transform: translate(-14px, -2px); transition: transform .45s ease; }
+.denti[data-state="point"] .d-arm-l { animation: d-point-l 2.4s ease-in-out infinite; }
+.denti[data-state="point"] .d-head { animation: none; transform: rotate(-6deg); }
+.denti[data-state="point"] .d-root { animation: d-point-root 2.4s ease-in-out infinite; }
+.denti[data-state="point"] .d-arrows { opacity: 1; }
+.denti[data-state="point"] .d-arrow { animation: d-arrow 1.2s ease-out infinite; }
+.denti[data-state="point"] .d-arrow-2 { animation-delay: .2s; }
+.denti[data-state="point"] .d-arrow-3 { animation-delay: .4s; }
+@keyframes d-point-l    { 0%, 100% { transform: rotate(80deg); } 50% { transform: rotate(88deg); } }
+@keyframes d-point-root { 0%, 100% { transform: translateX(-6px) rotate(-3deg); } 50% { transform: translate(-10px, -8px) rotate(-4deg); } }
+@keyframes d-arrow      { 0% { opacity: 0; transform: translateX(10px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateX(-12px); } }
+
+/* SPIN — salto (2 dtk): jongkok → melompat berputar 360° → mendarat */
+.denti[data-state="spin"] .d-eye-open { opacity: 0; }
+.denti[data-state="spin"] .d-eye-happy { opacity: 1; }
+.denti[data-state="spin"] .d-root { transform-origin: 200px 262px; animation: d-spin 2s cubic-bezier(.4,0,.2,1) infinite; }
+.denti[data-state="spin"] .d-shadow { animation: d-spin-shadow 2s cubic-bezier(.4,0,.2,1) infinite; }
+.denti[data-state="spin"] .d-arm-l { animation: d-spin-l 2s ease-in-out infinite; }
+.denti[data-state="spin"] .d-arm-r { animation: d-spin-r 2s ease-in-out infinite; }
+.denti[data-state="spin"] .d-head { animation: none; }
+.denti[data-state="spin"] .d-stars { animation: d-spin-stars 2s linear infinite; }
+.denti[data-state="spin"] .d-star { animation: d-burst 1s ease-out infinite; }
+.denti[data-state="spin"] .d-star-3, .denti[data-state="spin"] .d-star-4 { animation-delay: .2s; }
+@keyframes d-spin        { 0%, 100% { transform: none; } 12% { transform: translateY(10px) scale(1.06, .92); } 24% { transform: translateY(-40px); } 62% { transform: translateY(-52px) rotate(360deg); } 76% { transform: translateY(6px) rotate(360deg) scale(1.06, .94); } 86% { transform: rotate(360deg); } }
+@keyframes d-spin-shadow { 0%, 100% { transform: scale(1); opacity: 1; } 24%, 62% { transform: scale(.65); opacity: .45; } 76% { transform: scale(1.08); opacity: 1; } }
+@keyframes d-spin-l      { 0%, 12%, 86%, 100% { transform: rotate(0); } 24%, 70% { transform: rotate(70deg); } }
+@keyframes d-spin-r      { 0%, 12%, 86%, 100% { transform: rotate(0); } 24%, 70% { transform: rotate(-70deg); } }
+@keyframes d-spin-stars  { 0%, 70% { opacity: 0; } 76%, 92% { opacity: 1; } 100% { opacity: 0; } }
+
+/* SURPRISE — kaget (2 dtk): melonjak, tanda seru, tangan terbuka */
+.denti[data-state="surprise"] .d-eye-open { opacity: 0; }
+.denti[data-state="surprise"] .d-eye-wow { opacity: 1; }
+.denti[data-state="surprise"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="surprise"] .d-mouth-o { opacity: 1; }
+.denti[data-state="surprise"] .d-exclaim { animation: d-exclaim 2s ease-out infinite; }
+.denti[data-state="surprise"] .d-root { animation: d-surprise 2s cubic-bezier(.3,0,.3,1) infinite; }
+.denti[data-state="surprise"] .d-head { animation: d-surprise-head 2s ease-out infinite; }
+.denti[data-state="surprise"] .d-arm-l { animation: d-surprise-l 2s ease-out infinite; }
+.denti[data-state="surprise"] .d-arm-r { animation: d-surprise-r 2s ease-out infinite; }
+.denti[data-state="surprise"] .d-fin-l { animation: d-surprise-fin-l 2s ease-out infinite; }
+.denti[data-state="surprise"] .d-fin-r { animation: d-surprise-fin-r 2s ease-out infinite; }
+.denti[data-state="surprise"] .d-chest-core { animation: d-flash 2s linear infinite; }
+@keyframes d-exclaim        { 0% { opacity: 0; transform: translateY(14px) scale(.3); } 8% { opacity: 1; transform: translateY(-4px) scale(1.2); } 16%, 80% { opacity: 1; transform: none; } 92%, 100% { opacity: 0; transform: none; } }
+@keyframes d-surprise       { 0%, 100% { transform: none; } 8% { transform: translateY(-30px) scale(1.06); } 18%, 85% { transform: translateY(-12px); } }
+@keyframes d-surprise-head  { 0%, 100% { transform: none; } 8% { transform: translateY(-8px); } 18%, 85% { transform: translateY(-3px); } }
+@keyframes d-surprise-l     { 0%, 100% { transform: rotate(0); } 8%, 85% { transform: rotate(62deg); } 46% { transform: rotate(54deg); } }
+@keyframes d-surprise-r     { 0%, 100% { transform: rotate(0); } 8%, 85% { transform: rotate(-62deg); } 46% { transform: rotate(-54deg); } }
+@keyframes d-surprise-fin-l { 0%, 100% { transform: rotate(0); } 8%, 85% { transform: rotate(-22deg); } }
+@keyframes d-surprise-fin-r { 0%, 100% { transform: rotate(0); } 8%, 85% { transform: rotate(22deg); } }
+
+/* THANKS — terima kasih (3,2 dtk): melambai → membungkuk dengan tangan di dada */
+.denti[data-state="thanks"] .d-eye-open { opacity: 0; }
+.denti[data-state="thanks"] .d-eye-happy { opacity: 1; }
+.denti[data-state="thanks"] .d-arm-r { animation: d-thx-arm 3.2s ease-in-out infinite; }
+.denti[data-state="thanks"] .d-arm-l { animation: d-thx-arm-l 3.2s ease-in-out infinite; }
+.denti[data-state="thanks"] .d-root { animation: d-thx-root 3.2s ease-in-out infinite; }
+.denti[data-state="thanks"] .d-head { animation: d-thx-head 3.2s ease-in-out infinite; }
+.denti[data-state="thanks"] .d-cheeks { animation: d-thx-glow 3.2s ease-in-out infinite; }
+.denti[data-state="thanks"] .d-hearts { animation: d-thx-glow 3.2s ease-in-out infinite; }
+.denti[data-state="thanks"] .d-heart { animation: d-heart-rise 1.6s ease-in-out infinite; }
+.denti[data-state="thanks"] .d-heart-2 { animation-delay: .4s; }
+.denti[data-state="thanks"] .d-heart-3 { animation-delay: .8s; }
+.denti[data-state="thanks"] .d-heart-4 { animation-delay: 1.2s; }
+@keyframes d-thx-arm   { 0% { transform: rotate(0); } 8%, 24% { transform: rotate(-110deg); } 16%, 32% { transform: rotate(-134deg); } 40% { transform: rotate(-110deg); } 50%, 82% { transform: rotate(100deg); } 94%, 100% { transform: rotate(0); } }
+@keyframes d-thx-arm-l { 0%, 46% { transform: rotate(0); } 54%, 82% { transform: rotate(-14deg); } 94%, 100% { transform: rotate(0); } }
+@keyframes d-thx-root  { 0%, 44%, 94%, 100% { transform: none; } 56%, 82% { transform: translateY(10px) scale(1, .97); } }
+@keyframes d-thx-head  { 0% { transform: none; } 8%, 36% { transform: rotate(4deg); } 44% { transform: none; } 56%, 82% { transform: translateY(16px) scale(.98, .9); } 94%, 100% { transform: none; } }
+@keyframes d-thx-glow  { 0%, 50% { opacity: 0; } 58%, 86% { opacity: 1; } 96%, 100% { opacity: 0; } }
+
+/* NOD — mengangguk (setuju / "siap!") */
+.denti[data-state="nod"] .d-eye-open { opacity: 0; }
+.denti[data-state="nod"] .d-eye-happy { opacity: 1; }
+.denti[data-state="nod"] .d-head { animation: d-nod-yes .9s ease-in-out infinite; }
+.denti[data-state="nod"] .d-root { animation: d-float 1.8s ease-in-out infinite; }
+@keyframes d-nod-yes { 0%, 100% { transform: none; } 30% { transform: translateY(8px) rotate(1deg); } 60% { transform: translateY(-2px); } }
+
+/* CLAP — bertepuk tangan (ucapan selamat / pujian) */
+.denti[data-state="clap"] .d-eye-open { opacity: 0; }
+.denti[data-state="clap"] .d-eye-happy { opacity: 1; }
+.denti[data-state="clap"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="clap"] .d-mouth-talk { opacity: 1; transform: scaleY(1.1); }
+.denti[data-state="clap"] .d-arm-l { animation: d-clap-l .3s ease-in-out infinite alternate; }
+.denti[data-state="clap"] .d-arm-r { animation: d-clap-r .3s ease-in-out infinite alternate; }
+.denti[data-state="clap"] .d-root { animation: d-bob 1.2s ease-in-out infinite; }
+.denti[data-state="clap"] .d-stars { opacity: 1; }
+.denti[data-state="clap"] .d-star { animation: d-twinkle .9s ease-in-out infinite; }
+.denti[data-state="clap"] .d-star-2 { animation-delay: .3s; }
+.denti[data-state="clap"] .d-star-3 { animation-delay: .6s; }
+@keyframes d-clap-l { from { transform: rotate(-78deg); } to { transform: rotate(-101deg); } }
+@keyframes d-clap-r { from { transform: rotate(78deg); } to { transform: rotate(101deg); } }
+
+/* ═════ PENGUBAH · mode anak ═════ */
+.denti[data-kid="true"] .d-cheeks { opacity: 1; }
+.denti[data-kid="true"] .d-hearts, .denti[data-kid="true"] .d-stars { opacity: 1; }
+.denti[data-kid="true"] .d-heart { animation: d-heart-rise 2.6s ease-in-out infinite; }
+.denti[data-kid="true"] .d-heart-2 { animation-delay: 1.3s; }
+.denti[data-kid="true"] .d-heart-3 { animation-delay: .65s; }
+.denti[data-kid="true"] .d-heart-4 { animation-delay: 1.95s; }
+.denti[data-kid="true"] .d-star { animation: d-twinkle 2s ease-in-out infinite; }
+.denti[data-kid="true"] .d-star-2 { animation-delay: .5s; }
+.denti[data-kid="true"] .d-star-3 { animation-delay: 1s; }
+.denti[data-kid="true"] .d-star-4 { animation-delay: 1.5s; }
+.denti[data-kid="true"] .d-star-5 { animation-delay: .8s; }
+.denti[data-kid="true"][data-state="idle"] .d-root { animation: d-bounce 1.8s cubic-bezier(.3,0,.3,1) infinite; }
+.denti[data-kid="true"][data-state="idle"] .d-eye-open { opacity: 0; }
+.denti[data-kid="true"][data-state="idle"] .d-eye-happy { opacity: 1; }
+.denti[data-kid="true"][data-state="idle"] .d-arm-r { animation: d-kid-wiggle 1.8s ease-in-out infinite; }
+.denti[data-kid="true"][data-state="idle"] .d-arm-l { animation: d-kid-wiggle-l 1.8s ease-in-out infinite; }
+.denti[data-kid="true"][data-state="idle"] .d-head { animation: d-sway 1.8s ease-in-out infinite; }
+@keyframes d-heart-rise { 0% { opacity: 0; transform: translateY(10px) scale(.6); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px) scale(1.1); } }
+@keyframes d-bounce { 0%, 100% { transform: translateY(0) scale(1.03, .97); } 45% { transform: translateY(-22px) scale(.98, 1.03); } 60% { transform: translateY(-20px); } }
+@keyframes d-kid-wiggle   { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(-44deg); } }
+@keyframes d-kid-wiggle-l { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(44deg); } }
+
+
+/* ═════ v4 · gerakan &amp; ekspresi tambahan ═════ */
+.denti .d-bulb, .denti .d-quest, .denti .d-shades { opacity: 0; transition: opacity .35s ease; }
+@keyframes d-q-pop { 0%, 100% { opacity: .2; transform: translateY(6px) scale(.8); } 50% { opacity: 1; transform: translateY(-6px) scale(1.1); } }
+@keyframes d-bulb-glow { 0%, 100% { opacity: .7; transform: scale(.94); } 50% { opacity: 1; transform: scale(1.08); } }
+.denti .d-bulb, .denti .d-q { transform-origin: 200px -14px; }
+
+/* kedip sebelah mata */
+.denti[data-state="wink"] .d-eye-r { animation: d-wink 1.5s ease-in-out infinite; transform-origin: 238px 160px; }
+.denti[data-state="wink"] .d-head { animation: d-wink-head 1.5s ease-in-out infinite; }
+.denti[data-state="wink"] .d-arm-r { animation: d-wink-arm 1.5s ease-in-out infinite; }
+.denti[data-state="wink"] .d-sparks { opacity: 1; }
+@keyframes d-wink { 0%, 20%, 100% { transform: scaleY(1); } 38%, 70% { transform: scaleY(.07); } }
+@keyframes d-wink-head { 0%, 100% { transform: rotate(0); } 40%, 70% { transform: rotate(5deg); } }
+@keyframes d-wink-arm { 0%, 100% { transform: rotate(0); } 45%, 70% { transform: rotate(-26deg); } }
+
+/* sorak: kedua tangan terangkat, melompat kecil */
+.denti[data-state="cheer"] .d-eye-open { opacity: 0; }
+.denti[data-state="cheer"] .d-eye-happy { opacity: 1; }
+.denti[data-state="cheer"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="cheer"] .d-mouth-talk { opacity: 1; transform: scaleY(1.2); }
+.denti[data-state="cheer"] .d-arm-l { animation: d-cheer-l .5s ease-in-out infinite alternate; }
+.denti[data-state="cheer"] .d-arm-r { animation: d-cheer-r .5s ease-in-out infinite alternate; }
+.denti[data-state="cheer"] .d-root { animation: d-hop .8s ease-in-out infinite; }
+.denti[data-state="cheer"] .d-stars { opacity: 1; }
+.denti[data-state="cheer"] .d-star { animation: d-twinkle .8s ease-in-out infinite; }
+.denti[data-state="cheer"] .d-star-2 { animation-delay: .25s; }
+.denti[data-state="cheer"] .d-star-3 { animation-delay: .5s; }
+@keyframes d-cheer-l { from { transform: rotate(138deg); } to { transform: rotate(160deg); } }
+@keyframes d-cheer-r { from { transform: rotate(-138deg); } to { transform: rotate(-160deg); } }
+@keyframes d-hop { 0%, 100% { transform: translateY(0) scale(1.03, .97); } 50% { transform: translateY(-26px) scale(.98, 1.03); } }
+
+/* lompat tinggi sekali (jongkok → melesat → mendarat) */
+.denti[data-state="jump"] .d-eye-open { opacity: 0; }
+.denti[data-state="jump"] .d-eye-happy { opacity: 1; }
+.denti[data-state="jump"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="jump"] .d-mouth-o { opacity: 1; }
+.denti[data-state="jump"] .d-root { animation: d-jump 1.6s cubic-bezier(.3,.1,.3,1) infinite; }
+.denti[data-state="jump"] .d-shadow { animation: d-spin-shadow 1.6s ease-in-out infinite; }
+.denti[data-state="jump"] .d-arm-l { animation: d-spin-l 1.6s ease-in-out infinite; }
+.denti[data-state="jump"] .d-arm-r { animation: d-spin-r 1.6s ease-in-out infinite; }
+@keyframes d-jump { 0%, 100% { transform: none; } 14% { transform: translateY(12px) scale(1.07, .9); } 36% { transform: translateY(-64px) scale(.96, 1.06); } 58% { transform: translateY(-30px); } 78% { transform: translateY(10px) scale(1.06, .92); } }
+
+/* membungkuk hormat */
+.denti[data-state="bow"] .d-eye-open { opacity: 0; }
+.denti[data-state="bow"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="bow"] .d-root { animation: d-bow 2.2s ease-in-out infinite; }
+.denti[data-state="bow"] .d-head { animation: d-bow-head 2.2s ease-in-out infinite; }
+.denti[data-state="bow"] .d-arm-l { animation: d-bow-arm-l 2.2s ease-in-out infinite; }
+.denti[data-state="bow"] .d-arm-r { animation: d-bow-arm-r 2.2s ease-in-out infinite; }
+@keyframes d-bow { 0%, 100% { transform: none; } 30%, 70% { transform: translateY(14px) rotate(9deg); } }
+@keyframes d-bow-head { 0%, 100% { transform: none; } 30%, 70% { transform: rotate(10deg) translateY(10px); } }
+@keyframes d-bow-arm-l { 0%, 100% { transform: rotate(0); } 30%, 70% { transform: rotate(-40deg); } }
+@keyframes d-bow-arm-r { 0%, 100% { transform: rotate(0); } 30%, 70% { transform: rotate(40deg); } }
+
+/* angkat bahu: tidak tahu */
+.denti[data-state="shrug"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="shrug"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="shrug"] .d-arm-l { animation: d-shrug-l 1.9s ease-in-out infinite; }
+.denti[data-state="shrug"] .d-arm-r { animation: d-shrug-r 1.9s ease-in-out infinite; }
+.denti[data-state="shrug"] .d-head { animation: d-shrug-head 1.9s ease-in-out infinite; }
+.denti[data-state="shrug"] .d-sweat { opacity: 1; }
+@keyframes d-shrug-l { 0%, 100% { transform: rotate(0); } 25%, 65% { transform: rotate(62deg); } }
+@keyframes d-shrug-r { 0%, 100% { transform: rotate(0); } 25%, 65% { transform: rotate(-62deg); } }
+@keyframes d-shrug-head { 0%, 100% { transform: none; } 25%, 65% { transform: rotate(-5deg) translateY(6px); } }
+
+/* keren: kacamata hitam */
+.denti[data-state="cool"] .d-shades { opacity: 1; }
+.denti[data-state="cool"] .d-eye-open { opacity: 0; }
+.denti[data-state="cool"] .d-root { animation: d-cool-sway 2.6s ease-in-out infinite; }
+.denti[data-state="cool"] .d-arm-r { animation: d-cool-arm 2.6s ease-in-out infinite; }
+.denti[data-state="cool"] .d-sparks { opacity: 1; }
+@keyframes d-cool-sway { 0%, 100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(3deg) translateY(-8px); } }
+@keyframes d-cool-arm { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-30deg); } }
+
+/* menghela napas lega / lelah */
+.denti[data-state="sigh"] .d-eye-open { opacity: 0; }
+.denti[data-state="sigh"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="sigh"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="sigh"] .d-mouth-o { opacity: 1; }
+.denti[data-state="sigh"] .d-root { animation: d-sigh 2.3s ease-in-out infinite; }
+.denti[data-state="sigh"] .d-head { animation: d-sigh-head 2.3s ease-in-out infinite; }
+.denti[data-state="sigh"] .d-waves { opacity: 1; }
+@keyframes d-sigh { 0%, 100% { transform: translateY(0) scale(1.02, 1.02); } 45% { transform: translateY(8px) scale(.98, .96); } }
+@keyframes d-sigh-head { 0%, 100% { transform: none; } 45% { transform: rotate(-4deg) translateY(6px); } }
+
+/* dapat ide */
+.denti[data-state="idea"] .d-bulb { opacity: 1; animation: d-bulb-glow 1s ease-in-out infinite; }
+.denti[data-state="idea"] .d-eye-open { opacity: 0; }
+.denti[data-state="idea"] .d-eye-wow { opacity: 1; }
+.denti[data-state="idea"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="idea"] .d-mouth-o { opacity: 1; }
+.denti[data-state="idea"] .d-arm-r { animation: d-idea-arm 1.2s ease-in-out infinite; }
+.denti[data-state="idea"] .d-root { animation: d-bob 1.4s ease-in-out infinite; }
+@keyframes d-idea-arm { 0%, 100% { transform: rotate(-150deg); } 50% { transform: rotate(-164deg); } }
+
+/* bingung */
+.denti[data-state="confused"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="confused"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="confused"] .d-quest { opacity: 1; }
+.denti[data-state="confused"] .d-q { animation: d-q-pop 1.2s ease-in-out infinite; }
+.denti[data-state="confused"] .d-q-2 { animation-delay: .5s; }
+.denti[data-state="confused"] .d-head { animation: d-confused-head 1.6s ease-in-out infinite; }
+.denti[data-state="confused"] .d-eyes { transform: translate(10px, -4px); transition: transform .4s ease; }
+@keyframes d-confused-head { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+/* mengintip dari samping */
+.denti[data-state="peek"] .d-eyes { transform: translate(-16px, 0); transition: transform .4s ease; }
+.denti[data-state="peek"] .d-root { animation: d-peek 2.4s ease-in-out infinite; }
+.denti[data-state="peek"] .d-head { animation: d-peek-head 2.4s ease-in-out infinite; }
+.denti[data-state="peek"] .d-arm-l { animation: d-peek-arm 2.4s ease-in-out infinite; }
+@keyframes d-peek { 0%, 100% { transform: translateX(0); } 35%, 70% { transform: translateX(-34px) rotate(-6deg); } }
+@keyframes d-peek-head { 0%, 100% { transform: none; } 35%, 70% { transform: rotate(-10deg); } }
+@keyframes d-peek-arm { 0%, 100% { transform: rotate(0); } 35%, 70% { transform: rotate(40deg); } }
+
+/* girang: bergetar riang */
+.denti[data-state="excited"] .d-eye-open { opacity: 0; }
+.denti[data-state="excited"] .d-eye-happy { opacity: 1; }
+.denti[data-state="excited"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="excited"] .d-mouth-talk { opacity: 1; transform: scaleY(1.25); }
+.denti[data-state="excited"] .d-root { animation: d-excited .36s ease-in-out infinite; }
+.denti[data-state="excited"] .d-arm-l { animation: d-cheer-l .24s ease-in-out infinite alternate; }
+.denti[data-state="excited"] .d-arm-r { animation: d-cheer-r .24s ease-in-out infinite alternate; }
+.denti[data-state="excited"] .d-hearts, .denti[data-state="excited"] .d-stars { opacity: 1; }
+.denti[data-state="excited"] .d-star { animation: d-twinkle .5s ease-in-out infinite; }
+@keyframes d-excited { 0%, 100% { transform: translate(0, 0) rotate(-1.5deg); } 50% { transform: translate(3px, -9px) rotate(1.5deg); } }
+
+/* hormat ala pramuka/petugas */
+.denti[data-state="salute"] .d-eye-open { opacity: 0; }
+.denti[data-state="salute"] .d-eye-happy { opacity: 1; }
+.denti[data-state="salute"] .d-arm-r { animation: d-salute 2s ease-in-out infinite; }
+.denti[data-state="salute"] .d-root { animation: d-float 2.4s ease-in-out infinite; }
+@keyframes d-salute { 0%, 100% { transform: rotate(0); } 25%, 75% { transform: rotate(-146deg); } }
+
+/* ═════ v5 · amarah, tangis, pusing, peregangan, mencari, telepon, kopi, otot ═════ */
+.denti .d-brows, .denti .d-tears, .denti .d-spirals, .denti .d-lens, .denti .d-phone, .denti .d-cup,
+.denti .d-puffs, .denti .d-vein, .denti .d-steam, .denti .d-dizzy { opacity: 0; transition: opacity .3s ease; }
+.denti .d-tear, .denti .d-spiral, .denti .d-puff, .denti .d-steam path { transform-box: fill-box; transform-origin: center; }
+.denti .d-dizzy { transform-origin: 200px 40px; }
+@keyframes d-tear-fall { 0% { opacity: 0; transform: translateY(-6px) scale(.6); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(46px) scale(1); } }
+@keyframes d-puff-rise { 0% { opacity: .9; transform: translateY(8px) scale(.6); } 100% { opacity: 0; transform: translateY(-34px) scale(1.5); } }
+@keyframes d-steam-rise { 0% { opacity: 0; transform: translateY(10px); } 40% { opacity: .9; } 100% { opacity: 0; transform: translateY(-18px); } }
+@keyframes d-spin-slow { to { transform: rotate(360deg); } }
+@keyframes d-spin-slow-r { to { transform: rotate(-360deg); } }
+@keyframes d-quake { 0%, 100% { transform: translate(0, 0); } 20% { transform: translate(-3px, 1px); } 40% { transform: translate(3px, -1px); } 60% { transform: translate(-2px, -1px); } 80% { transform: translate(2px, 1px); } }
+
+/* marah: alis menukik, uap di telinga, bergetar */
+.denti[data-state="angry"] .d-brows, .denti[data-state="angry"] .d-puffs, .denti[data-state="angry"] .d-vein { opacity: 1; }
+.denti[data-state="angry"] .d-eye { fill: #ff9a88; }
+.denti[data-state="angry"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="angry"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="angry"] .d-cheeks { opacity: 1; }
+.denti[data-state="angry"] .d-cheeks ellipse { fill: #ff6b6b; }
+.denti[data-state="angry"] .d-root { animation: d-quake .32s linear infinite; }
+.denti[data-state="angry"] .d-puff { animation: d-puff-rise 1.1s ease-out infinite; }
+.denti[data-state="angry"] .d-puff-2, .denti[data-state="angry"] .d-puff-4 { animation-delay: .5s; }
+.denti[data-state="angry"] .d-vein { animation: d-bulb-glow .7s ease-in-out infinite; transform-origin: 320px 70px; }
+.denti[data-state="angry"] .d-arm-l { animation: none; transform: rotate(14deg); }
+.denti[data-state="angry"] .d-arm-r { animation: none; transform: rotate(-14deg); }
+
+/* menangis: air mata mengalir, kepala tertunduk, sesenggukan */
+.denti[data-state="cry"] .d-tears { opacity: 1; }
+.denti[data-state="cry"] .d-tear { animation: d-tear-fall 1.2s ease-in infinite; }
+.denti[data-state="cry"] .d-tear-2 { animation-delay: .15s; }
+.denti[data-state="cry"] .d-tear-3 { animation-delay: .5s; }
+.denti[data-state="cry"] .d-tear-4 { animation-delay: .65s; }
+.denti[data-state="cry"] .d-eye-open { opacity: 0; }
+.denti[data-state="cry"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="cry"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="cry"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="cry"] .d-head { animation: d-cry-head 1.4s ease-in-out infinite; }
+.denti[data-state="cry"] .d-root { animation: d-sob .7s ease-in-out infinite; }
+.denti[data-state="cry"] .d-arm-l { animation: none; transform: rotate(-12deg); }
+.denti[data-state="cry"] .d-arm-r { animation: none; transform: rotate(12deg); }
+@keyframes d-cry-head { 0%, 100% { transform: rotate(-3deg) translateY(8px); } 50% { transform: rotate(3deg) translateY(10px); } }
+@keyframes d-sob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px) scale(1.01, .985); } }
+
+/* pusing: mata spiral, bintang berputar di atas kepala */
+.denti[data-state="dizzy"] .d-spirals, .denti[data-state="dizzy"] .d-dizzy { opacity: 1; }
+.denti[data-state="dizzy"] .d-eye-open { opacity: 0; }
+.denti[data-state="dizzy"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="dizzy"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="dizzy"] .d-spiral { animation: d-spin-slow 1.2s linear infinite; }
+.denti[data-state="dizzy"] .d-spiral-r { animation-name: d-spin-slow-r; }
+.denti[data-state="dizzy"] .d-dizzy { animation: d-spin-slow 2.4s linear infinite; }
+.denti[data-state="dizzy"] .d-root { animation: d-dizzy-sway 2.6s ease-in-out infinite; }
+.denti[data-state="dizzy"] .d-head { animation: d-confused-head 1.3s ease-in-out infinite; }
+.denti[data-state="dizzy"] .d-arm-l { animation: d-dizzy-arm 1.3s ease-in-out infinite; }
+.denti[data-state="dizzy"] .d-arm-r { animation: d-dizzy-arm 1.3s ease-in-out infinite reverse; }
+@keyframes d-dizzy-sway { 0%, 100% { transform: rotate(-5deg) translateX(-6px); } 50% { transform: rotate(5deg) translateX(6px); } }
+@keyframes d-dizzy-arm { 0%, 100% { transform: rotate(12deg); } 50% { transform: rotate(-12deg); } }
+
+/* meregangkan badan sambil menguap */
+.denti[data-state="stretch"] .d-eye-open { opacity: 0; }
+.denti[data-state="stretch"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="stretch"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="stretch"] .d-mouth-o { opacity: 1; animation: d-yawn 2.8s ease-in-out infinite; }
+.denti[data-state="stretch"] .d-arm-l { animation: d-stretch-l 2.8s ease-in-out infinite; }
+.denti[data-state="stretch"] .d-arm-r { animation: d-stretch-r 2.8s ease-in-out infinite; }
+.denti[data-state="stretch"] .d-root { animation: d-stretch 2.8s ease-in-out infinite; }
+.denti[data-state="stretch"] .d-head { animation: d-stretch-head 2.8s ease-in-out infinite; }
+@keyframes d-stretch { 0%, 100% { transform: none; } 35%, 65% { transform: translateY(-14px) scale(.96, 1.1); } }
+@keyframes d-stretch-head { 0%, 100% { transform: none; } 35%, 65% { transform: rotate(-6deg) translateY(-8px); } }
+@keyframes d-stretch-l { 0%, 100% { transform: rotate(0); } 35%, 65% { transform: rotate(150deg); } }
+@keyframes d-stretch-r { 0%, 100% { transform: rotate(0); } 35%, 65% { transform: rotate(-150deg); } }
+@keyframes d-yawn { 0%, 100% { transform: scale(.7); } 35%, 65% { transform: scale(1.9, 2.4); } }
+
+/* mencari dengan kaca pembesar */
+.denti[data-state="search"] .d-lens { opacity: 1; }
+.denti[data-state="search"] .d-arm-r { animation: d-search-arm 3s ease-in-out infinite; }
+.denti[data-state="search"] .d-eyes { animation: d-search-eyes 3s ease-in-out infinite; }
+.denti[data-state="search"] .d-head { animation: d-search-head 3s ease-in-out infinite; }
+.denti[data-state="search"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="search"] .d-mouth-o { opacity: 1; transform: scale(.7); transform-box: fill-box; transform-origin: center; }
+@keyframes d-search-arm { 0%, 100% { transform: rotate(-128deg); } 50% { transform: rotate(-114deg); } }
+@keyframes d-search-eyes { 0%, 100% { transform: translateX(8px); } 50% { transform: translateX(-10px); } }
+@keyframes d-search-head { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-4deg); } }
+
+/* menelepon */
+.denti[data-state="phone"] .d-phone { opacity: 1; }
+.denti[data-state="phone"] .d-arm-r { animation: d-phone-arm 3.2s ease-in-out infinite; }
+.denti[data-state="phone"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="phone"] .d-mouth-talk { opacity: 1; animation: d-talk .28s ease-in-out infinite alternate; }
+.denti[data-state="phone"] .d-head { animation: d-phone-head 3.2s ease-in-out infinite; }
+.denti[data-state="phone"] .d-eye-open { opacity: 0; }
+.denti[data-state="phone"] .d-eye-happy { opacity: 1; }
+@keyframes d-phone-arm { 0%, 100% { transform: rotate(-143deg); } 50% { transform: rotate(-137deg); } }
+@keyframes d-phone-head { 0%, 100% { transform: rotate(3deg); } 50% { transform: rotate(5deg) translateY(2px); } }
+
+/* ngopi santai */
+.denti[data-state="coffee"] .d-cup, .denti[data-state="coffee"] .d-steam { opacity: 1; }
+.denti[data-state="coffee"] .d-steam path { animation: d-steam-rise 1.6s ease-out infinite; }
+.denti[data-state="coffee"] .d-steam-2 { animation-delay: .6s; }
+.denti[data-state="coffee"] .d-arm-r { animation: d-coffee-arm 3s ease-in-out infinite; }
+.denti[data-state="coffee"] .d-eye-open { opacity: 0; }
+.denti[data-state="coffee"] .d-eye-happy { opacity: 1; }
+.denti[data-state="coffee"] .d-root { animation: d-float 3s ease-in-out infinite; }
+.denti[data-state="coffee"] .d-head { animation: d-coffee-head 3s ease-in-out infinite; }
+@keyframes d-coffee-arm { 0%, 100% { transform: rotate(-128deg); } 45% { transform: rotate(-148deg); } 70% { transform: rotate(-144deg); } }
+@keyframes d-coffee-head { 0%, 100% { transform: none; } 45%, 70% { transform: rotate(-4deg) translateY(4px); } }
+
+/* pamer otot */
+.denti[data-state="flex"] .d-eye-open { opacity: 0; }
+.denti[data-state="flex"] .d-eye-happy { opacity: 1; }
+.denti[data-state="flex"] .d-mouth-smile { opacity: 0; }
+.denti[data-state="flex"] .d-mouth-talk { opacity: 1; transform: scaleY(.8); }
+.denti[data-state="flex"] .d-arm-l { animation: d-flex-l 1.2s ease-in-out infinite; }
+.denti[data-state="flex"] .d-arm-r { animation: d-flex-r 1.2s ease-in-out infinite; }
+.denti[data-state="flex"] .d-root { animation: d-flex-body 1.2s ease-in-out infinite; }
+.denti[data-state="flex"] .d-sparks, .denti[data-state="flex"] .d-stars { opacity: 1; }
+.denti[data-state="flex"] .d-star { animation: d-twinkle .7s ease-in-out infinite; }
+@keyframes d-flex-l { 0%, 100% { transform: rotate(100deg) scale(1); } 50% { transform: rotate(116deg) scale(1.12, 1.05); } }
+@keyframes d-flex-r { 0%, 100% { transform: rotate(-100deg) scale(1); } 50% { transform: rotate(-116deg) scale(1.12, 1.05); } }
+@keyframes d-flex-body { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04, .97) translateY(4px); } }
+
+/* ═════ v6 · 50 ekspresi &amp; gerakan tambahan (dibangkitkan dari daftar di patch_mascot_v6) ═════ */
+.denti .d-brows-w, .denti .d-xeyes, .denti .d-eye-star, .denti .d-eye-coin, .denti .d-mouth-flat, .denti .d-mouth-wavy, .denti .d-mouth-grin, .denti .d-mask, .denti .d-hat, .denti .d-finger, .denti .d-whisper, .denti .d-earhand, .denti .d-facepalm, .denti .d-clip, .denti .d-book, .denti .d-thumb, .denti .d-mic, .denti .d-flag, .denti .d-cloud, .denti .d-snow, .denti .d-sun, .denti .d-thermo, .denti .d-hourglass, .denti .d-spinner, .denti .d-check, .denti .d-warn, .denti .d-lock, .denti .d-shield, .denti .d-chart, .denti .d-cake, .denti .d-gift, .denti .d-aura, .denti .d-growl, .denti .d-heartbig, .denti .d-pray, .denti .d-glitch { opacity: 0; transition: opacity .3s ease; }
+.denti .d-rain, .denti .d-flake, .denti .d-flame, .denti .d-spin-arc, .denti .d-flagcloth { transform-box: fill-box; transform-origin: center; }
+@keyframes d-v-arm { 0%, 100% { transform: rotate(var(--a0, 0deg)); } 50% { transform: rotate(var(--a1, var(--a0, 0deg))); } }
+@keyframes d-v-body { 0%, 100% { transform: translate(var(--x0, 0px), var(--y0, 0px)) rotate(var(--r0, 0deg)); } 50% { transform: translate(var(--x1, var(--x0, 0px)), var(--y1, var(--y0, 0px))) rotate(var(--r1, var(--r0, 0deg))); } }
+@keyframes d-v-head { 0%, 100% { transform: translateY(var(--hy0, 0px)) rotate(var(--hr0, 0deg)); } 50% { transform: translateY(var(--hy1, var(--hy0, 0px))) rotate(var(--hr1, var(--hr0, 0deg))); } }
+@keyframes d-v-fall { 0% { opacity: 0; transform: translateY(-6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(34px); } }
+@keyframes d-v-flicker { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(.88, 1.14); } }
+@keyframes d-v-wave { 0%, 100% { transform: skewY(-6deg); } 50% { transform: skewY(6deg); } }
+@keyframes d-v-spinz { to { transform: rotate(360deg); } }
+@keyframes d-v-glitch { 0%, 100% { transform: translateX(0); opacity: .65; } 25% { transform: translateX(-14px); } 50% { transform: translateX(10px); opacity: .2; } 75% { transform: translateX(-6px); } }
+@keyframes d-v-pop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.18); } }
+@keyframes d-v-sandflip { 0%, 40% { transform: rotate(0); } 60%, 100% { transform: rotate(180deg); } }
+.denti .d-hat, .denti .d-mask { transform-origin: 200px 150px; }
+.denti .d-hourglass { transform-origin: 200px 12px; } .denti .d-check, .denti .d-warn, .denti .d-lock, .denti .d-shield { transform-origin: 336px 46px; } .denti .d-chart { transform-origin: 336px 50px; }
+.denti[data-state="grateful"] .d-eye-open { opacity: 0; } .denti[data-state="grateful"] .d-eye-happy { opacity: 1; }
+.denti[data-state="grateful"] .d-hearts { opacity: 1; }
+.denti[data-state="grateful"] .d-cheeks { opacity: 1; }
+.denti[data-state="grateful"] .d-tears { opacity: 1; }
+.denti[data-state="grateful"] .d-arm-l { animation: d-v-arm 2.60s ease-in-out infinite; --a0: -75deg; --a1: -80deg; }
+.denti[data-state="grateful"] .d-arm-r { animation: d-v-arm 2.60s ease-in-out infinite; --a0: 75deg; --a1: 80deg; }
+.denti[data-state="grateful"] .d-root { animation: d-v-body 2.60s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="grateful"] .d-head { animation: d-v-head 2.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="proud"] .d-eye-open { opacity: 0; } .denti[data-state="proud"] .d-eye-happy { opacity: 1; }
+.denti[data-state="proud"] .d-mouth-smile { opacity: 0; } .denti[data-state="proud"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="proud"] .d-sparks { opacity: 1; }
+.denti[data-state="proud"] .d-stars { opacity: 1; }
+.denti[data-state="proud"] .d-arm-l { animation: d-v-arm 1.80s ease-in-out infinite; --a0: 30deg; --a1: 36deg; }
+.denti[data-state="proud"] .d-arm-r { animation: d-v-arm 1.80s ease-in-out infinite; --a0: -30deg; --a1: -36deg; }
+.denti[data-state="proud"] .d-root { animation: d-v-body 1.80s ease-in-out infinite; --y0: 0px; --y1: -6px; --s0: 1.03; --s1: 1.06; }
+.denti[data-state="proud"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: -3deg; --hr1: -1deg; }
+.denti[data-state="worried"] .d-mouth-smile { opacity: 0; } .denti[data-state="worried"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="worried"] .d-brows-w { opacity: 1; }
+.denti[data-state="worried"] .d-sweat { opacity: 1; }
+.denti[data-state="worried"] .d-arm-l { animation: d-v-arm 0.40s ease-in-out infinite; --a0: -75deg; --a1: -70deg; }
+.denti[data-state="worried"] .d-arm-r { animation: d-v-arm 0.40s ease-in-out infinite; --a0: 75deg; --a1: 70deg; }
+.denti[data-state="worried"] .d-root { animation: d-v-body 0.40s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="worried"] .d-head { animation: d-v-head 1.20s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="nervous"] .d-eye-open { opacity: 0; } .denti[data-state="nervous"] .d-eye-wow { opacity: 1; }
+.denti[data-state="nervous"] .d-mouth-smile { opacity: 0; } .denti[data-state="nervous"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="nervous"] .d-brows-w { opacity: 1; }
+.denti[data-state="nervous"] .d-sweat { opacity: 1; }
+.denti[data-state="nervous"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -70deg; --a1: -60deg; }
+.denti[data-state="nervous"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 70deg; --a1: 60deg; }
+.denti[data-state="nervous"] .d-root { animation: d-v-body 0.14s ease-in-out infinite; --x0: -3px; --x1: 3px; }
+.denti[data-state="nervous"] .d-head { animation: d-v-head 0.20s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="blush"] .d-eye-open { opacity: 0; } .denti[data-state="blush"] .d-eye-happy { opacity: 1; }
+.denti[data-state="blush"] .d-cheeks { opacity: 1; }
+.denti[data-state="blush"] .d-hearts { opacity: 1; }
+.denti[data-state="blush"] .d-arm-l { animation: d-v-arm 2.20s ease-in-out infinite; --a0: -75deg; --a1: -70deg; }
+.denti[data-state="blush"] .d-root { animation: d-v-body 2.20s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="blush"] .d-head { animation: d-v-head 2.20s ease-in-out infinite; --hr0: 5deg; --hr1: 8deg; }
+.denti[data-state="blush"] .d-eyes { transform: translate(-14px, 0); transition: transform .4s ease; }
+.denti[data-state="sulk"] .d-mouth-smile { opacity: 0; } .denti[data-state="sulk"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="sulk"] .d-cheeks { opacity: 1; }
+.denti[data-state="sulk"] .d-arm-l { animation: d-v-arm 2.60s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="sulk"] .d-arm-r { animation: d-v-arm 2.60s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="sulk"] .d-root { animation: d-v-body 2.60s ease-in-out infinite; --x0: 10px; --x1: 14px; --r0: 5deg; --r1: 7deg; }
+.denti[data-state="sulk"] .d-head { animation: d-v-head 2.60s ease-in-out infinite; --hr0: 6deg; --hr1: 8deg; }
+.denti[data-state="sulk"] .d-eyes { transform: translate(18px, 2px); transition: transform .4s ease; }
+.denti[data-state="hopeful"] .d-eye-open { opacity: 0; } .denti[data-state="hopeful"] .d-eye-star { opacity: 1; }
+.denti[data-state="hopeful"] .d-sparks { opacity: 1; }
+.denti[data-state="hopeful"] .d-stars { opacity: 1; }
+.denti[data-state="hopeful"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -112deg; --a1: -116deg; }
+.denti[data-state="hopeful"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 112deg; --a1: 116deg; }
+.denti[data-state="hopeful"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -8px; }
+.denti[data-state="hopeful"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -4deg; --hr1: 0deg; --hy0: -4px; --hy1: -6px; }
+.denti[data-state="relieved"] .d-eye-open { opacity: 0; } .denti[data-state="relieved"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="relieved"] .d-sweat { opacity: 1; }
+.denti[data-state="relieved"] .d-sparks { opacity: 1; }
+.denti[data-state="relieved"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 6deg; --a1: 10deg; }
+.denti[data-state="relieved"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -6deg; --a1: -10deg; }
+.denti[data-state="relieved"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: 9px; --s0: 1.02; --s1: 0.97; }
+.denti[data-state="relieved"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 0deg; --hr1: -4deg; --hy0: 0px; --hy1: 6px; }
+.denti[data-state="disappointed"] .d-mouth-smile { opacity: 0; } .denti[data-state="disappointed"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="disappointed"] .d-lids { opacity: 1; }
+.denti[data-state="disappointed"] .d-arm-l { animation: d-v-arm 2.80s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="disappointed"] .d-arm-r { animation: d-v-arm 2.80s ease-in-out infinite; --a0: -10deg; --a1: -14deg; }
+.denti[data-state="disappointed"] .d-root { animation: d-v-body 2.80s ease-in-out infinite; --y0: 8px; --y1: 12px; --s0: 0.98; --s1: 0.97; }
+.denti[data-state="disappointed"] .d-head { animation: d-v-head 2.80s ease-in-out infinite; --hr0: -3deg; --hr1: -5deg; --hy0: 10px; --hy1: 14px; }
+.denti[data-state="gloomy"] .d-mouth-smile { opacity: 0; } .denti[data-state="gloomy"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="gloomy"] .d-lids { opacity: 1; }
+.denti[data-state="gloomy"] .d-cloud { opacity: 1; }
+.denti[data-state="gloomy"] .d-arm-l { animation: d-v-arm 3.20s ease-in-out infinite; --a0: 8deg; --a1: 12deg; }
+.denti[data-state="gloomy"] .d-arm-r { animation: d-v-arm 3.20s ease-in-out infinite; --a0: -8deg; --a1: -12deg; }
+.denti[data-state="gloomy"] .d-root { animation: d-v-body 3.20s ease-in-out infinite; --y0: 6px; --y1: 10px; }
+.denti[data-state="gloomy"] .d-head { animation: d-v-head 3.20s ease-in-out infinite; --hr0: -2deg; --hr1: -4deg; --hy0: 8px; --hy1: 12px; }
+.denti[data-state="cozy"] .d-eye-open { opacity: 0; } .denti[data-state="cozy"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="cozy"] .d-hearts { opacity: 1; }
+.denti[data-state="cozy"] .d-cheeks { opacity: 1; }
+.denti[data-state="cozy"] .d-arm-l { animation: d-v-arm 3.40s ease-in-out infinite; --a0: -75deg; --a1: -78deg; }
+.denti[data-state="cozy"] .d-arm-r { animation: d-v-arm 3.40s ease-in-out infinite; --a0: 75deg; --a1: 78deg; }
+.denti[data-state="cozy"] .d-root { animation: d-v-body 3.40s ease-in-out infinite; --y0: 0px; --y1: -8px; }
+.denti[data-state="cozy"] .d-head { animation: d-v-head 3.40s ease-in-out infinite; --hr0: -4deg; --hr1: 4deg; }
+.denti[data-state="shock"] .d-eye-open { opacity: 0; } .denti[data-state="shock"] .d-eye-wow { opacity: 1; }
+.denti[data-state="shock"] .d-mouth-smile { opacity: 0; } .denti[data-state="shock"] .d-mouth-o { opacity: 1; }
+.denti[data-state="shock"] .d-exclaim { opacity: 1; }
+.denti[data-state="shock"] .d-sweat { opacity: 1; }
+.denti[data-state="shock"] .d-arm-l { animation: d-v-arm 0.50s ease-in-out infinite; --a0: 150deg; --a1: 160deg; }
+.denti[data-state="shock"] .d-arm-r { animation: d-v-arm 0.50s ease-in-out infinite; --a0: -150deg; --a1: -160deg; }
+.denti[data-state="shock"] .d-root { animation: d-v-body 0.50s ease-in-out infinite; --y0: -18px; --y1: -24px; --s0: 1.05; --s1: 1.07; }
+.denti[data-state="shock"] .d-head { animation: d-v-head 0.30s ease-in-out infinite; --hr0: -4deg; --hr1: 4deg; --hy0: -6px; --hy1: -8px; }
+.denti[data-state="shock"] .d-mouth-o { transform: scale(1.7); transform-box: fill-box; transform-origin: center; }
+.denti[data-state="giggle"] .d-eye-open { opacity: 0; } .denti[data-state="giggle"] .d-eye-happy { opacity: 1; }
+.denti[data-state="giggle"] .d-mouth-smile { opacity: 0; } .denti[data-state="giggle"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="giggle"] .d-cheeks { opacity: 1; }
+.denti[data-state="giggle"] .d-haha { opacity: 1; }
+.denti[data-state="giggle"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 30deg; --a1: 20deg; }
+.denti[data-state="giggle"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -30deg; --a1: -20deg; }
+.denti[data-state="giggle"] .d-root { animation: d-v-body 0.22s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="giggle"] .d-head { animation: d-v-head 0.22s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="smug"] .d-lids { opacity: 1; }
+.denti[data-state="smug"] .d-sparks { opacity: 1; }
+.denti[data-state="smug"] .d-arm-l { animation: d-v-arm 2.80s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="smug"] .d-arm-r { animation: d-v-arm 2.80s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="smug"] .d-root { animation: d-v-body 2.80s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="smug"] .d-head { animation: d-v-head 2.80s ease-in-out infinite; --hr0: -7deg; --hr1: -4deg; --hy0: -4px; --hy1: -6px; }
+.denti[data-state="curious"] .d-eye-open { opacity: 0; } .denti[data-state="curious"] .d-eye-wow { opacity: 1; }
+.denti[data-state="curious"] .d-mouth-smile { opacity: 0; } .denti[data-state="curious"] .d-mouth-o { opacity: 1; }
+.denti[data-state="curious"] .d-quest { opacity: 1; }
+.denti[data-state="curious"] .d-arm-l { animation: d-v-arm 2.20s ease-in-out infinite; --a0: 20deg; --a1: 20deg; }
+.denti[data-state="curious"] .d-arm-r { animation: d-v-arm 2.20s ease-in-out infinite; --a0: -20deg; --a1: -26deg; }
+.denti[data-state="curious"] .d-root { animation: d-v-body 2.20s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="curious"] .d-head { animation: d-v-head 2.20s ease-in-out infinite; --hr0: -10deg; --hr1: 10deg; }
+.denti[data-state="curious"] .d-mouth-o { transform: scale(.6); transform-box: fill-box; transform-origin: center; }
+.denti[data-state="suspicious"] .d-mouth-smile { opacity: 0; } .denti[data-state="suspicious"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="suspicious"] .d-lids { opacity: 1; }
+.denti[data-state="suspicious"] .d-sweat { opacity: 1; }
+.denti[data-state="suspicious"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="suspicious"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="suspicious"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="suspicious"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 4deg; --hr1: 6deg; }
+.denti[data-state="suspicious"] .d-eyes { transform: translate(-14px, 0); transition: transform .4s ease; }
+.denti[data-state="determined"] .d-mouth-smile { opacity: 0; } .denti[data-state="determined"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="determined"] .d-brows { opacity: 1; }
+.denti[data-state="determined"] .d-aura { opacity: 1; }
+.denti[data-state="determined"] .d-arm-l { animation: d-v-arm 0.70s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="determined"] .d-arm-r { animation: d-v-arm 0.70s ease-in-out infinite; --a0: -14deg; --a1: -18deg; }
+.denti[data-state="determined"] .d-root { animation: d-v-body 0.70s ease-in-out infinite; --s0: 1.03; --s1: 1.07; }
+.denti[data-state="determined"] .d-head { animation: d-v-head 0.70s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="focused"] .d-mouth-smile { opacity: 0; } .denti[data-state="focused"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="focused"] .d-scan { opacity: 1; }
+.denti[data-state="focused"] .d-sparks { opacity: 1; }
+.denti[data-state="focused"] .d-arm-l { animation: d-v-arm 3.00s ease-in-out infinite; --a0: -60deg; --a1: -64deg; }
+.denti[data-state="focused"] .d-arm-r { animation: d-v-arm 3.00s ease-in-out infinite; --a0: 60deg; --a1: 64deg; }
+.denti[data-state="focused"] .d-root { animation: d-v-body 3.00s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="focused"] .d-head { animation: d-v-head 3.00s ease-in-out infinite; --hr0: 3deg; --hr1: 5deg; }
+.denti[data-state="overwhelmed"] .d-eye-open { opacity: 0; } .denti[data-state="overwhelmed"] .d-eye-wow { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-mouth-smile { opacity: 0; } .denti[data-state="overwhelmed"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-sweat { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-quest { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-puffs { opacity: 1; }
+.denti[data-state="overwhelmed"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 150deg; --a1: 120deg; }
+.denti[data-state="overwhelmed"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -150deg; --a1: -120deg; }
+.denti[data-state="overwhelmed"] .d-root { animation: d-v-body 0.30s ease-in-out infinite; --x0: -4px; --x1: 4px; --y0: 0px; --y1: -6px; }
+.denti[data-state="overwhelmed"] .d-head { animation: d-v-head 0.30s ease-in-out infinite; --hr0: -6deg; --hr1: 6deg; }
+.denti[data-state="dreamy"] .d-eye-open { opacity: 0; } .denti[data-state="dreamy"] .d-eye-happy { opacity: 1; }
+.denti[data-state="dreamy"] .d-stars { opacity: 1; }
+.denti[data-state="dreamy"] .d-hearts { opacity: 1; }
+.denti[data-state="dreamy"] .d-arm-l { animation: d-v-arm 3.60s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="dreamy"] .d-arm-r { animation: d-v-arm 3.60s ease-in-out infinite; --a0: -14deg; --a1: -18deg; }
+.denti[data-state="dreamy"] .d-root { animation: d-v-body 3.60s ease-in-out infinite; --y0: -4px; --y1: -16px; }
+.denti[data-state="dreamy"] .d-head { animation: d-v-head 3.60s ease-in-out infinite; --hr0: 4deg; --hr1: 8deg; --hy0: -4px; --hy1: -10px; }
+.denti[data-state="dreamy"] .d-eyes { transform: translate(0, -8px); transition: transform .4s ease; }
+.denti[data-state="yawn"] .d-eye-open { opacity: 0; } .denti[data-state="yawn"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="yawn"] .d-mouth-smile { opacity: 0; } .denti[data-state="yawn"] .d-mouth-o { opacity: 1; }
+.denti[data-state="yawn"] .d-zzz { opacity: 1; }
+.denti[data-state="yawn"] .d-arm-l { animation: d-v-arm 2.80s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="yawn"] .d-arm-r { animation: d-v-arm 2.80s ease-in-out infinite; --a0: -10deg; --a1: -14deg; }
+.denti[data-state="yawn"] .d-root { animation: d-v-body 2.80s ease-in-out infinite; --y0: 0px; --y1: 6px; }
+.denti[data-state="yawn"] .d-head { animation: d-v-head 2.80s ease-in-out infinite; --hr0: 0deg; --hr1: -9deg; --hy0: 0px; --hy1: -8px; }
+.denti[data-state="yawn"] .d-mouth-o { animation: d-yawn 2.8s ease-in-out infinite; }
+.denti[data-state="tired"] .d-mouth-smile { opacity: 0; } .denti[data-state="tired"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="tired"] .d-lids { opacity: 1; }
+.denti[data-state="tired"] .d-zzz { opacity: 1; }
+.denti[data-state="tired"] .d-sweat { opacity: 1; }
+.denti[data-state="tired"] .d-arm-l { animation: d-v-arm 3.20s ease-in-out infinite; --a0: 8deg; --a1: 10deg; }
+.denti[data-state="tired"] .d-arm-r { animation: d-v-arm 3.20s ease-in-out infinite; --a0: -8deg; --a1: -10deg; }
+.denti[data-state="tired"] .d-root { animation: d-v-body 3.20s ease-in-out infinite; --y0: 6px; --y1: 10px; --s0: 0.99; --s1: 0.97; }
+.denti[data-state="tired"] .d-head { animation: d-v-head 3.20s ease-in-out infinite; --hr0: -3deg; --hr1: -6deg; --hy0: 8px; --hy1: 12px; }
+.denti[data-state="sick"] .d-lids { opacity: 1; }
+.denti[data-state="sick"] .d-mask { opacity: 1; }
+.denti[data-state="sick"] .d-thermo { opacity: 1; }
+.denti[data-state="sick"] .d-sweat { opacity: 1; }
+.denti[data-state="sick"] .d-arm-l { animation: d-v-arm 1.20s ease-in-out infinite; --a0: -75deg; --a1: -72deg; }
+.denti[data-state="sick"] .d-arm-r { animation: d-v-arm 1.20s ease-in-out infinite; --a0: 6deg; --a1: 8deg; }
+.denti[data-state="sick"] .d-root { animation: d-v-body 1.20s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="sick"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: -5deg; --hr1: 5deg; --hy0: 4px; --hy1: 6px; }
+.denti[data-state="freezing"] .d-mouth-smile { opacity: 0; } .denti[data-state="freezing"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="freezing"] .d-snow { opacity: 1; }
+.denti[data-state="freezing"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -75deg; --a1: -72deg; }
+.denti[data-state="freezing"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 75deg; --a1: 72deg; }
+.denti[data-state="freezing"] .d-root { animation: d-v-body 0.10s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="freezing"] .d-head { animation: d-v-head 0.10s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="hot"] .d-eye-open { opacity: 0; } .denti[data-state="hot"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="hot"] .d-mouth-smile { opacity: 0; } .denti[data-state="hot"] .d-mouth-o { opacity: 1; }
+.denti[data-state="hot"] .d-sun { opacity: 1; }
+.denti[data-state="hot"] .d-sweat { opacity: 1; }
+.denti[data-state="hot"] .d-steam { opacity: 1; }
+.denti[data-state="hot"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 22deg; }
+.denti[data-state="hot"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -14deg; --a1: -22deg; }
+.denti[data-state="hot"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="hot"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="hot"] .d-steam { transform: translate(-240px, 0); }
+.denti[data-state="hungry"] .d-eye-open { opacity: 0; } .denti[data-state="hungry"] .d-eye-wow { opacity: 1; }
+.denti[data-state="hungry"] .d-mouth-smile { opacity: 0; } .denti[data-state="hungry"] .d-mouth-talk { opacity: 1; }
+.denti[data-state="hungry"] .d-growl { opacity: 1; }
+.denti[data-state="hungry"] .d-arm-l { animation: d-v-arm 0.80s ease-in-out infinite; --a0: -75deg; --a1: -80deg; }
+.denti[data-state="hungry"] .d-arm-r { animation: d-v-arm 0.80s ease-in-out infinite; --a0: 75deg; --a1: 80deg; }
+.denti[data-state="hungry"] .d-root { animation: d-v-body 0.80s ease-in-out infinite; --y0: 0px; --y1: 4px; --s0: 1; --s1: 1.04; }
+.denti[data-state="hungry"] .d-head { animation: d-v-head 0.80s ease-in-out infinite; --hr0: 0deg; --hr1: 4deg; }
+.denti[data-state="welcome"] .d-eye-open { opacity: 0; } .denti[data-state="welcome"] .d-eye-happy { opacity: 1; }
+.denti[data-state="welcome"] .d-sparks { opacity: 1; }
+.denti[data-state="welcome"] .d-hearts { opacity: 1; }
+.denti[data-state="welcome"] .d-arm-l { animation: d-v-arm 1.80s ease-in-out infinite; --a0: 88deg; --a1: 96deg; }
+.denti[data-state="welcome"] .d-arm-r { animation: d-v-arm 1.80s ease-in-out infinite; --a0: -88deg; --a1: -96deg; }
+.denti[data-state="welcome"] .d-root { animation: d-v-body 1.80s ease-in-out infinite; --y0: 0px; --y1: -8px; }
+.denti[data-state="welcome"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="goodbye"] .d-eye-open { opacity: 0; } .denti[data-state="goodbye"] .d-eye-happy { opacity: 1; }
+.denti[data-state="goodbye"] .d-tears { opacity: 1; }
+.denti[data-state="goodbye"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="goodbye"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -128deg; --a1: -150deg; }
+.denti[data-state="goodbye"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --r0: -2deg; --r1: 2deg; }
+.denti[data-state="goodbye"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: 3deg; --hr1: -3deg; }
+.denti[data-state="thumbsup"] .d-eye-open { opacity: 0; } .denti[data-state="thumbsup"] .d-eye-happy { opacity: 1; }
+.denti[data-state="thumbsup"] .d-mouth-smile { opacity: 0; } .denti[data-state="thumbsup"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="thumbsup"] .d-thumb { opacity: 1; }
+.denti[data-state="thumbsup"] .d-sparks { opacity: 1; }
+.denti[data-state="thumbsup"] .d-arm-l { animation: d-v-arm 1.40s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="thumbsup"] .d-arm-r { animation: d-v-arm 1.40s ease-in-out infinite; --a0: -128deg; --a1: -122deg; }
+.denti[data-state="thumbsup"] .d-root { animation: d-v-body 1.40s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="thumbsup"] .d-head { animation: d-v-head 1.40s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="heart_hands"] .d-eye-open { opacity: 0; } .denti[data-state="heart_hands"] .d-eye-heart { opacity: 1; }
+.denti[data-state="heart_hands"] .d-heartbig { opacity: 1; }
+.denti[data-state="heart_hands"] .d-cheeks { opacity: 1; }
+.denti[data-state="heart_hands"] .d-arm-l { animation: d-v-arm 2.20s ease-in-out infinite; --a0: 150deg; --a1: 156deg; }
+.denti[data-state="heart_hands"] .d-arm-r { animation: d-v-arm 2.20s ease-in-out infinite; --a0: -150deg; --a1: -156deg; }
+.denti[data-state="heart_hands"] .d-root { animation: d-v-body 2.20s ease-in-out infinite; --y0: -4px; --y1: -12px; }
+.denti[data-state="heart_hands"] .d-head { animation: d-v-head 2.20s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="pray"] .d-eye-open { opacity: 0; } .denti[data-state="pray"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="pray"] .d-pray { opacity: 1; }
+.denti[data-state="pray"] .d-sparks { opacity: 1; }
+.denti[data-state="pray"] .d-arm-l { animation: d-v-arm 3.00s ease-in-out infinite; --a0: -112deg; --a1: -112deg; }
+.denti[data-state="pray"] .d-arm-r { animation: d-v-arm 3.00s ease-in-out infinite; --a0: 112deg; --a1: 112deg; }
+.denti[data-state="pray"] .d-root { animation: d-v-body 3.00s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="pray"] .d-head { animation: d-v-head 3.00s ease-in-out infinite; --hr0: 0deg; --hr1: -3deg; --hy0: 4px; --hy1: 6px; }
+.denti[data-state="whisper"] .d-mouth-smile { opacity: 0; } .denti[data-state="whisper"] .d-mouth-o { opacity: 1; }
+.denti[data-state="whisper"] .d-whisper { opacity: 1; }
+.denti[data-state="whisper"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="whisper"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="whisper"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="whisper"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: -7deg; --hr1: -5deg; }
+.denti[data-state="whisper"] .d-eyes { transform: translate(14px, 0); transition: transform .4s ease; } .denti[data-state="whisper"] .d-mouth-o { transform: scale(.55); transform-box: fill-box; transform-origin: center; }
+.denti[data-state="shush"] .d-mouth-smile { opacity: 0; } .denti[data-state="shush"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="shush"] .d-finger { opacity: 1; }
+.denti[data-state="shush"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="shush"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="shush"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -3px; }
+.denti[data-state="shush"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 0deg; --hr1: 2deg; }
+.denti[data-state="listen"] .d-earhand { opacity: 1; }
+.denti[data-state="listen"] .d-waves { opacity: 1; }
+.denti[data-state="listen"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="listen"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="listen"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -3px; }
+.denti[data-state="listen"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 8deg; --hr1: 11deg; }
+.denti[data-state="listen"] .d-eyes { transform: translate(10px, 0); transition: transform .4s ease; }
+.denti[data-state="slowclap"] .d-mouth-smile { opacity: 0; } .denti[data-state="slowclap"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="slowclap"] .d-lids { opacity: 1; }
+.denti[data-state="slowclap"] .d-arm-l { animation: d-v-arm 1.80s ease-in-out infinite; --a0: -70deg; --a1: -82deg; }
+.denti[data-state="slowclap"] .d-arm-r { animation: d-v-arm 1.80s ease-in-out infinite; --a0: 70deg; --a1: 82deg; }
+.denti[data-state="slowclap"] .d-root { animation: d-v-body 1.80s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="slowclap"] .d-head { animation: d-v-head 1.80s ease-in-out infinite; --hr0: 0deg; --hr1: -2deg; }
+.denti[data-state="facepalm"] .d-mouth-smile { opacity: 0; } .denti[data-state="facepalm"] .d-mouth-sad { opacity: 1; }
+.denti[data-state="facepalm"] .d-facepalm { opacity: 1; }
+.denti[data-state="facepalm"] .d-sweat { opacity: 1; }
+.denti[data-state="facepalm"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 10deg; --a1: 14deg; }
+.denti[data-state="facepalm"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -10deg; --a1: -14deg; }
+.denti[data-state="facepalm"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 6px; --y1: 9px; }
+.denti[data-state="facepalm"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: -4deg; --hr1: -7deg; --hy0: 8px; --hy1: 12px; }
+.denti[data-state="party"] .d-eye-open { opacity: 0; } .denti[data-state="party"] .d-eye-happy { opacity: 1; }
+.denti[data-state="party"] .d-mouth-smile { opacity: 0; } .denti[data-state="party"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="party"] .d-hat { opacity: 1; }
+.denti[data-state="party"] .d-stars { opacity: 1; }
+.denti[data-state="party"] .d-notes { opacity: 1; }
+.denti[data-state="party"] .d-sparks { opacity: 1; }
+.denti[data-state="party"] .d-arm-l { animation: d-v-arm 0.80s ease-in-out infinite; --a0: 150deg; --a1: 160deg; }
+.denti[data-state="party"] .d-arm-r { animation: d-v-arm 0.80s ease-in-out infinite; --a0: -150deg; --a1: -160deg; }
+.denti[data-state="party"] .d-root { animation: d-v-body 0.80s ease-in-out infinite; --y0: 0px; --y1: -22px; }
+.denti[data-state="party"] .d-head { animation: d-v-head 0.80s ease-in-out infinite; --hr0: -4deg; --hr1: 4deg; }
+.denti[data-state="birthday"] .d-eye-open { opacity: 0; } .denti[data-state="birthday"] .d-eye-happy { opacity: 1; }
+.denti[data-state="birthday"] .d-hat { opacity: 1; }
+.denti[data-state="birthday"] .d-cake { opacity: 1; }
+.denti[data-state="birthday"] .d-stars { opacity: 1; }
+.denti[data-state="birthday"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -72deg; --a1: -76deg; }
+.denti[data-state="birthday"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 72deg; --a1: 76deg; }
+.denti[data-state="birthday"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="birthday"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="gift"] .d-eye-open { opacity: 0; } .denti[data-state="gift"] .d-eye-happy { opacity: 1; }
+.denti[data-state="gift"] .d-gift { opacity: 1; }
+.denti[data-state="gift"] .d-hearts { opacity: 1; }
+.denti[data-state="gift"] .d-sparks { opacity: 1; }
+.denti[data-state="gift"] .d-arm-l { animation: d-v-arm 1.40s ease-in-out infinite; --a0: -72deg; --a1: -76deg; }
+.denti[data-state="gift"] .d-arm-r { animation: d-v-arm 1.40s ease-in-out infinite; --a0: 72deg; --a1: 76deg; }
+.denti[data-state="gift"] .d-root { animation: d-v-body 1.40s ease-in-out infinite; --y0: 0px; --y1: -6px; }
+.denti[data-state="gift"] .d-head { animation: d-v-head 1.40s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="flag"] .d-eye-open { opacity: 0; } .denti[data-state="flag"] .d-eye-happy { opacity: 1; }
+.denti[data-state="flag"] .d-mouth-smile { opacity: 0; } .denti[data-state="flag"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="flag"] .d-flag { opacity: 1; }
+.denti[data-state="flag"] .d-stars { opacity: 1; }
+.denti[data-state="flag"] .d-arm-l { animation: d-v-arm 1.40s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="flag"] .d-arm-r { animation: d-v-arm 1.40s ease-in-out infinite; --a0: -128deg; --a1: -134deg; }
+.denti[data-state="flag"] .d-root { animation: d-v-body 1.40s ease-in-out infinite; --r0: -2deg; --r1: 2deg; }
+.denti[data-state="flag"] .d-head { animation: d-v-head 1.40s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="sing"] .d-eye-open { opacity: 0; } .denti[data-state="sing"] .d-eye-sleep { opacity: 1; }
+.denti[data-state="sing"] .d-mouth-smile { opacity: 0; } .denti[data-state="sing"] .d-mouth-talk { opacity: 1; }
+.denti[data-state="sing"] .d-mic { opacity: 1; }
+.denti[data-state="sing"] .d-notes { opacity: 1; }
+.denti[data-state="sing"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 18deg; }
+.denti[data-state="sing"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -128deg; --a1: -132deg; }
+.denti[data-state="sing"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --r0: -3deg; --r1: 3deg; }
+.denti[data-state="sing"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -5deg; --hr1: 5deg; }
+.denti[data-state="loading"] .d-mouth-smile { opacity: 0; } .denti[data-state="loading"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="loading"] .d-spinner { opacity: 1; }
+.denti[data-state="loading"] .d-scan { opacity: 1; }
+.denti[data-state="loading"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="loading"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -14deg; --a1: -14deg; }
+.denti[data-state="loading"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -5px; }
+.denti[data-state="loading"] .d-head { animation: d-v-head 3.00s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="success"] .d-eye-open { opacity: 0; } .denti[data-state="success"] .d-eye-happy { opacity: 1; }
+.denti[data-state="success"] .d-check { opacity: 1; }
+.denti[data-state="success"] .d-sparks { opacity: 1; }
+.denti[data-state="success"] .d-stars { opacity: 1; }
+.denti[data-state="success"] .d-arm-l { animation: d-v-arm 0.70s ease-in-out infinite; --a0: 150deg; --a1: 156deg; }
+.denti[data-state="success"] .d-arm-r { animation: d-v-arm 0.70s ease-in-out infinite; --a0: -150deg; --a1: -156deg; }
+.denti[data-state="success"] .d-root { animation: d-v-body 0.70s ease-in-out infinite; --y0: 0px; --y1: -14px; }
+.denti[data-state="success"] .d-head { animation: d-v-head 0.70s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="warning"] .d-eye-open { opacity: 0; } .denti[data-state="warning"] .d-eye-wow { opacity: 1; }
+.denti[data-state="warning"] .d-mouth-smile { opacity: 0; } .denti[data-state="warning"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="warning"] .d-warn { opacity: 1; }
+.denti[data-state="warning"] .d-exclaim { opacity: 1; }
+.denti[data-state="warning"] .d-sweat { opacity: 1; }
+.denti[data-state="warning"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="warning"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -128deg; --a1: -118deg; }
+.denti[data-state="warning"] .d-root { animation: d-v-body 0.30s ease-in-out infinite; --x0: -2px; --x1: 2px; }
+.denti[data-state="warning"] .d-head { animation: d-v-head 0.30s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="error"] .d-eye-open { opacity: 0; } .denti[data-state="error"] .d-xeyes { opacity: 1; }
+.denti[data-state="error"] .d-mouth-smile { opacity: 0; } .denti[data-state="error"] .d-mouth-wavy { opacity: 1; }
+.denti[data-state="error"] .d-glitch { opacity: 1; }
+.denti[data-state="error"] .d-vein { opacity: 1; }
+.denti[data-state="error"] .d-arm-l { animation: d-v-arm 0.30s ease-in-out infinite; --a0: 60deg; --a1: -40deg; }
+.denti[data-state="error"] .d-arm-r { animation: d-v-arm 0.30s ease-in-out infinite; --a0: -60deg; --a1: 40deg; }
+.denti[data-state="error"] .d-root { animation: d-v-body 0.18s ease-in-out infinite; --x0: -5px; --x1: 6px; --y0: 0px; --y1: -3px; }
+.denti[data-state="error"] .d-head { animation: d-v-head 0.15s ease-in-out infinite; --hr0: -5deg; --hr1: 6deg; }
+.denti[data-state="lock"] .d-mouth-smile { opacity: 0; } .denti[data-state="lock"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="lock"] .d-lock { opacity: 1; }
+.denti[data-state="lock"] .d-arm-l { animation: d-v-arm 2.40s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="lock"] .d-arm-r { animation: d-v-arm 2.40s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="lock"] .d-root { animation: d-v-body 2.40s ease-in-out infinite; --y0: 0px; --y1: -2px; }
+.denti[data-state="lock"] .d-head { animation: d-v-head 2.40s ease-in-out infinite; --hr0: 0deg; --hr1: 1deg; }
+.denti[data-state="shield"] .d-shield { opacity: 1; }
+.denti[data-state="shield"] .d-sparks { opacity: 1; }
+.denti[data-state="shield"] .d-arm-l { animation: d-v-arm 2.00s ease-in-out infinite; --a0: -75deg; --a1: -78deg; }
+.denti[data-state="shield"] .d-arm-r { animation: d-v-arm 2.00s ease-in-out infinite; --a0: 75deg; --a1: 78deg; }
+.denti[data-state="shield"] .d-root { animation: d-v-body 2.00s ease-in-out infinite; --y0: 0px; --y1: -4px; }
+.denti[data-state="shield"] .d-head { animation: d-v-head 2.00s ease-in-out infinite; --hr0: -2deg; --hr1: 2deg; }
+.denti[data-state="hourglass"] .d-mouth-smile { opacity: 0; } .denti[data-state="hourglass"] .d-mouth-flat { opacity: 1; }
+.denti[data-state="hourglass"] .d-hourglass { opacity: 1; }
+.denti[data-state="hourglass"] .d-arm-l { animation: d-v-arm 2.60s ease-in-out infinite; --a0: -75deg; --a1: -75deg; }
+.denti[data-state="hourglass"] .d-arm-r { animation: d-v-arm 2.60s ease-in-out infinite; --a0: 75deg; --a1: 75deg; }
+.denti[data-state="hourglass"] .d-root { animation: d-v-body 2.60s ease-in-out infinite; --y0: 0px; --y1: -3px; }
+.denti[data-state="hourglass"] .d-head { animation: d-v-head 3.20s ease-in-out infinite; --hr0: 5deg; --hr1: -5deg; }
+.denti[data-state="hourglass"] .d-eyes { transform: translate(0, -6px); transition: transform .4s ease; }
+.denti[data-state="chart"] .d-chart { opacity: 1; }
+.denti[data-state="chart"] .d-sparks { opacity: 1; }
+.denti[data-state="chart"] .d-arm-l { animation: d-v-arm 1.60s ease-in-out infinite; --a0: 14deg; --a1: 14deg; }
+.denti[data-state="chart"] .d-arm-r { animation: d-v-arm 1.60s ease-in-out infinite; --a0: -128deg; --a1: -120deg; }
+.denti[data-state="chart"] .d-root { animation: d-v-body 1.60s ease-in-out infinite; --y0: 0px; --y1: -5px; }
+.denti[data-state="chart"] .d-head { animation: d-v-head 1.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+.denti[data-state="money"] .d-eye-open { opacity: 0; } .denti[data-state="money"] .d-eye-coin { opacity: 1; }
+.denti[data-state="money"] .d-mouth-smile { opacity: 0; } .denti[data-state="money"] .d-mouth-grin { opacity: 1; }
+.denti[data-state="money"] .d-sparks { opacity: 1; }
+.denti[data-state="money"] .d-stars { opacity: 1; }
+.denti[data-state="money"] .d-arm-l { animation: d-v-arm 0.60s ease-in-out infinite; --a0: -72deg; --a1: -84deg; }
+.denti[data-state="money"] .d-arm-r { animation: d-v-arm 0.60s ease-in-out infinite; --a0: 72deg; --a1: 84deg; }
+.denti[data-state="money"] .d-root { animation: d-v-body 0.60s ease-in-out infinite; --y0: 0px; --y1: -14px; }
+.denti[data-state="money"] .d-head { animation: d-v-head 0.60s ease-in-out infinite; --hr0: -3deg; --hr1: 3deg; }
+/* gerakan khusus bagian */
+.denti[data-state="gloomy"] .d-rain, .denti[data-state="gloomy"] .d-rain-1 { animation: d-v-fall 1.1s ease-in infinite; }
+.denti .d-rain-2 { animation-delay: .35s; } .denti .d-rain-3 { animation-delay: .7s; }
+.denti[data-state="freezing"] .d-flake { animation: d-v-fall 2s linear infinite; }
+.denti .d-flake-2 { animation-delay: .4s; } .denti .d-flake-3 { animation-delay: .8s; } .denti .d-flake-4 { animation-delay: 1.2s; } .denti .d-flake-5 { animation-delay: 1.6s; }
+.denti[data-state="hot"] .d-sun { animation: d-v-pop 1.6s ease-in-out infinite; transform-origin: 340px 40px; }
+.denti[data-state="determined"] .d-flame, .denti[data-state="birthday"] .d-flame { animation: d-v-flicker .5s ease-in-out infinite; }
+.denti[data-state="determined"] .d-brows { opacity: 1; }
+.denti[data-state="flag"] .d-flagcloth { animation: d-v-wave 1s ease-in-out infinite; transform-origin: 2px -68px; }
+.denti[data-state="loading"] .d-spin-arc { animation: d-v-spinz 1s linear infinite; }
+.denti[data-state="hourglass"] .d-hourglass { animation: d-v-sandflip 3.2s ease-in-out infinite; }
+.denti[data-state="success"] .d-check, .denti[data-state="shield"] .d-shield, .denti[data-state="warning"] .d-warn, .denti[data-state="lock"] .d-lock, .denti[data-state="chart"] .d-chart { animation: d-v-pop 1.2s ease-in-out infinite; }
+.denti[data-state="error"] .d-glitch { animation: d-v-glitch .4s steps(2) infinite; }
+.denti[data-state="error"] .d-xeyes { animation: d-v-glitch .5s steps(2) infinite; }
+.denti[data-state="party"] .d-hat { animation: none; }
+.denti[data-state="growl"], .denti[data-state="hungry"] .d-growl { animation: d-v-pop .8s ease-in-out infinite; transform-origin: 200px 456px; }
+.denti[data-state="slowclap"] .d-arm-r { animation-delay: .9s; }
+.denti[data-state="listen"] .d-waves { transform: translateX(-30px); }
+.denti[data-state="sick"] .d-sweat { opacity: 1; }
+.denti[data-state="grateful"] .d-tear-1, .denti[data-state="grateful"] .d-tear-2 { animation-duration: 1.8s; }
+.denti[data-state="goodbye"] .d-tear-3, .denti[data-state="goodbye"] .d-tear-4, .denti[data-state="goodbye"] .d-tear-2, .denti[data-state="grateful"] .d-tear-3, .denti[data-state="grateful"] .d-tear-4 { display: none; }
+.denti[data-state="goodbye"] .d-tear, .denti[data-state="grateful"] .d-tear { animation: d-tear-fall 1.8s ease-in infinite; }
+
+/* ═════ SISTEM LOD · Optimasi Ketajaman &amp; Performa ═════ */
+.denti .d-orbit-dot { animation: d-pulse 3.6s ease-in-out infinite; }
+.denti .d-orbit-dot-2 { animation-delay: 1.8s; }
+
+/* Pada LOD mini (≤ 72px), sembunyikan partikel latar mikro (.d-orbit, .d-sparks saat idle) agar siluet tajam &amp; bebas artefak sub-piksel */
+.denti[data-lod="mini"] .d-orbit { opacity: 0; pointer-events: none; }
+.denti[data-lod="mini"][data-state="idle"] .d-sparks { opacity: 0; }
+.denti[data-lod="mini"] .d-spark { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .denti, .denti * { animation: none !important; transition: none !important; }
+}
+
+.denti{--d-outline:#163047}.dark .denti,.denti[data-theme="dark"]{--d-outline:#F8FAFC}
+.denti,.denti *{animation:none!important;transition:none!important}
+.denti[data-state="talk"] .d-arm-r{transform:rotate(-38deg)}
+</style>
+  <defs>
+    <linearGradient id="ds-talk-INSTANCE-shell" x1=".25" y1="0" x2=".65" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" />
+      <stop offset=".58" stop-color="#F8FAFC" />
+      <stop offset="1" stop-color="#CBD5E1" />
+    </linearGradient>
+    <clipPath id="ds-talk-INSTANCE-bodyClip">
+      <path d="M200 270 C258 270 290 306 290 354 C290 410 252 444 200 444 C148 444 110 410 110 354 C110 306 142 270 200 270 Z" />
+    </clipPath>
+    <clipPath id="ds-talk-INSTANCE-visorClip">
+      <path d="M200 88 C270 88 304 106 304 160 L304 176 C304 222 274 240 200 240 C126 240 96 222 96 176 L96 160 C96 106 130 88 200 88 Z" />
+    </clipPath>
+  </defs>
+  <g class="d-orbit" transform="rotate(-14 200 252)">
+    <path id="ds-talk-INSTANCE-orbit" d="M22 252 a178 64 0 1 0 356 0 a178 64 0 1 0 -356 0" fill="none" stroke="#e6c698" stroke-width="7" opacity=".4" />
+    <circle class="d-orbit-dot d-orbit-dot-1" cx="22" cy="252" r="4.5" fill="#fff1d6" />
+    <circle class="d-orbit-dot d-orbit-dot-2" cx="378" cy="252" r="3.5" fill="#a9e4ff" />
+  </g>
+  <g class="d-shadow">
+    <ellipse cx="200" cy="466" rx="140" ry="22" fill="#CBD5E1" />
+    <ellipse class="d-ring-1" cx="200" cy="464" rx="122" ry="16" fill="none" stroke="#6cc4ff" stroke-width="7" opacity=".82" />
+    <ellipse class="d-ring-2" cx="200" cy="464" rx="88" ry="11" fill="none" stroke="#ecca97" stroke-width="7" opacity=".88" />
+    <ellipse class="d-ring-3" cx="200" cy="464" rx="54" ry="7" fill="none" stroke="#a9e4ff" stroke-width="7" opacity=".65" />
+  </g>
+  <g class="d-lean">
+    <g class="d-root">
+      <g class="d-figure">
+        <g class="d-body">
+          <path d="M200 270 C258 270 290 306 290 354 C290 410 252 444 200 444 C148 444 110 410 110 354 C110 306 142 270 200 270 Z" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+          <g clip-path="url(#ds-talk-INSTANCE-bodyClip)">
+            <ellipse cx="112" cy="420" rx="46" ry="62" fill="#0F766E" opacity=".88" />
+            <ellipse cx="288" cy="420" rx="46" ry="62" fill="#0F766E" opacity=".88" />
+            <path d="M150 300 C162 288 178 282 196 281" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".95" />
+          </g>
+          <path d="M152 404 C174 424 226 424 248 404" stroke="#8faad4" stroke-width="7" fill="none" opacity=".6" />
+          <g class="d-chest">
+            <circle cx="200" cy="336" r="35" fill="#CBD5E1" />
+            <circle cx="200" cy="336" r="29" fill="#0b1324" />
+            <circle cx="200" cy="336" r="29" fill="none" stroke="#E7C98B" stroke-width="7" />
+            <circle class="d-chest-core" cx="200" cy="336" r="20" fill="#5EEAD4" />
+            <ellipse cx="193" cy="328" rx="6" ry="4" fill="#fff" opacity=".9" />
+            <g class="d-chest-heart">
+              <g transform="translate(200 323) scale(1.15)">
+                <path d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" fill="#ff8fb8" />
+              </g>
+            </g>
+          </g>
+        </g>
+        <ellipse cx="200" cy="266" rx="54" ry="12" fill="#0d1628" />
+        <ellipse cx="200" cy="264" rx="44" ry="6" fill="none" stroke="#6cc4ff" stroke-width="7" opacity=".8" />
+        <g class="d-head">
+          <g class="d-fin-l">
+            <path d="M60 128 C42 108 40 78 52 56 C66 72 72 102 68 128 Z" fill="#0F766E" stroke="var(--d-outline, #163047)" stroke-width="7" />
+          </g>
+          <g class="d-fin-r">
+            <path d="M340 128 C358 108 360 78 348 56 C334 72 328 102 332 128 Z" fill="#0F766E" stroke="var(--d-outline, #163047)" stroke-width="7" />
+          </g>
+          <g class="d-ear-l">
+            <rect x="46" y="122" width="40" height="88" rx="20" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <ellipse cx="58" cy="166" rx="18" ry="36" fill="none" stroke="#E7C98B" stroke-width="7" />
+            <ellipse class="d-ear-face" cx="58" cy="166" rx="13" ry="29" fill="#0F766E" />
+            <ellipse cx="55" cy="152" rx="4" ry="9" fill="#fff" opacity=".75" />
+          </g>
+          <g class="d-ear-r">
+            <rect x="314" y="122" width="40" height="88" rx="20" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <ellipse cx="342" cy="166" rx="18" ry="36" fill="none" stroke="#E7C98B" stroke-width="7" />
+            <ellipse class="d-ear-face" cx="342" cy="166" rx="13" ry="29" fill="#0F766E" />
+            <ellipse cx="345" cy="152" rx="4" ry="9" fill="#fff" opacity=".75" />
+          </g>
+          <path d="M200 56 C282 56 330 84 330 152 L330 176 C330 236 290 262 200 262 C110 262 70 236 70 176 L70 152 C70 84 118 56 200 56 Z" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+          <path d="M104 98 C124 76 152 66 186 64" stroke="#fff" stroke-width="10.0" fill="none" stroke-linecap="round" opacity=".95" />
+          <g class="d-visor">
+            <path d="M200 88 C270 88 304 106 304 160 L304 176 C304 222 274 240 200 240 C126 240 96 222 96 176 L96 160 C96 106 130 88 200 88 Z" fill="#0B1220" />
+            <path class="d-visor-rim" d="M200 88 C270 88 304 106 304 160 L304 176 C304 222 274 240 200 240 C126 240 96 222 96 176 L96 160 C96 106 130 88 200 88 Z" fill="none" stroke="#5fbaff" stroke-width="7" opacity=".75" />
+            <path d="M128 112 C156 100 196 98 236 102" stroke="#fff" stroke-opacity=".22" stroke-width="8.0" fill="none" stroke-linecap="round" />
+            <g class="d-brackets" fill="none" stroke="#6fdcff" stroke-width="7" stroke-linecap="round">
+              <path d="M120 134 v-10 q0 -8 8 -8 h10" />
+              <path d="M280 134 v-10 q0 -8 -8 -8 h-10" />
+              <path d="M120 194 v10 q0 8 8 8 h10" />
+              <path d="M280 194 v10 q0 8 -8 8 h-10" />
+            </g>
+            <g clip-path="url(#ds-talk-INSTANCE-visorClip)">
+              <g class="d-scan">
+                <rect x="96" y="66" width="208" height="28" fill="#5EEAD4" />
+                <rect x="96" y="93" width="208" height="3" fill="#8fe8ff" />
+              </g>
+            </g>
+          </g>
+          <g class="d-gaze">
+            <g class="d-eyes">
+              <g class="d-eye-open">
+                <ellipse class="d-eye d-eye-l" cx="162" cy="160" rx="17" ry="21" fill="#5EEAD4" />
+                <ellipse class="d-eye d-eye-r" cx="238" cy="160" rx="17" ry="21" fill="#5EEAD4" />
+              </g>
+              <g class="d-eye-happy" fill="none" stroke="#5EEAD4" stroke-width="12.8" stroke-linecap="round">
+                <path d="M140 170 Q162 140 184 170" />
+                <path d="M216 170 Q238 140 260 170" />
+              </g>
+              <g class="d-eye-sleep" fill="none" stroke="#5EEAD4" stroke-width="8.8" stroke-linecap="round">
+                <path d="M142 164 Q162 176 182 164" />
+                <path d="M218 164 Q238 176 258 164" />
+              </g>
+              <g class="d-eye-wow" fill="none" stroke="#5EEAD4" stroke-width="7.8">
+                <circle cx="162" cy="160" r="18" />
+                <circle cx="238" cy="160" r="18" />
+              </g>
+              <g class="d-eye-heart" fill="#ff8fb8">
+                <g transform="translate(162 143) scale(1.75)">
+                  <path class="d-eyeheart" d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" />
+                </g>
+                <g transform="translate(238 143) scale(1.75)">
+                  <path class="d-eyeheart" d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" />
+                </g>
+              </g>
+            </g>
+            <g class="d-lids" fill="#070b16">
+              <path d="M136 128 L190 128 L190 146 L136 166 Z" />
+              <path d="M264 128 L210 128 L210 146 L264 166 Z" />
+            </g>
+            <g class="d-shades">
+              <path d="M130 138 H192 V170 Q192 188 172 188 H150 Q130 188 130 168 Z" fill="#05080f" stroke="#E7C98B" stroke-width="7" />
+              <path d="M208 138 H270 V168 Q270 188 250 188 H228 Q208 188 208 170 Z" fill="#05080f" stroke="#E7C98B" stroke-width="7" />
+              <path d="M192 148 H208" stroke="#E7C98B" stroke-width="7" stroke-linecap="round" />
+              <path d="M138 146 L158 146 L146 166 Z" fill="#fff" opacity=".22" />
+              <path d="M216 146 L236 146 L224 166 Z" fill="#fff" opacity=".22" />
+            </g>
+            <g class="d-brows" fill="none" stroke="#ff8a7a" stroke-width="9.0" stroke-linecap="round">
+              <path d="M134 126 L190 148" />
+              <path d="M266 126 L210 148" />
+            </g>
+            <g class="d-tears" fill="#9fe0ff">
+              <g transform="translate(146 184)">
+                <path class="d-tear d-tear-1" d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" />
+              </g>
+              <g transform="translate(254 184)">
+                <path class="d-tear d-tear-2" d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" />
+              </g>
+              <g transform="translate(176 188)">
+                <path class="d-tear d-tear-3" d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" />
+              </g>
+              <g transform="translate(224 188)">
+                <path class="d-tear d-tear-4" d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" />
+              </g>
+            </g>
+            <g class="d-spirals" fill="none" stroke="#5EEAD4" stroke-width="7" stroke-linecap="round">
+              <g transform="translate(162 160)">
+                <path class="d-spiral" d="M0 0 a4 4 0 0 1 8 0 a8 8 0 0 1 -16 0 a12 12 0 0 1 24 0 a16 16 0 0 1 -32 0" />
+              </g>
+              <g transform="translate(238 160)">
+                <path class="d-spiral d-spiral-r" d="M0 0 a4 4 0 0 1 8 0 a8 8 0 0 1 -16 0 a12 12 0 0 1 24 0 a16 16 0 0 1 -32 0" />
+              </g>
+            </g>
+            <g class="d-brows-w" fill="none" stroke="#bfeeff" stroke-width="7" stroke-linecap="round">
+              <path d="M138 142 L186 124" />
+              <path d="M262 142 L214 124" />
+            </g>
+            <g class="d-xeyes" fill="none" stroke="#ff8a8a" stroke-width="9.0" stroke-linecap="round">
+              <path d="M146 144 L178 176 M178 144 L146 176" />
+              <path d="M222 144 L254 176 M254 144 L222 176" />
+            </g>
+            <g class="d-eye-star" fill="#5EEAD4">
+              <g transform="translate(162 160) scale(1.7)">
+                <path d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+              </g>
+              <g transform="translate(238 160) scale(1.7)">
+                <path d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+              </g>
+            </g>
+            <g class="d-eye-coin">
+              <circle cx="162" cy="160" r="19" fill="#E7C98B" stroke="#fff4de" stroke-width="7" />
+              <text x="162" y="170" text-anchor="middle" font-size="27" font-weight="800" fill="#7a5420" font-family="Inter, system-ui, sans-serif">$</text>
+              <circle cx="238" cy="160" r="19" fill="#E7C98B" stroke="#fff4de" stroke-width="7" />
+              <text x="238" y="170" text-anchor="middle" font-size="27" font-weight="800" fill="#7a5420" font-family="Inter, system-ui, sans-serif">$</text>
+            </g>
+          </g>
+          <g class="d-gaze-soft">
+            <g class="d-mouth">
+              <path class="d-mouth-smile" d="M178 196 Q200 216 222 196" fill="none" stroke="#5EEAD4" stroke-width="7" stroke-linecap="round" />
+              <ellipse class="d-mouth-talk" cx="200" cy="200" rx="11" ry="7" fill="#5EEAD4" />
+              <ellipse class="d-mouth-o" cx="200" cy="202" rx="7" ry="8" fill="none" stroke="#5EEAD4" stroke-width="7" />
+              <path class="d-mouth-sad" d="M186 208 Q200 196 214 208" fill="none" stroke="#5EEAD4" stroke-width="7" stroke-linecap="round" />
+              <path class="d-mouth-flat" d="M186 206 H214" fill="none" stroke="#5EEAD4" stroke-width="7" stroke-linecap="round" />
+              <path class="d-mouth-wavy" d="M182 206 q4 -8 8 0 t8 0 t8 0 t8 0" fill="none" stroke="#5EEAD4" stroke-width="7" stroke-linecap="round" />
+              <path class="d-mouth-grin" d="M176 194 Q200 224 224 194 Z" fill="#5EEAD4" />
+            </g>
+          </g>
+          <g class="d-cheeks">
+            <ellipse cx="134" cy="196" rx="15" ry="8" fill="#ff9cc0" opacity=".55" />
+            <ellipse cx="266" cy="196" rx="15" ry="8" fill="#ff9cc0" opacity=".55" />
+          </g>
+          <g class="d-mask">
+            <path d="M156 192 Q200 184 244 192 L240 224 Q200 238 160 224 Z" fill="#e9f7ff" stroke="#7cc4ff" stroke-width="7" />
+            <path d="M164 203 H236 M166 213 H234" stroke="#bcd9f5" stroke-width="7" />
+            <path d="M156 194 Q136 190 130 176 M244 194 Q264 190 270 176" fill="none" stroke="#7cc4ff" stroke-width="7" />
+          </g>
+          <g class="d-hat">
+            <path d="M168 72 L200 4 L232 72 Z" fill="#ff8fb8" stroke="#fff" stroke-width="7" />
+            <path d="M178 52 H222 M187 34 H213" stroke="#fff4de" stroke-width="7" stroke-linecap="round" />
+            <circle cx="200" cy="4" r="8" fill="#ffd76a" />
+          </g>
+          <g class="d-finger">
+            <rect x="193" y="188" width="14" height="48" rx="7" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <path d="M184 232 Q200 252 216 232 L216 246 Q200 266 184 246 Z" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+          </g>
+          <g class="d-whisper">
+            <ellipse cx="256" cy="208" rx="20" ry="27" transform="rotate(-20 256 208)" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <path d="M244 192 l10 -9 M249 202 l13 -7" stroke="#9fb7dc" stroke-width="7" stroke-linecap="round" />
+          </g>
+          <g class="d-earhand">
+            <path d="M330 168 Q362 146 360 190 Q356 218 330 206 Z" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <path d="M342 176 q8 -2 8 8" fill="none" stroke="#9fb7dc" stroke-width="7" stroke-linecap="round" />
+          </g>
+          <g class="d-facepalm">
+            <ellipse cx="200" cy="170" rx="56" ry="42" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <path d="M160 150 V128 M181 142 V118 M204 140 V116 M227 144 V122" stroke="#9fb7dc" stroke-width="7" stroke-linecap="round" />
+          </g>
+        </g>
+        <g class="d-arm-l">
+          <g transform="translate(90 322) rotate(22)">
+            <path d="M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <path d="M-27 0 A27 27 0 0 1 27 0 L27 10 C16 17 -16 17 -27 10 Z" fill="#0F766E" />
+            <path d="M-26 20 C-12 28 12 28 26 20" stroke="#E7C98B" stroke-width="7" fill="none" stroke-linecap="round" />
+            <path d="M-15 32 C-15 52 -14 70 -12 82" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85" />
+            <g class="d-clip">
+              <g transform="translate(0 116) rotate(53)">
+                <rect x="-24" y="-32" width="48" height="64" rx="5" fill="#fff" stroke="#E7C98B" stroke-width="7" />
+                <rect x="-10" y="-38" width="20" height="10" rx="3" fill="#E7C98B" />
+                <path d="M-14 -14 H14 M-14 -2 H14 M-14 10 H6" stroke="#7cc4ff" stroke-width="7" stroke-linecap="round" />
+                <path d="M-12 20 l4 4 l9 -10" fill="none" stroke="#3ddc84" stroke-width="7" stroke-linecap="round" />
+              </g>
+            </g>
+            <g class="d-book">
+              <g transform="translate(0 116) rotate(53)">
+                <path d="M-32 -22 H-2 V24 H-32 Z M2 -22 H32 V24 H2 Z" fill="#fff" stroke="#7cc4ff" stroke-width="7" stroke-linejoin="round" />
+                <path d="M-25 -10 H-9 M-25 0 H-9 M-25 10 H-9 M9 -10 H25 M9 0 H25 M9 10 H25" stroke="#bcd0e8" stroke-width="7" stroke-linecap="round" />
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="d-arm-r">
+          <g transform="translate(310 322) rotate(-22)">
+            <path d="M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <path d="M-27 0 A27 27 0 0 1 27 0 L27 10 C16 17 -16 17 -27 10 Z" fill="#0F766E" />
+            <path d="M-26 20 C-12 28 12 28 26 20" stroke="#E7C98B" stroke-width="7" fill="none" stroke-linecap="round" />
+            <path d="M-15 32 C-15 52 -14 70 -12 82" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85" />
+            <g class="d-lens">
+              <path d="M0 98 V122" stroke="#E7C98B" stroke-width="8.0" stroke-linecap="round" />
+              <circle cx="0" cy="140" r="20" fill="#bfeeff" fill-opacity=".28" stroke="#E7C98B" stroke-width="7" />
+              <path d="M-11 133 Q-8 126 0 124" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9" />
+            </g>
+            <g class="d-phone">
+              <rect x="-11" y="92" width="22" height="44" rx="6" fill="#0b1426" stroke="#E7C98B" stroke-width="7" />
+              <rect x="-7" y="97" width="14" height="30" rx="3" fill="#5fd0ff" opacity=".85" />
+              <circle cx="0" cy="131.5" r="1.8" fill="#fff4de" />
+            </g>
+            <g class="d-cup">
+              <path d="M-9 100 L9 100 L14 136 L-14 136 Z" fill="#fff" stroke="#E7C98B" stroke-width="7" stroke-linejoin="round" />
+              <path d="M13 108 Q28 112 22 128 Q19 134 13 132" fill="none" stroke="#E7C98B" stroke-width="7" stroke-linecap="round" />
+              <ellipse cx="0" cy="136" rx="14" ry="3.2" fill="#8a5a34" />
+            </g>
+            <g class="d-thumb">
+              <g transform="translate(0 118) rotate(150)">
+                <rect x="-15" y="-4" width="30" height="27" rx="10" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+                <path d="M-6 -4 V-24 Q-6 -33 2 -31 Q9 -29 9 -20 V-4" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+              </g>
+            </g>
+            <g class="d-mic">
+              <g transform="translate(0 114) rotate(150)">
+                <rect x="-4" y="-8" width="8" height="32" rx="4" fill="#4a5568" />
+                <circle cy="-18" r="12" fill="#c9d4e6" stroke="#E7C98B" stroke-width="7" />
+              </g>
+            </g>
+            <g class="d-flag">
+              <g transform="translate(0 112) rotate(150)">
+                <path d="M0 16 V-74" stroke="#b78a4c" stroke-width="7" stroke-linecap="round" />
+                <g class="d-flagcloth">
+                  <rect x="2" y="-74" width="46" height="12" fill="#ff4d5a" />
+                  <rect x="2" y="-62" width="46" height="12" fill="#fff" stroke="#e5e9f2" />
+                </g>
+              </g>
+            </g>
+          </g>
+        </g>
+        <g class="d-brush">
+          <g transform="translate(234 238) rotate(38) scale(1.15)">
+            <rect x="-30" y="-4.5" width="62" height="9" rx="4.5" fill="#0F766E" stroke="#fff" stroke-opacity=".6" />
+            <rect x="-52" y="-6.5" width="24" height="13" rx="5" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+            <g stroke="#bfeeff" stroke-width="7" stroke-linecap="round">
+              <path d="M-47 -8 v-9" />
+              <path d="M-40 -8 v-9" />
+              <path d="M-33 -8 v-9" />
+            </g>
+          </g>
+        </g>
+        <g class="d-foam" fill="#fff">
+          <circle class="d-bub d-bub-1" cx="180" cy="214" r="6" />
+          <circle class="d-bub d-bub-2" cx="214" cy="190" r="5" />
+          <circle class="d-bub d-bub-3" cx="190" cy="230" r="4" />
+          <circle class="d-bub d-bub-4" cx="172" cy="196" r="3.5" />
+        </g>
+        <g class="d-tooth">
+          <g transform="translate(200 6)">
+            <circle r="50" fill="#CBD5E1" />
+            <path d="M-24 -26 C-32 -18 -32 0 -26 12 C-22 22 -20 34 -14 34 C-8 34 -6 18 0 18 C6 18 8 34 14 34 C20 34 22 22 26 12 C32 0 32 -18 24 -26 C16 -33 8 -30 0 -26 C-8 -30 -16 -33 -24 -26 Z" fill="url(#ds-talk-INSTANCE-shell)" stroke="#7cc4ff" stroke-width="7" />
+            <path d="M-15 -18 C-19 -10 -19 -2 -16 6" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" />
+            <g fill="#fff4de">
+              <g transform="translate(32 -26) scale(0.6)">
+                <path class="d-tooth-star" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+              </g>
+              <g transform="translate(-34 20) scale(0.45)">
+                <path class="d-tooth-star d-tooth-star-2" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="d-fx">
+    <g class="d-sparks" fill="#fff1d6">
+      <circle class="d-spark d-spark-1" cx="34" cy="250" r="3.5" />
+      <circle class="d-spark d-spark-2" cx="372" cy="214" r="3" />
+      <circle class="d-spark d-spark-3" cx="356" cy="388" r="2.5" />
+      <circle class="d-spark d-spark-4" cx="56" cy="400" r="2.5" />
+    </g>
+    <g class="d-bubble">
+      <rect x="316" y="-6" width="88" height="54" rx="27" fill="#0b1426" fill-opacity=".92" stroke="#E7C98B" stroke-width="7" />
+      <circle cx="318" cy="60" r="7" fill="#0b1426" stroke="#ecca97" stroke-width="7" />
+      <circle cx="306" cy="76" r="4" fill="#0b1426" stroke="#ecca97" stroke-width="7" />
+      <g fill="#bfeeff">
+        <circle class="d-bdot d-bdot-1" cx="342" cy="21" r="6" />
+        <circle class="d-bdot d-bdot-2" cx="360" cy="21" r="6" />
+        <circle class="d-bdot d-bdot-3" cx="378" cy="21" r="6" />
+      </g>
+    </g>
+    <g class="d-waves" fill="none" stroke="#ecca97" stroke-linecap="round">
+      <path class="d-wave d-wave-1" d="M368 146 q14 20 0 40" stroke-width="7" />
+      <path class="d-wave d-wave-2" d="M382 130 q24 36 0 72" stroke-width="7" />
+      <path class="d-wave d-wave-3" d="M396 114 q34 52 0 104" stroke-width="7" />
+    </g>
+    <g class="d-stars" fill="#fff4de">
+      <g transform="translate(40 92)">
+        <path class="d-star d-star-1" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(368 64) scale(0.8)">
+        <path class="d-star d-star-2" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(384 318) scale(0.65)">
+        <path class="d-star d-star-3" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(24 352) scale(0.7)">
+        <path class="d-star d-star-4" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(200 18) scale(0.6)">
+        <path class="d-star d-star-5" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+    </g>
+    <g class="d-hearts" fill="#ff8fb8">
+      <g transform="translate(52 60) scale(0.9)">
+        <path class="d-heart d-heart-1" d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" />
+      </g>
+      <g transform="translate(352 40) scale(0.7)">
+        <path class="d-heart d-heart-2" d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" />
+      </g>
+      <g transform="translate(70 240) scale(0.6)">
+        <path class="d-heart d-heart-3" d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" />
+      </g>
+      <g transform="translate(336 226) scale(0.8)">
+        <path class="d-heart d-heart-4" d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" />
+      </g>
+    </g>
+    <g class="d-zzz" fill="#bfeeff" font-family="Inter, system-ui, sans-serif" font-weight="600">
+      <text class="d-z d-z-1" x="300" y="78" font-size="24">z</text>
+      <text class="d-z d-z-2" x="324" y="52" font-size="30">z</text>
+      <text class="d-z d-z-3" x="352" y="22" font-size="38">Z</text>
+    </g>
+    <g class="d-notes">
+      <g transform="translate(54 150)">
+        <path class="d-note d-note-1" d="M-7 0 A7 5.5 -20 1 0 7 0 A7 5.5 -20 1 0 -7 0 Z M5 -1 V-30 L17 -26 V-20 L7.5 -23.5 V-1 Z" fill="#ecca97" />
+      </g>
+      <g transform="translate(352 112) scale(1.2)">
+        <path class="d-note d-note-2" d="M-7 0 A7 5.5 -20 1 0 7 0 A7 5.5 -20 1 0 -7 0 Z M5 -1 V-30 L17 -26 V-20 L7.5 -23.5 V-1 Z" fill="#a9e4ff" />
+      </g>
+      <g transform="translate(344 276) scale(0.9)">
+        <path class="d-note d-note-3" d="M-7 0 A7 5.5 -20 1 0 7 0 A7 5.5 -20 1 0 -7 0 Z M5 -1 V-30 L17 -26 V-20 L7.5 -23.5 V-1 Z" fill="#ecca97" />
+      </g>
+    </g>
+    <g class="d-exclaim" fill="#E7C98B">
+      <rect x="193" y="-36" width="14" height="40" rx="7" />
+      <circle cx="200" cy="18" r="7.5" />
+    </g>
+    <g class="d-haha" fill="#ecca97" font-family="Inter, system-ui, sans-serif" font-weight="700">
+      <text class="d-ha d-ha-1" x="300" y="70" font-size="30">ha</text>
+      <text class="d-ha d-ha-2" x="30" y="96" font-size="26">ha</text>
+      <text class="d-ha d-ha-3" x="326" y="26" font-size="22">ha!</text>
+    </g>
+    <g class="d-bulb">
+      <circle cx="200" cy="-14" r="24" fill="#ffe9a8" stroke="#ecca97" stroke-width="7" />
+      <path d="M188 6 H212 V16 Q212 22 206 22 H194 Q188 22 188 16 Z" fill="#c9a56a" />
+      <path d="M190 -14 Q200 -2 210 -14" fill="none" stroke="#ecca97" stroke-width="7" stroke-linecap="round" />
+      <g stroke="#ffe9a8" stroke-width="7" stroke-linecap="round">
+        <path d="M200 -50 V-60" />
+        <path d="M168 -34 L160 -42" />
+        <path d="M232 -34 L240 -42" />
+        <path d="M160 -12 H150" />
+        <path d="M240 -12 H250" />
+      </g>
+    </g>
+    <g class="d-quest" fill="#E7C98B" font-family="Inter, system-ui, sans-serif" font-weight="800">
+      <text class="d-q d-q-1" x="300" y="50" font-size="54">?</text>
+      <text class="d-q d-q-2" x="56" y="76" font-size="34">?</text>
+    </g>
+    <g class="d-puffs" fill="#ffd5cc" opacity=".9">
+      <circle class="d-puff d-puff-1" cx="58" cy="96" r="9" />
+      <circle class="d-puff d-puff-2" cx="70" cy="80" r="6" />
+      <circle class="d-puff d-puff-3" cx="342" cy="96" r="9" />
+      <circle class="d-puff d-puff-4" cx="330" cy="80" r="6" />
+    </g>
+    <g class="d-vein" fill="none" stroke="#ff6b6b" stroke-width="7" stroke-linecap="round">
+      <g transform="translate(320 70) scale(1)">
+        <path d="M-12 -4 Q-4 -4 -4 -12 M12 -4 Q4 -4 4 -12 M-12 4 Q-4 4 -4 12 M12 4 Q4 4 4 12" />
+      </g>
+    </g>
+    <g class="d-steam" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".8">
+      <path class="d-steam-1" d="M362 196 q-8 -12 0 -22 q8 -10 0 -22" />
+      <path class="d-steam-2" d="M378 200 q-8 -12 0 -22 q8 -10 0 -22" />
+    </g>
+    <g class="d-dizzy" fill="#fff4de">
+      <g transform="translate(128 36) scale(1.1)">
+        <path d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(272 36) scale(1.1)">
+        <path d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(200 0) scale(1.1)">
+        <path d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(200 76) scale(0.9)">
+        <path d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+    </g>
+    <g class="d-cloud">
+      <g fill="#b9c6dc" stroke="#8fa3c4" stroke-width="7">
+        <circle cx="158" cy="12" r="20" />
+        <circle cx="200" cy="-4" r="26" />
+        <circle cx="242" cy="12" r="20" />
+        <rect x="158" y="12" width="84" height="20" rx="10" stroke="none" />
+      </g>
+      <g fill="#7cc4ff">
+        <g transform="translate(172 46) scale(0.8)">
+          <path class="d-rain d-rain-1" d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" />
+        </g>
+        <g transform="translate(200 50) scale(0.8)">
+          <path class="d-rain d-rain-2" d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" />
+        </g>
+        <g transform="translate(228 46) scale(0.8)">
+          <path class="d-rain d-rain-3" d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" />
+        </g>
+      </g>
+    </g>
+    <g class="d-snow" fill="#e8f7ff" stroke="#8fd0ff" stroke-width="7">
+      <g transform="translate(60 90) scale(0.6)">
+        <path class="d-flake d-flake-1" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(340 110) scale(0.5)">
+        <path class="d-flake d-flake-2" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(40 220) scale(0.45)">
+        <path class="d-flake d-flake-3" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(366 250) scale(0.6)">
+        <path class="d-flake d-flake-4" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+      <g transform="translate(120 40) scale(0.5)">
+        <path class="d-flake d-flake-5" d="M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z" />
+      </g>
+    </g>
+    <g class="d-sun">
+      <g stroke="#ffd76a" stroke-width="7" stroke-linecap="round">
+        <path d="M340 6 V-6 M340 74 V86 M300 40 H288 M380 40 H392 M312 12 L304 4 M368 12 L376 4 M312 68 L304 76 M368 68 L376 76" />
+      </g>
+      <circle cx="340" cy="40" r="22" fill="#ffd76a" stroke="#ffb347" stroke-width="7" />
+    </g>
+    <g class="d-thermo">
+      <g transform="translate(342 150)">
+        <rect x="-6" y="-34" width="12" height="52" rx="6" fill="#fff" stroke="#9fb7dc" stroke-width="7" />
+        <circle cy="22" r="10" fill="#ff6b6b" stroke="#9fb7dc" stroke-width="7" />
+        <rect x="-2.5" y="-8" width="5" height="30" fill="#ff6b6b" />
+      </g>
+    </g>
+    <g class="d-hourglass" fill="none" stroke="#E7C98B" stroke-width="7" stroke-linecap="round">
+      <g transform="translate(200 12) scale(1.35)">
+        <path d="M-15 -24 H15 M-15 24 H15 M-12 -24 Q-12 -4 0 0 Q-12 4 -12 24 M12 -24 Q12 -4 0 0 Q12 4 12 24" />
+        <path d="M-6 20 H6" stroke="#ffd76a" />
+      </g>
+    </g>
+    <g class="d-spinner">
+      <g transform="translate(200 12) scale(1.35)">
+        <circle r="20" fill="none" stroke="#bfeeff" stroke-width="7" opacity=".3" />
+        <circle class="d-spin-arc" r="20" fill="none" stroke="#E7C98B" stroke-width="7" stroke-linecap="round" stroke-dasharray="32 100" />
+      </g>
+    </g>
+    <g class="d-check">
+      <g transform="translate(336 46)">
+        <circle r="24" fill="#3ddc84" stroke="#fff" stroke-width="7" />
+        <path d="M-11 1 L-3 10 L12 -9" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </g>
+    <g class="d-warn">
+      <g transform="translate(336 46)">
+        <path d="M0 -26 L26 20 H-26 Z" fill="#ffcc33" stroke="#e09b00" stroke-width="7" stroke-linejoin="round" />
+        <rect x="-3.5" y="-12" width="7" height="20" rx="3.5" fill="#5b3a00" />
+        <circle cy="14" r="4" fill="#5b3a00" />
+      </g>
+    </g>
+    <g class="d-lock">
+      <g transform="translate(336 46)">
+        <path d="M-10 -4 V-14 a10 10 0 0 1 20 0 V-4" fill="none" stroke="#E7C98B" stroke-width="7" />
+        <rect x="-18" y="-4" width="36" height="28" rx="6" fill="#E7C98B" stroke="#b78a4c" stroke-width="7" />
+        <circle cy="9" r="4" fill="#5b3a00" />
+      </g>
+    </g>
+    <g class="d-shield">
+      <g transform="translate(336 46)">
+        <path d="M0 -28 L24 -17 V4 Q24 22 0 31 Q-24 22 -24 4 V-17 Z" fill="#5fbaff" stroke="#fff" stroke-width="7" stroke-linejoin="round" />
+        <path d="M-10 2 L-3 10 L11 -8" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </g>
+    <g class="d-chart">
+      <g transform="translate(336 50)">
+        <rect x="-26" y="2" width="12" height="22" rx="2" fill="#7cc4ff" />
+        <rect x="-6" y="-10" width="12" height="34" rx="2" fill="#5fbaff" />
+        <rect x="14" y="-24" width="12" height="48" rx="2" fill="#3f8ff0" />
+        <path d="M-28 -8 L-6 -24 L8 -16 L28 -38" fill="none" stroke="#3ddc84" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+      </g>
+    </g>
+    <g class="d-cake">
+      <g transform="translate(200 398)">
+        <ellipse cy="28" rx="50" ry="9" fill="#e8eef9" />
+        <rect x="-36" y="-6" width="72" height="34" rx="7" fill="#ffd1dc" />
+        <rect x="-36" y="-6" width="72" height="13" rx="6" fill="#fff" />
+        <rect x="-3" y="-28" width="6" height="22" rx="2" fill="#7cc4ff" />
+        <path class="d-flame" d="M0 -44 q-7 9 0 16 q7 -7 0 -16" fill="#ffb347" />
+      </g>
+    </g>
+    <g class="d-gift">
+      <g transform="translate(200 404)">
+        <rect x="-32" y="-12" width="64" height="46" rx="6" fill="#ff8fb8" />
+        <rect x="-7" y="-12" width="14" height="46" fill="#fff4de" />
+        <rect x="-32" y="5" width="64" height="11" fill="#fff4de" opacity=".9" />
+        <path d="M0 -12 q-20 -24 -24 -6 q5 9 24 6 q19 3 24 -6 q-4 -18 -24 6" fill="#fff4de" />
+      </g>
+    </g>
+    <g class="d-aura">
+      <g transform="translate(54 232) scale(1.3)">
+        <path class="d-flame" d="M0 -34 Q18 -10 8 10 Q4 20 -2 20 Q-16 14 -10 -6 Q-4 6 0 -2 Q-2 -16 0 -34Z" fill="#ff9a3c" />
+      </g>
+      <g transform="translate(346 232) scale(1.3)">
+        <path class="d-flame d-flame-2" d="M0 -34 Q18 -10 8 10 Q4 20 -2 20 Q-16 14 -10 -6 Q-4 6 0 -2 Q-2 -16 0 -34Z" fill="#ff9a3c" />
+      </g>
+    </g>
+    <g class="d-growl" fill="#E7C98B" font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="20">
+      <text x="200" y="462" text-anchor="middle">grrrk…</text>
+    </g>
+    <g class="d-heartbig">
+      <g transform="translate(200 8) scale(2.4)">
+        <path d="M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z" fill="#ff8fb8" />
+      </g>
+    </g>
+    <g class="d-pray">
+      <g transform="translate(200 322)">
+        <ellipse rx="14" ry="26" transform="rotate(-14)" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+        <ellipse rx="14" ry="26" transform="rotate(14)" fill="url(#ds-talk-INSTANCE-shell)" stroke="var(--d-outline, #163047)" stroke-width="7" />
+      </g>
+    </g>
+    <g class="d-glitch">
+      <rect x="88" y="118" width="224" height="7" fill="#ff5c8a" opacity=".65" />
+      <rect x="100" y="176" width="200" height="5" fill="#5cffd0" opacity=".6" />
+      <rect x="92" y="210" width="216" height="6" fill="#5c8aff" opacity=".6" />
+    </g>
+    <g class="d-sweat">
+      <g transform="translate(318 96)">
+        <path d="M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z" fill="#a9e4ff" />
+      </g>
+    </g>
+    <g class="d-arrows" fill="none" stroke="#E7C98B" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+      <path class="d-arrow d-arrow-1" d="M64 232 l-13 13 l13 13" />
+      <path class="d-arrow d-arrow-2" d="M44 232 l-13 13 l13 13" />
+      <path class="d-arrow d-arrow-3" d="M24 232 l-13 13 l13 13" />
+    </g>
+  </g>
+</svg>

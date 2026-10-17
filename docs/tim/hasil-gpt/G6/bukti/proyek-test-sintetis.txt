@@ -1,0 +1,65 @@
+
+> dentiva@1.11.0 test
+> npm run test --workspaces --if-present && npm run test:api
+
+
+> @dentiva/clinic@1.11.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.js:46:25). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+10.43.48 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+10.43.48 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
+
+ RUN  v4.1.11 D:/dentiva/gpt-g1-g6/apps/clinic
+
+
+ Test Files  24 passed (24)
+      Tests  545 passed (545)
+   Start at  10:43:48
+   Duration  66.34s (transform 3.90s, setup 6.61s, import 24.94s, tests 79.85s, environment 71.64s)
+
+
+> @dentiva/console@0.1.0 test
+> vitest run
+
+10.44.55 [vite] warning: `esbuild` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `oxc` instead.
+10.44.55 [vite] warning: `optimizeDeps.esbuildOptions` option was specified by "vite:react-babel" plugin. This option is deprecated, please use `optimizeDeps.rolldownOptions` instead.
+Both esbuild and oxc options were set. oxc options will be used and esbuild options will be ignored. The following esbuild options were set: `{ jsx: 'automatic', jsxImportSource: undefined }`
+
+ RUN  v4.1.11 D:/dentiva/gpt-g1-g6/apps/console
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  10:44:55
+   Duration  3.24s (transform 108ms, setup 186ms, import 244ms, tests 18ms, environment 1.87s)
+
+
+> @dentiva/shared@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.11 D:/dentiva/gpt-g1-g6/packages/shared
+
+
+ Test Files  1 passed (1)
+      Tests  10 passed (10)
+   Start at  10:44:59
+   Duration  517ms (transform 92ms, setup 0ms, import 245ms, tests 27ms, environment 0ms)
+
+
+> dentiva@1.11.0 test:api
+> vitest run --config supabase/functions/console-api/vitest.config.ts
+
+
+ RUN  v4.1.11 D:/dentiva/gpt-g1-g6/supabase/functions/console-api
+
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  10:45:01
+   Duration  656ms (transform 135ms, setup 0ms, import 288ms, tests 84ms, environment 0ms)
+
