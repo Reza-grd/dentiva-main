@@ -1,0 +1,8 @@
+86db5ac lod=hero 220px ×1: TaskDuration 11.21% | Layout 1.10% | RecalcStyle 1.82% | Script 0.00%
+86db5ac lod=standar 120px ×1: TaskDuration 10.02% | Layout 0.94% | RecalcStyle 1.71% | Script 0.00%
+86db5ac lod=mini 58px ×1: TaskDuration 0.10% | Layout 0.00% | RecalcStyle 0.00% | Script 0.00%
+86db5ac lod=hero 220px ×7: TaskDuration 72.20% | Layout 5.47% | RecalcStyle 11.29% | Script 0.00%
+f2d4647 lod=hero 220px ×1: TaskDuration 0.32% | Layout 0.02% | RecalcStyle 0.03% | Script 0.00%
+f2d4647 lod=standar 120px ×1: TaskDuration 0.33% | Layout 0.02% | RecalcStyle 0.04% | Script 0.00%
+f2d4647 lod=mini 58px ×1: TaskDuration 0.10% | Layout 0.00% | RecalcStyle 0.00% | Script 0.00%
+f2d4647 lod=hero 220px ×7: TaskDuration 0.96% | Layout 0.07% | RecalcStyle 0.14% | Script 0.00%

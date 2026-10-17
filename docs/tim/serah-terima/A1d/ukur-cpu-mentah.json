@@ -1,0 +1,54 @@
+{
+  "waktu_ukur_utc": "2026-10-17T08:52:41.317297+00:00",
+  "worktree_eksekusi": "D:\\dentiva\\antigravity-A4c",
+  "pengukuran": [
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs 86db5ac hero 220 1",
+      "exit_code": 0,
+      "stdout": "86db5ac lod=hero 220px ×1: TaskDuration 11.21% | Layout 1.10% | RecalcStyle 1.82% | Script 0.00%\n",
+      "stderr": ""
+    },
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs 86db5ac standar 120 1",
+      "exit_code": 0,
+      "stdout": "86db5ac lod=standar 120px ×1: TaskDuration 10.02% | Layout 0.94% | RecalcStyle 1.71% | Script 0.00%\n",
+      "stderr": ""
+    },
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs 86db5ac mini 58 1",
+      "exit_code": 0,
+      "stdout": "86db5ac lod=mini 58px ×1: TaskDuration 0.10% | Layout 0.00% | RecalcStyle 0.00% | Script 0.00%\n",
+      "stderr": ""
+    },
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs 86db5ac hero 220 7",
+      "exit_code": 0,
+      "stdout": "86db5ac lod=hero 220px ×7: TaskDuration 72.20% | Layout 5.47% | RecalcStyle 11.29% | Script 0.00%\n",
+      "stderr": ""
+    },
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs f2d4647 hero 220 1",
+      "exit_code": 0,
+      "stdout": "f2d4647 lod=hero 220px ×1: TaskDuration 0.32% | Layout 0.02% | RecalcStyle 0.03% | Script 0.00%\n",
+      "stderr": ""
+    },
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs f2d4647 standar 120 1",
+      "exit_code": 0,
+      "stdout": "f2d4647 lod=standar 120px ×1: TaskDuration 0.33% | Layout 0.02% | RecalcStyle 0.04% | Script 0.00%\n",
+      "stderr": ""
+    },
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs f2d4647 mini 58 1",
+      "exit_code": 0,
+      "stdout": "f2d4647 lod=mini 58px ×1: TaskDuration 0.10% | Layout 0.00% | RecalcStyle 0.00% | Script 0.00%\n",
+      "stderr": ""
+    },
+    {
+      "perintah": "node docs/tim/alat/ukur-cpu-denti.mjs f2d4647 hero 220 7",
+      "exit_code": 0,
+      "stdout": "f2d4647 lod=hero 220px ×7: TaskDuration 0.96% | Layout 0.07% | RecalcStyle 0.14% | Script 0.00%\n",
+      "stderr": ""
+    }
+  ]
+}
