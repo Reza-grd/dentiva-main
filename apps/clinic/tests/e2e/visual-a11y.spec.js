@@ -112,12 +112,37 @@ test.describe('Audit Aksesibilitas (axe-core) & Regresi Visual (Terang/Gelap × 
           await page.goto(pg.url);
           await expect(page.getByText(pg.readyText).first()).toBeVisible();
 
-          const filename = `${pg.slug}-${vp.name}-${theme}.png`;
+          const baseName = `${pg.slug}-${vp.name}-${theme}`;
+          const filename = `${baseName}.png`;
           const outPath = path.join(VISUAL_DIR, filename);
-          await page.screenshot({ path: outPath, fullPage: false });
+          await page.screenshot({ path: outPath, fullPage: false, animations: 'disabled' });
 
           const stat = fs.statSync(outPath);
           expect(stat.size).toBeGreaterThan(5_000);
+
+          // Pastikan direktori __screenshots__ tersedia dan cek apakah baseline spesifik platform (win32/linux/darwin) sudah ada
+          const screenshotsDir = path.resolve(__dirname, '__screenshots__');
+          fs.mkdirSync(screenshotsDir, { recursive: true });
+          const platformSnapshotPath = path.join(screenshotsDir, `${baseName}-${process.platform}.png`);
+          const win32FallbackPath = path.join(screenshotsDir, `${baseName}-win32.png`);
+          const hasNativePlatformBaseline = fs.existsSync(platformSnapshotPath);
+
+          if (!hasNativePlatformBaseline && fs.existsSync(win32FallbackPath)) {
+            // Saat pertama kali berjalan di CI Linux sebelum baseline *-linux.png di-commit:
+            // salin baseline referensi sebagai pembanding lintas-OS dan simpan hasil render asli platform ke folder bukti visual
+            fs.copyFileSync(win32FallbackPath, platformSnapshotPath);
+            fs.copyFileSync(outPath, path.join(VISUAL_DIR, `${baseName}-${process.platform}.png`));
+          }
+
+          // Bandingkan terhadap baseline per-platform ({arg}-{platform}.png):
+          // - 2% maxDiffPixelRatio (threshold 0.2) jika baseline native platform sudah ada
+          // - 6% maxDiffPixelRatio (threshold 0.3) jika membandingkan lintas-OS (DirectWrite Windows vs FreeType Linux)
+          await expect(page).toHaveScreenshot(filename, {
+            fullPage: false,
+            animations: 'disabled',
+            maxDiffPixelRatio: hasNativePlatformBaseline ? 0.02 : 0.06,
+            threshold: hasNativePlatformBaseline ? 0.2 : 0.3,
+          });
         }
       });
     }

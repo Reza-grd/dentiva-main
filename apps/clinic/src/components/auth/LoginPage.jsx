@@ -24,12 +24,26 @@ const loginSchema = z.object({
   password: z.string().min(6, 'Password minimal 6 karakter'),
 });
 
+const GENERIC_LOGIN_ERROR = 'Email atau password salah.';
+
+const normalizeLoginError = (msg) => {
+  if (!msg) return '';
+  if (
+    msg.includes('Akun Anda tidak aktif') ||
+    msg.includes('data profil belum ada') ||
+    msg.includes('Isi email Anda di kolom Email')
+  ) {
+    return msg;
+  }
+  return GENERIC_LOGIN_ERROR;
+};
+
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
 
   const { signIn, requestPasswordReset, user, userProfile, error: authError } = useAuth();
-  const displayError = serverError || authError;
+  const displayError = normalizeLoginError(serverError || authError);
   const [resetState, setResetState] = useState(null); // null | 'sending' | 'sent'
   const navigate = useNavigate();
   const toast = useToast();
@@ -46,8 +60,8 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     setServerError('');
     try {
-      const { success, error: signInError } = await signIn(data.email, data.password);
-      if (!success) setServerError(signInError || 'Email atau password salah');
+      const { success } = await signIn(data.email, data.password);
+      if (!success) setServerError(GENERIC_LOGIN_ERROR);
     } catch (err) {
       setServerError('Terjadi kesalahan. Silakan coba lagi.');
       toast.error(err.message || 'Terjadi kesalahan saat login');

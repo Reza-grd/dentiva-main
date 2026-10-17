@@ -11,8 +11,15 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   workers: 2,
   timeout: 60_000,
+  snapshotPathTemplate: '{testDir}/__screenshots__/{arg}-{platform}{ext}',
+  updateSnapshots: 'missing',
   expect: {
     timeout: 20_000,
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.02,
+      threshold: 0.2,
+      animations: 'disabled',
+    },
   },
   reporter: [
     ['list'],

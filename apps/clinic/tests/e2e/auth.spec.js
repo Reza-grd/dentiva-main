@@ -40,16 +40,27 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await expect(page.getByRole('heading', { name: /Rina Puspita/i })).toBeVisible();
   });
 
-  test('Login dengan password salah menampilkan pesan galat dan tetap di /login', async ({ page }) => {
+  test('Login gagal menampilkan pesan galat generik yang sama untuk email tidak terdaftar maupun sandi salah', async ({ page }) => {
     await setupSyntheticClinic(page);
 
     await page.goto('/login');
+    // Kasus 1: Email tidak terdaftar di sistem
+    await page.getByPlaceholder('nama@email.com').fill('tidak-terdaftar@klinik-sintetis.test');
+    await page.getByPlaceholder('••••••••').fill('PasswordApaSaja123!');
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/login$/);
+    const alertBox = page.getByRole('alert');
+    await expect(alertBox).toBeVisible();
+    await expect(alertBox).toContainText('Email atau password salah.');
+
+    // Kasus 2: Email terdaftar tetapi password salah -> pesan harus identik (tidak membedakan)
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
     await page.getByPlaceholder('••••••••').fill('PasswordSalah999!');
     await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
 
     await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByText(/Invalid login credentials|Email atau password salah/i)).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Email atau password salah.');
   });
 
   test('Simulasi tantangan MFA TOTP ketika bendera fitur MFA aktif memverifikasi faktor aal2', async ({ page }) => {

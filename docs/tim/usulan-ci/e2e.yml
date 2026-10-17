@@ -45,13 +45,15 @@ jobs:
         run: npm run test:e2e
         working-directory: apps/clinic
 
-      - name: Unggah laporan Playwright & tangkapan layar
+      - name: Unggah laporan Playwright, baseline platform, & tangkapan layar
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report-clinic
           path: |
             apps/clinic/playwright-report/
+            apps/clinic/test-results/
+            apps/clinic/tests/e2e/__screenshots__/
             docs/tim/serah-terima/A4/visual/
           retention-days: 14
 
@@ -72,8 +74,9 @@ jobs:
       - name: Pasang dependensi
         run: npm ci
 
-      - name: Build aplikasi klinik
-        run: npm run build:clinic
+      - name: Build aplikasi klinik (mode desktop tanpa Service Worker)
+        run: npx vite build --mode desktop
+        working-directory: apps/clinic
 
       - name: Jalankan Lighthouse CI
         run: npx @lhci/cli@0.14.x autorun --config=apps/clinic/lighthouserc.cjs
