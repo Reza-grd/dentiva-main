@@ -28,7 +28,8 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState('');
 
-  const { signIn, requestPasswordReset, user, userProfile } = useAuth();
+  const { signIn, requestPasswordReset, user, userProfile, error: authError } = useAuth();
+  const displayError = serverError || authError;
   const [resetState, setResetState] = useState(null); // null | 'sending' | 'sent'
   const navigate = useNavigate();
   const toast = useToast();
@@ -152,11 +153,11 @@ const LoginPage = () => {
             </div>
 
             {/* Error Message */}
-            {serverError && (
-              <div className="mb-6 bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-xl flex items-start gap-3">
+            {displayError && (
+              <div role="alert" className="mb-6 bg-red-500/10 border-l-4 border-red-500 p-4 rounded-r-xl flex items-start gap-3">
                 <AlertCircle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
-                <p className="text-sm font-medium text-red-600 dark:text-red-400 leading-snug">
-                  {serverError}
+                <p className="text-sm font-medium text-red-700 dark:text-red-400 leading-snug">
+                  {displayError}
                 </p>
               </div>
             )}
@@ -196,6 +197,7 @@ const LoginPage = () => {
                     onClick={() => setShowPassword(v => !v)}
                     disabled={isSubmitting}
                     tabIndex={-1}
+                    aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-text-muted hover:text-text-primary hover:bg-background rounded-lg transition-colors border-0 bg-transparent cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}

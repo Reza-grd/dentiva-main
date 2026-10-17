@@ -88,7 +88,7 @@ const ChartCard = ({ title, subtitle, children, loading, action }) => (
     <CardHeader className="flex flex-row items-start justify-between pb-2 space-y-0">
       <div>
         <CardTitle>{title}</CardTitle>
-        {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{subtitle}</p>}
+        {subtitle && <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">{subtitle}</p>}
       </div>
       {action && <div>{action}</div>}
     </CardHeader>
@@ -105,14 +105,14 @@ const ChartCard = ({ title, subtitle, children, loading, action }) => (
 // ─── Status badge ────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
   const map = {
-    scheduled:  { label: 'Terjadwal',   variant: 'primary' },
-    ongoing:    { label: 'Berlangsung', variant: 'warning' },
-    completed:  { label: 'Selesai',     variant: 'success' },
-    cancelled:  { label: 'Batal',       variant: 'danger' },
+    scheduled:  { label: 'Terjadwal',   variant: 'primary', className: '!text-sky-800 dark:!text-sky-300' },
+    ongoing:    { label: 'Berlangsung', variant: 'warning', className: '!text-amber-800 dark:!text-amber-300' },
+    completed:  { label: 'Selesai',     variant: 'success', className: '!text-emerald-800 dark:!text-emerald-300' },
+    cancelled:  { label: 'Batal',       variant: 'danger',  className: '!text-red-800 dark:!text-red-300' },
   };
-  const { label, variant } = map[status] || { label: status, variant: 'default' };
+  const { label, variant, className } = map[status] || { label: status, variant: 'default', className: '' };
   return (
-    <Badge variant={variant}>{label}</Badge>
+    <Badge variant={variant} className={className}>{label}</Badge>
   );
 };
 

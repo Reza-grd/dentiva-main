@@ -219,6 +219,7 @@ const PatientList = () => {
                   <Filter className="h-4 w-4 text-gray-400" />
                 </div>
                 <select
+                  aria-label="Filter jenis kelamin pasien"
                   value={filterGender}
                   onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
                   className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none"
@@ -236,6 +237,7 @@ const PatientList = () => {
                   <Filter className="h-4 w-4 text-gray-400" />
                 </div>
                 <select
+                  aria-label="Filter status pasien"
                   value={filterStatus}
                   onChange={(e) => { setFilterStatus(e.target.value); setPage(1); }}
                   className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none"
@@ -389,6 +391,7 @@ const PatientList = () => {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-500 dark:text-gray-400">Per Halaman:</span>
                 <select
+                  aria-label="Jumlah pasien per halaman"
                   value={pageSize}
                   onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
                   className="glass-input px-2.5 py-1 text-xs rounded-lg bg-transparent border-gray-250"

@@ -63,10 +63,10 @@ const TopBar = ({ onMenuClick }) => {
             <Menu size={20} />
           </button>
           
-          <div className="hidden md:flex items-center gap-2 text-xs font-medium text-text-muted opacity-90">
+          <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
             <span>Dentiva</span>
-            <ChevronRight size={12} className="text-text-muted opacity-60" />
-            <span className="text-text-primary text-sm font-bold opacity-100">{pageTitle}</span>
+            <ChevronRight size={12} className="text-gray-400 dark:text-gray-500" />
+            <span className="text-text-primary text-sm font-bold">{pageTitle}</span>
           </div>
         </div>
 
@@ -152,9 +152,9 @@ const TopBar = ({ onMenuClick }) => {
                   {formatDoctorName(userProfile) || userProfile?.full_name || 'User'}
                 </div>
                 <div className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 w-fit px-1.5 py-0.5 rounded-md ${
-                  userProfile?.role === 'admin' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
-                  userProfile?.role === 'resepsionis' ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400' :
-                  'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  userProfile?.role === 'admin' ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300' :
+                  userProfile?.role === 'resepsionis' ? 'bg-violet-500/15 text-violet-800 dark:text-violet-300' :
+                  'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
                 }`}>
                   {role}
                 </div>
