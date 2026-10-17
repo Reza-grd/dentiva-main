@@ -1,0 +1,2759 @@
+{
+  "versi": 1,
+  "commit_sumber": "df7f178c3ac8a9711f9a290e029fcfc5c14c9008",
+  "sha256_sumber": {
+    "apps/clinic/src/components/common/Sidebar.jsx": "4931434330fff2ab3dc8b1b8f28af6417e60806a53eb06da2711c26fb487993a",
+    "apps/clinic/src/components/dashboard/OnboardingChecklist.jsx": "9464bf50c50869f32ab8f987e24de93939f667d1a84bc3b6075af86c8932cd53",
+    "apps/clinic/src/components/settings/SettingsPage.jsx": "bd751339f8fae845addca3dbcc713c1417a6b94b1b86d4fc277fbb7ec6c0bac4",
+    "apps/clinic/src/components/treatments/TreatmentMaster.jsx": "32df95604301ce3735ceb86c95c6869b1cd008537d92b8b21b0a597dba6028cb",
+    "apps/clinic/src/components/admin/UserManagementPage.jsx": "aec74c7d249266b4e79afa938675325968d6fad07944ad035b67065956756463",
+    "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx": "d75abfe45b593a7d911f229918d23923eead1d6975b0ef0b88c488e1721fd1ed",
+    "apps/clinic/src/components/layout/TopBar.jsx": "79d73ecec36107a771c078847e2fb154b216455ef54772f3cf910f47d6b770ff",
+    "apps/clinic/src/components/auth/LoginPage.jsx": "a514b83369e0d7da79a7b80d64bada2458deeb11e145e737476c80d06ef9cdfa",
+    "apps/clinic/src/components/patient/PatientList.jsx": "2e7d2c5b1561c5cf6f1ad2a586e455b6abda430da6c298f73601f554f6740aba",
+    "apps/clinic/src/components/patient/PatientRegistration.jsx": "fc9b94454031bffa931535476bb7cec2399115705dae52e10471ac0e55cc111d",
+    "apps/clinic/src/components/patient/PatientDetail.jsx": "291a8f1b8d9bc74f9a1c8f980bce615ed8e59f2e6a960c22d90e2cf5d13eb043",
+    "apps/clinic/src/components/patient/ScheduleVisitForm.jsx": "cedbedc63616e2bf426c39b115c860d855034494dc75ed33b337541427817186",
+    "apps/clinic/src/components/schedule/SchedulePage.jsx": "085e11cf2860e48adbc97808ef63b71e59fe24508aa685368319ac65ce3319a6",
+    "apps/clinic/src/components/schedule/BookingRequests.jsx": "b81c29ee3f289f3801e287d5b3db12d65db73857c9a088592c2f8d88e80ad3fc",
+    "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx": "70426e45be6dba918cde751ec8f4a90aa2263fbe5937abc91f670c6a10ec9c39",
+    "apps/clinic/src/components/medical-record/odontogram/Odontogram.jsx": "cfa4f5b692a12ddf78f94180303e4e13e5478c7145511b12d18c682004a70142",
+    "apps/clinic/src/components/medical-record/DiagnosisTreatment.jsx": "7af612656d19b488f0a1dbe7e763ca6e24772e0ac3ccfc2d3b4063595252f67b",
+    "apps/clinic/src/components/medical-record/PrescriptionEntry.jsx": "06ca2f5957044c8bfd1cf63f40f2a812657ebfe4144be2e2efb3a9c70d2cc9e5",
+    "apps/clinic/src/components/medical-record/ConsentFormModal.jsx": "ee46fb0e032f77cc82faeb527c8b483845e35c806487bf697750135eed3f7174",
+    "apps/clinic/src/components/payment/PaymentForm.jsx": "f58f51f21fba7a39e83b731819b5aacc641f44f98205eb8d6de3d17efcfb570e",
+    "apps/clinic/src/components/payment/QrisPanel.jsx": "dcd7c3bb15eb7f716bf615a8fa17d08e8c950c1cf5b4f99f4fa453f878fff889",
+    "apps/clinic/src/components/payment/PaymentList.jsx": "e89185bc53089e060ab9073f77b2ee12884b3dbdc45145a59f5950387a2e1287",
+    "apps/clinic/src/components/costing/CostingDashboard.jsx": "c67227e87e579a39a8985ebd1c3eb7ebb23ecbb1540bc33dbccd17e8076104c8",
+    "apps/clinic/src/components/costing/MasterBahan.jsx": "8ac54ab34a2a63777afc3239dfd50cba0110e6ee1c6f8e4c5dc8c0e00d4c3e8e",
+    "apps/clinic/src/components/costing/MaterialPurchases.jsx": "1b8b8a12598e7bf78a8913332bad5f99d8dddcfe78ef37222703654fcc17bc7d",
+    "apps/clinic/src/components/costing/StockMovements.jsx": "13744c1a68158afc6d1ee06eed6441e73ca9aa3cdf4ccb65686e1a61bed83f0c",
+    "apps/clinic/src/components/costing/StockOpname.jsx": "bbf41fff4788987fadbc2cb27e3bb656e51426b3ddd56047eb91f732e16c7897",
+    "apps/clinic/src/components/costing/OverheadCosts.jsx": "af4c5f9304eb04293bf939184fe08f711a9b258c9b3df4ca238a9f5966eb782d",
+    "apps/clinic/src/components/costing/TreatmentBOM.jsx": "bd76ad58609150b1874c301ddc9320f2c6d6fc034626167b7732f3c9046dd98e",
+    "apps/clinic/src/components/costing/ProfitabilityReport.jsx": "21f222284ba8563725922972d4c39a4d5964e5e9306fa552ee3605a1b3c5cab6",
+    "apps/clinic/src/components/financial/ExpensesPage.jsx": "caa2526fc5e93258257fa2d0a11373f290722703981592ca6ee0996962d39cfc",
+    "apps/clinic/src/components/queue/QueueDisplayPage.jsx": "ab6496efb3ed036554a606946db9259baae364b53026975c6518384b679d4f0f",
+    "apps/clinic/src/components/settings/QueueDisplayLinks.jsx": "3bc0596f5227f690cd04c13f507966df168579dcf322c821c506e84d78ce4c9d",
+    "apps/clinic/src/components/queue/QueueDisplay.jsx": "45eefa2a489437478ec46bda84eebc561bafa839526463e995a8771bab74bd83",
+    "apps/clinic/src/components/ai/DentiGuideWidget.jsx": "c2e86dbc3b8b28851899518e60644bbc70e917c7d9fb92ad3f2d8dd395998f40",
+    "apps/clinic/src/components/ai/AiAssistantPage.jsx": "34865bccfda874714ea548a3534da775855050f121aaa1714bfd8bc93befb924",
+    "apps/clinic/src/components/ai/AgentActions.jsx": "43e47355acf8123ae5a077c28356c7a24d5a47a3aa062686b44117cfecce5b75",
+    "apps/clinic/src/components/common/DesktopUpdater.jsx": "61d6f80a8feac263cd2ef421b21ada67312a53745a730d7bb5fc173c5ba05627",
+    "apps/clinic/src/components/auth/AccessDenied.jsx": "e88bdcd79646cd0932b387a14ec274fe06596aaa402aa11c3695bd131717d70c",
+    "apps/clinic/src/components/common/ErrorBoundary.jsx": "c7b9722587f7fe4b73230158a661d22aa023a3a2dafeb51aced5bf55ed8c919a",
+    "apps/clinic/src/components/auth/ClinicUnavailable.jsx": "01228bcf46d3d2a42b6288fda6980a3281f7410b34cac07b2ecef8db8271792a"
+  },
+  "langkah": [
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "langkah": 1,
+      "teks": "Buka **Dashboard**. Jika kartu **Siapkan klinik Anda** muncul, gunakan daftar tugasnya sebagai pintasan. Bila kartu sudah disembunyikan, buka tujuan yang sama melalui menu.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 27,
+          "penanda": "label: 'Dashboard'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/dashboard/OnboardingChecklist.jsx",
+          "baris": 60,
+          "penanda": "Siapkan klinik Anda"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "langkah": 2,
+      "teks": "Buka **Pengaturan → Profil Klinik**. Lengkapi nama, alamat, dan telepon klinik, lalu pilih **Simpan Perubahan**. Periksa pesan **Tersimpan**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 41,
+          "penanda": "label: 'Pengaturan'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 444,
+          "penanda": "Nama Klinik"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1303,
+          "penanda": "Simpan Perubahan"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "langkah": 3,
+      "teks": "Buka **Master Treatment → Tambah Treatment**. Isi kode, nama, kategori, dan harga dasar yang disetujui klinik, lalu **Simpan**. Periksa daftar sebelum menambah tarif lain.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 36,
+          "penanda": "label: 'Master Treatment'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/treatments/TreatmentMaster.jsx",
+          "baris": 179,
+          "penanda": "Tambah Treatment"
+        },
+        {
+          "berkas": "apps/clinic/src/components/treatments/TreatmentMaster.jsx",
+          "baris": 421,
+          "penanda": "'Update' : 'Simpan'"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "langkah": 4,
+      "teks": "Buka **Kelola Pengguna → Tambah Staf** untuk membuat akun resepsionis. Isi formulir dan sandi awal secara privat, lalu **Simpan Staf**. Formulir saat ini hanya menawarkan peran resepsionis; untuk akun dokter, hubungi admin klinik yang mengoordinasikan penyediaan akun dengan tim Dentiva.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 39,
+          "penanda": "label: 'Kelola Pengguna'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 118,
+          "penanda": "setShowAddModal(true)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 168,
+          "penanda": "<option value=\"resepsionis\">"
+        },
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "'Simpan Staf'"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "langkah": 5,
+      "teks": "Setelah akun dokter tersedia, buka **Jadwal Dokter → Tambah Jadwal**. Pilih dokter, hari, jam mulai dan selesai, lalu simpan. Ikuti artikel jadwal praktik untuk rinciannya.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 29,
+          "penanda": "label: 'Jadwal Dokter'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 372,
+          "penanda": "Tambah Jadwal Praktek"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "langkah": 6,
+      "teks": "Minta resepsionis dan dokter masuk dengan akun masing-masing. Cocokkan peran di **Menu profil pengguna** dan menu yang tersedia sebelum mulai bekerja.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 54,
+          "penanda": "resepsionis: ["
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "langkah": 1,
+      "teks": "Pada halaman masuk, isi **Email** dan **Password** akun Anda sendiri. Gunakan tombol bergambar mata hanya bila layar tidak terlihat orang lain.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 188,
+          "penanda": "register('email')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 203,
+          "penanda": "register('password')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 214,
+          "penanda": "Tampilkan password"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "langkah": 2,
+      "teks": "Pilih **Masuk ke Sistem**. Tunggu dashboard terbuka; bila muncul galat, periksa email dan sandi sebelum mencoba lagi.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 245,
+          "penanda": "Masuk ke Sistem"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 27,
+          "penanda": "GENERIC_LOGIN_ERROR"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "langkah": 3,
+      "teks": "Buka **Menu profil pengguna** untuk memeriksa nama dan peran. Di ponsel, gunakan **Buka menu navigasi** untuk melihat menu kerja Anda.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        },
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 60,
+          "penanda": "Buka menu navigasi"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "langkah": 4,
+      "teks": "Setelah selesai, buka **Menu profil pengguna → Keluar**. Pastikan halaman masuk tampil sebelum perangkat dipakai orang lain.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 37,
+          "penanda": "handleLogout"
+        },
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 185,
+          "penanda": "<LogOut size={16} /> Keluar"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "langkah": 1,
+      "teks": "Jika masih bisa masuk, buka **Menu profil pengguna → Pengaturan → Keamanan**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 179,
+          "penanda": "navigate('/pengaturan')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 383,
+          "penanda": "label: 'Keamanan'"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "langkah": 2,
+      "teks": "Isi **Password saat ini**, **Password baru**, dan **Konfirmasi password baru**. Gunakan sandi panjang dan unik; ikuti penolakan atau persyaratan server bila muncul.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 819,
+          "penanda": "placeholder=\"Password saat ini\""
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 827,
+          "penanda": "placeholder=\"Password baru\""
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 835,
+          "penanda": "placeholder=\"Konfirmasi password baru\""
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "langkah": 3,
+      "teks": "Pilih **Update Password** dan tunggu pesan **Password berhasil diganti!**. Bila gagal, jangan menganggap sandi sudah berubah.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 852,
+          "penanda": "'Update Password'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 215,
+          "penanda": "toast.success('Password berhasil diganti!')"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "langkah": 4,
+      "teks": "Untuk MFA, periksa bagian keamanan: tombol **Aktifkan 2FA (Nonaktif)** belum bisa digunakan. Hubungi admin klinik untuk status penerapan MFA; jangan mencari QR atau kode pemulihan di layar ini.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 810,
+          "penanda": "Aktifkan 2FA (Nonaktif)"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "langkah": 5,
+      "teks": "Jika lupa sandi atau tidak bisa masuk, hubungi admin klinik melalui kanal internal yang sudah dikenal. Tombol **Lupa password?** memang ada, tetapi pesan “tautan dikirim” belum membuktikan email diterima selama SMTP belum aktif.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 74,
+          "penanda": "Lupa password?"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 232,
+          "penanda": "resetState === 'sent'"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "langkah": 1,
+      "teks": "Buka **Data Pasien** dan cari nama atau nomor rekam medis. Jika pasien sudah ada, gunakan artikel kunjungan pasien lama.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 48,
+          "penanda": "label: 'Data Pasien'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 211,
+          "penanda": "Cari nama, No. RM, No. WA, atau alamat..."
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "langkah": 2,
+      "teks": "Buka **Daftar Pasien**, lalu pilih **Pasien Baru**. Pada **Identitas & Jaminan**, isi nama, jenis kelamin, nomor WhatsApp, dan identitas yang sesuai. Pilihan identitas meliputi NIK, NIK ibu untuk bayi, paspor, atau lainnya; jangan mengarang NIK.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 58,
+          "penanda": "label: 'Daftar Pasien'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 473,
+          "penanda": "Pasien Baru"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 493,
+          "penanda": "title: 'Identitas & Jaminan'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 569,
+          "penanda": "NIK Ibu Kandung (Bayi Baru Lahir)"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "langkah": 3,
+      "teks": "Catat persetujuan notifikasi WhatsApp sesuai jawaban pasien. Pilih **Lanjutkan →**, lalu lengkapi **Alamat Domisili** dengan memilih wilayah berurutan dan mengisi alamat detail.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 63,
+          "penanda": "wa_consent"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1013,
+          "penanda": "Lanjutkan →"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 494,
+          "penanda": "title: 'Alamat Domisili'"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "langkah": 4,
+      "teks": "Pilih **Daftar Pasien** bila hanya mendaftarkan, atau **Daftar & Jadwalkan** bila akan membuat kunjungan pertama. Tunggu dialog berhasil yang menampilkan nomor rekam medis.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1025,
+          "penanda": "'Mendaftar...' : 'Daftar Pasien'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1036,
+          "penanda": "Daftar & Jadwalkan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 362,
+          "penanda": "setSuccessModalData({"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "langkah": 5,
+      "teks": "Jika memilih penjadwalan, tekan **Lanjut ke Penjadwalan →**, isi tanggal, jam, dokter, serta keluhan kunjungan, lalu **Simpan Jadwal**. Konfirmasi hasil sebelum menutup dialog.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1186,
+          "penanda": "Lanjut ke Penjadwalan →"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 903,
+          "penanda": "Jadwal Kunjungan Pertama"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1052,
+          "penanda": "<Save size={18} /> Simpan Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "langkah": 1,
+      "teks": "Buka **Data Pasien**. Ketik nama, nomor RM, nomor WA, atau alamat pada kolom pencarian, lalu tunggu hasilnya.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 48,
+          "penanda": "label: 'Data Pasien'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 211,
+          "penanda": "Cari nama, No. RM, No. WA, atau alamat..."
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "langkah": 2,
+      "teks": "Jika belum ditemukan, periksa **Semua Gender**, **Semua Status**, serta halaman daftar. Gunakan pemilih jumlah pasien per halaman bila diperlukan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 227,
+          "penanda": "Semua Gender"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 245,
+          "penanda": "Semua Status"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 394,
+          "penanda": "Jumlah pasien per halaman"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "langkah": 3,
+      "teks": "Cocokkan setidaknya dua pengenal, misalnya nama dan nomor RM, kemudian pilih ikon **Lihat Detail**. Hindari memilih pasien hanya berdasarkan nama yang mirip.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 350,
+          "penanda": "title=\"Lihat Detail\""
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 400,
+          "penanda": "no_rm"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "langkah": 4,
+      "teks": "Sebagai resepsionis, pilih **Edit Data** pada detail pasien, perbaiki biodata yang telah dikonfirmasi, lalu **Simpan**. Gunakan **Batal** bila perubahan belum tepat. Dokter yang perlu koreksi biodata dapat meminta bantuan resepsionis.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 358,
+          "penanda": "role === 'resepsionis'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 374,
+          "penanda": "setEditing(true)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 365,
+          "penanda": "onClick={handleSave}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 362,
+          "penanda": "onClick={handleCancel}"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "langkah": 5,
+      "teks": "Periksa kembali data setelah penyimpanan berhasil. Bila muncul galat, baca pesannya dan jangan membuat pasien baru untuk menggantikan biodata yang gagal diubah.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 254,
+          "penanda": "patientService.updatePatient(patientId, dataToUpdate)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 257,
+          "penanda": "setEditing(false)"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "langkah": 1,
+      "teks": "Buka **Daftar Pasien → Pasien Lama**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 58,
+          "penanda": "label: 'Daftar Pasien'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 28,
+          "penanda": "Pasien Lama"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "langkah": 2,
+      "teks": "Cari nama, nomor RM, atau nomor WhatsApp. Ketik setidaknya dua karakter, pilih hasil yang benar, dan cocokkan identitasnya.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1071,
+          "penanda": "Masukkan Nama, No. RM, atau No. WhatsApp..."
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 85,
+          "penanda": "debouncedOldTerm.trim().length < 2"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "langkah": 3,
+      "teks": "Pada **Jadwal Kunjungan Baru**, pilih dokter, tanggal, jam, dan isi keluhan atau alasan kunjungan. Cocokkan waktu dengan jadwal praktik klinik.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1141,
+          "penanda": "Jadwal Kunjungan Baru"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/ScheduleVisitForm.jsx",
+          "baris": 16,
+          "penanda": "Pilih Dokter"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 104,
+          "penanda": "Harap lengkapi tanggal, jam, dan dokter"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "langkah": 4,
+      "teks": "Pilih **Jadwalkan Kunjungan** dan tunggu dialog keberhasilan. Bila gagal, periksa pesan dan jadwal yang sudah ada sebelum mengirim ulang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1155,
+          "penanda": "Jadwalkan Kunjungan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 121,
+          "penanda": "setScheduleSuccessModalData({"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "langkah": 5,
+      "teks": "Buka **Jadwal**, pilih tanggal yang sesuai, lalu periksa pasien dan dokter pada kunjungan berstatus **Terjadwal**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 61,
+          "penanda": "label: 'Jadwal'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 257,
+          "penanda": "Pilih tanggal kunjungan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 25,
+          "penanda": "scheduled: 'Terjadwal'"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "langkah": 1,
+      "teks": "Buka **Jadwal Dokter**. Periksa daftar atau filter **Semua Dokter** sebelum menambahkan jadwal.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 29,
+          "penanda": "label: 'Jadwal Dokter'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 259,
+          "penanda": "Semua Dokter"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "langkah": 2,
+      "teks": "Pilih **Tambah Jadwal**, kemudian pilih dokter dan hari praktik.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 246,
+          "penanda": "<Plus size={14} /> Tambah Jadwal"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 395,
+          "penanda": "value={formData.dokter_id}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 412,
+          "penanda": "value={formData.hari}"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "langkah": 3,
+      "teks": "Isi **Jam Mulai** dan **Jam Selesai**. Jam mulai harus lebih awal; satu dokter tidak dapat memiliki dua entri hari yang sama melalui formulir ini.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 426,
+          "penanda": "Jam Mulai"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 127,
+          "penanda": "Jam mulai harus lebih awal"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 139,
+          "penanda": "Dokter ini sudah memiliki jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "langkah": 4,
+      "teks": "Isi **Jumlah Pasien per Hari** bila klinik memakai kapasitas tertentu, lalu periksa pratinjau slot. Bila kosong, aplikasi menampilkan interval bawaan 30 menit.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 465,
+          "penanda": "Jumlah Pasien per Hari"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 483,
+          "penanda": "Interval default 30 menit per slot"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "langkah": 5,
+      "teks": "Pilih **Tambah Jadwal** untuk menyimpan entri baru. Untuk perubahan berikutnya, gunakan ikon **Edit** dan **Simpan Perubahan**; ikon **Nonaktifkan** dapat menghentikan penggunaan jadwal sesuai kebutuhan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 525,
+          "penanda": "editTarget ? 'Simpan Perubahan' : 'Tambah Jadwal'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 330,
+          "penanda": "'Nonaktifkan' : 'Aktifkan'"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "langkah": 1,
+      "teks": "Buka **Booking Online**, lalu pilih status **Menunggu**. Gunakan tombol **Muat ulang** bila perlu mengambil daftar terbaru.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 62,
+          "penanda": "label: 'Booking Online'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 12,
+          "penanda": "pending: { label: 'Menunggu'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 101,
+          "penanda": "aria-label=\"Muat ulang\""
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "langkah": 2,
+      "teks": "Periksa kode booking, nama, nomor kontak, dokter, tanggal, dan jam. Cocokkan dengan daftar **Jadwal** sebelum menerima permintaan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 118,
+          "penanda": "r.reference_code"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 121,
+          "penanda": "r.requested_time.slice"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 61,
+          "penanda": "label: 'Jadwal'"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "langkah": 3,
+      "teks": "Pilih **Konfirmasi** bila tersedia, atau **Tolak** bila permintaan tidak dapat diterima. Jika menolak, isi alasan internal bila diperlukan, lalu tunggu hasil pembaruan status.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 129,
+          "penanda": "setRowStatus(r, 'confirmed')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 130,
+          "penanda": "setRowStatus(r, 'rejected')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 65,
+          "penanda": "Alasan penolakan (opsional"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "langkah": 4,
+      "teks": "Gunakan **Kabari via WA**, periksa tujuan dan isi pesan di WhatsApp, lalu kirim melalui WhatsApp. Membuka tautan tidak berarti pesan sudah terkirim.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 136,
+          "penanda": "Kabari via WA"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 83,
+          "penanda": "https://wa.me/"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "langkah": 5,
+      "teks": "Untuk booking yang dikonfirmasi, gunakan **Daftarkan pasien**. Cari apakah pasien sudah tercatat; pilih alur pasien lama bila sudah ada. Jika pasien baru, lengkapi pendaftaran. Tetapkan kembali dokter, tanggal, dan jam booking saat membuat jadwal, kemudian periksa kunjungannya.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 141,
+          "penanda": "Daftarkan pasien"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 140,
+          "penanda": "fromBooking: { nama:"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 28,
+          "penanda": "Pasien Lama"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 67,
+          "penanda": "scheduleData"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "langkah": 1,
+      "teks": "Buka **Jadwal Hari Ini**. Pilih tanggal dan filter status yang diperlukan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 46,
+          "penanda": "label: 'Jadwal Hari Ini'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 257,
+          "penanda": "Pilih tanggal kunjungan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 436,
+          "penanda": "Filter status kunjungan"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "langkah": 2,
+      "teks": "Periksa identitas pasien dan kunjungannya. Gunakan **Profil** atau tombol **Rekam Medis** pada kartu bila perlu meninjau data sebelum melayani.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 617,
+          "penanda": "navigate(`/pasien/${visit.patient_id}`)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 625,
+          "penanda": "navigate(`/rekam-medis/${visit.patient_id}`)"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "langkah": 3,
+      "teks": "Untuk kunjungan **Terjadwal**, pilih **Mulai** ketika pelayanan benar-benar dimulai. Tunggu status berubah menjadi **Berlangsung**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 643,
+          "penanda": "handleUpdateStatus(visit.id, 'ongoing')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 26,
+          "penanda": "ongoing:   'Berlangsung'"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "langkah": 4,
+      "teks": "Isi dan simpan rekam medis sesuai pemeriksaan. Setelah pelayanan serta pencatatan selesai, periksa status; **Simpan Rekam Medis** juga mengirim status selesai pada kunjungan yang disimpan. Jika masih **Berlangsung**, gunakan **Selesai** pada kartu.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 533,
+          "penanda": "status: 'completed'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 652,
+          "penanda": "handleUpdateStatus(visit.id, 'completed')"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "langkah": 5,
+      "teks": "Jika kunjungan memang dibatalkan, gunakan **Batalkan** pada kunjungan yang masih Terjadwal atau Berlangsung. Pastikan status menjadi **Dibatalkan**; jangan memakai pembatalan untuk menghapus jejak pelayanan yang sudah terjadi.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 661,
+          "penanda": "handleUpdateStatus(visit.id, 'cancelled')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 28,
+          "penanda": "cancelled: 'Dibatalkan'"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "langkah": 1,
+      "teks": "Buka **Data Pasien**, cari pasien, lalu pilih ikon **Rekam Medis**. Cocokkan nama dan nomor RM pada halaman yang terbuka.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 48,
+          "penanda": "label: 'Data Pasien'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 358,
+          "penanda": "title=\"Rekam Medis\""
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 678,
+          "penanda": "patient.no_rm"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "langkah": 2,
+      "teks": "Isi riwayat penyakit dan **Keluhan Utama**, kemudian lengkapi hasil pemeriksaan pada bagian yang sesuai. Tandai alergi hanya berdasarkan informasi yang sudah dikonfirmasi.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 738,
+          "penanda": "Riwayat Penyakit Medis"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 485,
+          "penanda": "errors.chief_complaint = 'Keluhan Utama wajib diisi'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 746,
+          "penanda": "key:'alergi'"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "langkah": 3,
+      "teks": "Pada **Histori Kunjungan & SOAP**, pilih kunjungan yang benar. Gunakan **Tambah Kunjungan** hanya jika memang perlu entri baru. Isi tanggal, **Keluhan (S)**, **Diagnosa (A)**, dan **Terapi/Tindakan (P)**; pilih kode ICD-10 bila sesuai.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1310,
+          "penanda": "Histori Kunjungan & SOAP"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1311,
+          "penanda": "Tambah Kunjungan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 490,
+          "penanda": "Keluhan (S)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 491,
+          "penanda": "Diagnosa (A)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 492,
+          "penanda": "Terapi/Tindakan (P)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1433,
+          "penanda": "<ICD10Picker"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "langkah": 4,
+      "teks": "Jika memakai **Template SOAP**, periksa dialog penggantian isi dan tinjau ulang hasilnya. Template menimpa isi SOAP terkait; sesuaikan dengan pemeriksaan pasien.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 431,
+          "penanda": "Ganti isi SOAP dengan template"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1380,
+          "penanda": "Gunakan Template SOAP:"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "langkah": 5,
+      "teks": "Pilih **Simpan Rekam Medis**. Tunggu pesan **Berhasil disimpan!**; jika pesan menyebut sebagian data gagal, catatan belum dapat dianggap tersimpan seluruhnya. Periksa kembali sebelum mencoba menyimpan ulang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 624,
+          "penanda": "toast.success('Berhasil disimpan!')"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 518,
+          "penanda": "Sebagian data medis gagal disimpan"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "langkah": 6,
+      "teks": "Bila banner draf muncul saat membuka kembali halaman, pilih **Pulihkan Draf** hanya setelah memastikan pasien dan isinya benar, lalu simpan ke server. Pilih **Abaikan** bila draf tidak tepat.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 698,
+          "penanda": "Draf rekam medis yang belum disimpan ditemukan!"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 710,
+          "penanda": "Pulihkan Draf"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 323,
+          "penanda": "toast.info('Draf diabaikan')"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "langkah": 1,
+      "teks": "Buka rekam medis pasien yang benar, lalu gulir ke bagian odontogram. Pilih **Bantuan Simbol** bila perlu melihat legenda.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 704,
+          "penanda": "Buka Rekam Medis"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1227,
+          "penanda": "Bantuan Simbol"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "langkah": 2,
+      "teks": "Klik gigi atau permukaan yang diperiksa, lalu pilih kode simbol pada panel. Untuk kode yang memerlukan permukaan, pilih permukaan spesifik; ikuti pesan aplikasi bila pilihan tidak sesuai.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/odontogram/Odontogram.jsx",
+          "baris": 226,
+          "penanda": "handleToothClick"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/odontogram/Odontogram.jsx",
+          "baris": 246,
+          "penanda": "handleSurfaceClick"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/odontogram/Odontogram.jsx",
+          "baris": 307,
+          "penanda": "Pilih permukaan gigi spesifik"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "langkah": 3,
+      "teks": "Periksa nomor gigi dan hasil tanda sebelum melanjutkan. Jika memakai simbol bridge, pilih gigi akhir pada baris yang sama sesuai petunjuk **Mode Bridge**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/odontogram/Odontogram.jsx",
+          "baris": 272,
+          "penanda": "Gigi tidak berada dalam baris yang sama"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/odontogram/Odontogram.jsx",
+          "baris": 376,
+          "penanda": "Mode Bridge: Pilih gigi akhir"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "langkah": 4,
+      "teks": "Pada bagian diagnosis dan tindakan, cari kode/nama diagnosis serta tindakan yang benar, lalu pilih hasilnya. Catatan diagnosis bebas dan kode ICD-10 pada SOAP juga perlu diperiksa sesuai kunjungan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/DiagnosisTreatment.jsx",
+          "baris": 112,
+          "penanda": "Cari kode / nama diagnosis..."
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/DiagnosisTreatment.jsx",
+          "baris": 206,
+          "penanda": "Cari nama tindakan/perawatan..."
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1433,
+          "penanda": "<ICD10Picker"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "langkah": 5,
+      "teks": "Lengkapi bidang rekam medis yang wajib, kemudian **Simpan Rekam Medis**. Periksa hasil penyimpanan; perubahan gambar sebelum simpan belum menjadi bukti perubahan di server.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 500,
+          "penanda": "Harap lengkapi semua bidang wajib"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "langkah": 1,
+      "teks": "Buka rekam medis dan pilih kunjungan yang benar pada **Histori Kunjungan & SOAP**. Pastikan kunjungan tidak terkunci sebelum mengubah isinya.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1310,
+          "penanda": "Histori Kunjungan & SOAP"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1402,
+          "penanda": "disabled={visit.is_locked || saving}"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "langkah": 2,
+      "teks": "Di bagian resep, cari obat pada **Cari nama obat...**, pilih obat yang benar, lalu isi dosis, frekuensi, dan jumlah sesuai keputusan dokter. Tinjau alergi; ketiadaan peringatan aplikasi tidak membuktikan obat aman.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/PrescriptionEntry.jsx",
+          "baris": 153,
+          "penanda": "Cari nama obat..."
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/PrescriptionEntry.jsx",
+          "baris": 88,
+          "penanda": "setDosis(obat.dosis_default"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/PrescriptionEntry.jsx",
+          "baris": 92,
+          "penanda": "checkForAllergy(obat.nama_obat)"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "langkah": 3,
+      "teks": "Pilih tombol tambah pada baris obat dan periksa daftar resep. Pilih **Simpan Rekam Medis** untuk menyimpan perubahan. Setelah kunjungan tersimpan dan memuat resep, gunakan **Cetak Resep**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/PrescriptionEntry.jsx",
+          "baris": 223,
+          "penanda": "onClick={handleAdd}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1368,
+          "penanda": "Cetak Resep"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "langkah": 4,
+      "teks": "Untuk kunjungan yang sudah tersimpan dan belum terkunci, pilih **Informed Consent**. Isi judul serta jenis tindakan, jelaskan tindakan melalui prosedur klinik, lalu minta pasien menandatangani kotak yang disediakan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1333,
+          "penanda": "Informed Consent"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/ConsentFormModal.jsx",
+          "baris": 140,
+          "penanda": "value={title}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/ConsentFormModal.jsx",
+          "baris": 151,
+          "penanda": "value={treatmentType}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/ConsentFormModal.jsx",
+          "baris": 187,
+          "penanda": "Gunakan mouse atau jari"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "langkah": 5,
+      "teks": "Pilih **Simpan Persetujuan**, tunggu konfirmasi berhasil, lalu periksa entri pada daftar **Informed Consents**. Klik entri tindakan tersebut bila perlu menghasilkan PDF.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/ConsentFormModal.jsx",
+          "baris": 214,
+          "penanda": "Simpan Persetujuan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/ConsentFormModal.jsx",
+          "baris": 108,
+          "penanda": "Informed consent berhasil disimpan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1460,
+          "penanda": "Informed Consents"
+        },
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1466,
+          "penanda": "generateConsentPdf(c,"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "langkah": 1,
+      "teks": "Buka **Jadwal**, pilih tanggal, lalu cari kunjungan berstatus **Selesai**. Pilih tombol pembayaran pada kartu untuk membuka formulir kunjungan itu.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 61,
+          "penanda": "label: 'Jadwal'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 632,
+          "penanda": "visit.status === 'completed'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/schedule/SchedulePage.jsx",
+          "baris": 634,
+          "penanda": "navigate(`/pembayaran/${visit.id}`)"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "langkah": 2,
+      "teks": "Cocokkan pasien, kunjungan, tindakan, jumlah, dan harga. Periksa biaya tambahan serta diskon sesuai kebijakan klinik; jangan mengubah pilihan klinis tanpa koordinasi dokter.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 28,
+          "penanda": "selectedTreatments"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1109,
+          "penanda": "value={paymentData.biaya_tambahan}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1135,
+          "penanda": "value={paymentData.diskon}"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "langkah": 3,
+      "teks": "Isi **Uang Diterima** sesuai dana yang diterima dan pilih metode pembayaran yang sesuai, misalnya Cash, QRIS, atau Transfer Bank. Periksa **TOTAL BAYAR** sebelum melanjutkan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1150,
+          "penanda": "value={paymentData.jumlah_bayar"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1182,
+          "penanda": "<option value=\"cash\">Cash"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1184,
+          "penanda": "<option value=\"transfer\">Transfer Bank"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 712,
+          "penanda": "TOTAL BAYAR:"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "langkah": 4,
+      "teks": "Pilih status **Lunas**, **Bayar Sebagian**, atau **Pending** sesuai keadaan sebenarnya. Untuk QRIS, periksa notifikasi dana masuk di aplikasi bank/e-wallet klinik; menampilkan QR tidak berarti pembayaran berhasil.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1204,
+          "penanda": "<option value=\"paid\">Lunas"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1205,
+          "penanda": "<option value=\"partial\">Bayar Sebagian"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/QrisPanel.jsx",
+          "baris": 66,
+          "penanda": "Simpan pembayaran hanya setelah"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "langkah": 5,
+      "teks": "Pilih **Simpan Pembayaran** dan tunggu konfirmasi. Jika koneksi putus atau hasil tidak jelas, buka kembali detail pembayaran yang sama sebelum mengirim ulang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1253,
+          "penanda": "Simpan Pembayaran"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 258,
+          "penanda": "paymentService.saveVisitPayment"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 326,
+          "penanda": "navigate(`/pembayaran/${payment.visit_id}`)"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "langkah": 6,
+      "teks": "Buka **Pembayaran**, cari invoice atau pasien, lalu periksa status terakhir melalui **Detail**. Lanjutkan pencetakan invoice dari detail yang sudah tercatat.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 66,
+          "penanda": "label: 'Pembayaran'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 221,
+          "penanda": "Cari nama pasien atau invoice..."
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 329,
+          "penanda": "Detail"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "langkah": 1,
+      "teks": "Buka **Pembayaran**. Cari nama pasien atau nomor invoice, lalu sesuaikan rentang waktu dan status bila hasil belum muncul.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 66,
+          "penanda": "label: 'Pembayaran'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 221,
+          "penanda": "Cari nama pasien atau invoice..."
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 233,
+          "penanda": "Filter rentang waktu pembayaran"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 250,
+          "penanda": "Filter status pembayaran"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "langkah": 2,
+      "teks": "Pilih **Detail** pada invoice yang benar. Cocokkan nomor invoice, pasien, item, total, dan status bayar.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 326,
+          "penanda": "navigate(`/pembayaran/${payment.visit_id}`)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 754,
+          "penanda": "existingPayment.invoice_number"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "langkah": 3,
+      "teks": "Pilih **Cetak Invoice**. Periksa identitas klinik, alamat, dan rincian pada pratinjau sebelum mencetak atau menyimpan PDF melalui dialog cetak browser.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 333,
+          "penanda": "handlePrintInvoice"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "langkah": 4,
+      "teks": "Untuk invoice lunas, gunakan **Kirim Ulang Invoice WA** hanya bila fitur tersedia dan pasien memberi izin WhatsApp. Baca hasil pengiriman; status ditunda atau gagal bukan bukti pesan sudah diterima.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 772,
+          "penanda": "Kirim Ulang Invoice WA"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 286,
+          "penanda": "skipped_no_consent:"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 318,
+          "penanda": "handleResendWhatsApp"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "langkah": 5,
+      "teks": "Jika dialog cetak tidak muncul pada desktop, buka aplikasi web resmi yang diberikan klinik melalui browser dan cari invoice yang sama. Jangan membuat pembayaran baru untuk mencoba mencetak ulang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 333,
+          "penanda": "handlePrintInvoice"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 245,
+          "penanda": "Masuk ke Sistem"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 221,
+          "penanda": "Cari nama pasien atau invoice..."
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "langkah": 1,
+      "teks": "Buka **Biaya & Modal → Master Bahan & Gudang**. Periksa daftar agar bahan yang sama tidak dibuat dua kali.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 37,
+          "penanda": "label: 'Biaya & Modal'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 17,
+          "penanda": "label: 'Master Bahan & Gudang'"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "langkah": 2,
+      "teks": "Pilih **Tambah Bahan Baru**. Isi kode bahan, nama, kategori, dan satuan dasar.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 187,
+          "penanda": "Tambah Bahan Baru"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 57,
+          "penanda": "Kode, nama, dan satuan dasar wajib diisi"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "langkah": 3,
+      "teks": "Isi satuan beli dan faktor konversi sesuai kemasan yang diterima. Contoh sintetis: satu box berisi 100 pcs berarti faktor konversi 100; jangan memasukkan jumlah box sebagai isi per box.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 291,
+          "penanda": "value={formData.satuan_beli}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 295,
+          "penanda": "value={formData.faktor_konversi}"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "langkah": 4,
+      "teks": "Isi stok minimum serta pemasok bila diperlukan, lalu **Simpan**. Setelah tersimpan, gunakan **Stok Masuk** untuk mencatat pembelian; pembuatan master melalui formulir ini bukan pencatatan pembelian.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 303,
+          "penanda": "value={formData.stok_minimum}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 340,
+          "penanda": "'Menyimpan...' : 'Simpan'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 18,
+          "penanda": "label: 'Stok Masuk'"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "langkah": 5,
+      "teks": "Untuk melihat batch, pilih ikon **Lihat Batch & Expired** pada baris bahan. Cocokkan tanggal kedaluwarsa dan sisa batch dengan kondisi gudang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 237,
+          "penanda": "Lihat Batch & Expired"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 354,
+          "penanda": "Info Batch & Kadaluarsa"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "langkah": 1,
+      "teks": "Buka **Biaya & Modal → Stok Masuk**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 37,
+          "penanda": "label: 'Biaya & Modal'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 18,
+          "penanda": "label: 'Stok Masuk'"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "langkah": 2,
+      "teks": "Isi tanggal pembelian dan pilih bahan pada **Pilih Bahan**. Pastikan kode/nama sesuai barang yang diterima.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 132,
+          "penanda": "value={formData.tanggal}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 146,
+          "penanda": "-- Pilih Bahan --"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "langkah": 3,
+      "teks": "Isi jumlah beli dan harga per satuan beli. Tinjau perhitungan jumlah satuan dasar dan total pembelian; misalnya jumlah box harus dikalikan isi per box yang benar.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 163,
+          "penanda": "value={formData.jumlah_beli}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 175,
+          "penanda": "value={formData.harga_satuan_beli}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 58,
+          "penanda": "jumlah_dasar"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "langkah": 4,
+      "teks": "Lengkapi pemasok, nomor faktur, dan tanggal kedaluwarsa bila ada. Cocokkan semuanya dengan nota serta kemasan fisik.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 201,
+          "penanda": "value={formData.supplier}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 190,
+          "penanda": "value={formData.no_faktur}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 211,
+          "penanda": "value={formData.tanggal_kadaluarsa}"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "langkah": 5,
+      "teks": "Pilih **Proses Pembelian**. Setelah proses berhasil, periksa perubahan melalui **Kartu Stok** dan informasi batch pada master bahan sebelum mencatat pembelian berikutnya.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 245,
+          "penanda": "Proses Pembelian"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 32,
+          "penanda": "if (res.success)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 19,
+          "penanda": "label: 'Kartu Stok'"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "langkah": 1,
+      "teks": "Buka **Biaya & Modal → Kartu Stok**. Pilih bahan, jenis pergerakan, dan rentang tanggal untuk menelusuri selisih.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 37,
+          "penanda": "label: 'Biaya & Modal'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 19,
+          "penanda": "label: 'Kartu Stok'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockMovements.jsx",
+          "baris": 78,
+          "penanda": "Semua Tipe"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockMovements.jsx",
+          "baris": 88,
+          "penanda": "value={filters.startDate}"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "langkah": 2,
+      "teks": "Hitung stok fisik dalam satuan dasar bahan. Buka **Stok Opname → Lakukan Opname Baru** untuk membuka formulir.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 20,
+          "penanda": "label: 'Stok Opname'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 126,
+          "penanda": "Lakukan Opname Baru"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 218,
+          "penanda": "selectedMaterial.satuan_dasar"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "langkah": 3,
+      "teks": "Pilih tanggal dan bahan. Bandingkan **Stok Sistem (Saat Ini)** dengan jumlah yang benar-benar ada, lalu isi **Stok Fisik Aktual** sebagai saldo akhir, bukan nilai selisih.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 194,
+          "penanda": "value={formData.tanggal}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 225,
+          "penanda": "value={formData.stok_fisik}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 54,
+          "penanda": "stok_sistem: mat ? mat.stok_saat_ini"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "langkah": 4,
+      "teks": "Baca **Selisih** yang ditampilkan, lalu isi **Catatan** berisi alasan yang dapat dipertanggungjawabkan, misalnya koreksi salah hitung. Pastikan arah penyesuaiannya benar.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 235,
+          "penanda": "Selisih:"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 244,
+          "penanda": "Alasan selisih (rusak, hilang, dll)..."
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "langkah": 5,
+      "teks": "Pilih **Simpan Opname**. Periksa riwayat opname serta Kartu Stok setelah proses berhasil; jika hasil belum jelas, jangan membuat opname kedua sebelum membaca saldo terbaru.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 254,
+          "penanda": "Simpan Opname"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 110,
+          "penanda": "Riwayat Stok Opname"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/StockMovements.jsx",
+          "baris": 81,
+          "penanda": "Opname (Selisih)"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "langkah": 1,
+      "teks": "Buka **Biaya & Modal → Biaya Operasional → Tambah Biaya Overhead**. Isi kategori, nama biaya, dan jumlah bulanan, lalu **Simpan**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 37,
+          "penanda": "label: 'Biaya & Modal'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 15,
+          "penanda": "label: 'Biaya Operasional'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 279,
+          "penanda": "Tambah Biaya Overhead"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 363,
+          "penanda": "value={formData.jumlah_bulanan}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 394,
+          "penanda": "onClick={handleSaveCost}"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "langkah": 2,
+      "teks": "Pada **Target & Alokasi Bulanan**, pilih periode dan gunakan **Edit Target** bila target sudah ada. Periksa total overhead serta **Estimasi Total Bobot Tindakan**, lalu **Kunci Target**. Target ini masukan perhitungan, bukan jumlah pasien yang pasti datang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 186,
+          "penanda": "Target & Alokasi Bulanan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 222,
+          "penanda": "Edit Target"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 240,
+          "penanda": "Estimasi Total Bobot Tindakan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 262,
+          "penanda": "Kunci Target"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "langkah": 3,
+      "teks": "Buka **Resep Bahan (BOM)**. Cari dan pilih perawatan yang akan disusun, lalu **Tambah Bahan**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 16,
+          "penanda": "label: 'Resep Bahan (BOM)'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 137,
+          "penanda": "Cari perawatan..."
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 179,
+          "penanda": "<Plus size={16} /> Tambah Bahan"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "langkah": 4,
+      "teks": "Pilih bahan, isi jumlah rata-rata dalam satuan dasar serta **Wastage (%)**. Tinjau pilihan **Bahan Wajib**, kemudian **Simpan**. Periksa resepnya sebelum melanjutkan ke perawatan lain.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 25,
+          "penanda": "qty_rata2"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 283,
+          "penanda": "Wastage (%)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 310,
+          "penanda": "Bahan Wajib (otomatis dipotong dari stok saat selesai)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 317,
+          "penanda": "onClick={handleSaveBOM}"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "langkah": 5,
+      "teks": "Buka **Lap. Profitabilitas**, pilih awal dan akhir periode, lalu baca harga jual, modal, dan margin yang tersedia. Bila belum ada data, periksa transaksi, harga bahan, dan resep; jangan menganggap data kosong sebagai laba nol yang sudah terukur.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 21,
+          "penanda": "label: 'Lap. Profitabilitas'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/ProfitabilityReport.jsx",
+          "baris": 102,
+          "penanda": "value={dateRange.startDate}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/ProfitabilityReport.jsx",
+          "baris": 43,
+          "penanda": "item.total_modal"
+        },
+        {
+          "berkas": "apps/clinic/src/components/costing/ProfitabilityReport.jsx",
+          "baris": 44,
+          "penanda": "item.margin"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "langkah": 1,
+      "teks": "Buka **Pengeluaran** dan pilih periode yang relevan. Periksa daftar untuk memastikan nota belum tercatat.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 32,
+          "penanda": "label: 'Pengeluaran'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 192,
+          "penanda": "setMonth("
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 98,
+          "penanda": "r.nomor_nota"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "langkah": 2,
+      "teks": "Pilih **Tambah**, lalu isi tanggal, kategori, jumlah, pemasok, nomor nota, dan deskripsi sesuai bukti transaksi.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 224,
+          "penanda": "onClick={openNew}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 356,
+          "penanda": "value={editing.tanggal_expense}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 377,
+          "penanda": "value={editing.nomor_nota}"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "langkah": 3,
+      "teks": "Bila memakai **Pindai nota**, pilih foto nota pembelian yang jelas dan sudah bebas data pasien. Periksa ulang hasil pembacaan, terutama nominal, tanggal, dan pemasok. Bila AI tidak aktif atau kuota habis, lanjutkan pengisian manual.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 221,
+          "penanda": "onClick={startScan}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 317,
+          "penanda": "Periksa hasil pindai nota"
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 107,
+          "penanda": "Silakan isi manual."
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "langkah": 4,
+      "teks": "Pilih **Simpan**. Bila muncul catatan transaksi mirip, bandingkan dahulu. Gunakan **Tetap simpan** hanya jika Anda telah memastikan transaksi memang berbeda dan sah.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 401,
+          "penanda": "<Button type=\"submit\""
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 399,
+          "penanda": "Tetap simpan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 155,
+          "penanda": "expenseService.byNota"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "langkah": 5,
+      "teks": "Tunggu pesan **Pengeluaran disimpan.** atau **Pengeluaran diperbarui.**, lalu periksa barisnya. Untuk koreksi, gunakan ikon **Ubah** pada pengeluaran yang sama.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 190,
+          "penanda": "'Pengeluaran diperbarui.' : 'Pengeluaran disimpan.'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 304,
+          "penanda": "title=\"Ubah\""
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "langkah": 1,
+      "teks": "Buka **Layar Antrean** pada akun admin atau resepsionis.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 30,
+          "penanda": "label: 'Layar Antrean'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/queue/QueueDisplayPage.jsx",
+          "baris": 20,
+          "penanda": "<QueueDisplayLinks />"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "langkah": 2,
+      "teks": "Isi nama layar, misalnya “TV Ruang Tunggu”, lalu **Buat tautan**. Tunggu tautan baru tampil.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 94,
+          "penanda": "placeholder=\"Nama layar"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 85,
+          "penanda": "Buat tautan"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "langkah": 3,
+      "teks": "Pilih **Salin tautan**, lalu buka alamat tersebut di browser TV dan simpan sebagai bookmark. Tautan lengkap hanya ditampilkan sekali; jika salin otomatis gagal, salin manual dari kotak tautan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 72,
+          "penanda": "Salin tautan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 24,
+          "penanda": "hanya ditampilkan sekali"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 72,
+          "penanda": "Salin tautan secara manual"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "langkah": 4,
+      "teks": "Periksa layar TV: gunakan nomor antrean, inisial, dan nama dokter untuk membantu panggilan. Jika layar tidak memperbarui data, periksa koneksi dan konfirmasikan antrean kepada resepsionis.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/queue/QueueDisplay.jsx",
+          "baris": 12,
+          "penanda": "get_queue_display"
+        },
+        {
+          "berkas": "apps/clinic/src/components/queue/QueueDisplay.jsx",
+          "baris": 96,
+          "penanda": "setInterval(fetchQueue"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 85,
+          "penanda": "nomor antrean, inisial"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "langkah": 5,
+      "teks": "Bila TV diganti atau tautan tersebar, buka **Tautan yang pernah dibuat → Cabut** pada tautan terkait. Konfirmasi pencabutan dan buat tautan baru bila diperlukan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 134,
+          "penanda": "Tautan yang pernah dibuat"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 57,
+          "penanda": "Cabut tautan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 63,
+          "penanda": "toast.success('Tautan dicabut')"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "langkah": 1,
+      "teks": "Untuk panduan aplikasi, pilih **Buka Denti, pemandu Dentiva**, lalu ketik pertanyaan seperti “buka jadwal” atau “apa itu HPP?”. Pilih tombol **Kirim**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
+          "baris": 210,
+          "penanda": "Buka Denti, pemandu Dentiva"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
+          "baris": 203,
+          "penanda": "aria-label=\"Tulis pesan untuk Denti\""
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
+          "baris": 205,
+          "penanda": "aria-label=\"Kirim\""
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "langkah": 2,
+      "teks": "Sebagai admin, buka **Asisten AI** untuk pertanyaan bisnis atau usulan tindakan. Jika layar persetujuan penggunaan tampil, baca informasi pemrosesan data dan aktifkan hanya bila Anda berwenang serta setuju.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 34,
+          "penanda": "label: 'Asisten AI'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 551,
+          "penanda": "Saya admin klinik ini dan menyetujui"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 553,
+          "penanda": "onClick={() => toggle(true)}"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "langkah": 3,
+      "teks": "Periksa pemakaian kuota, lalu tulis pertanyaan operasional yang jelas dan pilih **Kirim**. Contoh sintetis: “Bahan apa yang perlu dipesan ulang?”. Enter mengirim; Shift+Enter membuat baris baru.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 482,
+          "penanda": "status.kuota_bulanan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 717,
+          "penanda": "Enter untuk kirim, Shift+Enter baris baru"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 732,
+          "penanda": "<Send size={16} /> Kirim"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "langkah": 4,
+      "teks": "Jika memindai nota dari Asisten AI, pilih ikon **Pindai nota agar Denti mencatatnya** dan unggah foto nota pembelian yang sesuai. Periksa hasil serta kartu usulan; foto terbaca belum berarti pengeluaran atau stok sudah dicatat.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 722,
+          "penanda": "Pindai nota agar Denti mencatatnya"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 321,
+          "penanda": "ask(notaMessage(d)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 66,
+          "penanda": "Data baru berubah setelah Anda menyetujui."
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "langkah": 5,
+      "teks": "Tinjau jawaban dan kartu usulan. Agen dapat membantu bahan, stok, pengeluaran, overhead, resep bahan, dan tarif; untuk pembayaran pasien, rekam medis, data pasien, pengguna, atau pengaturan, gunakan menu resmi dengan akun berwenang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 65,
+          "penanda": "Usulan tindakan Denti"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 740,
+          "penanda": "Hanya angka ringkasan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
+          "baris": 19,
+          "penanda": "khusus admin"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "langkah": 1,
+      "teks": "Buka **Asisten AI** dan minta pekerjaan operasional yang jelas. Tunggu kartu **Usulan tindakan Denti**; kalimat “sudah dicatat” tanpa kartu/hasil bukan bukti data berubah.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 34,
+          "penanda": "label: 'Asisten AI'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 65,
+          "penanda": "aria-label=\"Usulan tindakan Denti\""
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "langkah": 2,
+      "teks": "Baca judul, rincian, risiko, dan seluruh peringatan pada kartu. Cocokkan bahan, nominal, satuan, tanggal, serta nota. Jika ada yang keliru, pilih **Tolak**, tunggu status **Ditolak**, lalu minta usulan yang diperbaiki.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 84,
+          "penanda": "p.rincian"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 87,
+          "penanda": "p.peringatan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 97,
+          "penanda": "Tolak: ${p.judul}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 80,
+          "penanda": "> Ditolak"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "langkah": 3,
+      "teks": "Jika benar, pilih **Setujui** sekali dan tunggu status **Dijalankan**. Bila ada beberapa kartu, periksa semuanya sebelum memilih **Setujui semua**; persetujuan massal satu paket, sehingga satu kegagalan membatalkan seluruh paket tersebut.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 94,
+          "penanda": "Setujui: ${p.judul}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 79,
+          "penanda": "> Dijalankan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 120,
+          "penanda": "Setujui semua ("
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 125,
+          "penanda": "bila ada yang gagal, tidak ada yang berubah"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "langkah": 4,
+      "teks": "Gunakan **Lihat di Pengeluaran**, **Lihat di Master Treatment**, atau **Lihat di Biaya & Modal**, sesuai jenis kartu, untuk memeriksa hasil tercatat.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 104,
+          "penanda": "Lihat di {link.label}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 21,
+          "penanda": "label: 'Pengeluaran'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 22,
+          "penanda": "label: 'Master Treatment'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 23,
+          "penanda": "label: 'Biaya & Modal'"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "langkah": 5,
+      "teks": "Untuk hasil yang masih dapat dibatalkan, pilih **Batalkan** pada kartu Dijalankan dan tunggu **Dibatalkan**. Tombol ini hanya muncul jika server menyatakan tindakan mendukung pembatalan; periksa hasil akhirnya melalui menu terkait.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 105,
+          "penanda": "{a.bisaBatal &&"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 106,
+          "penanda": "Batalkan: ${p.judul}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 81,
+          "penanda": "> Dibatalkan"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "langkah": 6,
+      "teks": "Jika kartu **Kedaluwarsa**, minta usulan baru setelah membaca data terbaru. Jika persetujuan/pembatalan gagal atau koneksi terputus, baca pesan galat dan periksa hasil di menu terkait sebelum mengirim permintaan lagi.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 82,
+          "penanda": "> Kedaluwarsa"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 112,
+          "penanda": "Minta Denti membuat usulan ini lagi."
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 90,
+          "penanda": "{a.error &&"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "langkah": 1,
+      "teks": "Pada halaman masuk versi web, pilih **Unduh aplikasi desktop**. Minta admin klinik memverifikasi sumber dan installer resmi sebelum pemasangan Windows/macOS; bila perangkat menampilkan peringatan keamanan, hentikan dan minta bantuan admin.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 255,
+          "penanda": "Unduh aplikasi desktop"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "langkah": 2,
+      "teks": "Setelah pemasangan yang disetujui pengelola, buka Dentiva dan masuk dengan akun pribadi melalui **Masuk ke Sistem**. Periksa peran seperti pada aplikasi web.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 245,
+          "penanda": "Masuk ke Sistem"
+        },
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "langkah": 3,
+      "teks": "Jika kartu **Dentiva … tersedia** muncul, simpan semua pekerjaan dahulu. Pilih **Perbarui sekarang** hanya setelah admin memastikan kanal pembaruan siap, atau **Nanti** untuk melanjutkan pekerjaan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 84,
+          "penanda": "Dentiva {update.version} tersedia"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 86,
+          "penanda": "Simpan pekerjaan Anda dulu"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 101,
+          "penanda": "'Perbarui sekarang'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 103,
+          "penanda": ">Nanti<"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "langkah": 4,
+      "teks": "Tunggu proses unduh, pemasangan, dan mulai ulang. Jika kartu menampilkan kegagalan, periksa koneksi dan gunakan **Coba lagi** hanya setelah pekerjaan aman; bila tetap gagal, hubungi admin klinik untuk installer yang diverifikasi.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 53,
+          "penanda": "update.downloadAndInstall"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 63,
+          "penanda": "await relaunch()"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 101,
+          "penanda": "'Coba lagi'"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "langkah": 5,
+      "teks": "Jika cetak invoice tidak membuka dialog di desktop, gunakan aplikasi web resmi melalui browser dan buka invoice yang sama dari **Pembayaran → Detail → Cetak Invoice**.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 326,
+          "penanda": "navigate(`/pembayaran/${payment.visit_id}`)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "langkah": 1,
+      "teks": "Periksa peran pada **Menu profil pengguna**. Gunakan menu sesuai tugas: admin untuk bisnis/agregat, dokter untuk klinis, resepsionis untuk administrasi serta pembayaran. Jika **Akses Ditolak**, pilih **Kembali ke Dashboard** dan hubungi admin klinik bila hak akses perlu ditinjau.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 24,
+          "penanda": "const menus ="
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/AccessDenied.jsx",
+          "baris": 28,
+          "penanda": "Kembali ke Dashboard"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "langkah": 2,
+      "teks": "Saat mencari atau membuka detail pasien, verifikasi penerima dan tujuan penggunaan sebelum menyalin, mencetak, atau membagikan informasi. Jangan masukkan data pasien ke Denti; gunakan panduan tanpa identitas.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 350,
+          "penanda": "title=\"Lihat Detail\""
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 824,
+          "penanda": "Export PDF PDP"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
+          "baris": 203,
+          "penanda": "aria-label=\"Tulis pesan untuk Denti\""
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "langkah": 3,
+      "teks": "Jika pasien meminta salinan, koreksi, atau penghapusan, teruskan ke penanggung jawab klinik melalui admin. Dokter/resepsionis berwenang dapat membuka detail pasien dan **Catat Permintaan** sesuai prosedur verifikasi klinik. Mencatat permintaan tidak otomatis mengabulkan atau menghapus data.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 831,
+          "penanda": "Catat Permintaan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 130,
+          "penanda": "pdpService.createDataSubjectRequest"
+        },
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 133,
+          "penanda": "requestType: pdpForm.requestType"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "langkah": 4,
+      "teks": "Untuk pertanyaan backup, admin dapat membuka **Pengaturan → Database** dan membaca status yang ditampilkan. **Buat Backup Sekarang (Nonaktif)** dan **Pilih File Backup (Nonaktif)** belum bisa dipakai; hubungi admin klinik untuk diteruskan ke pengelola sistem.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 41,
+          "penanda": "label: 'Pengaturan'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 387,
+          "penanda": "label: 'Database'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1252,
+          "penanda": "Buat Backup Sekarang (Nonaktif)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1263,
+          "penanda": "Pilih File Backup (Nonaktif)"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "langkah": 5,
+      "teks": "Akhiri sesi melalui **Menu profil pengguna → Keluar** ketika selesai, terutama pada perangkat bersama. Amankan hasil cetak dan unduhan sebelum menyerahkan perangkat.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 185,
+          "penanda": "<LogOut size={16} /> Keluar"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "langkah": 1,
+      "teks": "**Menu hilang atau Akses Ditolak?** Periksa peran di menu profil, lalu gunakan **Kembali ke Dashboard**. Hubungi admin klinik bila pembagian tugas tidak sesuai; jangan mencoba akun orang lain atau mengubah alamat untuk melewati izin.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/AccessDenied.jsx",
+          "baris": 28,
+          "penanda": "Kembali ke Dashboard"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "langkah": 2,
+      "teks": "**Email reset tidak datang atau lupa sandi?** Hubungi admin klinik. **Lupa password?** masih dapat menampilkan pesan pengiriman, tetapi SMTP/email reset sandi belum aktif; jangan menunggu email sebagai satu-satunya jalur pemulihan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 74,
+          "penanda": "Lupa password?"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 232,
+          "penanda": "resetState === 'sent'"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "langkah": 3,
+      "teks": "**Halaman gagal dimuat?** Periksa jaringan terlebih dahulu. Pada galat daftar Pembayaran gunakan **Coba lagi**; pada layar **Aplikasi Mengalami Kendala** gunakan **Muat Ulang Halaman** setelah menilai pekerjaan yang belum tersimpan. Catat pesan galat tanpa data pasien bila tetap gagal.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 273,
+          "penanda": ">Coba lagi</button>"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/ErrorBoundary.jsx",
+          "baris": 32,
+          "penanda": "Aplikasi Mengalami Kendala"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/ErrorBoundary.jsx",
+          "baris": 41,
+          "penanda": "Muat Ulang Halaman"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "langkah": 4,
+      "teks": "**Pembayaran atau usulan Denti belum jelas hasilnya?** Buka detail transaksi atau menu hasil usulan dan periksa status. Pesan jawaban AI, QR yang tampil, atau tombol yang sudah ditekan belum membuktikan proses selesai. Jangan mengulang simpan atau Setujui sebelum memeriksa.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 326,
+          "penanda": "navigate(`/pembayaran/${payment.visit_id}`)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 104,
+          "penanda": "Lihat di {link.label}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/QrisPanel.jsx",
+          "baris": 66,
+          "penanda": "Simpan pembayaran hanya setelah"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "langkah": 5,
+      "teks": "**Denti sibuk, kuota habis, atau tidak menjawab?** Baca pesan di **Asisten AI** dan periksa kuota. Gunakan **Pengeluaran** atau **Biaya & Modal** untuk pekerjaan manual sesuai izin; coba AI kembali kemudian tanpa mengirim data pasien.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 482,
+          "penanda": "status.kuota_bulanan"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 264,
+          "penanda": "res.error"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 32,
+          "penanda": "label: 'Pengeluaran'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 37,
+          "penanda": "label: 'Biaya & Modal'"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "langkah": 6,
+      "teks": "**Backup atau pemulihan data diperlukan?** Hubungi admin klinik. Tombol backup/restore belum aktif, backup offsite belum aktif, dan pengelola perlu memeriksa cadangan serta pilihan pemulihan sebelum memberi keputusan.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1252,
+          "penanda": "Buat Backup Sekarang (Nonaktif)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1263,
+          "penanda": "Pilih File Backup (Nonaktif)"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "langkah": 7,
+      "teks": "**Klinik ditangguhkan atau pendaftaran belum aktif?** Baca keterangan layar, hubungi admin klinik agar berkoordinasi dengan tim Dentiva, lalu pilih **Periksa lagi** setelah ada pembaruan status. Tombol ini memeriksa ulang, bukan mengaktifkan klinik sendiri.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/ClinicUnavailable.jsx",
+          "baris": 19,
+          "penanda": "Periksa lagi"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/ClinicUnavailable.jsx",
+          "baris": 28,
+          "penanda": "refreshAccountStatus"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,408 @@
+[
+  {
+    "slug": "mulai-cepat-klinik-baru",
+    "judul": "Mulai cepat untuk klinik baru",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "onboarding",
+      "klinik baru",
+      "profil klinik",
+      "tarif",
+      "staf",
+      "resepsionis"
+    ]
+  },
+  {
+    "slug": "masuk-dan-keluar",
+    "judul": "Masuk dan keluar dengan akun pribadi",
+    "peran": [
+      "admin",
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "login",
+      "logout",
+      "akun",
+      "email",
+      "password",
+      "ponsel"
+    ]
+  },
+  {
+    "slug": "sandi-dan-mfa",
+    "judul": "Mengganti sandi, lupa sandi, dan status MFA",
+    "peran": [
+      "admin",
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "password",
+      "sandi",
+      "lupa password",
+      "reset email",
+      "MFA",
+      "2FA",
+      "TOTP",
+      "autentikator"
+    ]
+  },
+  {
+    "slug": "mendaftarkan-pasien-baru",
+    "judul": "Mendaftarkan pasien baru",
+    "peran": [
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "pendaftaran",
+      "pasien baru",
+      "identitas",
+      "NIK",
+      "WhatsApp",
+      "kasir"
+    ]
+  },
+  {
+    "slug": "mencari-memperbarui-pasien",
+    "judul": "Mencari pasien dan memperbarui biodata",
+    "peran": [
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "pencarian",
+      "pasien",
+      "biodata",
+      "alamat",
+      "nomor RM",
+      "ubah pasien"
+    ]
+  },
+  {
+    "slug": "kunjungan-pasien-lama",
+    "judul": "Membuat janji untuk pasien lama",
+    "peran": [
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "jadwal",
+      "janji temu",
+      "pasien lama",
+      "kunjungan ulang",
+      "dokter"
+    ]
+  },
+  {
+    "slug": "jadwal-praktik-dokter",
+    "judul": "Mengatur jadwal praktik dokter",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "jadwal dokter",
+      "praktik",
+      "hari",
+      "jam",
+      "kapasitas",
+      "slot"
+    ]
+  },
+  {
+    "slug": "booking-online",
+    "judul": "Menangani permintaan booking online",
+    "peran": [
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "booking online",
+      "konfirmasi",
+      "tolak",
+      "WhatsApp",
+      "janji"
+    ]
+  },
+  {
+    "slug": "layanan-dokter",
+    "judul": "Melihat antrean dan memperbarui status layanan",
+    "peran": [
+      "dokter"
+    ],
+    "kata_kunci": [
+      "jadwal hari ini",
+      "antrean",
+      "mulai",
+      "selesai",
+      "batalkan",
+      "kunjungan"
+    ]
+  },
+  {
+    "slug": "mengisi-rekam-medis",
+    "judul": "Mengisi dan menyimpan rekam medis",
+    "peran": [
+      "dokter"
+    ],
+    "kata_kunci": [
+      "rekam medis",
+      "RME",
+      "SOAP",
+      "keluhan",
+      "diagnosa",
+      "terapi",
+      "draf"
+    ]
+  },
+  {
+    "slug": "odontogram-dan-diagnosis",
+    "judul": "Mencatat odontogram dan diagnosis",
+    "peran": [
+      "dokter"
+    ],
+    "kata_kunci": [
+      "odontogram",
+      "gigi",
+      "permukaan",
+      "simbol",
+      "diagnosis",
+      "ICD-10",
+      "tindakan"
+    ]
+  },
+  {
+    "slug": "resep-dan-persetujuan",
+    "judul": "Menambahkan resep dan persetujuan tindakan",
+    "peran": [
+      "dokter"
+    ],
+    "kata_kunci": [
+      "resep",
+      "obat",
+      "dosis",
+      "frekuensi",
+      "consent",
+      "persetujuan",
+      "tanda tangan"
+    ]
+  },
+  {
+    "slug": "pembayaran-kunjungan",
+    "judul": "Mencatat pembayaran kunjungan",
+    "peran": [
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "kasir",
+      "pembayaran",
+      "lunas",
+      "cicilan",
+      "pending",
+      "QRIS",
+      "transfer"
+    ]
+  },
+  {
+    "slug": "invoice-dan-kwitansi",
+    "judul": "Mencari dan mencetak invoice",
+    "peran": [
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "invoice",
+      "kwitansi",
+      "faktur",
+      "cetak",
+      "PDF",
+      "WhatsApp",
+      "kasir"
+    ]
+  },
+  {
+    "slug": "master-bahan",
+    "judul": "Menyiapkan master bahan dan satuan stok",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "master bahan",
+      "gudang",
+      "satuan",
+      "box",
+      "konversi",
+      "stok minimum",
+      "batch"
+    ]
+  },
+  {
+    "slug": "mencatat-stok-masuk",
+    "judul": "Mencatat pembelian dan stok masuk",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "stok masuk",
+      "pembelian",
+      "faktur",
+      "pemasok",
+      "harga",
+      "konversi",
+      "kedaluwarsa"
+    ]
+  },
+  {
+    "slug": "opname-dan-kartu-stok",
+    "judul": "Memeriksa kartu stok dan mencatat opname",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "opname",
+      "kartu stok",
+      "selisih",
+      "stok fisik",
+      "koreksi",
+      "gudang"
+    ]
+  },
+  {
+    "slug": "biaya-hpp-dan-margin",
+    "judul": "Menyiapkan biaya, resep bahan, dan membaca HPP",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "HPP",
+      "BOM",
+      "resep bahan",
+      "overhead",
+      "biaya",
+      "margin",
+      "profitabilitas",
+      "wastage"
+    ]
+  },
+  {
+    "slug": "mencatat-pengeluaran",
+    "judul": "Mencatat pengeluaran dan memeriksa nota",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "pengeluaran",
+      "nota",
+      "pindai",
+      "biaya",
+      "pemasok",
+      "duplikat"
+    ]
+  },
+  {
+    "slug": "layar-antrean-tv",
+    "judul": "Menyiapkan layar antrean TV",
+    "peran": [
+      "admin",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "TV",
+      "antrean",
+      "token",
+      "layar ruang tunggu",
+      "tautan",
+      "cabut"
+    ]
+  },
+  {
+    "slug": "menggunakan-denti",
+    "judul": "Menggunakan Denti dan memahami batasnya",
+    "peran": [
+      "admin",
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "Denti",
+      "AI",
+      "agen",
+      "panduan",
+      "kuota",
+      "pindai nota",
+      "asisten"
+    ]
+  },
+  {
+    "slug": "usulan-denti",
+    "judul": "Menyetujui, menolak, dan membatalkan usulan Denti",
+    "peran": [
+      "admin"
+    ],
+    "kata_kunci": [
+      "Denti Agen",
+      "setujui",
+      "tolak",
+      "batalkan",
+      "undo",
+      "kedaluwarsa",
+      "duplikat"
+    ]
+  },
+  {
+    "slug": "aplikasi-desktop",
+    "judul": "Menggunakan Dentiva Desktop dan menangani pembaruan",
+    "peran": [
+      "admin",
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "desktop",
+      "Windows",
+      "macOS",
+      "installer",
+      "update",
+      "pembaruan",
+      "cetak",
+      "offline"
+    ]
+  },
+  {
+    "slug": "privasi-dan-backup",
+    "judul": "Menjaga privasi pasien dan meminta bantuan pemulihan",
+    "peran": [
+      "admin",
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "privasi",
+      "data pasien",
+      "akses",
+      "backup",
+      "offsite",
+      "pemulihan",
+      "permintaan data"
+    ]
+  },
+  {
+    "slug": "faq-pemecahan-masalah",
+    "judul": "FAQ dan pemecahan masalah sehari-hari",
+    "peran": [
+      "admin",
+      "dokter",
+      "resepsionis"
+    ],
+    "kata_kunci": [
+      "FAQ",
+      "galat",
+      "error",
+      "koneksi",
+      "akses ditolak",
+      "AI sibuk",
+      "reset",
+      "backup",
+      "dukungan"
+    ]
+  }
+]
