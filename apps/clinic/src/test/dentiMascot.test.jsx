@@ -271,5 +271,36 @@ describe('Maskot Denti — polesan A1b (orbit, pegas lompat, glow hero, kontras 
     expect(browsW.getAttribute('fill')).toBe('none');
     expect(browsW.getAttribute('stroke')).toBe('#5EEAD4');
   });
+
+  it('(7) regresi CPU A1d: animasi orbit tidak berulang tanpa batas pada state idle, hanya berputar 1 kali (<=2s) pada state aktif, serta jeda otomatis saat data-animate="off" atau 20 dtk idle', () => {
+    // 1. Aturan CSS dasar .denti .d-orbit-dot wajib animation: none (tanpa infinite)
+    const baseOrbitRule = css.match(/\.denti\s+\.d-orbit-dot\s*\{([^}]*)\}/);
+    expect(baseOrbitRule).not.toBeNull();
+    expect(baseOrbitRule[1]).toMatch(/animation:\s*none/);
+    expect(css).not.toMatch(/d-orbit-move[^;]*infinite/);
+    expect(css).toMatch(/\.denti\[data-state="celebrate"\]\s+\.d-orbit-dot-1[\s\S]*?animation:\s*d-orbit-move\s+1\.8s\s+steps\(24,\s*end\)\s+1/);
+    expect(css).toMatch(/\.denti\[data-animate="off"\][\s\S]*?animation:\s*none\s*!important/);
+
+    // 2. Siklus hidup data-animate="on|off" dan data-idle-deep="true|false"
+    vi.useFakeTimers();
+    const { container, rerender } = render(<DentiMascot state="idle" size={220} />);
+    const svg = container.querySelector('svg.denti');
+    expect(svg).toHaveAttribute('data-animate', 'on');
+    expect(svg).toHaveAttribute('data-idle-deep', 'false');
+
+    // Setelah 20 detik idle tanpa interaksi, data-idle-deep menjadi true
+    act(() => { vi.advanceTimersByTime(20000); });
+    expect(svg).toHaveAttribute('data-idle-deep', 'true');
+
+    // Interaksi pengguna membangunkan kembali (data-idle-deep -> false)
+    act(() => { window.dispatchEvent(new Event('pointerdown')); });
+    expect(svg).toHaveAttribute('data-idle-deep', 'false');
+
+    // Prop animate={false} mematikan seluruh animasi (data-animate="off")
+    rerender(<DentiMascot state="idle" size={220} animate={false} />);
+    expect(svg).toHaveAttribute('data-animate', 'off');
+    vi.useRealTimers();
+  });
 });
+
 

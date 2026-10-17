@@ -42,7 +42,7 @@ export function resolveDentiLod(lod = 'auto', size = 220) {
  * Markup SVG berasal dari konstanta internal (bukan input pengguna), jadi aman disisipkan.
  */
 export default function DentiMascot({
-  state = 'idle', kid = false, size = 220, lod = 'auto', className = '', title = 'Denti, asisten AI Dentiva', track = false, look = null,
+  state = 'idle', kid = false, size = 220, lod = 'auto', className = '', title = 'Denti, asisten AI Dentiva', track = false, look = null, animate = true,
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const resolvedLod = resolveDentiLod(lod, size);
@@ -51,11 +51,55 @@ export default function DentiMascot({
   const pixelWidth = Math.max(1, Math.round(Number(size) || 220));
   const pixelHeight = Math.max(1, Math.round((pixelWidth * 480) / 400));
   const ref = useRef(null);
+  const [inView, setInView] = useState(true);
+  const [tabVisible, setTabVisible] = useState(() => (typeof document === 'undefined' ? true : document.visibilityState !== 'hidden'));
+  const [deepIdle, setDeepIdle] = useState(false);
+
   // Kedip alami: tempo & jeda acak per Denti, kadang kedip dua kali
   const life = useMemo(() => ({
     style: { '--blink': `${(4.2 + Math.random() * 2.8).toFixed(2)}s`, '--blink-delay': `${(-Math.random() * 4).toFixed(2)}s` },
     blink: Math.random() < 0.3 ? '2' : '1',
   }), []);
+
+  // Jeda otomatis saat tidak terlihat di layar (IntersectionObserver) atau tab latar belakang (visibilitychange)
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof window === 'undefined') return undefined;
+    const onVis = () => setTabVisible(document.visibilityState !== 'hidden');
+    document.addEventListener('visibilitychange', onVis);
+    let io = null;
+    if (typeof window.IntersectionObserver === 'function') {
+      io = new window.IntersectionObserver(([entry]) => {
+        if (entry) setInView(entry.isIntersecting);
+      });
+      io.observe(el);
+    }
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      if (io) io.disconnect();
+    };
+  }, []);
+
+  // Setelah 20 dtk pada state idle tanpa interaksi pengguna, matikan animasi dekoratif (sparks, brackets, orbit)
+  useEffect(() => {
+    if (safeState !== 'idle' || typeof window === 'undefined') {
+      setDeepIdle(false);
+      return undefined;
+    }
+    let timer = setTimeout(() => setDeepIdle(true), 20000);
+    const wakeUp = () => {
+      setDeepIdle(false);
+      clearTimeout(timer);
+      timer = setTimeout(() => setDeepIdle(true), 20000);
+    };
+    window.addEventListener('pointerdown', wakeUp, { passive: true });
+    window.addEventListener('keydown', wakeUp, { passive: true });
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('pointerdown', wakeUp);
+      window.removeEventListener('keydown', wakeUp);
+    };
+  }, [safeState]);
 
   // Arah pandang: `look` ({x, y} −1…1) diutamakan; selain itu mengikuti kursor bila `track`
   useEffect(() => {
@@ -77,6 +121,8 @@ export default function DentiMascot({
     return () => { window.removeEventListener('pointermove', onMove); cancelAnimationFrame(raf); };
   }, [track, look?.x, look?.y]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const shouldAnimate = Boolean(animate) && inView && tabVisible && !reducedMotion();
+
   return (
     <svg
       ref={ref}
@@ -90,6 +136,8 @@ export default function DentiMascot({
       data-state={safeState}
       data-lod={resolvedLod}
       data-kid={kid ? 'true' : 'false'}
+      data-animate={shouldAnimate ? 'on' : 'off'}
+      data-idle-deep={deepIdle ? 'true' : 'false'}
       role="img"
       aria-label={title}
       dangerouslySetInnerHTML={{ __html: markup }}
