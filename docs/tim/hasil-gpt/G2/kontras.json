@@ -1,0 +1,466 @@
+[
+  {
+    "theme": "light",
+    "foreground": "text",
+    "background": "bg",
+    "ratio": 12.9669,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "text",
+    "background": "card",
+    "ratio": 13.5669,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "muted",
+    "background": "bg",
+    "ratio": 7.2425,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "muted",
+    "background": "card",
+    "ratio": 7.5777,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "accent",
+    "background": "bg",
+    "ratio": 5.2312,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "accent",
+    "background": "card",
+    "ratio": 5.4733,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "info",
+    "background": "bg",
+    "ratio": 6.4052,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "info",
+    "background": "card",
+    "ratio": 6.7016,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "success",
+    "background": "bg",
+    "ratio": 6.8149,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "success",
+    "background": "card",
+    "ratio": 7.1303,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "warning",
+    "background": "bg",
+    "ratio": 6.7765,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "warning",
+    "background": "card",
+    "ratio": 7.09,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "danger",
+    "background": "bg",
+    "ratio": 6.1839,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "danger",
+    "background": "card",
+    "ratio": 6.47,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "focus",
+    "background": "bg",
+    "ratio": 5.2312,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "focus",
+    "background": "card",
+    "ratio": 5.4733,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "border",
+    "background": "bg",
+    "ratio": 4.5484,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "border",
+    "background": "card",
+    "ratio": 4.7588,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "on-accent",
+    "background": "accent",
+    "ratio": 5.4733,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "text",
+    "background": "hover",
+    "ratio": 12.384,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "text",
+    "background": "selected",
+    "ratio": 12.04,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-1",
+    "background": "card",
+    "ratio": 5.4733,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-2",
+    "background": "card",
+    "ratio": 6.7016,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-3",
+    "background": "card",
+    "ratio": 6.9833,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-4",
+    "background": "card",
+    "ratio": 6.2852,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-5",
+    "background": "card",
+    "ratio": 7.09,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-6",
+    "background": "card",
+    "ratio": 7.1303,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-7",
+    "background": "card",
+    "ratio": 7.9031,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "light",
+    "foreground": "chart-8",
+    "background": "card",
+    "ratio": 6.3226,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "text",
+    "background": "bg",
+    "ratio": 17.895,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "text",
+    "background": "card",
+    "ratio": 15.9942,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "muted",
+    "background": "bg",
+    "ratio": 12.6107,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "muted",
+    "background": "card",
+    "ratio": 11.2712,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "accent",
+    "background": "bg",
+    "ratio": 12.6566,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "accent",
+    "background": "card",
+    "ratio": 11.3122,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "info",
+    "background": "bg",
+    "ratio": 10.3828,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "info",
+    "background": "card",
+    "ratio": 9.28,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "success",
+    "background": "bg",
+    "ratio": 13.3344,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "success",
+    "background": "card",
+    "ratio": 11.918,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "warning",
+    "background": "bg",
+    "ratio": 15.034,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "warning",
+    "background": "card",
+    "ratio": 13.4371,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "danger",
+    "background": "bg",
+    "ratio": 9.8648,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "danger",
+    "background": "card",
+    "ratio": 8.817,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "focus",
+    "background": "bg",
+    "ratio": 12.6566,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "focus",
+    "background": "card",
+    "ratio": 11.3122,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "border",
+    "background": "bg",
+    "ratio": 7.3022,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "border",
+    "background": "card",
+    "ratio": 6.5265,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "on-accent",
+    "background": "accent",
+    "ratio": 12.6566,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "text",
+    "background": "hover",
+    "ratio": 13.9817,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "text",
+    "background": "selected",
+    "ratio": 9.0299,
+    "minimum": 4.5,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-1",
+    "background": "card",
+    "ratio": 11.3122,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-2",
+    "background": "card",
+    "ratio": 9.28,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-3",
+    "background": "card",
+    "ratio": 9.4664,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-4",
+    "background": "card",
+    "ratio": 8.8499,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-5",
+    "background": "card",
+    "ratio": 13.4371,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-6",
+    "background": "card",
+    "ratio": 11.918,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-7",
+    "background": "card",
+    "ratio": 8.3943,
+    "minimum": 3,
+    "pass": true
+  },
+  {
+    "theme": "dark",
+    "foreground": "chart-8",
+    "background": "card",
+    "ratio": 9.5114,
+    "minimum": 3,
+    "pass": true
+  }
+]
