@@ -51,9 +51,9 @@ const PatientAvatar = ({
 
   // Warna background berdasarkan gender
   const bgColor = gender === 'Perempuan'
-    ? 'bg-pink-500/10 text-pink-600 dark:text-pink-400'
+    ? 'bg-pink-500/15 text-pink-800 dark:text-pink-300'
     : gender === 'Laki-laki'
-      ? 'bg-accent-primary/10 text-accent-primary'
+      ? 'bg-sky-500/15 text-sky-800 dark:text-sky-300'
       : 'bg-background text-text-muted border border-border';
 
   const showImage = resolvedUrl && !imgError;

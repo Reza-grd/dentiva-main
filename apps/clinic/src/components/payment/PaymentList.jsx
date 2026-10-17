@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Search, Calendar, Filter, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { DollarSign, Search, Calendar, Filter, CheckCircle, Clock, XCircle, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { paymentService } from '../../services/paymentService';
@@ -184,11 +184,11 @@ const PaymentList = () => {
         <div className="glass-panel p-5 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Sudah Lunas</p>
-              <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{formatCurrency(stats.paid)}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Sudah Lunas</p>
+              <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(stats.paid)}</p>
             </div>
             <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CheckCircle className="text-emerald-500" size={24} />
+              <CheckCircle className="text-emerald-600 dark:text-emerald-400" size={24} />
             </div>
           </div>
         </div>
@@ -196,11 +196,11 @@ const PaymentList = () => {
         <div className="glass-panel p-5 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Pending</p>
-              <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{formatCurrency(stats.pending)}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Pending</p>
+              <p className="text-xl font-bold text-amber-700 dark:text-amber-400">{formatCurrency(stats.pending)}</p>
             </div>
             <div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Clock className="text-amber-500" size={24} />
+              <Clock className="text-amber-600 dark:text-amber-400" size={24} />
             </div>
           </div>
         </div>
@@ -217,6 +217,7 @@ const PaymentList = () => {
               </div>
               <input
                 type="text"
+                aria-label="Cari nama pasien atau nomor invoice"
                 placeholder="Cari nama pasien atau invoice..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -229,6 +230,7 @@ const PaymentList = () => {
                 <Calendar className="h-4 w-4 text-gray-400" />
               </div>
               <select
+                aria-label="Filter rentang waktu pembayaran"
                 value={dateFilter}
                 onChange={(e) => { setDateFilter(e.target.value); setPage(1); }}
                 className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none"
@@ -245,6 +247,7 @@ const PaymentList = () => {
                 <Filter className="h-4 w-4 text-gray-400" />
               </div>
               <select
+                aria-label="Filter status pembayaran"
                 value={statusFilter}
                 onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
                 className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none"
@@ -277,7 +280,7 @@ const PaymentList = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
+              <thead className="text-xs text-gray-600 dark:text-gray-400 uppercase bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
                 <tr>
                   <th className="px-6 py-4 font-semibold">Tanggal</th>
                   <th className="px-6 py-4 font-semibold">Invoice</th>
@@ -295,7 +298,7 @@ const PaymentList = () => {
                       {formatDate(payment.created_at)}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-mono text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2 py-1 rounded">
+                      <span className="font-mono font-semibold text-sky-800 dark:text-sky-300 bg-sky-500/10 px-2 py-1 rounded">
                         {payment.invoice_number}
                       </span>
                     </td>

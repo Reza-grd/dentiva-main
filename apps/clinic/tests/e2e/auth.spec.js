@@ -1,28 +1,149 @@
 import { test, expect } from '@playwright/test';
+import { setupSyntheticClinic, SYNTHETIC_USERS } from './fixtures/syntheticClinic.js';
 
-test.describe('Dentiva Core Flows', () => {
-  
-  test('Admin can login successfully', async ({ page }) => {
-    // Navigate to login
-    await page.goto('/');
-    
-    // Check if we are on the login page (or if already logged in)
-    if (await page.getByPlaceholder('Email Anda').isVisible()) {
-      await page.getByPlaceholder('Email Anda').fill('admin@dentiva.com');
-      await page.getByPlaceholder('Password').fill('admin123'); // Example creds
-      await page.getByRole('button', { name: 'Masuk' }).click();
-    }
-    
-    // Should redirect to dashboard
-    await expect(page.locator('text=Dashboard')).toBeVisible({ timeout: 10000 });
+test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
+  test('Login sebagai Admin mengarahkan ke /admin dan menampilkan ringkasan klinik', async ({ page }) => {
+    await setupSyntheticClinic(page);
+
+    await page.goto('/login');
+    await expect(page.getByRole('heading', { name: /Selamat Datang/i })).toBeVisible();
+
+    await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
+    await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();
   });
 
-  test('Prevent Double Booking UI Check', async ({ page }) => {
-    // Assuming user is logged in via state setup (skipping true auth for brevity)
-    // Go to schedule page
-    await page.goto('/schedule');
-    
-    // Just verify the page loads and contains the Schedule header
-    await expect(page.locator('text=Jadwal Praktik')).toBeVisible();
+  test('Login sebagai Dokter mengarahkan ke /dokter dan memuat daftar pasien hari ini', async ({ page }) => {
+    await setupSyntheticClinic(page);
+
+    await page.goto('/login');
+    await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.dokter.email);
+    await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.dokter.password);
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/dokter$/);
+    await expect(page.getByText(/drg\. Sinta Maharani/i).first()).toBeVisible();
+  });
+
+  test('Login sebagai Resepsionis mengarahkan ke /resepsionis dan menampilkan antrean hari ini', async ({ page }) => {
+    await setupSyntheticClinic(page);
+
+    await page.goto('/login');
+    await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.resepsionis.email);
+    await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.resepsionis.password);
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/resepsionis$/);
+    await expect(page.getByRole('heading', { name: /Rina Puspita/i })).toBeVisible();
+  });
+
+  test('Login gagal menampilkan pesan galat generik yang sama untuk email tidak terdaftar maupun sandi salah', async ({ page }) => {
+    await setupSyntheticClinic(page);
+
+    await page.goto('/login');
+    // Kasus 1: Email tidak terdaftar di sistem
+    await page.getByPlaceholder('nama@email.com').fill('tidak-terdaftar@klinik-sintetis.test');
+    await page.getByPlaceholder('••••••••').fill('PasswordApaSaja123!');
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/login$/);
+    const alertBox = page.getByRole('alert');
+    await expect(alertBox).toBeVisible();
+    await expect(alertBox).toContainText('Email atau password salah.');
+
+    // Kasus 2: Email terdaftar tetapi password salah -> pesan harus identik (tidak membedakan)
+    await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
+    await page.getByPlaceholder('••••••••').fill('PasswordSalah999!');
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole('alert')).toContainText('Email atau password salah.');
+  });
+
+  test('Simulasi tantangan MFA TOTP ketika bendera fitur MFA aktif memverifikasi faktor aal2', async ({ page }) => {
+    await setupSyntheticClinic(page, { role: 'admin', mfaEnabled: true });
+
+    await page.goto('/admin');
+    await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();
+
+    // Verifikasi alur challenge & verify TOTP terhadap endpoint Auth Supabase sintetis
+    const mfaResult = await page.evaluate(async () => {
+      const challengeRes = await fetch(
+        'http://127.0.0.1:54321/auth/v1/factors/factor-totp-sintetis-001/challenge',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer synthetic-jwt-admin-aal1',
+          },
+        }
+      );
+      const challenge = await challengeRes.json();
+
+      const badVerifyRes = await fetch(
+        'http://127.0.0.1:54321/auth/v1/factors/factor-totp-sintetis-001/verify',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer synthetic-jwt-admin-aal1',
+          },
+          body: JSON.stringify({ challenge_id: challenge.id, code: '000000' }),
+        }
+      );
+
+      const goodVerifyRes = await fetch(
+        'http://127.0.0.1:54321/auth/v1/factors/factor-totp-sintetis-001/verify',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer synthetic-jwt-admin-aal1',
+          },
+          body: JSON.stringify({ challenge_id: challenge.id, code: '123456' }),
+        }
+      );
+      const goodVerify = await goodVerifyRes.json();
+
+      return {
+        challengeId: challenge.id,
+        badStatus: badVerifyRes.status,
+        goodStatus: goodVerifyRes.status,
+        upgradedToken: goodVerify.access_token,
+      };
+    });
+
+    expect(mfaResult.challengeId).toBe('challenge-totp-001');
+    expect(mfaResult.badStatus).toBe(422);
+    expect(mfaResult.goodStatus).toBe(200);
+    expect(mfaResult.upgradedToken).toContain('aal2');
+  });
+
+  test('Proteksi RBAC: Resepsionis ditolak saat membuka halaman khusus Admin (/admin/pengaturan)', async ({ page }) => {
+    await setupSyntheticClinic(page, { role: 'resepsionis' });
+
+    await page.goto('/admin/pengaturan');
+    await expect(page.getByRole('heading', { name: 'Akses Ditolak' })).toBeVisible();
+    await expect(page.getByText(/Anda tidak memiliki izin untuk mengakses halaman ini/i)).toBeVisible();
+
+    await page.getByRole('button', { name: /Kembali ke Dashboard/i }).click();
+    await expect(page).toHaveURL(/\/resepsionis$/);
+  });
+
+  test('Proteksi RBAC: Dokter ditolak saat membuka halaman Kasir Resepsionis (/resepsionis/pembayaran)', async ({ page }) => {
+    await setupSyntheticClinic(page, { role: 'dokter' });
+
+    await page.goto('/resepsionis/pembayaran');
+    await expect(page.getByRole('heading', { name: 'Akses Ditolak' })).toBeVisible();
+  });
+
+  test('Pengguna belum login yang mengakses rute terlindungi dialihkan ke /login', async ({ page }) => {
+    await setupSyntheticClinic(page);
+
+    await page.goto('/pasien');
+    await expect(page).toHaveURL(/\/login$/);
   });
 });

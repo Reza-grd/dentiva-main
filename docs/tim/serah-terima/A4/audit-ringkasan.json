@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-10-17T05:01:40.324Z",
+  "budgets": {
+    "performanceScoreTarget": 90,
+    "accessibilityScoreTarget": 95,
+    "bestPracticesScoreTarget": 95
+  },
+  "measured": {
+    "fcpMs": 536,
+    "domContentLoadedMs": 413,
+    "loadEventMs": 413,
+    "domNodes": 1496,
+    "htmlLang": "id",
+    "hasViewportMeta": true,
+    "hasTitle": true,
+    "doctype": true,
+    "pageErrorsCount": 0,
+    "axeSeriousOrCriticalCount": 0,
+    "axePassesCount": 27
+  }
+}

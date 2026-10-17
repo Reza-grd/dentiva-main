@@ -1,0 +1,82 @@
+# Usulan Workflow GitHub Actions — Paket A4 (Mutu Otomatis)
+# Lokasi usulan: docs/tim/usulan-ci/e2e.yml
+# Catatan: Sesuai pembagian wewenang tim, Antigravity tidak menyentuh .github/workflows/ secara langsung.
+# Ketua Tim dapat menyalin berkas ini ke .github/workflows/e2e.yml setelah meninjau hasil A4.
+
+name: Mutu Otomatis (E2E, Visual, A11y & Lighthouse)
+
+on:
+  pull_request:
+    branches: [main, console]
+  push:
+    branches: [console]
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_SUPABASE_URL: http://127.0.0.1:54321
+  VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+
+jobs:
+  e2e-visual-a11y:
+    name: Playwright E2E, Visual & Axe-Core
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Pasang browser Chromium untuk Playwright
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/clinic
+
+      - name: Jalankan suite E2E, regresi visual, dan audit axe-core
+        run: npm run test:e2e
+        working-directory: apps/clinic
+
+      - name: Unggah laporan Playwright, baseline platform, & tangkapan layar
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-clinic
+          path: |
+            apps/clinic/playwright-report/
+            apps/clinic/test-results/
+            apps/clinic/tests/e2e/__screenshots__/
+            docs/tim/serah-terima/A4/visual/
+          retention-days: 14
+
+  lighthouse-budget:
+    name: Anggaran Lighthouse CI (Perf >= 90, A11y >= 95, BP >= 95)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Build aplikasi klinik (mode desktop tanpa Service Worker)
+        run: npx vite build --mode desktop
+        working-directory: apps/clinic
+
+      - name: Jalankan Lighthouse CI
+        run: npx @lhci/cli@0.14.x autorun --config=apps/clinic/lighthouserc.cjs

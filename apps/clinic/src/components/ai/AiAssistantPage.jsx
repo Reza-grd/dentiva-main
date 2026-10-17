@@ -472,13 +472,13 @@ export default function AiAssistantPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Sparkles className="text-[var(--color-accent)]" /> Denti · Asisten AI
-          <Badge variant="warning">Beta</Badge>
+          <Badge variant="warning" className="!text-amber-800 dark:!text-amber-300">Beta</Badge>
         </h1>
-        <p className="text-sm text-gray-500">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
       </div>
       {status?.aktif && (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-gray-500 tabular-nums">
+          <span className="text-sm text-gray-600 dark:text-gray-400 tabular-nums">
             {status.terpakai_bulan_ini} / {status.kuota_bulanan} pertanyaan bulan ini
           </span>
           <Button size="sm" variant="outline" className="gap-1" onClick={() => setShowKnowledge((v) => !v)}>
@@ -576,7 +576,7 @@ export default function AiAssistantPage() {
               <div className="py-6 text-center space-y-5">
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">Mau tahu apa tentang klinik hari ini?</p>
-                  <p className="text-sm text-gray-500">Pilih contoh di bawah atau ketik pertanyaan Anda sendiri.</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Pilih contoh di bawah atau ketik pertanyaan Anda sendiri.</p>
                 </div>
                 {insight && (
                   <button type="button" className="ai-chip ai-chip--action mx-auto" onClick={() => ask('Ringkas kondisi klinik hari ini')}>
@@ -586,7 +586,7 @@ export default function AiAssistantPage() {
                 <div className="space-y-4 text-left">
                   {SUGGESTION_GROUPS.map((g) => (
                     <div key={g.label}>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">{g.label}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-2">{g.label}</p>
                       <div className="grid sm:grid-cols-2 gap-2">
                         {g.items.map((s) => (
                           <button key={s} type="button" onClick={() => ask(s)}

@@ -48,6 +48,7 @@ const initForm = (dateStr) => ({
 const SchedulePage = () => {
   const { userProfile } = useAuth();
   const navigate        = useNavigate();
+  const toast           = useToast();
 
   // ── State utama ─────────────────────────────────────────────────────────────
   const [visits,       setVisits]       = useState([]);
@@ -359,7 +360,7 @@ const SchedulePage = () => {
               }`}
             >
               <div className="w-full flex justify-between items-start">
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-white/80' : 'text-gray-400 dark:text-gray-500'}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
                   {getDayLabelShort(dow)}
                 </span>
                 {isToday && (
@@ -394,8 +395,8 @@ const SchedulePage = () => {
                         key={s.id} 
                         className={`flex justify-between items-center text-[9px] px-1 py-0.5 rounded font-mono ${
                           isSelected 
-                            ? 'bg-white/20 text-white border-white/10' 
-                            : 'bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10 text-[var(--color-accent)] dark:text-[var(--color-accent-secondary)] border-[var(--color-accent)]/10'
+                            ? 'bg-black/25 text-white border-white/20' 
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                         } border`}
                       >
                         <span className="font-semibold truncate max-w-[24px]" title={s.dokter?.full_name}>{nameShort}</span>
@@ -405,7 +406,7 @@ const SchedulePage = () => {
                   })}
                 </div>
               ) : (
-                <span className={`text-[9px] italic ${isSelected ? 'text-white/60' : 'text-gray-400'}`}>
+                <span className={`text-[9px] italic ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                   Libur
                 </span>
               )}
@@ -421,6 +422,7 @@ const SchedulePage = () => {
           <CalendarIcon size={16} className="text-gray-400 dark:text-gray-500" />
           <input
             type="date"
+            aria-label="Pilih tanggal kunjungan"
             value={selectedDate}
             onChange={e => setSelectedDate(e.target.value)}
             className="glass-input border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
@@ -431,6 +433,7 @@ const SchedulePage = () => {
         <div className="flex items-center gap-2">
           <Filter size={16} className="text-gray-400 dark:text-gray-500" />
           <select
+            aria-label="Filter status kunjungan"
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value)}
             className="glass-input border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
@@ -448,6 +451,7 @@ const SchedulePage = () => {
           <div className="flex items-center gap-2">
             <UserCheck size={16} className="text-gray-400 dark:text-gray-500" />
             <select
+              aria-label="Filter dokter"
               value={filterDokter}
               onChange={e => setFilterDokter(e.target.value)}
               className="glass-input border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent"
@@ -465,7 +469,7 @@ const SchedulePage = () => {
       <div className="glass-panel rounded-2xl overflow-hidden shadow-sm">
         <div className="px-5 py-3 bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10 border-b border-[var(--color-accent)]/10 dark:border-[var(--color-accent)]/20 flex items-center gap-2">
           <Stethoscope size={16} className="text-[var(--color-accent)]" />
-          <span className="font-semibold text-[var(--color-accent)] dark:text-gray-200 text-sm">
+          <span className="font-semibold text-slate-800 dark:text-gray-200 text-sm">
             Dokter Praktek — {getHariLabel(dayOfWeek(selectedDate))}
           </span>
           {loadingSchedules && (
@@ -474,7 +478,7 @@ const SchedulePage = () => {
         </div>
 
         {!loadingSchedules && daySchedules.filter(s => s.hari === dayOfWeek(selectedDate)).length === 0 ? (
-          <div className="px-5 py-4 text-sm text-gray-400 flex items-center gap-2">
+          <div className="px-5 py-4 text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
             <AlertCircle size={15} />
             Tidak ada dokter yang praktek pada hari ini.
           </div>
@@ -514,7 +518,7 @@ const SchedulePage = () => {
                       <CheckCircle2 size={11} />
                       {freeCount} slot tersedia
                     </span>
-                    <span className="text-gray-400">{slots.length} total slot</span>
+                    <span className="text-gray-600 dark:text-gray-300">{slots.length} total slot</span>
                   </div>
 
                   {/* Slot pills */}
@@ -529,7 +533,7 @@ const SchedulePage = () => {
                           title={taken ? 'Sudah terisi' : 'Tersedia'}
                           className={`px-2 py-0.5 rounded text-xs font-mono border ${
                             taken
-                              ? 'bg-red-50 text-red-400 border-red-200 line-through'
+                              ? 'bg-red-50 text-red-700 border-red-200 line-through'
                               : 'bg-green-50 text-green-700 border-green-200'
                           }`}
                         >
@@ -562,7 +566,7 @@ const SchedulePage = () => {
       {loading ? (
         <LoadingSpinner />
       ) : filteredVisits.length === 0 ? (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-500">
           <CalendarIcon size={48} className="mx-auto mb-3 opacity-30" />
           <p className="text-lg font-medium">Tidak ada kunjungan</p>
           <p className="text-sm mt-1">
@@ -666,12 +670,12 @@ const SchedulePage = () => {
               {/* Keluhan & dokter */}
               <div className="mt-2 pl-1 space-y-0.5">
                 {visit.keluhan && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     <span className="font-medium">Keluhan:</span> {visit.keluhan}
                   </p>
                 )}
                 {visit.dokter && (
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     Dokter: {visit.dokter.full_name}
                   </p>
                 )}
