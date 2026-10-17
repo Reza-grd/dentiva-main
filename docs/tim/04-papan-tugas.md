@@ -2,6 +2,8 @@
 
 _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · 🟩 selesai · ⏸ menunggu · 🟥 terblokir.
 
+> **Mulai 19 Okt 2026 berlaku `05-rencana-besar-2.md` ("Dentiva Siap Jual", 3 gelombang s/d 19 Des + stabilisasi s/d 15 Jan).** Kode tugas baru: P1–P11 (pemilik), K1–K11 (Ketua), A4c/A5/A8/A2/A3/A7/A6 (Antigravity), G8–G12 (GPT). Papan ini tetap untuk status & log.
+
 ## Tugas tersimpan dari sesi sebelumnya (jangan hilang)
 
 | # | Tugas | Status | Catatan |
@@ -69,6 +71,8 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 | 17 Okt 15.10 | Ketua | **Regresi CPU** (diukur `docs/tim/alat/ukur-cpu-denti.mjs`) | 🟥 A1b memperkenalkan animasi orbit `offset-path` yang membuat Denti hero/standar memakai **18–21% main thread saat diam** (A1: 0,5–0,6%). Mini aman. Laporan A1c menyebut batas 15% — salah, acuan <1%. **DILARANG deploy `console`→`main` sampai A1d diterima** (produksi masih A1, tidak terdampak). Misi: `prompts/antigravity/A1d-cpu-orbit.md`. Juga: workflow E2E CI run #2 GAGAL (job Playwright & Lighthouse; log butuh login GitHub — minta pemilik) |
 | 17 Okt 15.40 | Antigravity | A1d perbaikan CPU orbit (1 commit, 3 berkas mascot/**) | ✔ DITERIMA & digabung. Ukur Ketua (`ukur-cpu-denti.mjs`): **hero 0,35% · standar 0,32% · mini 0,14% · 7× hero 1,79%** (A1c: 18–21%) — semua di bawah target. Orbit diam saat idle, berputar sekali 1,8 dtk `steps(24)` pada state aktif; jeda otomatis saat tak terlihat (IntersectionObserver), tab tersembunyi, atau 20 dtk idle; listener/observer/timer dibersihkan. Lint 0 galat, 552 tes unit. Playwright 31/33: 2 gagal `dashboard-admin-mobile-375` karena **sapaan & tanggal bergantung jam** ("Selamat Siang"→"Sore") — cacat tes A4, bukan A1d → **A4c: bekukan jam (`page.clock.setFixedTime`) di tes visual**. Laporan A1d.md menyusul. **Larangan deploy dicabut** |
 | 17 Okt 15.50 | GPT | G7b Pusat Bantuan versi terbit (1 commit, 36 berkas, hanya `hasil-gpt/G7` + `serah-terima/G7b.md`) | ✔ DITERIMA & digabung. Verifikasi Ketua: 0 istilah teknis (SMTP/offsite/VPS/RLS/GoTrue/aal2/PGlite/edge function/nama berkas) di artikel; 0 tautan antar-artikel rusak; 26 artikel = indeks; `status-layanan.md` dengan 8 penanda `STATUS:`; 159/163 label tebal ditemukan di kode (sisa: 3 teks dinamis + 1 judul). Siap terbit setelah ada tempat terbitnya (mis. halaman bantuan di aplikasi/situs) |
+| 17 Okt 16.40 | Ketua | Keputusan pemilik: Eira BIRU (teal A1c dibatalkan, revert `1b05a57`) + ganti nama Denti→**Eira** (`33b3a25`, `b59109f`) | ✔ live: aplikasi (push pemilik), edge function `ai-assistant` (deploy), migrasi `20261017160000_ai_nama_eira` (diterapkan). Uji: db:agent 25/25, db:audit 8/8, eval 195/195, Deno 43/43, unit 550/550 (1 tes rapuh-waktu sesekali), Playwright 31/33 (2 = jam, A4c). Bundel produksi: "Eira" 97×, "Denti" 0×, tanpa teal |
+| 17 Okt 17.00 | Ketua | Rencana Besar 2 disusun (`05-rencana-besar-2.md`) + prompt G8 | Menunggu keputusan pemilik P1–P4 untuk menutup W1 |
 | — | Pemilik | T1 (kunci Claude), T4 (SMTP), T5 (storage offsite) | Menunggu tindakan pemilik |
 
 > **Instruksi perbaikan untuk Antigravity (sekali):** (1) di folder utama pastikan tak ada perubahan tak ter-commit milik Anda (`git status`); jika ada, `git add -A && git commit -m "wip(A1): …"` dulu.
