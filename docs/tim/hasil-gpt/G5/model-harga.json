@@ -1,0 +1,73 @@
+{
+  "status": "USULAN; seluruh biaya contoh ILUSTRASI, bukan konfigurasi billing aktif atau tarif vendor terverifikasi",
+  "source": "docs/denti-agen.md; supabase/migrations/20261008135226_ai_assistant_foundation.sql:348",
+  "assumptions": {
+    "highAiCostPerQuotaUnitIDR": 1450,
+    "lowAiCostPerQuotaUnitIDR": 750,
+    "annualMonthsCharged": 10,
+    "tax": "belum termasuk pajak; status PKP dan kewajiban ditinjau pemilik/akuntan",
+    "fixedCost": "alokasi contoh VPS/operasi/dukungan; bukan invoice aktual"
+  },
+  "plans": [
+    {
+      "name": "Starter",
+      "monthly": 1490000,
+      "annual": 14900000,
+      "ai": 0,
+      "users": 5,
+      "clinics": 1,
+      "storageGB": 10,
+      "patientsGuide": 10000,
+      "fixedCost": 250000,
+      "maxAiCostIllustration": 0,
+      "totalCostIllustration": 250000,
+      "grossMarginMonthlyIllustration": 0.8322,
+      "grossMarginAnnualIllustration": 0.7987
+    },
+    {
+      "name": "Pro",
+      "monthly": 2990000,
+      "annual": 29900000,
+      "ai": 300,
+      "users": 15,
+      "clinics": 1,
+      "storageGB": 30,
+      "patientsGuide": 30000,
+      "fixedCost": 400000,
+      "maxAiCostIllustration": 435000,
+      "totalCostIllustration": 835000,
+      "grossMarginMonthlyIllustration": 0.7207,
+      "grossMarginAnnualIllustration": 0.6649
+    },
+    {
+      "name": "Enterprise",
+      "monthly": 6490000,
+      "annual": 64900000,
+      "ai": 1000,
+      "users": 40,
+      "clinics": 1,
+      "storageGB": 100,
+      "patientsGuide": 100000,
+      "fixedCost": 800000,
+      "maxAiCostIllustration": 1450000,
+      "totalCostIllustration": 2250000,
+      "grossMarginMonthlyIllustration": 0.6533,
+      "grossMarginAnnualIllustration": 0.584
+    },
+    {
+      "name": "Group",
+      "monthly": 14900000,
+      "annual": 149000000,
+      "ai": 2000,
+      "users": 100,
+      "clinics": 3,
+      "storageGB": 300,
+      "patientsGuide": null,
+      "fixedCost": 1800000,
+      "maxAiCostIllustration": 2900000,
+      "totalCostIllustration": 4700000,
+      "grossMarginMonthlyIllustration": 0.6846,
+      "grossMarginAnnualIllustration": 0.6215
+    }
+  ]
+}
