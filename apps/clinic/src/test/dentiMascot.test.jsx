@@ -164,3 +164,68 @@ describe('Maskot Denti — sistem LOD & render HD (A1)', () => {
     }
   });
 });
+
+describe('Maskot Denti — polesan A1b (orbit, pegas lompat, glow hero, kontras tepi mini)', () => {
+  const css = readFileSync(resolve(__dirname, '../components/mascot/denti.css'), 'utf8');
+
+  it('(1) partikel orbit mengitari lintasan menggunakan CSS offset-path tanpa SMIL <animateMotion>', () => {
+    const { container } = render(<DentiMascot size={220} />);
+    expect(container.querySelectorAll('animateMotion').length).toBe(0);
+    const dots = container.querySelectorAll('.d-orbit-dot');
+    expect(dots.length).toBe(2);
+    expect(dots[0]).toHaveAttribute('cx', '0');
+    expect(dots[0]).toHaveAttribute('cy', '0');
+    expect(css).toMatch(/\.denti\s+\.d-orbit-dot\s*\{[^}]*offset-path:\s*path\(/);
+    expect(css).toMatch(/@keyframes\s+d-orbit-move\s*\{[\s\S]*?offset-distance:\s*100%/);
+  });
+
+  it('(2) animasi lompat/celebrate memiliki gerak pegas anggota tubuh & overshoot vertikal tanpa scale() pada seluruh badan', () => {
+    expect(css).toContain('d-celebrate-jump');
+    expect(css).toContain('d-celebrate-arm-l');
+    expect(css).toContain('d-celebrate-head');
+    expect(css).toContain('d-celebrate-fin-l');
+    for (const kf of ['d-celebrate-jump', 'd-jump', 'd-bounce', 'd-hop', 'd-v-body', 'd-call-root', 'd-wk-root', 'd-spin', 'd-surprise', 'd-thx-root']) {
+      const match = css.match(new RegExp(`@keyframes\\s+${kf}\\s*\\{(?:\\s*(?:from|to|[\\d%,\\s]+)\\s*\\{[^}]*\\})+\\s*\\}`));
+      expect(match, `keyframe ${kf} harus ada`).not.toBeNull();
+      expect(match[0]).not.toContain('scale(');
+    }
+  });
+
+  it('(3) LOD hero & standar memulihkan pendaran cahaya visor/mata/dada via radialGradient tanpa <filter>', () => {
+    const { container: hero } = render(<DentiMascot size={220} />);
+    expect(hero.querySelectorAll('filter').length).toBe(0);
+    expect(hero.querySelector('.d-visor-glow')).not.toBeNull();
+    expect(hero.querySelectorAll('.d-eye-glow').length).toBeGreaterThanOrEqual(2);
+    expect(hero.querySelector('.d-mouth-glow')).not.toBeNull();
+    expect(hero.querySelector('.d-chest-glow')).not.toBeNull();
+
+    const { container: mini } = render(<DentiMascot size={58} />);
+    expect(mini.querySelector('.d-visor-glow')).toBeNull();
+    expect(mini.querySelector('.d-eye-glow')).toBeNull();
+    expect(mini.querySelector('.d-chest-glow')).toBeNull();
+  });
+
+  it('(4) warna tepi (#edge) pada LOD mini memiliki rasio kontras WCAG >= 3:1 terhadap putih (#ffffff)', () => {
+    const relLum = (hex) => {
+      const n = parseInt(hex.replace('#', ''), 16);
+      const chans = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+        const s = v / 255;
+        return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * chans[0] + 0.7152 * chans[1] + 0.0722 * chans[2];
+    };
+    const contrastVsWhite = (hex) => (1.0 + 0.05) / (relLum(hex) + 0.05);
+
+    const { container } = render(<DentiMascot size={58} />);
+    const edgeGrad = [...container.querySelectorAll('linearGradient')].find((g) => g.id.endsWith('-edge'));
+    expect(edgeGrad).toBeDefined();
+    const stops = [...edgeGrad.querySelectorAll('stop')];
+    expect(stops.length).toBe(2);
+    for (const stop of stops) {
+      const color = stop.getAttribute('stop-color');
+      const opacity = Number(stop.getAttribute('stop-opacity') ?? '1');
+      expect(opacity).toBe(1);
+      expect(contrastVsWhite(color)).toBeGreaterThanOrEqual(3.0);
+    }
+  });
+});
