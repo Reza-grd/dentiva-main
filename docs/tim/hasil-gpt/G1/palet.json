@@ -1,0 +1,110 @@
+{
+  "version": "1.0",
+  "method": "WCAG relative luminance sRGB; hasil dibulatkan 4 desimal setelah perhitungan",
+  "colors": {
+    "backgroundLight": {
+      "hex": "#FFFFFF",
+      "againstWhite": 1.0,
+      "againstDark": 18.7231,
+      "role": "lihat pasangan penggunaan"
+    },
+    "backgroundDark": {
+      "hex": "#0B1220",
+      "againstWhite": 18.7231,
+      "againstDark": 1.0,
+      "role": "lihat pasangan penggunaan"
+    },
+    "enamel": {
+      "hex": "#F8FAFC",
+      "againstWhite": 1.0463,
+      "againstDark": 17.895,
+      "role": "dekoratif; bukan teks"
+    },
+    "enamelShade": {
+      "hex": "#CBD5E1",
+      "againstWhite": 1.4847,
+      "againstDark": 12.6107,
+      "role": "dekoratif; bukan teks"
+    },
+    "outline": {
+      "hex": "#163047",
+      "againstWhite": 13.5669,
+      "againstDark": 1.3801,
+      "role": "lihat pasangan penggunaan"
+    },
+    "visor": {
+      "hex": "#0B1220",
+      "againstWhite": 18.7231,
+      "againstDark": 1.0,
+      "role": "lihat pasangan penggunaan"
+    },
+    "face": {
+      "hex": "#5EEAD4",
+      "againstWhite": 1.4793,
+      "againstDark": 12.6566,
+      "role": "lihat pasangan penggunaan"
+    },
+    "tealLight": {
+      "hex": "#0F766E",
+      "againstWhite": 5.4733,
+      "againstDark": 3.4208,
+      "role": "lihat pasangan penggunaan"
+    },
+    "tealDark": {
+      "hex": "#5EEAD4",
+      "againstWhite": 1.4793,
+      "againstDark": 12.6566,
+      "role": "lihat pasangan penggunaan"
+    },
+    "warmDecoration": {
+      "hex": "#E7C98B",
+      "againstWhite": 1.6,
+      "againstDark": 11.7022,
+      "role": "dekoratif; bukan teks"
+    }
+  },
+  "pairs": [
+    {
+      "foreground": "outline",
+      "background": "enamel",
+      "ratio": 12.9669,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "face",
+      "background": "visor",
+      "ratio": 12.6566,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "tealLight",
+      "background": "backgroundLight",
+      "ratio": 5.4733,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "tealDark",
+      "background": "backgroundDark",
+      "ratio": 12.6566,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "foreground": "outline",
+      "background": "backgroundLight",
+      "ratio": 13.5669,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "foreground": "enamel",
+      "background": "backgroundDark",
+      "ratio": 17.895,
+      "minimum": 3,
+      "pass": true
+    }
+  ]
+}
