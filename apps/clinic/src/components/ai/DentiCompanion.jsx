@@ -24,7 +24,7 @@ function useTypewriter(text) {
 
 const CONFETTI_COLORS = ['#ecca97', '#7dd3ff', '#ff8fb8', '#a9e4ff', 'var(--color-accent)', '#fff1d6'];
 
-/** Ledakan konfeti singkat di sekitar Denti setiap kali `burst` berubah. */
+/** Ledakan konfeti singkat di sekitar Eira setiap kali `burst` berubah. */
 function Confetti({ burst }) {
   const pieces = useMemo(() => (burst ? Array.from({ length: 22 }, (_, i) => {
     const angle = (Math.PI * 2 * i) / 22 + Math.random() * 0.4;
@@ -50,7 +50,7 @@ function Confetti({ burst }) {
 }
 
 /**
- * Denti sebagai pendamping Asisten AI: maskot hidup + gelembung ucapan yang "mengetik".
+ * Eira sebagai pendamping Asisten AI: maskot hidup + gelembung ucapan yang "mengetik".
  *   track  → mata & badan mengikuti kursor;  look → arah pandang tetap ({x, y} −1…1)
  *   burst  → angka yang berubah memicu konfeti;  onPoke → diklik;  onHover → kursor masuk
  */
@@ -61,15 +61,15 @@ export default function DentiCompanion({ state, line, onPoke, onHover, size = 10
     <div className={`denti-companion ${compact ? 'denti-companion--compact' : ''}`}>
       <button type="button" className="denti-companion__avatar" onClick={onPoke}
         onPointerEnter={() => { if (onHover && Date.now() - hoverAt.current > 45000) { hoverAt.current = Date.now(); onHover(); } }}
-        aria-label="Colek Denti" title="Colek Denti">
-        <DentiMascot state={state} size={size} track={track} look={look} title="Denti, asisten AI Dentiva" />
+        aria-label="Colek Eira" title="Colek Eira">
+        <DentiMascot state={state} size={size} track={track} look={look} title="Eira, asisten AI Dentiva" />
         <Confetti burst={burst} />
       </button>
       {line && (
         <>
-          <span className="sr-only" aria-live="polite">Denti: {line}</span>
+          <span className="sr-only" aria-live="polite">Eira: {line}</span>
           <p className="denti-companion__bubble" aria-hidden="true">
-            <span className="denti-companion__name">Denti</span>
+            <span className="denti-companion__name">Eira</span>
             {typed}
             {typed.length < line.length && <span className="denti-companion__caret" />}
           </p>

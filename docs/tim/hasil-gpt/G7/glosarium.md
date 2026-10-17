@@ -40,17 +40,17 @@ Istilah operasional untuk pengguna aplikasi. Penjelasan ini bukan kebijakan huku
 | Wastage | Persentase susut yang dimasukkan pada resep bahan. Periksa kesesuaiannya dengan praktik klinik. |
 | HPP | Harga pokok/modal perawatan menurut masukan dan perhitungan aplikasi. Tidak sama dengan tarif pasien. |
 | Margin | Selisih harga jual dan modal pada perhitungan terkait. Periksa periode dan kelengkapan data sebelum menarik kesimpulan. |
-| Denti Pemandu | Pendamping lokal untuk panduan aplikasi dan navigasi semua peran. Bukan akses data bisnis agen bagi semua staf. |
+| Eira Pemandu | Pendamping lokal untuk panduan aplikasi dan navigasi semua peran. Bukan akses data bisnis agen bagi semua staf. |
 | Asisten AI | Halaman admin untuk pertanyaan ringkasan bisnis dan usulan tindakan sesuai akses/paket. Masukan pengguna dan foto nota harus bebas data pasien. |
 | Usulan | Kartu perubahan yang belum dijalankan. Jawaban teks AI tidak menggantikan kartu dan hasil yang dikonfirmasi. |
 | Setujui / Dijalankan | Perintah menjalankan usulan dan status setelah respons sukses. Selalu periksa hasil tercatat. |
 | Tolak / Ditolak | Menghentikan usulan yang belum dijalankan, bukan membatalkan transaksi yang sudah terjadi. |
 | Batalkan / Dibatalkan | Meminta pemulihan hasil tindakan yang dapat dibatalkan melalui aplikasi. Tidak tersedia untuk semua jenis tindakan. |
 | Kedaluwarsa usulan | Masa persetujuan berakhir. Minta usulan baru berdasarkan data terbaru. |
-| Kuota AI | Batas pemakaian AI yang ditampilkan aplikasi. Panduan lokal Denti berbeda dari permintaan AI berkuota. |
+| Kuota AI | Batas pemakaian AI yang ditampilkan aplikasi. Panduan lokal Eira berbeda dari permintaan AI berkuota. |
 | MFA / 2FA | Perlindungan akun dengan verifikasi tambahan, misalnya kode autentikator. Lihat [status layanan](artikel/status-layanan.md#mfa-mandiri) untuk petunjuk penggunaannya. |
 | Tautan layar antrean | Alamat khusus untuk menampilkan antrean di TV tanpa masuk sebagai staf. Siapa pun yang memegang alamat tersebut dapat melihat layar; bagikan hanya kepada pengelola layar. |
 | SATUSEHAT | Integrasi sistem kesehatan yang mempunyai pengaturan tersendiri. Keberadaan menu atau checklist bukan bukti sinkronisasi produksi berhasil. |
 | Cadangan dan pemulihan data | Salinan data dan proses pemulihannya saat diperlukan. Lihat [petunjuk bantuan pemulihan](artikel/status-layanan.md#pemulihan-data). |
 
-Lihat [indeks artikel](indeks.json), [panduan Denti](artikel/menggunakan-denti.md), dan [privasi serta backup](artikel/privasi-dan-backup.md) untuk langkah penggunaan.
+Lihat [indeks artikel](indeks.json), [panduan Eira](artikel/menggunakan-denti.md), dan [privasi serta backup](artikel/privasi-dan-backup.md) untuk langkah penggunaan.

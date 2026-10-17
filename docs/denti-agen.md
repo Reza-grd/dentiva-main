@@ -1,5 +1,8 @@
 # Denti Agen — Asisten AI yang bisa bertindak
 
+> **Nama baru (17 Okt 2026): _Eira_ / "Eira Agen"** (sebelumnya Denti Agen). Prompt AI, pesan aplikasi, dan pesan database (`20261017160000_ai_nama_eira.sql`) sudah memakai "Eira"; nama berkas & identifier internal tetap.
+
+
 Mulai 14 Okt 2026 Asisten AI admin (halaman **Asisten AI**) bukan hanya menjawab, tetapi juga **mengusulkan dan — setelah
 disetujui admin — menjalankan** pekerjaan pengelolaan keuangan & bahan klinik.
 

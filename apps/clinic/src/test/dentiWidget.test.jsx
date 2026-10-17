@@ -1,4 +1,4 @@
-/** Denti Pemandu (widget mengambang) — tersedia untuk semua peran, memakai otak lokal tanpa kuota AI. */
+/** Eira Pemandu (widget mengambang) — tersedia untuk semua peran, memakai otak lokal tanpa kuota AI. */
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -20,9 +20,9 @@ function Where() {
 }
 const wrap = (path = '/admin') => render(<MemoryRouter initialEntries={[path]}><DentiGuideWidget /><Where /></MemoryRouter>);
 const where = () => screen.getByTestId('where').textContent;
-const openPanel = () => fireEvent.click(screen.getByRole('button', { name: /Buka Denti/ }));
+const openPanel = () => fireEvent.click(screen.getByRole('button', { name: /Buka Eira/ }));
 async function say(text) {
-  fireEvent.change(screen.getByLabelText('Tulis pesan untuk Denti'), { target: { value: text } });
+  fireEvent.change(screen.getByLabelText('Tulis pesan untuk Eira'), { target: { value: text } });
   fireEvent.click(screen.getByRole('button', { name: 'Kirim' }));
 }
 
@@ -32,13 +32,13 @@ beforeEach(() => {
   auth.profile = { role: 'admin', full_name: 'Rina Sari' };
 });
 
-describe('Denti Pemandu', () => {
+describe('Eira Pemandu', () => {
   it('tombol mengambang membuka panel dengan sapaan & tombol saran sesuai peran', () => {
     auth.profile = { role: 'dokter', full_name: 'Alya Putri' };
     wrap('/dokter');
     expect(screen.queryByRole('dialog')).toBeNull();
     openPanel();
-    expect(screen.getByRole('dialog', { name: /Denti/ })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /Eira/ })).toBeInTheDocument();
     expect(screen.getByText(/Saya/, { selector: '.denti-widget__md p' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ajarkan cara mengisi rekam medis' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Buka jadwal hari ini' })).toBeInTheDocument();
@@ -123,9 +123,9 @@ describe('Denti Pemandu', () => {
     expect(screen.queryByText(/titik impas \(BEP\)/)).toBeNull();
   });
 
-  it('tersembunyi di halaman Asisten AI (sudah ada Denti di sana) dan Esc menutup panel', () => {
+  it('tersembunyi di halaman Asisten AI (sudah ada Eira di sana) dan Esc menutup panel', () => {
     const { unmount } = wrap('/admin/asisten-ai');
-    expect(screen.queryByRole('button', { name: /Buka Denti/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Buka Eira/ })).toBeNull();
     unmount();
     wrap('/admin');
     openPanel();

@@ -14,8 +14,8 @@ import './ai-assistant.css';
 import './denti-widget.css';
 
 /**
- * Denti Pemandu — pendamping mengambang untuk SEMUA peran (admin, dokter, resepsionis).
- * Hanya memakai otak lokal Denti (tanpa AI, tanpa kuota): membuka halaman/tab, "di mana …", tutorial langkah demi langkah,
+ * Eira Pemandu — pendamping mengambang untuk SEMUA peran (admin, dokter, resepsionis).
+ * Hanya memakai otak lokal Eira (tanpa AI, tanpa kuota): membuka halaman/tab, "di mana …", tutorial langkah demi langkah,
  * kamus istilah, checklist harian, kuis, dan hiburan. Pertanyaan data klinik diarahkan ke Asisten AI (khusus admin).
  */
 const STORE_KEY = 'dentiva-denti-widget';
@@ -88,7 +88,7 @@ export default function DentiGuideWidget() {
 
   const welcome = useCallback(() => ({
     role: 'assistant', local: true, intent: 'welcome', fresh: true,
-    content: `${getGreeting()}${name ? `, ${name}` : ''}! 👋 Saya **Denti**, pemandu Dentiva: bisa membuka halaman, mengajarkan cara memakai fitur, menjelaskan istilah, dan memberi checklist harian. Coba salah satu tombol di bawah, atau ketik bebas. 👇`,
+    content: `${getGreeting()}${name ? `, ${name}` : ''}! 👋 Saya **Eira**, pemandu Dentiva: bisa membuka halaman, mengajarkan cara memakai fitur, menjelaskan istilah, dan memberi checklist harian. Coba salah satu tombol di bawah, atau ketik bebas. 👇`,
   }), [name]);
 
   const toggle = () => {
@@ -144,7 +144,7 @@ export default function DentiGuideWidget() {
     setOpen(false);
   };
 
-  // Halaman Asisten AI sudah punya Denti sendiri.
+  // Halaman Asisten AI sudah punya Eira sendiri.
   if (location.pathname.startsWith('/admin/asisten-ai')) return null;
 
   const last = messages[messages.length - 1];
@@ -157,15 +157,15 @@ export default function DentiGuideWidget() {
   return (
     <div className="denti-widget print:hidden" data-open={open}>
       {open && (
-        <section className="denti-widget__panel" role="dialog" aria-label="Denti, pemandu Dentiva">
+        <section className="denti-widget__panel" role="dialog" aria-label="Eira, pemandu Dentiva">
           <header className="denti-widget__head">
-            <DentiMascot state={denti.state} size={64} track title="Denti, pemandu Dentiva" />
+            <DentiMascot state={denti.state} size={64} track title="Eira, pemandu Dentiva" />
             <div className="denti-widget__title">
-              <strong>Denti</strong>
+              <strong>Eira</strong>
               <span>Pemandu Dentiva · tanpa kuota</span>
             </div>
             <button type="button" className="denti-widget__icon" onClick={() => setMessages([welcome()])} aria-label="Mulai percakapan baru" title="Mulai baru"><RotateCcw size={15} /></button>
-            <button type="button" className="denti-widget__icon" onClick={() => setOpen(false)} aria-label="Tutup Denti"><X size={17} /></button>
+            <button type="button" className="denti-widget__icon" onClick={() => setOpen(false)} aria-label="Tutup Eira"><X size={17} /></button>
           </header>
 
           <div className="denti-widget__list" aria-live="polite">
@@ -188,7 +188,7 @@ export default function DentiGuideWidget() {
                   </div>
                 )
             ))}
-            {typing && <div className="denti-widget__row"><span className="ai-dots" aria-label="Denti sedang mengetik"><span /><span /><span /></span></div>}
+            {typing && <div className="denti-widget__row"><span className="ai-dots" aria-label="Eira sedang mengetik"><span /><span /><span /></span></div>}
             {chips.length > 0 && (
               <div className="denti-widget__chips" aria-label="Saran">
                 {chips.map((c) => <button key={c} type="button" className="ai-chip" onClick={() => ask(c)}>{c}</button>)}
@@ -200,15 +200,15 @@ export default function DentiGuideWidget() {
           <form className="denti-widget__form" onSubmit={(e) => { e.preventDefault(); ask(); }}>
             <input
               ref={inputRef} value={input} onChange={(e) => setInput(e.target.value)} maxLength={MAX_LEN}
-              placeholder="Tanya Denti: “buka jadwal”, “apa itu recall?”…" aria-label="Tulis pesan untuk Denti"
+              placeholder="Tanya Eira: “buka jadwal”, “apa itu recall?”…" aria-label="Tulis pesan untuk Eira"
             />
             <button type="submit" disabled={!input.trim() || typing} aria-label="Kirim"><Send size={16} /></button>
           </form>
         </section>
       )}
 
-      <button type="button" className="denti-widget__launch" onClick={toggle} aria-label={open ? 'Tutup Denti' : 'Buka Denti, pemandu Dentiva'} aria-expanded={open}>
-        <DentiMascot state={open ? 'happy' : 'idle'} size={58} title="Denti" />
+      <button type="button" className="denti-widget__launch" onClick={toggle} aria-label={open ? 'Tutup Eira' : 'Buka Eira, pemandu Dentiva'} aria-expanded={open}>
+        <DentiMascot state={open ? 'happy' : 'idle'} size={58} title="Eira" />
       </button>
     </div>
   );

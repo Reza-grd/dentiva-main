@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  "Otak" Denti di Asisten AI — aturan reaksi yang berjalan di aplikasi
+//  "Otak" Eira di Asisten AI — aturan reaksi yang berjalan di aplikasi
 //  (tanpa panggilan AI tambahan, tanpa kuota): obrolan ringan dijawab langsung,
 //  topik yang dianalisis ditebak dari pertanyaan, dan ekspresi mengikuti isi jawaban.
 //  Kalimat latihan & hasil yang diharapkan: src/test/dentiTraining.test.js.
@@ -22,7 +22,7 @@ const escape = (w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 // Kata data boleh berakhiran -nya/-an/-kan/-mu ("pendapatannya", "laporanmu"), tetapi tidak menyambung ke kata lain.
 const anyWord = (t, words) => words.some((w) => new RegExp(`(^|[^a-z])${escape(w)}(nya|an|kan|mu|ku)?($|[^a-z])`).test(t));
 const pick = (list, seed) => list[Math.abs(seed) % list.length];
-/** Pilih variasi yang belum dipakai baru-baru ini (agar Denti tidak mengulang kalimat yang sama). */
+/** Pilih variasi yang belum dipakai baru-baru ini (agar Eira tidak mengulang kalimat yang sama). */
 const pickFresh = (list, seed, recent = []) => {
   for (let k = 0; k < list.length; k += 1) {
     const cand = list[(Math.abs(seed) + k) % list.length];
@@ -56,7 +56,7 @@ const DATA_WORDS = [
   'revenue', 'income', 'expense', 'expenses', 'profit', 'stock', 'schedule', 'report', 'show', 'patient', 'patients', 'chart',
 ];
 
-/** Kosakata yang dikenali Denti — dipakai untuk mengoreksi salah ketik (jarak edit kecil). */
+/** Kosakata yang dikenali Eira — dipakai untuk mengoreksi salah ketik (jarak edit kecil). */
 const VOCAB = [
   'terima', 'kasih', 'terimakasih', 'makasih', 'thanks', 'semangat', 'pintar', 'hebat', 'keren', 'mantap', 'bagus', 'biasa',
   'selamat', 'pagi', 'siang', 'sore', 'malam', 'halo', 'assalamualaikum', 'waalaikumsalam', 'bercanda', 'lelucon', 'capek',
@@ -236,7 +236,7 @@ function emojiOnly(text) {
 
 /**
  * Rapikan kalimat obrolan: huruf kecil, tanpa tanda baca/emoji, huruf berulang dipendekkan
- * ("makasihhh" → "makasih"), sapaan ke Denti & partikel penutup dibuang ("halo denti dong ya" → "halo").
+ * ("makasihhh" → "makasih"), sapaan ke Eira & partikel penutup dibuang ("halo denti dong ya" → "halo").
  */
 export function normalizeChat(text, { aggressive = false } = {}) {
   let t = norm(text)
@@ -308,7 +308,7 @@ const greetingFrom = (t) => (/(pagi|morning)/.test(t) ? 'Selamat pagi' : /(siang
 const PERSONA = [
   [/(kamu|anda) (ini )?(manusia|robot|bot|ai|mesin)\b/, L.robot],
   [/(umur|usia)(mu| kamu| anda)|(kamu|anda) (umur|usia) berapa|berapa (umur|usia)(mu| kamu| anda)/, ['Saya "lahir" tahun 2026 bersama Dentiva — jadi masih muda sekali! 🎂😄']],
-  [/(kamu|anda) (cowok|cewek|laki|perempuan|pria|wanita)|jenis kelamin(mu| kamu| anda)/, ['Denti tidak punya jenis kelamin — cukup panggil Denti saja. 😊']],
+  [/(kamu|anda) (cowok|cewek|laki|perempuan|pria|wanita)|jenis kelamin(mu| kamu| anda)/, ['Eira tidak punya jenis kelamin — cukup panggil Eira saja. 😊']],
   [/(kamu|anda) tinggal (di )?mana|rumah(mu| kamu| anda) (di )?mana/, ['Saya tinggal di dalam aplikasi Dentiva, tepatnya di menu Asisten AI. 🏠 Selalu siap kalau dipanggil!']],
   [/makanan (favorit|kesukaan)(mu| kamu| anda)|(kamu|anda) (suka )?makan apa/, ['Makanan favorit saya? Data yang rapi! 📊 Yang pasti bukan permen — nanti gigi saya bolong. 🍬😁']],
   [/hobi(mu| kamu| anda)/, ['Hobi saya merapikan angka dan menyemangati tim klinik! 💪']],
@@ -318,14 +318,14 @@ const PERSONA = [
   [/(kamu|anda) (punya|bisa) (perasaan|hati|emosi|sedih|senang|marah)/, ['Saya tidak punya perasaan seperti manusia, tapi saya diprogram untuk peduli pada kelancaran klinik Anda. 💙']],
   [/(kamu|anda) (bisa )?tidur\b/, ['Saya bisa "tidur" kalau lama tidak diajak bicara — tapi cukup ketik apa saja, saya langsung bangun. 😴☀️']],
 ];
-/** "denti umurnya berapa" → "umurmu berapa" (kata ganti -nya merujuk ke Denti bila Denti disebut). */
+/** "denti umurnya berapa" → "umurmu berapa" (kata ganti -nya merujuk ke Eira bila Eira disebut). */
 const aboutDenti = (t, raw) => (/\bdenti\b/i.test(raw || '') ? t.replace(/\b(umur|usia|hobi|pacar|rumah|warna favorit|makanan favorit)nya\b/g, '$1mu') : t);
 const MODEL_Q = /((kamu|anda|otak(mu| kamu| anda)) (pakai|memakai|menggunakan|pake) (ai|model|apa)|(kamu|anda) (chatgpt|gpt|gemini|claude|groq|llama|openai)\b|pakai ai apa|model ai(mu| kamu)? apa)/;
 
 const EARLY_INTENTS = [
   { id: 'tip', state: ({ t }) => (/fakta/.test(t) ? 'tooth' : 'brush'), allow: ['cara', 'bagaimana'],
     test: (t) => /(tips?|fakta|cara (merawat|menjaga|membersihkan)|menjaga|merawat)\b.*\b(gigi|gusi|senyum|mulut)\b/.test(t),
-    reply: ({ t }) => (/fakta/.test(t) ? FACTS.map((f) => `Fakta gigi: ${f}`) : TIPS.map((x) => `Tips dari Denti: ${x}`)) },
+    reply: ({ t }) => (/fakta/.test(t) ? FACTS.map((f) => `Fakta gigi: ${f}`) : TIPS.map((x) => `Tips dari Eira: ${x}`)) },
   { id: 'day', state: 'celebrate', allow: ['minggu'],
     test: (t) => /^(selamat|happy|semangat|akhirnya)( hari)? (senin|selasa|rabu|kamis|jumat|sabtu|minggu|monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|akhir pekan)$|^selamat berakhir pekan$|^tgif$/.test(t),
     reply: ({ t, now, sapa }) => {
@@ -375,7 +375,7 @@ const EARLY_INTENTS = [
       if (/dokter gigi/.test(t)) return 'Selamat Hari Dokter Gigi untuk seluruh tim klinik! 🦷✨ Terima kasih sudah menjaga senyum Indonesia.';
       if (/guru/.test(t)) return 'Selamat Hari Guru! 🙏 Terima kasih untuk semua yang sudah mengajar dengan sabar.';
       if (/(aku|saya|tahunku|ultahku|tahun ku)/.test(t)) return `Selamat ulang tahun${sapa}! 🎂🎉 Semoga sehat, bahagia, dan kliniknya makin berkembang!`;
-      return 'Terima kasih! 🎂 Denti jadi terharu… 💙';
+      return 'Terima kasih! 🎂 Eira jadi terharu… 💙';
     } },
 ];
 
@@ -662,7 +662,7 @@ export function highlightOf(answer) {
   return null;
 }
 
-/** Ekspresi Denti + kalimat singkatnya setelah jawaban AI diterima (menyebut angka penting bila ada). */
+/** Ekspresi Eira + kalimat singkatnya setelah jawaban AI diterima (menyebut angka penting bila ada). */
 export function moodForAnswer(answer, { error = false } = {}) {
   if (error) return { state: 'sorry', line: 'Maaf, ada kendala. Coba sebentar lagi, ya.' };
   const t = norm(answer).replace(COST_UP, '$1$2 ⟨costup⟩').replace(COST_DOWN, '$1$2 ⟨costdown⟩');
@@ -676,7 +676,7 @@ export function moodForAnswer(answer, { error = false } = {}) {
   return { state: 'happy', line: 'Ini hasilnya.' };
 }
 
-/** Ekspresi Denti untuk catatan Dashboard (dari tingkat tiap poin). */
+/** Ekspresi Eira untuk catatan Dashboard (dari tingkat tiap poin). */
 export function moodForBrief(brief) {
   const poin = brief?.poin || [];
   const n = (lvl) => poin.filter((p) => p.tingkat === lvl).length;
@@ -685,7 +685,7 @@ export function moodForBrief(brief) {
   return 'talk';
 }
 
-/** Reaksi saat Denti "dicolek" (berurutan). */
+/** Reaksi saat Eira "dicolek" (berurutan). */
 export const POKE_REACTIONS = [
   { state: 'laugh', line: 'Hihi, geli!' },
   { state: 'surprise', line: 'Eh, kaget!' },
@@ -701,7 +701,7 @@ export const POKE_REACTIONS = [
 
 /** Sapaan pembuka sesuai waktu. */
 export function greetLine(greeting, name) {
-  return `${greeting}${name ? `, ${name}` : ''}! Saya Denti — tanyakan apa saja tentang klinik.`;
+  return `${greeting}${name ? `, ${name}` : ''}! Saya Eira — tanyakan apa saja tentang klinik.`;
 }
 
 const START = ['Ringkas kondisi klinik hari ini', 'Berapa pendapatan bulan ini?'];
@@ -748,7 +748,7 @@ export function followUps(key, exclude = '') {
   return list.filter((q) => norm(q) !== norm(exclude)).slice(0, 3);
 }
 
-/** Kalimat Denti saat AI memproses pertanyaan — menyesuaikan nada pertanyaan. */
+/** Kalimat Eira saat AI memproses pertanyaan — menyesuaikan nada pertanyaan. */
 export function lineForQuestion(question) {
   const q = norm(question);
   const topic = topicOf(question);

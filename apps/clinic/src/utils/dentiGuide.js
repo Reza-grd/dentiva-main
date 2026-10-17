@@ -1,5 +1,5 @@
 /**
- * Denti sebagai pemandu: membuka halaman/tab, menjelaskan letak menu, dan mengajarkan cara memakai fitur.
+ * Eira sebagai pemandu: membuka halaman/tab, menjelaskan letak menu, dan mengajarkan cara memakai fitur.
  * Sadar peran — mengikuti hak akses terbaru (admin tidak mengakses data pasien, kasir hanya resepsionis, dst).
  * Fungsi murni; diuji lewat dentiTraining.test.js. Teks masukan sudah dinormalkan (normalizeChat).
  */

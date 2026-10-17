@@ -691,7 +691,7 @@ export async function setupSyntheticClinic(page, options = {}) {
       const replyText =
         `Berdasarkan data klinik sintetis hari ini, berikut analisis untuk: **"${question}"**.\n\n` +
         `- **Pendapatan Hari Ini:** Rp 1.850.000 dari 4 transaksi.\n` +
-        `- **Usulan Denti Agen:** Saya telah menyiapkan 2 kartu tindakan di bawah yang menunggu keputusan Anda.`;
+        `- **Usulan Eira Agen:** Saya telah menyiapkan 2 kartu tindakan di bawah yang menunggu keputusan Anda.`;
 
       return respondJson(route, {
         answer: replyText,

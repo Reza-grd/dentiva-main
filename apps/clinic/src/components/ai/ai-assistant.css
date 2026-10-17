@@ -49,7 +49,7 @@
 @keyframes ai-mic-pulse { 50% { box-shadow: 0 0 0 6px rgb(239 68 68 / .15); } }
 @media (prefers-reduced-motion: reduce) { .ai-typeahead, .ai-mic--on { animation: none; } }
 
-/* Denti Agen: kartu usulan tindakan */
+/* Eira Agen: kartu usulan tindakan */
 .ai-acts { display: grid; gap: .6rem; margin-top: .85rem; }
 .ai-acts__lead { display: flex; align-items: center; gap: .35rem; font-size: .72rem; letter-spacing: .02em; color: var(--color-text-muted, #6b7280); }
 .ai-act { border: 1px solid var(--color-border, #e5e7eb); border-radius: .85rem; padding: .75rem .9rem; background: color-mix(in srgb, var(--color-accent) 3%, transparent); }

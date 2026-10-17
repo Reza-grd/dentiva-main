@@ -1,6 +1,6 @@
 /**
- * Saran Denti yang menyesuaikan halaman yang sedang dibuka ("Ajarkan cara menerima pembayaran" di halaman kasir, dst).
- * Setiap kalimat saran harus dipahami otak lokal Denti — dijaga oleh dentiPageHints.test.js.
+ * Saran Eira yang menyesuaikan halaman yang sedang dibuka ("Ajarkan cara menerima pembayaran" di halaman kasir, dst).
+ * Setiap kalimat saran harus dipahami otak lokal Eira — dijaga oleh dentiPageHints.test.js.
  */
 export const PAGE_HINTS = [
   { prefix: '/resepsionis/pembayaran', hints: ['Ajarkan cara menerima pembayaran', 'Kenapa invoice WA tidak terkirim?'] },

@@ -1,6 +1,6 @@
 /**
  * Siklus 38 · ketahanan otomatis — setiap kalimat latihan diturunkan menjadi beberapa bentuk yang
- * biasa diketik orang. Maksud kalimat tidak berubah, jadi jawaban Denti juga tidak boleh berubah.
+ * biasa diketik orang. Maksud kalimat tidak berubah, jadi jawaban Eira juga tidak boleh berubah.
  *   intent : "denti, …", "… ya", "…!!", HURUF KAPITAL, "… 😊"
  *   ke AI  : "denti, …", HURUF KAPITAL, "… ya" — tetap harus diteruskan ke AI
  */

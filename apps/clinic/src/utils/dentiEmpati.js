@@ -1,13 +1,13 @@
 /**
- * Mesin "empati & suasana" Denti — digerakkan DATA (utils/data/dentiEmpatiData.js).
+ * Mesin "empati & suasana" Eira — digerakkan DATA (utils/data/dentiEmpatiData.js).
  * Siapa pun (termasuk GPT) cukup menambah entri data; mesin ini tidak perlu disentuh.
  *
  * Entri: { id, state, say: [frasa…], reply: [balasan…], follow?: [chip…], contains?: boolean }
  *  - say      : kalimat pengguna (ditulis alami, huruf biasa). Dicocokkan SETELAH dinormalkan (normalizeChat),
  *               sehingga huruf besar, tanda baca, "dong/ya", salah ketik ringan, dan "denti," di depan tidak perlu ditulis ulang.
- *  - reply    : variasi balasan Denti (dipilih bergiliran, tidak mengulang yang baru dipakai). Boleh memuat {nama} / {sapa}.
+ *  - reply    : variasi balasan Eira (dipilih bergiliran, tidak mengulang yang baru dipakai). Boleh memuat {nama} / {sapa}.
  *  - contains : true → frasa boleh berada di tengah kalimat pendek (≤ 10 kata); bawaan false = harus sama persis.
- *  - follow   : tombol saran lanjutan (maks. 3); semuanya harus dipahami Denti (dijaga tes).
+ *  - follow   : tombol saran lanjutan (maks. 3); semuanya harus dipahami Eira (dijaga tes).
  * Frasa pengguna yang memuat kata data klinik (pasien, omzet, jadwal, …) tidak pernah dijawab di sini — tetap ke AI.
  */
 import { EMPATI } from './data/dentiEmpatiData.js';

@@ -1,5 +1,5 @@
 /**
- * Database uji untuk evaluasi Denti Agen: skema produksi ASLI (PGlite) + data klinik realistis,
+ * Database uji untuk evaluasi Eira Agen: skema produksi ASLI (PGlite) + data klinik realistis,
  * dan adaptor `rpc()/from()` yang meniru klien supabase-js dengan JWT admin (RLS & pemeriksaan peran tetap berlaku).
  */
 import { buildDb } from "../schema.mjs";

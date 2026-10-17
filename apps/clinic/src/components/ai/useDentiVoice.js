@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // ─────────────────────────────────────────────
-//  Suara Denti — memakai kemampuan bawaan browser (gratis, tanpa server):
+//  Suara Eira — memakai kemampuan bawaan browser (gratis, tanpa server):
 //    useSpeech()    : bacakan jawaban (Web Speech API · speechSynthesis), suara bahasa Indonesia bila ada
 //    useDictation() : bertanya lewat suara (SpeechRecognition, bahasa Indonesia)
 //  Bila browser tidak mendukung, `supported` = false dan tombolnya tidak ditampilkan.

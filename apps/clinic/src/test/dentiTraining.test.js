@@ -1,6 +1,6 @@
 /**
- * Latihan Denti — semua siklus di fixtures/dentiTrainingData.js harus lulus 100%.
- * Bila Denti salah paham, tambahkan kalimatnya ke siklus baru, perbaiki pola di utils/dentiMood.js
+ * Latihan Eira — semua siklus di fixtures/dentiTrainingData.js harus lulus 100%.
+ * Bila Eira salah paham, tambahkan kalimatnya ke siklus baru, perbaiki pola di utils/dentiMood.js
  * (atau utils/dentiSkills.js), lalu jalankan tes ini sampai lulus.
  */
 import { describe, it, expect } from 'vitest';
@@ -61,13 +61,13 @@ describe.each(CYCLES)('$name', (c) => {
     });
   }
   if (states.length) {
-    it(`${states.length} ekspresi gerak yang dipilih Denti`, () => {
+    it(`${states.length} ekspresi gerak yang dipilih Eira`, () => {
       const wrong = states.map(asCase3).filter(([t, st, ctx]) => talk(t, ctx)?.state !== st).map(([t, st, ctx]) => [t, st, talk(t, ctx)?.state ?? null]);
       expect(wrong).toEqual([]);
     });
   }
   if (moodLines.length) {
-    it(`${moodLines.length} gelembung Denti menyebut angka penting`, () => {
+    it(`${moodLines.length} gelembung Eira menyebut angka penting`, () => {
       const wrong = moodLines.filter(([t, want]) => !moodForAnswer(t).line.includes(want)).map(([t, want]) => [t, want, moodForAnswer(t).line]);
       expect(wrong).toEqual([]);
     });
@@ -79,7 +79,7 @@ describe.each(CYCLES)('$name', (c) => {
     });
   }
   if (lines.length) {
-    it(`${lines.length} kalimat Denti saat memproses`, () => {
+    it(`${lines.length} kalimat Eira saat memproses`, () => {
       const wrong = lines.filter(([q, want]) => !lineForQuestion(q).includes(want)).map(([q, want]) => [q, want, lineForQuestion(q)]);
       expect(wrong).toEqual([]);
     });
@@ -104,7 +104,7 @@ describe('Siklus 64 · ketahanan otomatis (augmentasi)', () => {
   }, 60000);
 });
 
-describe('Latihan Denti — balasan', () => {
+describe('Latihan Eira — balasan', () => {
   it('jam & tanggal dijawab dari perangkat', () => {
     expect(smallTalk('jam berapa?', { now: NOW }).reply).toContain('09.05');
     expect(smallTalk('hari ini tanggal berapa', { now: NOW }).reply).toMatch(/Sabtu, 10 Oktober 2026/);
@@ -126,8 +126,8 @@ describe('Latihan Denti — balasan', () => {
     expect(smallTalk('kamu bisa apa').reply).toMatch(/Keuangan[\s\S]*Perencanaan[\s\S]*Operasional/);
   });
 
-  it('normalisasi: huruf berulang, emoji, sapaan ke Denti, partikel', () => {
-    expect(normalizeChat('Makasihhh Denti!! 😍')).toBe('makasih');
+  it('normalisasi: huruf berulang, emoji, sapaan ke Eira, partikel', () => {
+    expect(normalizeChat('Makasihhh Eira!! 😍')).toBe('makasih');
     expect(normalizeChat('halo kak denti dong ya')).toBe('halo');
   });
 

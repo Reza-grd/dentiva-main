@@ -1,5 +1,5 @@
 /**
- * Latihan Denti v4 (siklus 41–52): pemandu (buka halaman/tab, "di mana", ajarkan cara), perintah gerakan,
+ * Latihan Eira v4 (siklus 41–52): pemandu (buka halaman/tab, "di mana", ajarkan cara), perintah gerakan,
  * kuis, emosi, dan jebakan agar pertanyaan data tetap ke AI. Format sama dengan dentiTrainingData.js, plus:
  *   states : [teks, ekspresi, konteks?]   (konteks: { role, offer, quiz })
  */

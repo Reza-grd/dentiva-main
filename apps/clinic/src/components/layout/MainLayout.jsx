@@ -44,7 +44,7 @@ const MainLayout = ({ children }) => {
         <BottomNav />
       </div>
 
-      {/* Denti Pemandu: pendamping mengambang untuk semua peran (otak lokal, tanpa kuota AI) */}
+      {/* Eira Pemandu: pendamping mengambang untuk semua peran (otak lokal, tanpa kuota AI) */}
       <DentiGuideWidget />
     </div>
   );

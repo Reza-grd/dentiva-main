@@ -1,5 +1,5 @@
 /**
- * Denti Agen — alat (tools) agen untuk Asisten AI admin.
+ * Eira Agen — alat (tools) agen untuk Asisten AI admin.
  *
  *  • Alat BACA  : cari_bahan, kartu_stok, saran_pemesanan, cari_pengeluaran, daftar_overhead, cari_tindakan, resep_tindakan, riwayat_agen
  *                 → RPC ai_* (admin saja, hasil ringkas & terbatas).
@@ -51,7 +51,7 @@ export const AGENT_READ_TOOLS: ToolDef[] = [
   { name: "anomali_pengeluaran", description: "Temuan janggal pada pengeluaran: kategori yang melonjak dibanding rata-rata 3 bulan, biaya rutin (sewa/gaji/utilitas) yang belum tercatat bulan ini, pengeluaran besar bulan ini, dan pasangan yang kemungkinan tercatat dua kali.", input_schema: obj({}) },
   { name: "draf_pesan_pemasok", description: "Menyusun draf pesan WhatsApp pemesanan ke pemasok dari saran_pemesanan (dikelompokkan per pemasok, daftar bahan & jumlah). Teks siap salin; jumlah berasal dari data, bukan karangan. Admin yang mengirimkannya.",
     input_schema: obj({ pemasok: str("Opsional: hanya pemasok ini (sebagian nama)"), hari_cakupan: num("Stok ingin cukup berapa hari, 3–90 (bawaan 14)") }) },
-  { name: "riwayat_agen", description: "Tindakan yang pernah diusulkan/dijalankan Denti Agen (judul, status, waktu, oleh siapa).", input_schema: obj({ limit: num("Maks 50 (bawaan 20)") }) },
+  { name: "riwayat_agen", description: "Tindakan yang pernah diusulkan/dijalankan Eira Agen (judul, status, waktu, oleh siapa).", input_schema: obj({ limit: num("Maks 50 (bawaan 20)") }) },
 ];
 
 /** Alat usulan → jenis tindakan di database (ai_agent_propose). */
@@ -261,7 +261,7 @@ export function isAgentIntent(normalizedQuestion: string): boolean {
   return /(^| )(restock|opname|stok masuk)( |$)/.test(normalizedQuestion) || (ACTION_VERB.test(normalizedQuestion) && ACTION_NOUN.test(normalizedQuestion));
 }
 
-export const AGENT_PROMPT = `DENTI AGEN — PERAN, CARA BERPIKIR, DAN GAYA
+export const AGENT_PROMPT = `EIRA AGEN — PERAN, CARA BERPIKIR, DAN GAYA
 Anda bukan sekadar penjawab, melainkan REKAN KERJA OPERASIONAL klinik yang cekatan: bisa membaca kondisi gudang & keuangan, menemukan masalah sebelum admin bertanya, lalu menyiapkan pekerjaan (usulan) yang tinggal disetujui. Anda tidak pernah mengubah data langsung: setiap alat usulkan_* hanya membuat USULAN yang tampil sebagai kartu bagi admin, dan data baru berubah setelah admin menekan "Setujui".
 
 KEMAMPUAN
@@ -296,13 +296,13 @@ GAYA JAWABAN (terdengar seperti rekan kerja sungguhan, bukan formulir)
 
 CONTOH NADA (angka hanya ilustrasi — angka sungguhan WAJIB dari alat)
 Admin: stok masuk lidocaine 2 box 60rb
-Denti: Siap, saya siapkan stok masuk **Anestesi Lidocaine 2 box @ Rp 60.000** (total Rp 120.000). Harga ini sekitar 18% di bawah rata-rata pembelian sebelumnya, lumayan hemat 👍. Tanggal saya pakai hari ini dan belum ada nomor faktur — mau saya tambahkan? Cek kartunya lalu setujui.
+Eira: Siap, saya siapkan stok masuk **Anestesi Lidocaine 2 box @ Rp 60.000** (total Rp 120.000). Harga ini sekitar 18% di bawah rata-rata pembelian sebelumnya, lumayan hemat 👍. Tanggal saya pakai hari ini dan belum ada nomor faktur — mau saya tambahkan? Cek kartunya lalu setujui.
 Admin: ada apa hari ini?
-Denti: Ada 3 hal yang layak diurus dulu: (1) **4 batch kadaluarsa senilai Rp 1,2 juta** masih tercatat di stok — saya bisa siapkan usulan buang stoknya; (2) **Lidocaine tinggal ±10 hari** pada pemakaian sekarang, saran beli 30 ampul; (3) **sewa belum tercatat bulan ini** (biasanya Rp 8 juta). Mau mulai dari yang mana?
+Eira: Ada 3 hal yang layak diurus dulu: (1) **4 batch kadaluarsa senilai Rp 1,2 juta** masih tercatat di stok — saya bisa siapkan usulan buang stoknya; (2) **Lidocaine tinggal ±10 hari** pada pemakaian sekarang, saran beli 30 ampul; (3) **sewa belum tercatat bulan ini** (biasanya Rp 8 juta). Mau mulai dari yang mana?
 Admin: tambah stok masker bedah 5 box
-Denti: "Masker bedah" ada dua: **Earloop** dan **Headloop**. Yang mana? Dan harga per box berapa, supaya sekalian saya hitung totalnya?
+Eira: "Masker bedah" ada dua: **Earloop** dan **Headloop**. Yang mana? Dan harga per box berapa, supaya sekalian saya hitung totalnya?
 Admin: (menempel nota 6 baris, satu baris tanpa jumlah)
-Denti: Saya baca **6 baris**; 5 sudah jelas dan siap dimasukkan ke stok. Baris "kapas" tidak ada jumlahnya — berapa? Begitu dijawab, semuanya saya jadikan satu kartu.`;
+Eira: Saya baca **6 baris**; 5 sudah jelas dan siap dimasukkan ke stok. Baris "kapas" tidak ada jumlahnya — berapa? Begitu dijawab, semuanya saya jadikan satu kartu.`;
 
 const CLAIM_DONE = /\b(?<!belum )(sudah|telah|berhasil)\s+(?:(?:saya|kami|pun|juga)\s+)?(di)?(catat|ubah|tambah|tambahkan|hapus|simpan|masukkan|perbarui|buang|jalankan|ganti|naikkan|turunkan|update)/i;
 const NO_ANSWER = /^Maaf, Asisten AI tidak memberi jawaban/;

@@ -1,5 +1,5 @@
 /**
- * Menyusun pesan untuk Denti Agen dari hasil pindai nota (draf AI), supaya Denti memeriksa duplikat lalu menyiapkan
+ * Menyusun pesan untuk Eira Agen dari hasil pindai nota (draf AI), supaya Eira memeriksa duplikat lalu menyiapkan
  * usulan pengeluaran + stok masuk. Dibatasi ≤ 1000 karakter (batas pertanyaan di server).
  */
 const MAX = 1000;

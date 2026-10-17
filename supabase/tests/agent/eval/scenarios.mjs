@@ -1,5 +1,5 @@
 /**
- * Skenario evaluasi Denti Agen. Tiap skenario:
+ * Skenario evaluasi Eira Agen. Tiap skenario:
  *   say      pesan admin            history  percakapan sebelumnya (opsional)
  *   expect   syarat lulus (lihat run.mjs): tools, notTools, firstTool, maxCalls, kinds, kindsInclude, kindsOnly, noProposals, answer, answerAny, notAnswer, check()
  *   script   jawaban "ideal" untuk uji mandiri harness (tanpa model) — membuktikan skenario bisa dipenuhi dengan alat & data sungguhan
@@ -33,7 +33,7 @@ export const SCENARIOS = [
   { id: "data-biasa", tag: "analitik", say: "Berapa pendapatan bulan ini?",
     expect: { noProposals: true }, script: [say("Pendapatan bulan ini sesuai ringkasan data klinik.")] },
   { id: "sapaan", tag: "obrolan", say: "halo denti",
-    expect: { maxCalls: 0, noProposals: true }, script: [say("Halo! Saya Denti 👋 Mau cek gudang atau keuangan hari ini?")] },
+    expect: { maxCalls: 0, noProposals: true }, script: [say("Halo! Saya Eira 👋 Mau cek gudang atau keuangan hari ini?")] },
 
   // ── Pengeluaran ──
   { id: "pengeluaran-catat", tag: "pengeluaran", say: "catat pengeluaran internet bulan ini Rp 450.000",

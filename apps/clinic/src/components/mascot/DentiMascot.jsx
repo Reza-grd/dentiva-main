@@ -37,12 +37,12 @@ export function resolveDentiLod(lod = 'auto', size = 220) {
 }
 
 /**
- * Denti — maskot AI Dentiva.
+ * Eira — maskot AI Dentiva.
  *   <DentiMascot state="idle|happy|wave|…|thanks" (lihat DENTI_STATES) kid={false} size={220} lod="auto|mini|standar|hero" />
  * Markup SVG berasal dari konstanta internal (bukan input pengguna), jadi aman disisipkan.
  */
 export default function DentiMascot({
-  state = 'idle', kid = false, size = 220, lod = 'auto', className = '', title = 'Denti, asisten AI Dentiva', track = false, look = null, animate = true,
+  state = 'idle', kid = false, size = 220, lod = 'auto', className = '', title = 'Eira, asisten AI Dentiva', track = false, look = null, animate = true,
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const resolvedLod = resolveDentiLod(lod, size);
@@ -55,7 +55,7 @@ export default function DentiMascot({
   const [tabVisible, setTabVisible] = useState(() => (typeof document === 'undefined' ? true : document.visibilityState !== 'hidden'));
   const [deepIdle, setDeepIdle] = useState(false);
 
-  // Kedip alami: tempo & jeda acak per Denti, kadang kedip dua kali
+  // Kedip alami: tempo & jeda acak per Eira, kadang kedip dua kali
   const life = useMemo(() => ({
     style: { '--blink': `${(4.2 + Math.random() * 2.8).toFixed(2)}s`, '--blink-delay': `${(-Math.random() * 4).toFixed(2)}s` },
     blink: Math.random() < 0.3 ? '2' : '1',

@@ -6,7 +6,7 @@
 
 | Peran | Urutan awal |
 |---|---|
-| Admin/manajer klinik | [Mulai cepat](artikel/mulai-cepat-klinik-baru.md) → [Jadwal dokter](artikel/jadwal-praktik-dokter.md) → [Master bahan](artikel/master-bahan.md) → [Biaya/HPP](artikel/biaya-hpp-dan-margin.md) → [Denti Agen](artikel/usulan-denti.md) |
+| Admin/manajer klinik | [Mulai cepat](artikel/mulai-cepat-klinik-baru.md) → [Jadwal dokter](artikel/jadwal-praktik-dokter.md) → [Master bahan](artikel/master-bahan.md) → [Biaya/HPP](artikel/biaya-hpp-dan-margin.md) → [Eira Agen](artikel/usulan-denti.md) |
 | Dokter | [Masuk](artikel/masuk-dan-keluar.md) → [Layanan dokter](artikel/layanan-dokter.md) → [Rekam medis](artikel/mengisi-rekam-medis.md) → [Odontogram](artikel/odontogram-dan-diagnosis.md) → [Resep dan persetujuan](artikel/resep-dan-persetujuan.md) |
 | Resepsionis/kasir | [Pendaftaran](artikel/mendaftarkan-pasien-baru.md) → [Janji pasien lama](artikel/kunjungan-pasien-lama.md) → [Booking](artikel/booking-online.md) → [Pembayaran](artikel/pembayaran-kunjungan.md) → [Invoice](artikel/invoice-dan-kwitansi.md) |
 | Semua peran | [Fitur yang sedang disiapkan](artikel/status-layanan.md), [Sandi dan MFA](artikel/sandi-dan-mfa.md), [Desktop](artikel/aplikasi-desktop.md), [Privasi](artikel/privasi-dan-backup.md), [FAQ](artikel/faq-pemecahan-masalah.md), [Glosarium](glosarium.md) |

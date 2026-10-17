@@ -1,4 +1,4 @@
-# Menyetujui, menolak, dan membatalkan usulan Denti
+# Menyetujui, menolak, dan membatalkan usulan Eira
 
 **Untuk siapa:** admin.
 
@@ -6,7 +6,7 @@ Usulan belum mengubah data bisnis. Hanya admin pembuat yang berwenang dapat menj
 
 ## Langkah
 
-1. Buka **Asisten AI** dan minta pekerjaan operasional yang jelas. Tunggu kartu **Usulan tindakan Denti**; kalimat “sudah dicatat” tanpa kartu/hasil bukan bukti data berubah.
+1. Buka **Asisten AI** dan minta pekerjaan operasional yang jelas. Tunggu kartu **Usulan tindakan Eira**; kalimat “sudah dicatat” tanpa kartu/hasil bukan bukti data berubah.
 2. Baca judul, rincian, risiko, dan seluruh peringatan pada kartu. Cocokkan bahan, nominal, satuan, tanggal, serta nota. Jika ada yang keliru, pilih **Tolak**, tunggu status **Ditolak**, lalu minta usulan yang diperbaiki.
 3. Jika benar, pilih **Setujui** sekali dan tunggu status **Dijalankan**. Bila ada beberapa kartu, periksa semuanya sebelum memilih **Setujui semua**; persetujuan massal satu paket, sehingga satu kegagalan membatalkan seluruh paket tersebut.
 4. Gunakan **Lihat di Pengeluaran**, **Lihat di Master Treatment**, atau **Lihat di Biaya & Modal**, sesuai jenis kartu, untuk memeriksa hasil tercatat.
@@ -21,6 +21,6 @@ Usulan belum mengubah data bisnis. Hanya admin pembuat yang berwenang dapat menj
 
 ## Artikel terkait
 
-- [Menggunakan Denti dan memahami batasnya](menggunakan-denti.md)
+- [Menggunakan Eira dan memahami batasnya](menggunakan-denti.md)
 - [Memeriksa kartu stok dan mencatat opname](opname-dan-kartu-stok.md)
 - [Mencatat pengeluaran dan memeriksa nota](mencatat-pengeluaran.md)

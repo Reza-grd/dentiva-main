@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  Keterampilan instan Denti (tanpa AI, tanpa kuota, < 1 ms):
+//  Keterampilan instan Eira (tanpa AI, tanpa kuota, < 1 ms):
 //  kalkulator & diskon, hitung tanggal, ingat nama panggilan.
 //  Dipakai oleh smallTalk() di utils/dentiMood.js.
 // ─────────────────────────────────────────────
@@ -10,7 +10,7 @@ const NUMBER_WORDS = {
   'dua belas': 12, se: 1,
 };
 
-/** Buang emoji & sapaan ke Denti di depan ("denti, 2 juta dibagi 30 😊" → "2 juta dibagi 30"). */
+/** Buang emoji & sapaan ke Eira di depan ("denti, 2 juta dibagi 30 😊" → "2 juta dibagi 30"). */
 export const cleanRaw = (raw) => String(raw || '')
   .replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, ' ')
   .replace(/^\s*(?:(?:hai|halo|hi)\s+)?denti\s*[,:]?\s+/i, '')
@@ -202,7 +202,7 @@ export function extractName(raw, isWordy) {
 }
 
 // ── Buka halaman ───────────────────────────────────────────────────────────
-/** Halaman admin yang bisa dibuka Denti: [alias…], rute, label. */
+/** Halaman admin yang bisa dibuka Eira: [alias…], rute, label. */
 const PAGES = [
   [['dashboard', 'beranda', 'home', 'halaman utama', 'halaman depan'], '/admin', 'Dashboard'],
   [['pasien', 'data pasien', 'daftar pasien', 'patients'], '/pasien', 'Data Pasien'],

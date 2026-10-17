@@ -1,5 +1,5 @@
 /**
- * DENTI — maskot AI Dentiva (konsep visual v3 · HD Multi-LOD).
+ * EIRA — maskot AI Dentiva (konsep visual v3 · HD Multi-LOD).
  *
  * Bentuk: kepala lebar membulat dengan visor hitam besar + aksen sudut biru, headphone di kedua
  * sisi (muka biru, cincin emas) dengan "antena sisi" berupa sirip cahaya, tubuh telur porselen

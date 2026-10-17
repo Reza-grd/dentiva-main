@@ -2,7 +2,7 @@
  * ai-assistant — Asisten AI untuk admin klinik.
  *
  * Mode (body.mode):
- *   "chat"    (bawaan) Tanya keuangan & manajemen + DENTI AGEN: alat baca (RPC ai_*) dan alat usulan (usulkan_*) untuk mengelola
+ *   "chat"    (bawaan) Tanya keuangan & manajemen + EIRA AGEN: alat baca (RPC ai_*) dan alat usulan (usulkan_*) untuk mengelola
  *             pengeluaran, bahan/stok, overhead, tarif & resep. Model hanya MENGUSULKAN; data berubah setelah admin menyetujui.
  *   "agent_apply" | "agent_reject" | "agent_undo"  Keputusan admin atas usulan (tanpa model AI, tanpa kuota; lihat agent.ts & ai_agent_* di database).
  *   "receipt" Foto nota → draf pengeluaran (vision + structured output). Tidak menyimpan apa pun;
@@ -616,12 +616,12 @@ async function runScheduledBriefs(p: Provider, admin: any) {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** Setujui / tolak / batalkan usulan Denti Agen. Tanpa model AI & tanpa kuota; database memeriksa admin, klinik, pemilik usulan, dan kedaluwarsa. */
+/** Setujui / tolak / batalkan usulan Eira Agen. Tanpa model AI & tanpa kuota; database memeriksa admin, klinik, pemilik usulan, dan kedaluwarsa. */
 // deno-lint-ignore no-explicit-any
 async function agentDecision(req: Request, db: SupabaseClient, mode: string, body: any): Promise<Response> {
   const fail = (e: { code?: string; message: string }) => {
     if (e.code === "AG001") return json(req, 422, { error: e.message });
-    if (e.code === "42501") return json(req, 403, { error: "Hanya admin klinik yang dapat menjalankan tindakan Denti Agen." });
+    if (e.code === "42501") return json(req, 403, { error: "Hanya admin klinik yang dapat menjalankan tindakan Eira Agen." });
     console.error("agent decision:", e.code, e.message);
     return json(req, 500, { error: "Tindakan gagal diproses. Coba lagi." });
   };

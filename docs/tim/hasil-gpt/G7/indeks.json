@@ -314,14 +314,14 @@
   },
   {
     "slug": "menggunakan-denti",
-    "judul": "Menggunakan Denti dan memahami batasnya",
+    "judul": "Menggunakan Eira dan memahami batasnya",
     "peran": [
       "admin",
       "dokter",
       "resepsionis"
     ],
     "kata_kunci": [
-      "Denti",
+      "Eira",
       "AI",
       "agen",
       "panduan",
@@ -332,12 +332,12 @@
   },
   {
     "slug": "usulan-denti",
-    "judul": "Menyetujui, menolak, dan membatalkan usulan Denti",
+    "judul": "Menyetujui, menolak, dan membatalkan usulan Eira",
     "peran": [
       "admin"
     ],
     "kata_kunci": [
-      "Denti Agen",
+      "Eira Agen",
       "setujui",
       "tolak",
       "batalkan",

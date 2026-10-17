@@ -1,4 +1,4 @@
-/** Denti pintar di Asisten AI: obrolan ringan tanpa kuota, topik analisis, ekspresi dari isi jawaban. */
+/** Eira pintar di Asisten AI: obrolan ringan tanpa kuota, topik analisis, ekspresi dari isi jawaban. */
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -16,7 +16,7 @@ vi.mock('../services/aiService', () => ({ aiService: ai }));
 import { ToastProvider } from '../components/common/ToastNotification';
 import AiAssistantPage from '../components/ai/AiAssistantPage';
 
-describe('Aturan Denti', () => {
+describe('Aturan Eira', () => {
   it('obrolan ringan dikenali; pertanyaan data tidak', () => {
     expect(smallTalk('Terima kasih!', { name: 'Rina' })).toMatchObject({ state: 'love', reply: expect.stringContaining('Rina') });
     expect(smallTalk('kamu pintar banget')).toMatchObject({ state: 'shy' });
@@ -52,7 +52,7 @@ describe('Aturan Denti', () => {
   });
 });
 
-describe('Denti di halaman Asisten AI', () => {
+describe('Eira di halaman Asisten AI', () => {
   const status = { paket: 'Pro', tersedia_di_paket: true, aktif: true, kuota_bulanan: 300, terpakai_bulan_ini: 1 };
   const wrap = () => render(<MemoryRouter><ToastProvider><AiAssistantPage /></ToastProvider></MemoryRouter>);
   const send = async (text) => {
@@ -69,40 +69,40 @@ describe('Denti di halaman Asisten AI', () => {
     ai.getProvider.mockResolvedValue({ success: true, data: { configured: true, provider: 'gemini', label: 'Google Gemini' } });
   });
 
-  it('menyapa saat dibuka; obrolan ringan dijawab Denti tanpa memanggil AI', async () => {
+  it('menyapa saat dibuka; obrolan ringan dijawab Eira tanpa memanggil AI', async () => {
     wrap();
-    expect(await screen.findByText(/Saya Denti — tanyakan apa saja/)).toBeInTheDocument();
+    expect(await screen.findByText(/Saya Eira — tanyakan apa saja/)).toBeInTheDocument();
     await send('terima kasih');
-    expect(await screen.findByText('Dijawab langsung oleh Denti · tidak memakai kuota')).toBeInTheDocument();
+    expect(await screen.findByText('Dijawab langsung oleh Eira · tidak memakai kuota')).toBeInTheDocument();
     expect(ai.ask).not.toHaveBeenCalled();
     expect(document.querySelector('svg.denti')).toHaveAttribute('data-state', 'love');
   });
 
-  it('pertanyaan data: Denti memindai lalu bereaksi pada jawaban; obrolan ringan tidak ikut riwayat AI', async () => {
+  it('pertanyaan data: Eira memindai lalu bereaksi pada jawaban; obrolan ringan tidak ikut riwayat AI', async () => {
     let resolve;
     ai.ask.mockReturnValue(new Promise((r) => { resolve = r; }));
     wrap();
     await send('halo');
-    await screen.findByText('Dijawab langsung oleh Denti · tidak memakai kuota');
+    await screen.findByText('Dijawab langsung oleh Eira · tidak memakai kuota');
     await send('Berapa pendapatan bulan ini?');
     expect(await screen.findByText('Menganalisis data pendapatan…')).toBeInTheDocument();
     await waitFor(() => expect(document.querySelector('svg.denti')).toHaveAttribute('data-state', 'scan'));
     expect(ai.ask).toHaveBeenCalledWith('Berapa pendapatan bulan ini?', []);
     resolve({ success: true, data: { answer: 'Pendapatan naik 15% dibanding bulan lalu.', tools: [], usage_id: 'u1' } });
-    // Denti "berbicara" selama jawaban muncul, lalu merayakan sambil menyebut angka pentingnya
+    // Eira "berbicara" selama jawaban muncul, lalu merayakan sambil menyebut angka pentingnya
     expect(await screen.findByText('Kabar baik — naik 15%! 🎉')).toBeInTheDocument();
     await waitFor(() => expect(document.querySelector('svg.denti')).toHaveAttribute('data-state', 'celebrate'), { timeout: 2500 });
   });
 
-  it('Denti bisa dicolek', async () => {
+  it('Eira bisa dicolek', async () => {
     wrap();
-    fireEvent.click(await screen.findByRole('button', { name: 'Colek Denti' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Colek Eira' }));
     expect(await screen.findByText('Hihi, geli!')).toBeInTheDocument();
     expect(document.querySelector('svg.denti')).toHaveAttribute('data-state', 'laugh');
   });
 });
 
-describe('Denti pintar — keterampilan di halaman', () => {
+describe('Eira pintar — keterampilan di halaman', () => {
   const status = { paket: 'Pro', tersedia_di_paket: true, aktif: true, kuota_bulanan: 300, terpakai_bulan_ini: 1 };
   const Where = () => {
     const loc = useLocation();
@@ -136,7 +136,7 @@ describe('Denti pintar — keterampilan di halaman', () => {
   it('kalkulator dijawab instan dengan indikator mengetik, tanpa AI', async () => {
     wrap();
     await send('diskon 20% dari 350rb');
-    expect(await screen.findByText('Denti sedang mengetik')).toBeInTheDocument();
+    expect(await screen.findByText('Eira sedang mengetik')).toBeInTheDocument();
     expect((await screen.findAllByText(/harga setelah diskon/)).length).toBeGreaterThan(0);
     expect(ai.ask).not.toHaveBeenCalled();
   });
@@ -169,14 +169,14 @@ describe('Denti pintar — keterampilan di halaman', () => {
   it('"mulai baru" membersihkan percakapan', async () => {
     wrap();
     await send('halo');
-    await screen.findByText('Dijawab langsung oleh Denti · tidak memakai kuota');
+    await screen.findByText('Dijawab langsung oleh Eira · tidak memakai kuota');
     await send('mulai baru');
     expect(await screen.findByText(/Percakapan dibersihkan/)).toBeInTheDocument();
-    await waitFor(() => expect(screen.queryByText('Dijawab langsung oleh Denti · tidak memakai kuota')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText('Dijawab langsung oleh Eira · tidak memakai kuota')).not.toBeInTheDocument());
   });
 });
 
-describe('Denti 4× — fitur hidup di halaman', () => {
+describe('Eira 4× — fitur hidup di halaman', () => {
   const status = { paket: 'Pro', tersedia_di_paket: true, aktif: true, kuota_bulanan: 300, terpakai_bulan_ini: 1 };
   const wrap = () => render(<MemoryRouter><ToastProvider><AiAssistantPage /></ToastProvider></MemoryRouter>);
   const box = () => screen.findByPlaceholderText(/Tulis pertanyaan/);
@@ -199,7 +199,7 @@ describe('Denti 4× — fitur hidup di halaman', () => {
     expect(input.value).toBe('Hitung diskon 10% dari 500rb');
   });
 
-  it('tombol Bacakan memakai suara browser dan Denti berbicara', async () => {
+  it('tombol Bacakan memakai suara browser dan Eira berbicara', async () => {
     const speak = vi.fn((u) => u.onstart?.());
     window.speechSynthesis = { speak, cancel: vi.fn(), getVoices: () => [{ lang: 'id-ID', name: 'Indonesia' }] };
     window.SpeechSynthesisUtterance = function U(text) { this.text = text; };

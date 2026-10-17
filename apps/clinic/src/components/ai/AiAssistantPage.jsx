@@ -40,7 +40,7 @@ const SUGGESTION_GROUPS = [
     'Bagaimana cara mengaktifkan booking online untuk pasien?',
     'Apa saja yang perlu diisi agar HPP dan margin tindakan terhitung?',
   ] },
-  { label: 'Denti Agen (bisa bertindak)', items: [
+  { label: 'Eira Agen (bisa bertindak)', items: [
     'Briefing hari ini: apa yang perlu saya urus?',
     'Catat pengeluaran listrik bulan ini Rp 1.250.000',
     'Bahan apa yang perlu dipesan ulang? Buatkan draf pesan ke pemasoknya.',
@@ -95,20 +95,20 @@ const SUGGEST_BANK = [
   'Biaya tetap 30 juta margin 150rb, BEP berapa pasien?', 'Kasih tips gigi', 'Bacakan jawabannya', 'Ganti mode gelap',
   'Buka layar antrean', 'Kamu bisa apa saja?',
 ];
-/** Ajakan singkat di gelembung Denti saat dibiarkan — memperkenalkan kemampuan tanpa mengganggu. */
+/** Ajakan singkat di gelembung Eira saat dibiarkan — memperkenalkan kemampuan tanpa mengganggu. */
 const IDLE_NUDGES = [
   'Bosan? Ketik "kuis" untuk menguji pengetahuan gigi 🎯', 'Ketik "tahukah kamu" — saya punya fakta gigi seru 🦷', 'Mau lihat atraksi? Ketik "semua gerakan" 🎭',
   'Bingung mulai dari mana? Ketik "checklist harian" 📋', 'Istilah baru? Tanya "apa itu odontogram?" 📖', 'Ketik "ajarkan cara …" — saya pandu langkah demi langkah 🧭',
   'Saya bisa membuka halaman: coba "buka laporan" ✨', 'Butuh jeda? Ketik "ngopi" ☕', 'Main suit yuk? Ketik "main suit" ✊✌️✋', 'Bingung memutuskan? Ketik "lempar koin" 🪙',
 ];
-/** Gerakan kecil saat Denti dibiarkan (agar terasa hidup). */
+/** Gerakan kecil saat Eira dibiarkan (agar terasa hidup). */
 const IDLE_MOVES = [
   ['think', 1800], ['happy', 1600], ['nod', 1800], ['wave', 1600], ['wink', 1500], ['peek', 2400], ['sigh', 2300],
   ['shrug', 1900], ['idea', 2400], ['jump', 1600], ['cool', 2600], ['salute', 2000], ['stretch', 2800], ['search', 3000], ['coffee', 3000],
   ['dreamy', 3600], ['yawn', 3000], ['giggle', 2400], ['curious', 2800], ['listen', 3000], ['smug', 2800],
 ];
 const MAX_LEN = 1000;
-/** Tanpa aktivitas selama ini → Denti tertidur (bangun lagi saat pengguna mengetik/bertanya). */
+/** Tanpa aktivitas selama ini → Eira tertidur (bangun lagi saat pengguna mengetik/bertanya). */
 const DOZE_AFTER_MS = 2 * 60 * 1000;
 const STORE_KEY = 'dentiva-ai-chat';
 
@@ -122,7 +122,7 @@ const saveChat = (msgs) => {
 const NICK_KEY = 'dentiva-denti-nickname';
 const loadNick = () => { try { return localStorage.getItem(NICK_KEY) || ''; } catch { return ''; } };
 const saveNick = (n) => { try { localStorage.setItem(NICK_KEY, n); } catch { /* abaikan */ } };
-/** Kalimat pendek untuk gelembung Denti (baris pertama, tanpa format Markdown). */
+/** Kalimat pendek untuk gelembung Eira (baris pertama, tanpa format Markdown). */
 const bubble = (text) => {
   const plain = String(text || '').replace(/[*_`]/g, '').split('\n').find((l) => l.trim()) || '';
   return plain.length > 110 ? `${plain.slice(0, 107).trimEnd()}…` : plain;
@@ -165,7 +165,7 @@ export default function AiAssistantPage() {
   const endRef = useRef(null);
   const inputRef = useRef(null);
 
-  // ─── Denti: pendamping yang bereaksi (aturan lokal, tanpa kuota AI) ───
+  // ─── Eira: pendamping yang bereaksi (aturan lokal, tanpa kuota AI) ───
   const [dentiLine, setDentiLine] = useState('');
   const [typing, setTyping] = useState(false);
   const timers = useRef([]);
@@ -190,7 +190,7 @@ export default function AiAssistantPage() {
   stateRef.current = denti.state;
   const [inputFocus, setInputFocus] = useState(false);
 
-  /** Tandai ada aktivitas; bangunkan Denti bila sedang tidur. */
+  /** Tandai ada aktivitas; bangunkan Eira bila sedang tidur. */
   const dozingRef = useRef(false);
   const touch = useCallback(() => {
     lastActive.current = Date.now();
@@ -228,7 +228,7 @@ export default function AiAssistantPage() {
     react('wave', name ? `Hai, ${name}! 👋` : 'Hai! 👋 Ada yang bisa saya bantu?', 1600);
   };
 
-  // Suara: bacakan jawaban (mulut Denti bergerak) & bertanya lewat suara
+  // Suara: bacakan jawaban (mulut Eira bergerak) & bertanya lewat suara
   const speech = useSpeech();
   const speakMsg = (text) => speech.speak(text, {
     onStart: () => { play('talk', 120000); setDentiLine('Saya bacakan, ya… 🔊'); },
@@ -301,7 +301,7 @@ export default function AiAssistantPage() {
     actions: (data.actions || []).map((a) => ({ ...a, state: 'pending', at: Date.now(), error: '' })), ...extra,
   });
 
-  // Pindai nota → Denti memeriksa duplikat lalu menyiapkan usulan pengeluaran + stok masuk
+  // Pindai nota → Eira memeriksa duplikat lalu menyiapkan usulan pengeluaran + stok masuk
   const notaRef = useRef(null);
   const onNotaPhoto = async (e) => {
     const file = e.target.files?.[0];
@@ -331,7 +331,7 @@ export default function AiAssistantPage() {
     const question = (q ?? input).trim();
     if (!question || (busy && !opts.force)) return;
     touch();
-    // Obrolan ringan dijawab Denti langsung — tidak memakai kuota AI
+    // Obrolan ringan dijawab Eira langsung — tidak memakai kuota AI
     const replies = [...messages].reverse().filter((m) => m.role === 'assistant');
     // Konteks percakapan: tawaran buka halaman (hanya bila balasan terakhir), dan kuis yang sedang berjalan
     const lastMsg = messages[messages.length - 1];
@@ -471,7 +471,7 @@ export default function AiAssistantPage() {
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Sparkles className="text-[var(--color-accent)]" /> Denti · Asisten AI
+          <Sparkles className="text-[var(--color-accent)]" /> Eira · Asisten AI
           <Badge variant="warning" className="!text-amber-800 dark:!text-amber-300">Beta</Badge>
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
@@ -530,7 +530,7 @@ export default function AiAssistantPage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Aktifkan Asisten Keuangan</h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-              Asisten menjawab pertanyaan seperti pendapatan, pengeluaran, tindakan paling menguntungkan, kinerja dokter, dan stok bahan, memakai data klinik Anda. Sebagai Denti Agen, ia juga bisa mengusulkan pencatatan pengeluaran, stok masuk, bahan baru, opname, overhead, tarif, dan resep bahan — tetapi data baru berubah hanya setelah Anda menekan Setujui.
+              Asisten menjawab pertanyaan seperti pendapatan, pengeluaran, tindakan paling menguntungkan, kinerja dokter, dan stok bahan, memakai data klinik Anda. Sebagai Eira Agen, ia juga bisa mengusulkan pencatatan pengeluaran, stok masuk, bahan baru, opname, overhead, tarif, dan resep bahan — tetapi data baru berubah hanya setelah Anda menekan Setujui.
             </p>
           </div>
           <ul className="space-y-3 text-sm text-gray-700 dark:text-gray-200">
@@ -624,7 +624,7 @@ export default function AiAssistantPage() {
                     </button>
                   )}
                   {!m.error && m.local && (
-                    <p className="mt-3 text-xs text-gray-400">Dijawab langsung oleh Denti · tidak memakai kuota</p>
+                    <p className="mt-3 text-xs text-gray-400">Dijawab langsung oleh Eira · tidak memakai kuota</p>
                   )}
                   {!m.error && !m.local && (
                     <p className="mt-3 text-xs text-gray-400 flex items-center gap-1 flex-wrap">
@@ -675,7 +675,7 @@ export default function AiAssistantPage() {
                 <div className="w-8 h-8 rounded-xl grid place-items-center bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)]">
                   <Sparkles size={16} className="text-[var(--color-accent)]" />
                 </div>
-                Denti sedang mengetik <span className="ai-dots"><span /><span /><span /></span>
+                Eira sedang mengetik <span className="ai-dots"><span /><span /><span /></span>
               </div>
             )}
 
@@ -719,7 +719,7 @@ export default function AiAssistantPage() {
             />
             <input ref={notaRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden" data-testid="nota-input" onChange={onNotaPhoto} />
             <Button type="button" variant="outline" className="h-11" disabled={busy || left === 0} onClick={() => notaRef.current?.click()}
-              aria-label="Pindai nota agar Denti mencatatnya" title="Pindai nota: Denti membaca lalu menyiapkan usulan pengeluaran & stok masuk">
+              aria-label="Pindai nota agar Eira mencatatnya" title="Pindai nota: Eira membaca lalu menyiapkan usulan pengeluaran & stok masuk">
               <Camera size={16} />
             </Button>
             {dictation.supported && (

@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────
-//  Denti di layar antrean — aturan keadaan (murni, mudah dites).
+//  Eira di layar antrean — aturan keadaan (murni, mudah dites).
 //  Data yang dipakai hanya yang dikirim get_queue_display: nomor, status,
 //  jam, jam praktik hari ini, dan penanda `kid` (boolean, bukan tanggal lahir).
 // ─────────────────────────────────────────────
 
-/** Tips bergilir saat antrean senggang: aksi Denti + teks bar bawah. */
+/** Tips bergilir saat antrean senggang: aksi Eira + teks bar bawah. */
 export const DENTI_TIPS = [
   { state: 'brush', text: 'Sikat gigi dua kali sehari: pagi setelah sarapan dan malam sebelum tidur.' },
   { state: 'tooth', text: 'Periksakan gigi setiap enam bulan agar masalah kecil tidak menjadi besar.' },
@@ -16,7 +16,7 @@ export const DENTI_TIPS = [
 
 export const SORRY_TEXT = 'Mohon maaf atas waktu tunggunya. Dokter akan segera melayani Anda.';
 export const SLEEP_TEXT = 'Klinik sedang di luar jam praktik. Sampai jumpa di jam praktik berikutnya.';
-/** Keterlambatan (menit) dari jam janji pasien berikutnya sebelum Denti meminta maaf. */
+/** Keterlambatan (menit) dari jam janji pasien berikutnya sebelum Eira meminta maaf. */
 export const SORRY_AFTER_MIN = 30;
 
 const toMinutes = (hhmm) => {
@@ -45,7 +45,7 @@ export function delayMinutes(next, now) {
 }
 
 /**
- * Keadaan dasar Denti + teks yang ia "ucapkan" di bar bawah (null = pakai pesan klinik biasa).
+ * Keadaan dasar Eira + teks yang ia "ucapkan" di bar bawah (null = pakai pesan klinik biasa).
  *   tidur (tutup & kosong) → maaf (antrean molor) → tips bergilir (belum ada yang diperiksa) → siaga
  */
 export function dentiScene({ hours, now, primary, waiting = [], tick = 0 }) {

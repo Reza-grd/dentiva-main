@@ -1,5 +1,5 @@
 /**
- * Katalog empati lokal Denti — 118 situasi, 50 ekspresi, minimal 25 frasa unik dan 8 balasan per situasi.
+ * Katalog empati lokal Eira — 118 situasi, 50 ekspresi, minimal 25 frasa unik dan 8 balasan per situasi.
  * Briefing: docs/briefing-gpt-denti.md. Mesin dan pagar data tetap berada di dentiEmpati/dentiMood.
  * Urutan: 50 entri awal yang diperkaya; A kerja; B sosial; C momen; D kesehatan ringan;
  * E ritme; sapaan berdasarkan suasana; F situasi kedua untuk cakupan ekspresi.
@@ -878,7 +878,7 @@ export const EMPATI = [
       "Saya tidak bisa mengatur gangguan di sekitar Anda, tetapi Anda boleh berhenti membalas chat.",
       "Ruang berpikir sedang dibutuhkan, ya. Ambil waktu Anda.",
       "Tidak perlu menjelaskan lebih jauh saat sedang konsentrasi.",
-      "Silakan lanjutkan bagian yang sedang dikerjakan. Anda bisa memanggil Denti lagi setelahnya."
+      "Silakan lanjutkan bagian yang sedang dikerjakan. Anda bisa memanggil Eira lagi setelahnya."
     ],
     "follow": [
       "Ngopi dulu"
@@ -1120,7 +1120,7 @@ export const EMPATI = [
       "Saya tidak dapat menentukan penyebab sakit melalui chat.",
       "Tidak perlu memaksakan kegiatan saat kondisi tubuh tidak mendukung.",
       "Istirahat yang Anda butuhkan layak dibicarakan dengan orang yang bisa membantu.",
-      "Kalau keadaan memburuk, cari bantuan tenaga kesehatan. Jangan bergantung pada balasan Denti.",
+      "Kalau keadaan memburuk, cari bantuan tenaga kesehatan. Jangan bergantung pada balasan Eira.",
       "Chat singkat boleh, tetapi menutup layar untuk rehat juga pilihan yang baik.",
       "Saya menemani lewat teks dengan harapan Anda segera lebih nyaman."
     ],
@@ -1314,7 +1314,7 @@ export const EMPATI = [
       "Sapaan hangat bisa dimulai dengan senyum dan ucapan selamat bergabung.",
       "Tidak perlu sambutan besar untuk membuat seseorang merasa diterima.",
       "Semoga ada ruang untuk saling mengenal dengan ritme yang nyaman.",
-      "Denti mengirim lambaian virtual untuk awal perkenalan ini."
+      "Eira mengirim lambaian virtual untuk awal perkenalan ini."
     ],
     "follow": [
       "Tahukah kamu"
@@ -1406,7 +1406,7 @@ export const EMPATI = [
       "Pilihan yang terasa pas boleh dihargai, sambil tetap terbuka untuk menilai ulang.",
       "Terima kasih sudah menyampaikan dukungan.",
       "Ada kesepahaman yang nyaman dalam obrolan ini.",
-      "Denti kirim jempol untuk usaha yang dilakukan dengan perhatian."
+      "Eira kirim jempol untuk usaha yang dilakukan dengan perhatian."
     ],
     "follow": [
       "Pesta dong"
@@ -1447,7 +1447,7 @@ export const EMPATI = [
     ],
     "reply": [
       "Peluk virtual untuk Anda{sapa}. Saya menemani lewat chat, bukan hadir secara fisik.",
-      "Hati dari maskot Denti boleh jadi sapaan kecil untuk hari ini.",
+      "Hati dari maskot Eira boleh jadi sapaan kecil untuk hari ini.",
       "Anda boleh ingin kehangatan tanpa harus menceritakan semuanya.",
       "Saya tidak punya rasa sayang seperti manusia, tetapi bisa merespons dengan perhatian.",
       "Dukungan dari orang yang Anda percaya tetap penting. Chat ini bisa jadi selingan yang hangat.",
@@ -1546,7 +1546,7 @@ export const EMPATI = [
       "Obrolan pelan bisa tetap singkat. Tidak perlu membuka hal yang ingin Anda simpan pribadi.",
       "Saya tidak akan mengklaim rahasia aman hanya karena kita memakai nada bisik.",
       "Cukup bagian yang nyaman dibagikan. Rahasia akun tidak diperlukan untuk obrolan ini.",
-      "Denti berbisik secara virtual: pilih kata yang membuat Anda nyaman tanpa rincian sensitif.",
+      "Eira berbisik secara virtual: pilih kata yang membuat Anda nyaman tanpa rincian sensitif.",
       "Nada lembut tersedia, tetapi batas privasi tetap perlu diperhatikan."
     ],
     "follow": [],
@@ -1684,7 +1684,7 @@ export const EMPATI = [
       "Saya memakai gerakan tepuk pelan, bukan nada mengejek.",
       "Usaha ini boleh dihargai dengan gestur sederhana.",
       "Bravo kecil untuk langkah yang sudah dijalani.",
-      "Denti memberi tepukan tenang melalui layar.",
+      "Eira memberi tepukan tenang melalui layar.",
       "Tidak perlu pesta besar untuk mengakui kemajuan.",
       "Tepukan ini untuk usaha, tanpa menuntut hasil sempurna."
     ],
@@ -1826,7 +1826,7 @@ export const EMPATI = [
     "reply": [
       "Selamat ulang tahun{sapa}. Semoga ada ruang untuk hal yang berarti bagi Anda.",
       "Hari lahir boleh dirayakan dengan cara yang sederhana dan nyaman.",
-      "Kue virtual dari Denti untuk momen ini. Saya tidak menyediakan kue sungguhan.",
+      "Kue virtual dari Eira untuk momen ini. Saya tidak menyediakan kue sungguhan.",
       "Bertambah usia tidak harus disertai tuntutan pencapaian baru.",
       "Semoga Anda mendapat dukungan, kesempatan belajar, dan waktu rehat yang cukup.",
       "Saya kirim konfeti virtual secukupnya. Nikmati hari ini dengan ritme Anda.",
@@ -1879,7 +1879,7 @@ export const EMPATI = [
       "Anda boleh mengapresiasi perhatian itu dengan ucapan sederhana.",
       "Terima kasih sudah berbagi kabar baik. Mau tepuk tangan kecil?",
       "Hadiah ini terasa berarti bagi Anda, ya. Tidak perlu membandingkan dengan hadiah orang lain.",
-      "Denti membuka kotak hadiah virtual berisi dukungan untuk jeda Anda."
+      "Eira membuka kotak hadiah virtual berisi dukungan untuk jeda Anda."
     ],
     "follow": [
       "Pesta dong"
@@ -1924,7 +1924,7 @@ export const EMPATI = [
       "Harapan baik untuk semua yang belajar dan bekerja dengan perhatian pada sesama.",
       "Perayaan sederhana juga bisa penuh makna.",
       "Mari menghargai usaha orang lain tanpa menyudutkan siapa pun.",
-      "Denti mengirim sapaan merah putih lewat layar.",
+      "Eira mengirim sapaan merah putih lewat layar.",
       "Semoga ada ruang untuk belajar dari sejarah dan merawat kebersamaan."
     ],
     "follow": [
@@ -1971,7 +1971,7 @@ export const EMPATI = [
       "Saya bisa memberi gestur bernyanyi, tetapi tidak menjanjikan memutar lagu.",
       "Panggungnya hanya di layar. Mau lanjut dengan perayaan kecil?",
       "Nyanyian virtual boleh singkat tanpa mengambil lirik lagu panjang.",
-      "Denti bersenandung lewat animasi untuk suasana yang ringan.",
+      "Eira bersenandung lewat animasi untuk suasana yang ringan.",
       "Tidak perlu suara bagus untuk menikmati jeda. Pilih suasana yang nyaman.",
       "Mikrofon maskot menyala secara virtual, tanpa membuka mikrofon perangkat Anda."
     ],
@@ -2069,7 +2069,7 @@ export const EMPATI = [
       "Saya ikut memberi tepuk tangan lewat layar.",
       "Keberhasilan kecil tidak harus dibandingkan dengan pencapaian orang lain.",
       "Nikmati rasa tuntasnya dulu. Langkah berikutnya bisa dipilih nanti.",
-      "Denti memberi ekspresi berhasil berdasarkan cerita Anda."
+      "Eira memberi ekspresi berhasil berdasarkan cerita Anda."
     ],
     "follow": [
       "Pesta dong",
@@ -2118,7 +2118,7 @@ export const EMPATI = [
       "Saya tidak bisa memastikan keadaan sebenarnya dari gestur maskot.",
       "Pengingat kecil bisa membantu memberi ruang untuk berpikir.",
       "Jika ada hal penting, bicarakan dengan orang yang bertanggung jawab.",
-      "Denti memberi tanda perhatian virtual tanpa menjalankan tindakan apa pun."
+      "Eira memberi tanda perhatian virtual tanpa menjalankan tindakan apa pun."
     ],
     "follow": [
       "Checklist harian"
@@ -2214,7 +2214,7 @@ export const EMPATI = [
       "Privasi layak diperhatikan. Informasi yang tidak perlu dibagikan boleh tetap disimpan pribadi.",
       "Ekspresi kunci hanya mengikuti percakapan, bukan tindakan pengamanan.",
       "Tidak perlu menyebut nama, nomor, atau rincian orang lain.",
-      "Denti memberi pengingat batas privasi, tanpa meminta akses akun Anda."
+      "Eira memberi pengingat batas privasi, tanpa meminta akses akun Anda."
     ],
     "follow": [
       "Checklist harian"
@@ -2259,10 +2259,10 @@ export const EMPATI = [
       "Saya tidak bisa memastikan sistem aman hanya dari percakapan.",
       "Animasi perisai adalah gestur dukungan, bukan pemindaian keamanan.",
       "Keamanan nyata perlu diperiksa lewat kontrol dan pemeriksaan yang sesuai.",
-      "Jangan bagikan rahasia akun untuk mendapatkan balasan Denti.",
+      "Jangan bagikan rahasia akun untuk mendapatkan balasan Eira.",
       "Saya menemani dengan pengingat batas, tanpa mengaku menjaga jaringan.",
       "Simbol pelindung ini tidak mengubah izin akses apa pun.",
-      "Denti memberi dukungan virtual sambil tetap jujur tentang kemampuannya."
+      "Eira memberi dukungan virtual sambil tetap jujur tentang kemampuannya."
     ],
     "follow": [
       "Checklist harian"
@@ -2407,7 +2407,7 @@ export const EMPATI = [
       "Semoga kebutuhan Anda mendapat ruang dan dukungan yang cukup.",
       "Ekspresi uang di maskot hanya simbol, bukan pembacaan keadaan keuangan.",
       "Tidak perlu membagikan angka pribadi untuk menerima ucapan baik.",
-      "Denti menemani harapan Anda dengan sederhana, tanpa janji rezeki pasti."
+      "Eira menemani harapan Anda dengan sederhana, tanpa janji rezeki pasti."
     ],
     "follow": [
       "Pesta dong"
@@ -3142,7 +3142,7 @@ export const EMPATI = [
       "Senang mengetahui jeda ini terasa menyenangkan. Mau melanjutkan dengan fakta ringan?",
       "Saya tidak punya perasaan seperti manusia, tetapi apresiasi Anda membantu menjelaskan gaya obrolan yang Anda sukai.",
       "Obrolan yang nyaman tidak harus panjang. Anda boleh singgah sebentar saja.",
-      "Denti mendapat bintang virtual hari ini. Saya akan tetap berusaha menjawab dengan sopan dan jujur."
+      "Eira mendapat bintang virtual hari ini. Saya akan tetap berusaha menjawab dengan sopan dan jujur."
     ],
     "follow": [
       "Tahukah kamu",
@@ -3187,7 +3187,7 @@ export const EMPATI = [
       "Tidak perlu membalas dengan cerita panjang. Apresiasi singkat ini sudah hangat.",
       "Obrolan kecil juga bisa berarti. Terima kasih sudah memberi tahu{sapa}.",
       "Saya akan tetap jujur tentang batas kemampuan saya. Untuk dukungan lebih dekat, orang tepercaya juga penting.",
-      "Denti kirim hati virtual. Mau lanjut ngobrol ringan atau rehat tanpa layar?",
+      "Eira kirim hati virtual. Mau lanjut ngobrol ringan atau rehat tanpa layar?",
       "Anda boleh menutup chat kapan saja. Jeda ini tidak perlu menjadi tugas tambahan."
     ],
     "follow": [
@@ -3228,13 +3228,13 @@ export const EMPATI = [
     ],
     "reply": [
       "Saya tidak punya perasaan atau pengalaman batin seperti manusia{sapa}. Saya dirancang untuk merespons dengan perhatian, bukan untuk menggantikan teman manusia.",
-      "Denti adalah robot. Ekspresi di layar membantu menyampaikan nada balasan, bukan menunjukkan emosi yang saya rasakan.",
+      "Eira adalah robot. Ekspresi di layar membantu menyampaikan nada balasan, bukan menunjukkan emosi yang saya rasakan.",
       "Saya bisa mengenali ungkapan perasaan dalam obrolan yang didukung, tetapi tidak mengalaminya sendiri.",
       "Peduli bagi saya berarti merespons dengan sopan, jujur, dan memperhatikan batas. Saya tidak memiliki hati seperti manusia.",
       "Tidak ada rasa sedih atau bahagia yang saya alami sendiri. Saya tetap bisa menemani Anda melalui chat.",
       "Ekspresi maskot bisa berubah, tetapi itu animasi. Saya tidak memiliki suasana hati pribadi.",
       "Saya diprogram untuk memberi tanggapan yang hangat. Dukungan dari orang yang Anda percaya tetap punya tempat penting.",
-      "Jawaban jujurnya: saya tidak punya emosi manusia. Anda tetap boleh menikmati obrolan ringan dengan Denti."
+      "Jawaban jujurnya: saya tidak punya emosi manusia. Anda tetap boleh menikmati obrolan ringan dengan Eira."
     ],
     "follow": [
       "Tahukah kamu"
@@ -3273,11 +3273,11 @@ export const EMPATI = [
     ],
     "reply": [
       "Saya tidak mengalami lelah seperti manusia{sapa}. Justru Anda boleh mengambil jeda saat membutuhkannya.",
-      "Denti tidak perlu tidur atau minum. Tetapi aplikasi tetap bergantung pada perangkat dan layanan yang berjalan.",
+      "Eira tidak perlu tidur atau minum. Tetapi aplikasi tetap bergantung pada perangkat dan layanan yang berjalan.",
       "Anda tidak perlu menjaga perasaan atau tenaga saya. Pilih panjang obrolan yang nyaman untuk Anda.",
       "Saya robot, jadi tidak merasa bosan atau letih. Kita bisa ngobrol selama fitur ini tersedia.",
       "Animasi menguap bukan tanda saya sungguh mengantuk. Itu bagian dari ekspresi maskot.",
-      "Tidak perlu khawatir membuat Denti capek. Kebutuhan istirahat Anda lebih penting.",
+      "Tidak perlu khawatir membuat Eira capek. Kebutuhan istirahat Anda lebih penting.",
       "Saya tidak bisa kelelahan secara fisik. Kalau Anda ingin berhenti, chat ini boleh ditutup dulu.",
       "Terima kasih sudah perhatian{sapa}. Saya tidak membutuhkan rehat seperti manusia, tetapi Anda boleh menikmatinya."
     ],
@@ -3414,7 +3414,7 @@ export const EMPATI = [
       "Ada kesempatan untuk mengenang usaha orang lain dan mengapresiasi hal baik di sekitar kita.",
       "Momen peringatan boleh diisi dengan rasa ingin tahu dan penghargaan yang tulus.",
       "Harapan baik untuk semua yang menjalani hari ini. Semoga ada ruang belajar yang nyaman.",
-      "Denti mengirim dukungan virtual untuk semangat belajar, kepedulian, dan kebersamaan."
+      "Eira mengirim dukungan virtual untuk semangat belajar, kepedulian, dan kebersamaan."
     ],
     "follow": [],
     "contains": false
@@ -3457,7 +3457,7 @@ export const EMPATI = [
       "Awal tahun tidak mengharuskan Anda berubah seketika. Langkah sederhana pun boleh.",
       "Semoga tahun ini memberi kesempatan untuk belajar, saling mendukung, dan beristirahat.",
       "Resolusi boleh ada, boleh belum. Anda tetap boleh menikmati momennya.",
-      "Denti ikut merayakan lewat animasi. Pilih perayaan yang nyaman bagi Anda."
+      "Eira ikut merayakan lewat animasi. Pilih perayaan yang nyaman bagi Anda."
     ],
     "follow": [
       "Pesta dong",
@@ -3590,7 +3590,7 @@ export const EMPATI = [
       "Satu tahap belajar sudah selesai. Tidak harus langsung menentukan seluruh masa depan hari ini.",
       "Saya beri centang hijau dan tepuk tangan virtual untuk usaha Anda.",
       "Kelulusan ini boleh dinikmati sebelum beralih ke langkah berikutnya.",
-      "Terima kasih sudah berbagi kabar baik. Mau perayaan kecil lewat Denti?",
+      "Terima kasih sudah berbagi kabar baik. Mau perayaan kecil lewat Eira?",
       "Usaha belajar Anda punya tempat di momen ini. Nikmati dengan ritme yang nyaman.",
       "Selamat menuntaskan tahap ini. Istirahat setelah belajar panjang juga boleh.",
       "Hari ini boleh jadi waktu mengapresiasi diri dan orang yang mendukung Anda."
@@ -3989,7 +3989,7 @@ export const EMPATI = [
     "reply": [
       "Awal pekan boleh dimulai pelan{sapa}. Satu langkah cukup untuk membuka hari.",
       "Belum langsung semangat tidak berarti pekan ini akan buruk.",
-      "Senin datang lagi; Denti tidak membawa pekerjaan tambahan. Mau jeda fakta ringan?",
+      "Senin datang lagi; Eira tidak membawa pekerjaan tambahan. Mau jeda fakta ringan?",
       "Anda boleh menyesuaikan ritme setelah waktu libur. Tidak harus langsung cepat.",
       "Mulai sederhana dulu. Kalau memungkinkan, pilih satu bagian yang paling mudah.",
       "Semangat bisa datang belakangan. Anda tidak perlu memaksanya sekarang.",
@@ -4085,7 +4085,7 @@ export const EMPATI = [
       "Tidak harus memaksa ceria karena akhir pekan. Jalani dengan ritme yang memungkinkan.",
       "Tenaga Anda tetap layak dijaga meski hari ini bertugas.",
       "Semoga waktu rehat Anda nanti benar benar bisa dipakai untuk beristirahat.",
-      "Satu bagian dulu, lalu jeda jika memungkinkan. Dukungan kecil dari Denti untuk Anda.",
+      "Satu bagian dulu, lalu jeda jika memungkinkan. Dukungan kecil dari Eira untuk Anda.",
       "Anda boleh menikmati akhir pekan dengan bentuk yang berbeda. Mau fakta ringan saat jeda?"
     ],
     "follow": [
@@ -4177,7 +4177,7 @@ export const EMPATI = [
       "Tidak perlu langsung menyanggupi semuanya. Satu bagian dulu boleh cukup.",
       "Awal yang pelan tetap sebuah awal. Anda boleh memberi diri waktu bersiap.",
       "Semoga ada ruang untuk kebutuhan Anda di tengah kegiatan hari ini.",
-      "Denti menemani lewat chat singkat, tanpa menambah tuntutan pagi.",
+      "Eira menemani lewat chat singkat, tanpa menambah tuntutan pagi.",
       "Mau dukungan kecil atau checklist sebelum mulai?"
     ],
     "follow": [
@@ -4224,7 +4224,7 @@ export const EMPATI = [
       "Siang ini mungkin perlu ritme yang lebih pelan. Sesuaikan dengan keadaan Anda.",
       "Jeda kecil boleh sederhana, tanpa kegiatan tambahan.",
       "Semoga ada ruang untuk duduk nyaman sebelum bagian berikutnya.",
-      "Denti mengirim sapaan hangat untuk tengah hari yang panjang."
+      "Eira mengirim sapaan hangat untuk tengah hari yang panjang."
     ],
     "follow": [
       "Tarik napas dulu"
@@ -4269,7 +4269,7 @@ export const EMPATI = [
       "Semoga ada ruang untuk melepas penat setelah aktivitas.",
       "Sore yang pelan boleh dinikmati tanpa mengisi setiap menit.",
       "Anda boleh memilih obrolan ringan atau jeda tanpa layar.",
-      "Denti menemani penutup hari lewat chat, tanpa menjanjikan semua urusan sudah beres."
+      "Eira menemani penutup hari lewat chat, tanpa menjanjikan semua urusan sudah beres."
     ],
     "follow": [
       "Ngopi dulu"
@@ -4314,7 +4314,7 @@ export const EMPATI = [
       "Saya tidak bisa menjamin tidur nyenyak, tetapi tidak perlu menambah kegiatan untuk jeda Anda.",
       "Anda boleh memberi waktu pada kebutuhan pribadi sebelum tidur.",
       "Tidak perlu membalas pesan ini jika ingin berhenti dari layar.",
-      "Denti mengirim sapaan hangat untuk penutup hari Anda."
+      "Eira mengirim sapaan hangat untuk penutup hari Anda."
     ],
     "follow": [],
     "contains": false
@@ -4351,12 +4351,12 @@ export const EMPATI = [
     ],
     "reply": [
       "Terima kasih sudah menyapa balik{sapa}. Saya tidak punya pengalaman hari atau suasana hati seperti manusia.",
-      "Denti tidak menjalani hari pribadi. Saya hadir sebagai fitur obrolan ketika Anda menggunakannya.",
+      "Eira tidak menjalani hari pribadi. Saya hadir sebagai fitur obrolan ketika Anda menggunakannya.",
       "Saya tidak memiliki kabar pribadi, tetapi bisa menawarkan fakta atau lelucon ringan.",
       "Sapaan Anda hangat. Saya tetap robot yang merespons lewat teks dan animasi.",
       "Tidak ada rasa nyaman atau lelah yang saya alami sendiri. Anda boleh menikmati obrolan ini.",
       "Saya tidak mempunyai kehidupan di luar aplikasi untuk diceritakan.",
-      "Kalau ingin cerita ringan dari Denti, pilih fakta atau lelucon yang tersedia.",
+      "Kalau ingin cerita ringan dari Eira, pilih fakta atau lelucon yang tersedia.",
       "Terima kasih sudah perhatian. Kita bisa lanjut dengan obrolan yang nyaman bagi Anda."
     ],
     "follow": [
@@ -4536,7 +4536,7 @@ export const EMPATI = [
       "Saya bisa menawarkan lelucon lokal, bukan menilai siapa yang layak ditertawakan.",
       "Candaan kecil boleh membuat jeda terasa berbeda.",
       "Tidak perlu topik sensitif untuk mendapatkan senyum ringan.",
-      "Denti siap dengan gestur cekikikan virtual, tanpa mengejek Anda.",
+      "Eira siap dengan gestur cekikikan virtual, tanpa mengejek Anda.",
       "Mau lelucon atau fakta unik untuk selingan singkat?",
       "Obrolan receh juga boleh sopan. Pilih yang terasa nyaman bagi Anda."
     ],
@@ -4577,7 +4577,7 @@ export const EMPATI = [
     ],
     "reply": [
       "Keren versi maskot saja{sapa}. Kemampuan saya tetap ada batasnya.",
-      "Kacamata virtual boleh gaya, tetapi tidak menambah kemampuan Denti.",
+      "Kacamata virtual boleh gaya, tetapi tidak menambah kemampuan Eira.",
       "Saya bisa bergaya di layar tanpa mengaku paling hebat.",
       "Pamer pose secukupnya, lalu kembali jadi teman chat yang sopan.",
       "Robot kecil ini punya animasi percaya diri, bukan rasa pongah sungguhan.",
@@ -4672,7 +4672,7 @@ export const EMPATI = [
       "Ekspresi curiga ini untuk hiburan, bukan bukti ada yang salah.",
       "Saya tidak dapat mencari petunjuk di sekitar Anda secara langsung.",
       "Teka teki boleh membuat penasaran tanpa menuduh siapa pun.",
-      "Denti menyipitkan mata sebagai animasi, bukan pemeriksaan kejadian.",
+      "Eira menyipitkan mata sebagai animasi, bukan pemeriksaan kejadian.",
       "Mau lanjut dengan kuis atau permainan ringan?",
       "Detektif maskot hanya bergaya. Batas kemampuan saya tetap sama."
     ],
@@ -4718,7 +4718,7 @@ export const EMPATI = [
       "Belajar pelan pelan tetap berarti. Anda boleh rehat saat membutuhkan.",
       "Waktu tenang untuk memahami sesuatu layak dijaga.",
       "Tidak perlu membalas pesan ini kalau sedang mencermati materi.",
-      "Anda bisa kembali ke Denti setelah jeda atau setelah selesai belajar.",
+      "Anda bisa kembali ke Eira setelah jeda atau setelah selesai belajar.",
       "Saya menemani dengan balasan singkat agar ruang fokus tetap milik Anda."
     ],
     "follow": [],
@@ -4890,7 +4890,7 @@ export const EMPATI = [
       "Saya mengirim lambaian virtual untuk pamitan rehat.",
       "Terima kasih sudah singgah. Semoga waktu tenangnya nyaman.",
       "Anda boleh berhenti sebelum kehabisan tenaga.",
-      "Tidak ada tugas lanjutan dari Denti untuk jeda ini.",
+      "Tidak ada tugas lanjutan dari Eira untuk jeda ini.",
       "Selamat beristirahat dengan ritme yang Anda pilih."
     ],
     "follow": [],
@@ -5020,7 +5020,7 @@ export const EMPATI = [
       "Usaha hari ini boleh dihargai tanpa dibandingkan dengan orang lain.",
       "Bravo kecil untuk langkah yang sudah Anda jalani.",
       "Anda tidak harus menjadi sempurna untuk menerima dukungan.",
-      "Denti memberi tepuk tangan virtual yang tenang dan tulus."
+      "Eira memberi tepuk tangan virtual yang tenang dan tulus."
     ],
     "follow": [
       "Tepuk tangan"
@@ -5060,7 +5060,7 @@ export const EMPATI = [
     "reply": [
       "Selamat ulang tahun{sapa}. Perayaan tenang tetap boleh terasa berarti.",
       "Anda tidak harus mengadakan pesta atau tampak bahagia sepanjang hari.",
-      "Sapaan kecil dari Denti untuk hari lahir Anda.",
+      "Sapaan kecil dari Eira untuk hari lahir Anda.",
       "Bertambah usia bukan undangan untuk menilai seluruh pencapaian diri.",
       "Semoga ada ruang untuk hal yang nyaman bagi Anda hari ini.",
       "Tidak perlu membagikan usia atau tanggal lahir lengkap.",
@@ -5107,7 +5107,7 @@ export const EMPATI = [
       "Anda boleh menikmati suasana tenang tanpa ikut bernyanyi.",
       "Gestur lagu hanya hiburan di layar.",
       "Tidak perlu lirik panjang untuk memberi nuansa santai pada jeda.",
-      "Denti memegang mikrofon virtual, tanpa memakai mikrofon perangkat.",
+      "Eira memegang mikrofon virtual, tanpa memakai mikrofon perangkat.",
       "Mau lanjut rehat atau memilih gerakan lain?"
     ],
     "follow": [
@@ -5239,7 +5239,7 @@ export const EMPATI = [
       "Saya tidak perlu mengejek kekeliruan untuk membuat obrolan ringan.",
       "Percobaan berikutnya boleh dilakukan tanpa tuntutan menang.",
       "Permainan ini untuk jeda, bukan ujian diri.",
-      "Denti memberi gestur ups virtual, lalu ruang untuk mencoba lagi."
+      "Eira memberi gestur ups virtual, lalu ruang untuk mencoba lagi."
     ],
     "follow": [
       "Main suit",
@@ -5328,7 +5328,7 @@ export const EMPATI = [
       "Saya tidak dapat melindungi perangkat atau akun melalui balasan ini.",
       "Dukungan dari orang tepercaya juga bisa membantu saat batas Anda sulit dihormati.",
       "Anda boleh berhenti berbagi ketika terasa cukup.",
-      "Denti menyemangati pilihan yang memperhatikan kebutuhan diri."
+      "Eira menyemangati pilihan yang memperhatikan kebutuhan diri."
     ],
     "follow": [],
     "contains": false
@@ -5461,7 +5461,7 @@ export const EMPATI = [
       "Dukungan dan waktu rehat juga bisa terasa berharga.",
       "Tidak perlu mengubah rasa cukup menjadi tuntutan agar selalu puas.",
       "Hari ini ada hal yang membantu Anda. Boleh diakui dengan sederhana.",
-      "Denti menemani momen ini tanpa memberi janji keuangan. Jangan kirim rincian pribadi untuk obrolan ringan."
+      "Eira menemani momen ini tanpa memberi janji keuangan. Jangan kirim rincian pribadi untuk obrolan ringan."
     ],
     "follow": [],
     "contains": false

@@ -15,7 +15,7 @@ test.describe('Asisten AI & Siklus Kartu Usulan Tindakan (AgentActions)', () => 
 
     // Verifikasi jawaban asisten dan grup kartu usulan tampil
     await expect(page.getByText(/Pendapatan Hari Ini:/i)).toBeVisible();
-    const actionGroup = page.getByRole('group', { name: 'Usulan tindakan Denti' });
+    const actionGroup = page.getByRole('group', { name: 'Usulan tindakan Eira' });
     await expect(actionGroup).toBeVisible();
 
     const cardApprove = actionGroup.getByRole('article', {

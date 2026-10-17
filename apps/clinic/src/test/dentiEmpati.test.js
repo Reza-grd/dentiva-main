@@ -1,5 +1,5 @@
 /**
- * Pagar mutu data empati Denti (utils/data/dentiEmpatiData.js) — dijalankan GPT setiap kali menambah entri.
+ * Pagar mutu data empati Eira (utils/data/dentiEmpatiData.js) — dijalankan GPT setiap kali menambah entri.
  * Gagal di sini = perbaiki DATA, jangan melonggarkan tes.
  */
 import { describe, it, expect } from 'vitest';
@@ -42,7 +42,7 @@ describe('Skema data empati', () => {
     expect(EMPATI.flatMap((e) => e.say.filter((p) => DATA.test(p)).map((p) => [e.id, p]))).toEqual([]);
   });
 
-  it('tombol saran ≤ 3 dan semuanya dipahami Denti', () => {
+  it('tombol saran ≤ 3 dan semuanya dipahami Eira', () => {
     const bad = [];
     for (const e of EMPATI) {
       if ((e.follow || []).length > 3) bad.push([e.id, 'follow > 3']);

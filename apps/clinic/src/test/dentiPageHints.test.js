@@ -1,4 +1,4 @@
-/** Saran per halaman harus selalu dipahami Denti untuk setiap peran (balasan lokal, bukan AI). */
+/** Saran per halaman harus selalu dipahami Eira untuk setiap peran (balasan lokal, bukan AI). */
 import { describe, it, expect } from 'vitest';
 import { smallTalk } from '../utils/dentiMood';
 import { PAGE_HINTS, pageHints } from '../utils/dentiPageHints';

@@ -1,5 +1,5 @@
 /**
- * Kamus istilah Denti: "apa itu scaling?", "HPP itu apa?", "maksud odontogram", "arti BEP".
+ * Kamus istilah Eira: "apa itu scaling?", "HPP itu apa?", "maksud odontogram", "arti BEP".
  * Berisi istilah klinik (dental) dan istilah di Dentiva. Penjelasan umum — keputusan perawatan tetap di tangan dokter.
  * Fungsi murni; teks masukan sudah dinormalkan (normalizeChat). Hanya istilah yang dikenal yang dijawab —
  * sisanya (pertanyaan data klinik) tetap diteruskan ke AI.

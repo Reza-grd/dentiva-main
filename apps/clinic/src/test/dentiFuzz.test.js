@@ -1,5 +1,5 @@
 /**
- * Ketahanan salah ketik Denti: setiap kalimat latihan diberi salah ketik acak (hapus / tukar / gandakan satu huruf pada kata ≥ 6 huruf).
+ * Ketahanan salah ketik Eira: setiap kalimat latihan diberi salah ketik acak (hapus / tukar / gandakan satu huruf pada kata ≥ 6 huruf).
  *  • Maksud harus tetap dikenali (≥ 90%).
  *  • Pertanyaan data + salah ketik TIDAK boleh bocor jadi obrolan (≤ 0,5%) — harus tetap ke AI.
  * Pembangkit acak deterministik, jadi hasilnya stabil.

@@ -67,7 +67,7 @@
 @keyframes ai-brief-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .ai-brief__shimmer { animation: none; } }
 
-/* Denti di kartu catatan */
+/* Eira di kartu catatan */
 .ai-brief__denti {
   flex: none; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 1rem;
   transition: transform .25s cubic-bezier(.2,.8,.2,1);

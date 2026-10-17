@@ -21,4 +21,4 @@ Kartu stok membantu menelusuri pergerakan. Opname menyesuaikan saldo berdasarkan
 
 - [Mencatat pembelian dan stok masuk](mencatat-stok-masuk.md)
 - [Menyiapkan master bahan dan satuan stok](master-bahan.md)
-- [Menyetujui, menolak, dan membatalkan usulan Denti](usulan-denti.md)
+- [Menyetujui, menolak, dan membatalkan usulan Eira](usulan-denti.md)

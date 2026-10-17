@@ -1,4 +1,4 @@
-/** Setiap tombol saran (chip) yang ditampilkan Denti harus dipahami Denti sendiri — tanpa kuota AI. */
+/** Setiap tombol saran (chip) yang ditampilkan Eira harus dipahami Eira sendiri — tanpa kuota AI. */
 import { describe, it, expect } from 'vitest';
 import { followUps, smallTalk } from '../utils/dentiMood';
 
@@ -11,7 +11,7 @@ const CTX = {
   'move:wink': { lastIntent: 'move:wink' }, 'move:coffee': { lastIntent: 'move:coffee' }, 'emo:sad': {}, 'emo:proud': {},
 };
 
-describe('Chip saran Denti', () => {
+describe('Chip saran Eira', () => {
   for (const [key, ctx] of Object.entries(CTX)) {
     it(`semua chip untuk "${key}" dijawab lokal`, () => {
       const chips = followUps(key);

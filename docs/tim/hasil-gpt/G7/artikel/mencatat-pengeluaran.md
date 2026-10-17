@@ -21,4 +21,4 @@ Pengeluaran dapat dicatat manual. Pindai nota adalah bantuan pengisian yang teta
 
 - [Mencatat pembelian dan stok masuk](mencatat-stok-masuk.md)
 - [Menyiapkan biaya, resep bahan, dan membaca HPP](biaya-hpp-dan-margin.md)
-- [Menggunakan Denti dan memahami batasnya](menggunakan-denti.md)
+- [Menggunakan Eira dan memahami batasnya](menggunakan-denti.md)

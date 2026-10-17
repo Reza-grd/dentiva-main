@@ -1,5 +1,5 @@
 /**
- * Evaluasi Denti Agen end-to-end: percakapan nyata (atau skrip) → alat produksi → basis data produksi (PGlite) → penilaian otomatis.
+ * Evaluasi Eira Agen end-to-end: percakapan nyata (atau skrip) → alat produksi → basis data produksi (PGlite) → penilaian otomatis.
  *
  *   npm run eval:agen:selftest                              # tanpa jaringan: membuktikan harness & skenario konsisten (dipakai CI)
  *   GEMINI_API_KEY=… npm run eval:agen -- --provider gemini  # model sungguhan (Gemini flash = penyedia produksi saat ini)
@@ -68,7 +68,7 @@ const admin = userClient(db);
 const today = jkt();
 const results = [];
 const list = SCENARIOS.filter((s) => (!only?.length || only.includes(s.id)) && (!tag || s.tag === tag) && (!selftest || s.script));
-console.log(`Evaluasi Denti Agen · penyedia=${provider}${keyEnv ? ` model=${model}` : ""} · ${list.length} skenario × ${repeat}\n`);
+console.log(`Evaluasi Eira Agen · penyedia=${provider}${keyEnv ? ` model=${model}` : ""} · ${list.length} skenario × ${repeat}\n`);
 
 for (const sc of list) {
   for (let run = 1; run <= repeat; run++) {

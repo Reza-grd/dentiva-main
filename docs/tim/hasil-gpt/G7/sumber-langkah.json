@@ -2188,17 +2188,17 @@
     {
       "slug": "menggunakan-denti",
       "langkah": 1,
-      "teks": "Untuk panduan aplikasi, pilih **Buka Denti, pemandu Dentiva**, lalu ketik pertanyaan seperti “buka jadwal” atau “apa itu HPP?”. Pilih tombol **Kirim**.",
+      "teks": "Untuk panduan aplikasi, pilih **Buka Eira, pemandu Dentiva**, lalu ketik pertanyaan seperti “buka jadwal” atau “apa itu HPP?”. Pilih tombol **Kirim**.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
           "baris": 210,
-          "penanda": "Buka Denti, pemandu Dentiva"
+          "penanda": "Buka Eira, pemandu Dentiva"
         },
         {
           "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
           "baris": 203,
-          "penanda": "aria-label=\"Tulis pesan untuk Denti\""
+          "penanda": "aria-label=\"Tulis pesan untuk Eira\""
         },
         {
           "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
@@ -2254,12 +2254,12 @@
     {
       "slug": "menggunakan-denti",
       "langkah": 4,
-      "teks": "Jika memindai nota dari Asisten AI, pilih ikon **Pindai nota agar Denti mencatatnya** dan unggah foto nota pembelian yang sesuai. Periksa hasil serta kartu usulan; foto terbaca belum berarti pengeluaran atau stok sudah dicatat.",
+      "teks": "Jika memindai nota dari Asisten AI, pilih ikon **Pindai nota agar Eira mencatatnya** dan unggah foto nota pembelian yang sesuai. Periksa hasil serta kartu usulan; foto terbaca belum berarti pengeluaran atau stok sudah dicatat.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
           "baris": 722,
-          "penanda": "Pindai nota agar Denti mencatatnya"
+          "penanda": "Pindai nota agar Eira mencatatnya"
         },
         {
           "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
@@ -2281,7 +2281,7 @@
         {
           "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
           "baris": 65,
-          "penanda": "Usulan tindakan Denti"
+          "penanda": "Usulan tindakan Eira"
         },
         {
           "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
@@ -2298,7 +2298,7 @@
     {
       "slug": "usulan-denti",
       "langkah": 1,
-      "teks": "Buka **Asisten AI** dan minta pekerjaan operasional yang jelas. Tunggu kartu **Usulan tindakan Denti**; kalimat “sudah dicatat” tanpa kartu/hasil bukan bukti data berubah.",
+      "teks": "Buka **Asisten AI** dan minta pekerjaan operasional yang jelas. Tunggu kartu **Usulan tindakan Eira**; kalimat “sudah dicatat” tanpa kartu/hasil bukan bukti data berubah.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
@@ -2308,7 +2308,7 @@
         {
           "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
           "baris": 65,
-          "penanda": "aria-label=\"Usulan tindakan Denti\""
+          "penanda": "aria-label=\"Usulan tindakan Eira\""
         }
       ]
     },
@@ -2428,7 +2428,7 @@
         {
           "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
           "baris": 112,
-          "penanda": "Minta Denti membuat usulan ini lagi."
+          "penanda": "Minta Eira membuat usulan ini lagi."
         },
         {
           "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
@@ -2557,7 +2557,7 @@
     {
       "slug": "privasi-dan-backup",
       "langkah": 2,
-      "teks": "Saat mencari atau membuka detail pasien, verifikasi penerima dan tujuan penggunaan sebelum menyalin, mencetak, atau membagikan informasi. Jangan masukkan data pasien ke Denti; gunakan panduan tanpa identitas.",
+      "teks": "Saat mencari atau membuka detail pasien, verifikasi penerima dan tujuan penggunaan sebelum menyalin, mencetak, atau membagikan informasi. Jangan masukkan data pasien ke Eira; gunakan panduan tanpa identitas.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
@@ -2572,7 +2572,7 @@
         {
           "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
           "baris": 203,
-          "penanda": "aria-label=\"Tulis pesan untuk Denti\""
+          "penanda": "aria-label=\"Tulis pesan untuk Eira\""
         }
       ]
     },
@@ -2696,7 +2696,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 4,
-      "teks": "Pembayaran atau usulan Denti belum jelas hasilnya? Buka detail transaksi atau menu hasil usulan dan periksa status. Pesan jawaban AI, QR yang tampil, atau tombol yang sudah ditekan belum membuktikan proses selesai. Jangan mengulang simpan atau Setujui sebelum memeriksa.",
+      "teks": "Pembayaran atau usulan Eira belum jelas hasilnya? Buka detail transaksi atau menu hasil usulan dan periksa status. Pesan jawaban AI, QR yang tampil, atau tombol yang sudah ditekan belum membuktikan proses selesai. Jangan mengulang simpan atau Setujui sebelum memeriksa.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
@@ -2718,7 +2718,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 5,
-      "teks": "Denti sibuk, kuota habis, atau tidak menjawab? Baca pesan di **Asisten AI** dan periksa kuota. Gunakan **Pengeluaran** atau **Biaya & Modal** untuk pekerjaan manual sesuai izin; coba AI kembali kemudian tanpa mengirim data pasien.",
+      "teks": "Eira sibuk, kuota habis, atau tidak menjawab? Baca pesan di **Asisten AI** dan periksa kuota. Gunakan **Pengeluaran** atau **Biaya & Modal** untuk pekerjaan manual sesuai izin; coba AI kembali kemudian tanpa mengirim data pasien.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",

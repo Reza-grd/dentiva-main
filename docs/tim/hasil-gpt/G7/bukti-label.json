@@ -2180,14 +2180,14 @@
     },
     {
       "slug": "menggunakan-denti",
-      "label_tebal": "Buka Denti, pemandu Dentiva",
-      "segmen": "Buka Denti, pemandu Dentiva",
+      "label_tebal": "Buka Eira, pemandu Dentiva",
+      "segmen": "Buka Eira, pemandu Dentiva",
       "jenis": "literal",
       "sumber": [
         {
           "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
           "baris": 210,
-          "penanda": "Buka Denti, pemandu Dentiva"
+          "penanda": "Buka Eira, pemandu Dentiva"
         }
       ]
     },
@@ -2232,14 +2232,14 @@
     },
     {
       "slug": "menggunakan-denti",
-      "label_tebal": "Pindai nota agar Denti mencatatnya",
-      "segmen": "Pindai nota agar Denti mencatatnya",
+      "label_tebal": "Pindai nota agar Eira mencatatnya",
+      "segmen": "Pindai nota agar Eira mencatatnya",
       "jenis": "literal",
       "sumber": [
         {
           "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
           "baris": 722,
-          "penanda": "Pindai nota agar Denti mencatatnya"
+          "penanda": "Pindai nota agar Eira mencatatnya"
         }
       ]
     },
@@ -2258,14 +2258,14 @@
     },
     {
       "slug": "usulan-denti",
-      "label_tebal": "Usulan tindakan Denti",
-      "segmen": "Usulan tindakan Denti",
+      "label_tebal": "Usulan tindakan Eira",
+      "segmen": "Usulan tindakan Eira",
       "jenis": "literal",
       "sumber": [
         {
           "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
           "baris": 65,
-          "penanda": "Usulan tindakan Denti"
+          "penanda": "Usulan tindakan Eira"
         }
       ]
     },

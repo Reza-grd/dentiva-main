@@ -4,7 +4,7 @@ import { Check, X, Undo2, AlertTriangle, ArrowRight, ShieldCheck, Clock } from '
 import { aiService } from '../../services/aiService';
 
 /**
- * Kartu usulan Denti Agen. Denti hanya MENGUSULKAN; data baru berubah setelah admin menekan "Setujui".
+ * Kartu usulan Eira Agen. Eira hanya MENGUSULKAN; data baru berubah setelah admin menekan "Setujui".
  * Status kartu disimpan di pesan (parent) lewat onChange: pending | applied | rejected | undone | expired.
  * Server tetap memeriksa admin, pemilik usulan, dan batas 30 menit (EXPIRES_MS hanya untuk tampilan).
  */
@@ -62,8 +62,8 @@ export default function AgentActions({ actions, onChange, onApplied }) {
   };
 
   return (
-    <div className="ai-acts" role="group" aria-label="Usulan tindakan Denti">
-      <p className="ai-acts__lead"><ShieldCheck size={14} /> Denti menyiapkan {actions.length} usulan. Data baru berubah setelah Anda menyetujui.</p>
+    <div className="ai-acts" role="group" aria-label="Usulan tindakan Eira">
+      <p className="ai-acts__lead"><ShieldCheck size={14} /> Eira menyiapkan {actions.length} usulan. Data baru berubah setelah Anda menyetujui.</p>
       {actions.map((a) => {
         const p = a.pratinjau || {};
         const risk = RISK[p.risiko] || RISK.rendah;
@@ -109,7 +109,7 @@ export default function AgentActions({ actions, onChange, onApplied }) {
                   )}
                 </>
               )}
-              {state === 'expired' && <span className="ai-act__hint">Minta Denti membuat usulan ini lagi.</span>}
+              {state === 'expired' && <span className="ai-act__hint">Minta Eira membuat usulan ini lagi.</span>}
             </footer>
           </article>
         );

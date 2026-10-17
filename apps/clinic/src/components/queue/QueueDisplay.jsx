@@ -13,7 +13,7 @@ import './queue-display.css';
 //  nama dokter, jam, dan status — tidak ada nama lengkap/No. RM/kontak.
 //  Palet berdiri sendiri (tidak bergantung tema aplikasi) agar selalu
 //  tampil gelap & kontras di TV.
-//  Maskot Denti: tips bergilir saat senggang, menunjuk saat pasien dipanggil,
+//  Maskot Eira: tips bergilir saat senggang, menunjuk saat pasien dipanggil,
 //  berterima kasih saat pasien selesai, minta maaf bila antrean molor, tidur di
 //  luar jam praktik dan bangun saat klinik buka. Mode anak memakai penanda `kid`.
 // ─────────────────────────────────────────────
@@ -117,7 +117,7 @@ const QueueDisplay = () => {
     return () => clearTimeout(t);
   }, [ongoing]);
 
-  // ─── Denti ───
+  // ─── Eira ───
   const scene = dentiScene({ hours, now, primary: ongoing[0], waiting, tick: messageIdx });
   const denti = useDentiDirector(scene.state);
   const { play, sequence } = denti;
@@ -318,7 +318,7 @@ const QueueDisplay = () => {
             <p className="qd-announce__initials">{announce.initials}</p>
             <p className="qd-announce__doctor">Silakan menuju ruang periksa · {announce.doctor || 'Dokter'}</p>
             <DentiMascot className="qd-denti qd-denti--announce" state="point" kid={Boolean(announce.kid)} size={220}
-              title="Denti mempersilakan pasien menuju ruang periksa" />
+              title="Eira mempersilakan pasien menuju ruang periksa" />
             <span className="qd-announce__timer" style={{ animationDuration: `${ANNOUNCE_MS}ms` }} />
           </div>
         </div>

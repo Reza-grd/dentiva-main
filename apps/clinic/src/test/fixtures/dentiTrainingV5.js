@@ -1,5 +1,5 @@
 /**
- * Latihan Denti v5 (siklus 54–63): kamus istilah, gerakan baru, "lagi", fakta & kuis lanjutan,
+ * Latihan Eira v5 (siklus 54–63): kamus istilah, gerakan baru, "lagi", fakta & kuis lanjutan,
  * checklist harian, tutorial per peran, pemecahan masalah, dan jebakan agar pertanyaan data tetap ke AI.
  * Format sama dengan dentiTrainingV4.js (intents, ai, states, replies, actions).
  */
@@ -114,7 +114,7 @@ export const CYCLES_V5 = [
     states: [
       ['meregang', 'stretch'], ['pamer otot', 'flex'], ['telepon', 'phone'], ['mode detektif', 'search'], ['ngopi', 'coffee'], ['puter puter', 'dizzy'], ['pura pura marah', 'angry'], ['pura pura nangis', 'cry'],
       ['hiks', 'cry'], ['kaca pembesar', 'search'], ['minum kopi', 'coffee'], ['kepala berputar', 'dizzy'],
-      // empati: pengguna yang menangis dihibur Denti dengan ekspresi sedih berair mata, bukan pura-pura marah
+      // empati: pengguna yang menangis dihibur Eira dengan ekspresi sedih berair mata, bukan pura-pura marah
       ['aku menangis', 'cry'], ['huhu', 'cry'], ['aku marah', 'sorry'], ['aku kesal', 'sorry'],
     ],
     actions: [['semua gerakan', 'showoff', null], ['gerakan apa saja', 'showoff', null]],

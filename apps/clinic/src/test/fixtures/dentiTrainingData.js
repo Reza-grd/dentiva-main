@@ -1,18 +1,18 @@
 /**
- * Data latihan Denti, per siklus. Setiap siklus menambah kalimat yang lebih menantang; SEMUA siklus
+ * Data latihan Eira, per siklus. Setiap siklus menambah kalimat yang lebih menantang; SEMUA siklus
  * harus tetap lulus (src/test/dentiTraining.test.js). Kalimat bisa berupa string atau [teks, konteks]
  * (konteks: { lastIntent, afterAnswer }).
  *   intents : intent obrolan ringan yang diharapkan
  *   ai      : kalimat yang HARUS diteruskan ke AI (bukan obrolan ringan)
- *   moods   : [isi jawaban AI, ekspresi Denti]
+ *   moods   : [isi jawaban AI, ekspresi Eira]
  *   topics  : [pertanyaan, topik "Menganalisis …"]
- *   replies : [kalimat, potongan teks yang wajib ada di balasan Denti]
+ *   replies : [kalimat, potongan teks yang wajib ada di balasan Eira]
  */
 export const CYCLES = [
   {
     name: 'Siklus 0 · dasar',
     intents: {
-      greet: ['halo', 'Halo Denti!', 'haloooo', 'hai kak', 'hi', 'hey denti', 'selamat pagi', 'Pagi!', 'siang dok', 'Selamat malam',
+      greet: ['halo', 'Halo Eira!', 'haloooo', 'hai kak', 'hi', 'hey denti', 'selamat pagi', 'Pagi!', 'siang dok', 'Selamat malam',
         'assalamualaikum', 'Assalamu alaikum', 'permisi', 'p', 'tes', 'testing'],
       thanks: ['terima kasih', 'Terimakasih ya', 'makasih', 'makasihhh denti', 'mksh', 'trims', 'thanks!', 'thank you', 'thx', 'tq',
         'tengkyu', 'nuhun', 'matur nuwun', 'oke makasih ya', 'Terima kasih banyak 🙏'],
@@ -285,7 +285,7 @@ export const CYCLES = [
     ai: ['tidak ada tagihan?', 'kenapa tidak ada pasien hari ini', 'jangan tampilkan pengeluaran kemarin', 'tidak usah detail, berapa laba?'],
   },
   {
-    name: 'Siklus 13 · kepribadian Denti',
+    name: 'Siklus 13 · kepribadian Eira',
     intents: {
       persona: ['kamu manusia?', 'kamu robot ya?', 'umur kamu berapa', 'kamu umur berapa', 'kamu cowok atau cewek',
         'kamu laki laki atau perempuan', 'kamu tinggal di mana', 'makanan favoritmu apa', 'kamu suka makan apa', 'hobimu apa',
@@ -399,7 +399,7 @@ export const CYCLES = [
       nav: ['buka menu pengaturan', 'pergi ke laporan', 'buka layar antrean',
         'ke dashboard', 'buka pengeluaran', 'buka pengguna', 'buka biaya dan modal', 'buka keuangan',
         'buka jadwal dokter', 'buka pengaturan whatsapp', 'buka profil', 'go to settings', 'open reports'],
-      // Sejak Tahap 2 (11 Okt 2026) admin tidak mengakses data pasien/kasir/jadwal kunjungan → Denti menolak dengan alasan
+      // Sejak Tahap 2 (11 Okt 2026) admin tidak mengakses data pasien/kasir/jadwal kunjungan → Eira menolak dengan alasan
       navdeny: ['buka jadwal', 'ke halaman pasien', 'tampilkan halaman recall', 'buka halaman pembayaran', 'buka pendaftaran pasien', 'buka booking'],
     },
     actions: [
@@ -445,7 +445,7 @@ export const CYCLES = [
     ],
   },
   {
-    name: 'Siklus 25 · Denti berempati saat memproses',
+    name: 'Siklus 25 · Eira berempati saat memproses',
     lines: [
       ['kok pendapatan turun ya?', 'Tenang'], ['kenapa pasien sepi banget', 'Tenang'], ['aduh gawat stok habis', 'Tenang'],
       ['tolong cepat cek tagihan', 'secepatnya'], ['urgent: berapa kas hari ini', 'secepatnya'], ['berapa pendapatan bulan ini?', 'pendapatan'],
@@ -459,7 +459,7 @@ export const CYCLES = [
       tip: ['tips gigi', 'kasih tips kesehatan gigi', 'fakta gigi', 'cara merawat gigi', 'gimana cara menjaga gigi sehat', 'tips sikat gigi',
         'fakta unik tentang gigi', 'tips senyum sehat', 'tips merawat gusi'],
     },
-    replies: [['fakta gigi', 'Fakta gigi'], ['tips gigi', 'Tips dari Denti']],
+    replies: [['fakta gigi', 'Fakta gigi'], ['tips gigi', 'Tips dari Eira']],
     ai: ['berapa pasien scaling bulan ini', 'tindakan gigi paling laris', 'harga gigi palsu berapa', 'tips gigi untuk pasien diabetes',
       'tips meningkatkan pendapatan klinik'],
   },
@@ -592,7 +592,7 @@ export const CYCLES = [
     ],
   },
   {
-    name: 'Siklus 37 · gelembung Denti menyebut angka penting',
+    name: 'Siklus 37 · gelembung Eira menyebut angka penting',
     moodLines: [
       ['Pendapatan bulan ini **Rp 12.400.000** — naik 8,2% dari bulan lalu.', '8,2%'], ['Kunjungan turun 12% minggu ini.', '12%'],
       ['Ada 3 bahan kadaluarsa minggu depan.', '3 bahan'], ['Semua tagihan sudah lunas.', 'lunas'], ['Laba bersih minus Rp 1.200.000.', 'minus'],
@@ -605,7 +605,7 @@ export const CYCLES = [
       'naik berapa persen pendapatan dari bulan lalu', 'margin rata-rata tindakan klinik', 'harga 350rb itu kemahalan?', 'modal klinik berapa',
       'bep kalau harga naik 10%', 'cicilan alat ke supplier berapa sisa', 'terbilang total pendapatan', 'mode pembayaran pasien', 'ganti tema laporan',
       'bacakan rekam medis pasien', 'selisih pendapatan bulan ini dan bulan lalu', 'berapa hari pasien terakhir tidak datang',
-      'dari 10 pasien berapa persen yang kembali', 'denti, berapa pendapatan bulan ini? 😊', 'DENTI, TAMPILKAN STOK',
+      'dari 10 pasien berapa persen yang kembali', 'denti, berapa pendapatan bulan ini? 😊', 'EIRA, TAMPILKAN STOK',
       'harga scaling 350rb modalnya berapa?', 'jual alat 2 juta', 'harga scaling naik 10% untungnya berapa',
     ],
   },

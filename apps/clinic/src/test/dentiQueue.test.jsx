@@ -12,7 +12,7 @@ import QueueDisplay from '../components/queue/QueueDisplay';
 const at = (h, m = 0) => new Date(2026, 9, 10, h, m);
 const HOURS = { open: '08:00', close: '17:00' };
 
-describe('Denti di layar antrean — aturan keadaan', () => {
+describe('Eira di layar antrean — aturan keadaan', () => {
   it('jam praktik: buka 30 mnt lebih awal, tutup 30 mnt sesudahnya; tanpa jadwal tutup 22–06', () => {
     expect(isClosed(HOURS, at(7, 29))).toBe(true);
     expect(isClosed(HOURS, at(7, 30))).toBe(false);
@@ -44,7 +44,7 @@ describe('Denti di layar antrean — aturan keadaan', () => {
   });
 });
 
-describe('Denti di layar antrean — tampilan', () => {
+describe('Eira di layar antrean — tampilan', () => {
   beforeEach(() => rpc.mockReset());
   const mount = () => render(
     <MemoryRouter initialEntries={['/antrean/tok']}>
@@ -52,7 +52,7 @@ describe('Denti di layar antrean — tampilan', () => {
     </MemoryRouter>,
   );
 
-  it('antrean kosong: Denti tampil besar di panggung', async () => {
+  it('antrean kosong: Eira tampil besar di panggung', async () => {
     rpc.mockResolvedValue({ data: { ok: true, clinic_name: 'Klinik Senyum', hours: { open: '00:00', close: '23:59' }, visits: [] }, error: null });
     mount();
     expect(await screen.findByText('Belum ada pasien yang dipanggil')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('Denti di layar antrean — tampilan', () => {
     expect(document.querySelector('.qd-denti--host')).toBeNull();
   });
 
-  it('ada pasien anak diperiksa: Denti jadi pembawa acara di bar bawah dengan mode anak', async () => {
+  it('ada pasien anak diperiksa: Eira jadi pembawa acara di bar bawah dengan mode anak', async () => {
     rpc.mockResolvedValue({ data: { ok: true, clinic_name: 'Klinik Senyum', hours: null, visits: [
       { no: 1, initials: 'A.', doctor: 'drg. Ani', time: null, status: 'ongoing', kid: true },
     ] }, error: null });

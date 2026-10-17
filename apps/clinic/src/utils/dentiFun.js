@@ -1,5 +1,5 @@
 /**
- * Denti yang hidup: perintah gerakan ("kedip", "lompat", "hormat"), pamer gerakan, kuis gigi interaktif,
+ * Eira yang hidup: perintah gerakan ("kedip", "lompat", "hormat"), pamer gerakan, kuis gigi interaktif,
  * dan reaksi emosi tambahan. Fungsi murni — diuji di dentiTraining.test.js. Masukan sudah dinormalkan.
  */
 
@@ -12,7 +12,7 @@ const fresh = (list, seed, recent = []) => {
   return pickOf(list, seed);
 };
 
-/** [id, ekspresi, pola, balasan[]] — "perintah gerak": Denti memperagakan lalu menjawab singkat. */
+/** [id, ekspresi, pola, balasan[]] — "perintah gerak": Eira memperagakan lalu menjawab singkat. */
 export const MOVES = [
   ['wink', 'wink', /^(kedip|kedipin|kedipkan|kedip mata|kedip dong|wink|coba kedip|kedipin dong|genit)( mata)?( dong)?$/,
     ['😉 Cring! Sudah, ya.', 'Kedip~ 😉 Kena deh!', 'Wink wink! 😉✨']],
@@ -49,7 +49,7 @@ export const MOVES = [
   ['flex', 'flex', /^(pamer otot|otot|flex|tunjukkan otot|tunjukin otot|kuat|kekuatan|tunjukkan kekuatan|kamu kuat|pamer kekuatan|bodybuilder|mode kuat|mode otot)( dong)?$/,
     ['Otot digital! 💪 Kuat kan? Setara 0,0 kg angkatan.', 'Hup! 💪✨ Siap angkat laporan sebulan penuh.', 'Lihat bisep saya! 😤💪 (Baterai penuh.)']],
   ['phone', 'phone', /^(telepon|telpon|nelpon|menelepon|angkat telepon|angkat telpon|telepon dong|pura pura telepon|phone|call me|terima telepon)( dong)?$/,
-    ['Halo, halo? 📞 Dengan Denti di sini!', 'Sebentar ya, ada telepon masuk… 📱 Ya, baik, siap!', 'Tut tut… 📞 Klinik Dentiva, ada yang bisa dibantu?']],
+    ['Halo, halo? 📞 Dengan Eira di sini!', 'Sebentar ya, ada telepon masuk… 📱 Ya, baik, siap!', 'Tut tut… 📞 Klinik Dentiva, ada yang bisa dibantu?']],
   ['search', 'search', /^(cari cari|mencari|pura pura mencari|detektif|mode detektif|main detektif|kaca pembesar|pakai kaca pembesar|selidiki|menyelidik|investigasi|cek cek)( dong)?$/,
     ['Mode detektif! 🔎 Mencari petunjuk…', 'Hmm, ada yang mencurigakan. 🕵️ Atau cuma debu?', 'Kaca pembesar siap! 🔍 Apa yang kita cari?']],
   ['coffee', 'coffee', /^(ngopi|minum kopi|kopi|kopi dulu|ngopi dulu|ayo ngopi|secangkir kopi|coffee break|ngopi santai|bikin kopi|seruput)( dulu)?( dong)?$/,
@@ -241,7 +241,7 @@ export function funReply(t0, { seed = 0, recent = [], quiz = null, name = '', la
   if (ch && !CHOOSE_DATA.test(`${ch[1]} ${ch[2]}`)) {
     const options = [ch[1].trim(), ch[2].trim()];
     const pick = options[Math.abs(seed) % 2];
-    return { intent: 'choose', state: 'idea', reply: `🤔 Hmm… saya pilih **${pick}**! ${pickOf(['Keputusan final. 😎', 'Feeling saya bilang begitu. ✨', 'Kalau ragu, ikuti kata Denti! 😄'], seed)}` };
+    return { intent: 'choose', state: 'idea', reply: `🤔 Hmm… saya pilih **${pick}**! ${pickOf(['Keputusan final. 😎', 'Feeling saya bilang begitu. ✨', 'Kalau ragu, ikuti kata Eira! 😄'], seed)}` };
   }
   if (RPS_START.test(t)) {
     return { intent: 'rps', state: 'excited', reply: '✊✌️✋ **Suit!** Pilih: *batu*, *gunting*, atau *kertas* — saya sudah siap!' };

@@ -7,10 +7,10 @@ import { resolve } from 'node:path';
 import DentiMascot, { useDentiDirector, DENTI_DURATIONS } from '../components/mascot/DentiMascot';
 import { DENTI_STATES } from '../components/mascot/dentiSvg';
 
-describe('Maskot Denti', () => {
+describe('Maskot Eira', () => {
   it('merender rig lengkap dengan state & mode anak', () => {
     const { container } = render(<DentiMascot state="call" kid size={200} />);
-    const svg = screen.getByRole('img', { name: /Denti/ });
+    const svg = screen.getByRole('img', { name: /Eira/ });
     expect(svg).toHaveAttribute('data-state', 'call');
     expect(svg).toHaveAttribute('data-kid', 'true');
     for (const part of ['.d-root', '.d-head', '.d-arm-l', '.d-arm-r', '.d-eye-open', '.d-eye-happy', '.d-eye-wow', '.d-waves', '.d-chest', '.d-bubble', '.d-brackets', '.d-orbit', '.d-fin-l', '.d-ear-r']) {
@@ -31,7 +31,7 @@ describe('Maskot Denti', () => {
       expect(DENTI_STATES).toContain(s);
     }
     const { container } = render(<DentiMascot state="brush" />);
-    expect(screen.getByRole('img', { name: /Denti/ })).toHaveAttribute('data-state', 'brush');
+    expect(screen.getByRole('img', { name: /Eira/ })).toHaveAttribute('data-state', 'brush');
     for (const part of ['.d-brush', '.d-foam', '.d-tooth', '.d-eye-heart', '.d-lids', '.d-mouth-sad', '.d-scan', '.d-notes', '.d-exclaim', '.d-haha', '.d-sweat', '.d-arrows', '.d-chest-heart']) {
       expect(container.querySelector(part)).not.toBeNull();
     }
@@ -93,7 +93,7 @@ describe('Maskot Denti', () => {
   });
 });
 
-describe('Maskot Denti — kelengkapan state', () => {
+describe('Maskot Eira — kelengkapan state', () => {
   const css = readFileSync(resolve(__dirname, '../components/mascot/denti.css'), 'utf8');
 
   it('setiap state punya aturan CSS (kecuali idle sebagai dasar)', () => {
@@ -109,7 +109,7 @@ describe('Maskot Denti — kelengkapan state', () => {
   });
 });
 
-describe('Maskot Denti — sistem LOD & render HD (A1)', () => {
+describe('Maskot Eira — sistem LOD & render HD (A1)', () => {
   it('memilih LOD otomatis berdasarkan size (<=72 mini, <=160 standar, >160 hero) dan menghormati prop lod eksplisit', () => {
     const { container, rerender } = render(<DentiMascot size={58} />);
     const svg = container.querySelector('svg.denti');
@@ -165,7 +165,7 @@ describe('Maskot Denti — sistem LOD & render HD (A1)', () => {
   });
 });
 
-describe('Maskot Denti — polesan A1b (orbit, pegas lompat, glow hero, kontras tepi mini)', () => {
+describe('Maskot Eira — polesan A1b (orbit, pegas lompat, glow hero, kontras tepi mini)', () => {
   const css = readFileSync(resolve(__dirname, '../components/mascot/denti.css'), 'utf8');
 
   it('(1) partikel orbit mengitari lintasan menggunakan CSS offset-path tanpa SMIL <animateMotion>', () => {

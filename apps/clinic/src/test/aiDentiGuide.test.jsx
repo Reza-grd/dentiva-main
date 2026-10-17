@@ -1,4 +1,4 @@
-/** Denti di halaman Asisten AI: membuka tab/halaman yang diminta, tawaran "ya", kuis, dan tautan tab Pengaturan. */
+/** Eira di halaman Asisten AI: membuka tab/halaman yang diminta, tawaran "ya", kuis, dan tautan tab Pengaturan. */
 import React from 'react';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -44,7 +44,7 @@ beforeEach(() => {
   ai.listKnowledge.mockResolvedValue({ success: true, data: [] });
 });
 
-describe('Denti membuka halaman yang diminta', () => {
+describe('Eira membuka halaman yang diminta', () => {
   it('"Buka jadwal dokter" langsung pindah halaman tanpa memanggil AI', async () => {
     wrap();
     await say('Buka jadwal dokter');
@@ -79,7 +79,7 @@ describe('Denti membuka halaman yang diminta', () => {
   });
 });
 
-describe('Denti sebagai kamus & pemandu harian', () => {
+describe('Eira sebagai kamus & pemandu harian', () => {
   it('"apa itu HPP" dijawab lokal, lalu "ya" membuka Biaya & Modal', async () => {
     wrap();
     await say('apa itu HPP?');
@@ -112,7 +112,7 @@ describe('Denti sebagai kamus & pemandu harian', () => {
   });
 });
 
-describe('Denti seru diajak ngobrol', () => {
+describe('Eira seru diajak ngobrol', () => {
   it('kuis gigi: mulai → menyerah → jawaban terungkap', async () => {
     wrap();
     await say('kuis');
@@ -141,14 +141,14 @@ describe('Konsistensi pemandu dengan aplikasi', () => {
   // `to` bisa berupa teks atau peta per peran
   const targets = () => PAGES.flatMap((p) => (typeof p.to === 'string' ? [p.to] : Object.values(p.to || {})));
 
-  it('setiap tautan ?tab= milik Denti ada di Pengaturan', () => {
+  it('setiap tautan ?tab= milik Eira ada di Pengaturan', () => {
     const settings = src('../components/settings/SettingsPage.jsx');
     const tabs = [...new Set(targets().map((to) => /[?&]tab=([\w-]+)/.exec(to)?.[1]).filter(Boolean))];
     expect(tabs.length).toBeGreaterThan(5);
     for (const t of tabs) expect(settings).toContain(`id: '${t}'`);
   });
 
-  it('setiap rute tujuan Denti terdaftar di App.jsx', () => {
+  it('setiap rute tujuan Eira terdaftar di App.jsx', () => {
     const app = src('../App.jsx');
     const routes = [...new Set(targets().map((to) => to.split('?')[0]))];
     const missing = routes.filter((r) => !app.includes(`path="${r}"`) && !app.includes(`path="${r.replace(/^\//, '')}"`) && !app.includes(`'${r}'`));

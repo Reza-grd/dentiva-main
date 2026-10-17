@@ -107,14 +107,14 @@ export const aiService = {
   },
 
   /**
-   * Denti Agen — keputusan admin atas usulan (tanpa model AI & tanpa kuota; database memeriksa admin, pemilik, kedaluwarsa).
+   * Eira Agen — keputusan admin atas usulan (tanpa model AI & tanpa kuota; database memeriksa admin, pemilik, kedaluwarsa).
    * applyActions: satu paket (atomik) → { ok, dijalankan, tindakan: [{ id, judul, hasil, bisa_batal }] }.
    */
   async applyActions(ids) { return callAgent({ mode: 'agent_apply', ids }); },
   async rejectActions(ids) { return callAgent({ mode: 'agent_reject', ids }); },
   async undoAction(id) { return callAgent({ mode: 'agent_undo', id }); },
 
-  /** Riwayat usulan/tindakan Denti Agen klinik ini (admin). */
+  /** Riwayat usulan/tindakan Eira Agen klinik ini (admin). */
   async listActions(limit = 30) {
     const { data, error } = await supabase.from('ai_actions')
       .select('id, kind, preview, status, created_at, decided_at, undoable')

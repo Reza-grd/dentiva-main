@@ -1,5 +1,5 @@
 /**
- * Uji fungsi database Denti Agen terhadap skema produksi ASLI (PGlite, tanpa Docker).
+ * Uji fungsi database Eira Agen terhadap skema produksi ASLI (PGlite, tanpa Docker).
  *   npm run db:agent
  * Mencakup: usulan → persetujuan → pembatalan untuk semua jenis tindakan, validasi, peringatan duplikat,
  * keamanan antar-klinik & peran, kedaluwarsa usulan, persetujuan massal yang atomik, dan alat baca.

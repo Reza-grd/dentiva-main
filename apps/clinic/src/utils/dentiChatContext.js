@@ -1,5 +1,5 @@
 /**
- * Konteks percakapan untuk otak lokal Denti (smallTalk), diturunkan dari daftar pesan:
+ * Konteks percakapan untuk otak lokal Eira (smallTalk), diturunkan dari daftar pesan:
  *   offer      — tawaran "Buka …" dari balasan terakhir (dijawab "ya"/"tidak")
  *   quiz       — nomor soal kuis yang sedang berjalan (atau null)
  *   lastIntent — maksud balasan lokal terakhir (untuk "lagi")

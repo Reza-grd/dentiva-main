@@ -1,15 +1,15 @@
 // ─────────────────────────────────────────────
-//  Kalimat Denti — banyak variasi agar percakapan tidak monoton.
+//  Kalimat Eira — banyak variasi agar percakapan tidak monoton.
 //  Dipilih lewat pickFresh() di dentiMood.js (tidak mengulang balasan yang baru dipakai).
 // ─────────────────────────────────────────────
 
 export const greet = (g, s) => [
-  `${g}${s}! Saya Denti. Mau cek apa hari ini — pendapatan, jadwal dokter, atau stok bahan?`,
+  `${g}${s}! Saya Eira. Mau cek apa hari ini — pendapatan, jadwal dokter, atau stok bahan?`,
   `${g}${s}! Ada yang bisa saya bantu?`,
   `${g}${s}! 👋 Senang ketemu lagi. Mau mulai dari mana?`,
   `${g}${s}! Siap membantu — tanya apa saja tentang klinik.`,
   `${g}${s}! ☀️ Semoga harinya lancar. Ada yang ingin dicek?`,
-  `${g}${s}! Denti di sini. Mau saya ringkas kondisi klinik hari ini?`,
+  `${g}${s}! Eira di sini. Mau saya ringkas kondisi klinik hari ini?`,
   `${g}${s}! 🦷 Hari yang bagus untuk senyum sehat. Ada yang bisa dibantu?`,
   `${g}${s}! 😊 Ketik pertanyaan apa saja, saya bantu cari jawabannya.`,
 ];
@@ -26,8 +26,8 @@ export const thanks = (s, wish) => (wish
 export const praise = [
   'Aduh, jadi malu… Terima kasih! ☺️', 'Ah, bisa saja. Terima kasih, saya jadi makin semangat belajar! ☺️',
   'Hehe, terima kasih! Semua berkat data klinik Anda yang rapi. ☺️', 'Wah, terima kasih! Pujian Anda bikin baterai saya penuh lagi. 🔋',
-  'Hehe, Denti jadi semangat! 💪 Terima kasih.', 'Terima kasih! Saya terus belajar supaya makin berguna untuk klinik. 📚',
-  'Hehe, Denti jadi ingin berjoget saking senangnya! 💃',
+  'Hehe, Eira jadi semangat! 💪 Terima kasih.', 'Terima kasih! Saya terus belajar supaya makin berguna untuk klinik. 📚',
+  'Hehe, Eira jadi ingin berjoget saking senangnya! 💃',
   'Aww, Anda juga hebat sudah mengelola klinik dengan rapi! 👏',
 ];
 
@@ -39,7 +39,7 @@ export const tired = [
   'Semangat! Anda sudah bekerja keras hari ini. 💪 Ada yang bisa saya ringankan?',
   'Jangan lupa makan, ya. 🍱 Klinik yang hebat butuh tim yang sehat.',
   'Sedikit lagi! 💙 Kalau mau, saya daftarkan hal yang bisa ditunda sampai besok.',
-  'Peluk virtual dari Denti! 🤗 Mau saya cek yang paling mendesak saja?',
+  'Peluk virtual dari Eira! 🤗 Mau saya cek yang paling mendesak saja?',
 ];
 
 export const ack = [
@@ -64,7 +64,7 @@ export const complaint = (afterAnswer) => (afterAnswer
     'Terima kasih masukannya. 🙏 Saya catat dan akan berusaha lebih baik.',
     'Hmm, maaf kalau mengecewakan. 🙏 Coba sebutkan apa yang ingin Anda ketahui.',
     'Siap diperbaiki! 💪 Ceritakan bagian mana yang kurang tepat.',
-    'Maaf ya, Denti masih belajar. 🙏 Boleh diulang dengan kata lain?',
+    'Maaf ya, Eira masih belajar. 🙏 Boleh diulang dengan kata lain?',
     'Waduh, maaf. 🙏 Coba tanyakan dengan kalimat lain — saya berusaha lebih tepat.',
   ]);
 
@@ -80,27 +80,27 @@ export const apologize = (s) => [
 ];
 
 export const bye = (s) => [
-  `Sampai jumpa${s}! Semoga klinik lancar hari ini. 👋`, `Sampai nanti${s}! 👋`, `Dadah${s}! Denti tunggu pertanyaan berikutnya. 😊`,
+  `Sampai jumpa${s}! Semoga klinik lancar hari ini. 👋`, `Sampai nanti${s}! 👋`, `Dadah${s}! Eira tunggu pertanyaan berikutnya. 😊`,
   `Terima kasih sudah mampir${s}! 👋`, `Sampai jumpa — jaga senyum tetap sehat${s}! 🦷`,
-  `Hati-hati di jalan${s}! 👋`, `Sampai ketemu lagi${s} — semoga harinya menyenangkan! ✨`, `Oke${s}, Denti istirahat dulu. Panggil kapan saja! 😴`,
+  `Hati-hati di jalan${s}! 👋`, `Sampai ketemu lagi${s} — semoga harinya menyenangkan! ✨`, `Oke${s}, Eira istirahat dulu. Panggil kapan saja! 😴`,
 ];
 
 export const how = (s) => [
   `Kabar baik, siap membantu${s}! 😊 Ada yang ingin dicek hari ini?`, `Baik sekali${s}! Baterai penuh dan data siap dibaca. 🔋`,
-  `Sehat dan semangat${s}! 💪 Bagaimana dengan Anda?`, `Kabar Denti baik! Terima kasih sudah bertanya${s}. 😊`,
+  `Sehat dan semangat${s}! 💪 Bagaimana dengan Anda?`, `Kabar Eira baik! Terima kasih sudah bertanya${s}. 😊`,
   `Prima${s}! Semua sistem normal. 🟢`, `Baik, terima kasih! Semoga kabar Anda juga baik${s}. 😊`,
   `Luar biasa baik${s} — apalagi kalau bisa membantu. ✨`, 'Baik! Visor bersih, sirip siap goyang. 😄 Ada yang bisa dibantu?',
 ];
 
 export const who = [
-  'Saya **Denti** 🦷, asisten AI Dentiva. Saya membaca angka ringkasan klinik — pendapatan, jadwal, stok, recall — lalu menjelaskannya dengan bahasa sehari-hari. Data identitas dan rekam medis pasien tidak pernah saya lihat.',
-  'Kenalkan, saya **Denti** 🦷 — maskot sekaligus asisten AI Dentiva. Tugas saya membantu Anda memahami angka klinik dengan cepat.',
-  'Saya **Denti**, robot asisten klinik gigi Anda! 🤖🦷 Bisa menjawab soal pendapatan, jadwal, stok, sampai menghitung diskon.',
-  'Nama saya **Denti** 😊 — asisten AI di Dentiva. Saya hanya membaca angka ringkasan, bukan data pribadi pasien.',
-  'Saya **Denti** — si robot biru di aplikasi Dentiva. 🤖 Spesialis angka klinik dan penyemangat tim!',
-  'Panggil saja **Denti**. 🦷 Saya asisten AI yang membantu admin klinik membaca data dengan cepat — tanpa melihat data pribadi pasien.',
-  'Saya **Denti**, asisten AI Dentiva. Anggap saja saya rekan kerja yang selalu siap 24 jam. 🕐',
-  'Halo, saya **Denti**! 🦷 Teman kerja digital Anda untuk urusan keuangan, jadwal, dan operasional klinik.',
+  'Saya **Eira** 🦷, asisten AI Dentiva. Saya membaca angka ringkasan klinik — pendapatan, jadwal, stok, recall — lalu menjelaskannya dengan bahasa sehari-hari. Data identitas dan rekam medis pasien tidak pernah saya lihat.',
+  'Kenalkan, saya **Eira** 🦷 — maskot sekaligus asisten AI Dentiva. Tugas saya membantu Anda memahami angka klinik dengan cepat.',
+  'Saya **Eira**, robot asisten klinik gigi Anda! 🤖🦷 Bisa menjawab soal pendapatan, jadwal, stok, sampai menghitung diskon.',
+  'Nama saya **Eira** 😊 — asisten AI di Dentiva. Saya hanya membaca angka ringkasan, bukan data pribadi pasien.',
+  'Saya **Eira** — si robot biru di aplikasi Dentiva. 🤖 Spesialis angka klinik dan penyemangat tim!',
+  'Panggil saja **Eira**. 🦷 Saya asisten AI yang membantu admin klinik membaca data dengan cepat — tanpa melihat data pribadi pasien.',
+  'Saya **Eira**, asisten AI Dentiva. Anggap saja saya rekan kerja yang selalu siap 24 jam. 🕐',
+  'Halo, saya **Eira**! 🦷 Teman kerja digital Anda untuk urusan keuangan, jadwal, dan operasional klinik.',
 ];
 
 export const maker = [
@@ -114,17 +114,17 @@ export const maker = [
   'Pembuat saya tim **Dentiva**. Mereka juga yang memastikan data pasien tetap aman. 🔒',
 ];
 
-export const laugh = ['Hehe 😄', 'Hihi, senang Anda terhibur! 😄', 'Wkwk, Denti ikut ketawa! 🤭', 'Haha! Senyum itu bagus untuk kesehatan gigi juga, lho. 😁', 'Hehe, tawa Anda menular! 😆', 'Haha, senang lihat Anda senyum! 😄', 'Wkwkwk, Denti sampai berkedip-kedip. 🤣', 'Hihi, tertawa bikin otot wajah olahraga! 😆'];
-export const dance = ['Siap! Sedikit gerakan biar semangat kerja hari ini. 🎵', 'Musik, mulai! 🎶', 'Goyang dulu biar segar! 💃', 'Satu, dua, tiga — joget! 🕺', 'Denti tampil spesial untuk Anda! 🎶✨', 'Kiri, kanan, putar! 🕺', 'Joget dulu, kerja lagi! 🎵', 'Lantai dansa dibuka! 🪩'];
+export const laugh = ['Hehe 😄', 'Hihi, senang Anda terhibur! 😄', 'Wkwk, Eira ikut ketawa! 🤭', 'Haha! Senyum itu bagus untuk kesehatan gigi juga, lho. 😁', 'Hehe, tawa Anda menular! 😆', 'Haha, senang lihat Anda senyum! 😄', 'Wkwkwk, Eira sampai berkedip-kedip. 🤣', 'Hihi, tertawa bikin otot wajah olahraga! 😆'];
+export const dance = ['Siap! Sedikit gerakan biar semangat kerja hari ini. 🎵', 'Musik, mulai! 🎶', 'Goyang dulu biar segar! 💃', 'Satu, dua, tiga — joget! 🕺', 'Eira tampil spesial untuk Anda! 🎶✨', 'Kiri, kanan, putar! 🕺', 'Joget dulu, kerja lagi! 🎵', 'Lantai dansa dibuka! 🪩'];
 export const cheer = ['Semangat juga! 🎉', 'Hore! 🎉 Ikut senang!', 'Yeay! 🙌 Semangat terus!', 'Mantap, semangat! 💪', 'Ikut senang mendengarnya! 🎊', 'Gas terus! 🚀', 'Semangat 45! 🇮🇩', 'Yuk, kita bikin hari ini luar biasa! ✨'];
 export const relief = ['Syukurlah! 💪 Semoga tetap segar sampai jam praktik selesai.', 'Syukurlah, ikut senang! 💪', 'Mantap, tetap bugar! 🌟', 'Syukurlah — energi penuh berarti siap produktif! ⚡', 'Hebat, masih segar! 😄', 'Syukurlah! Tetap jaga minum air, ya. 💧', 'Keren, staminanya juara! 🏆'];
-export const amazed = ['Hehe, keren kan? 😄', 'Wah juga! 😄 Ada yang bisa saya bantu?', 'Wow juga! ✨', 'Hehe, kaget ya? 😆', 'Seru, kan? 😄 Mau coba tanya yang lain?', 'Hehe, saya juga kaget! 😮', 'Wah, ada apa nih? 👀', 'Wow! Denti jadi penasaran. ✨'];
-export const decline = ['Oke, tidak masalah! 😊', 'Oke, siap. Kalau butuh sesuatu, panggil saja. 😊', 'Siap, tidak jadi. 👍', 'Baik, Denti standby saja. 🫡', 'Oke! Saya di sini kalau dibutuhkan. 😊', 'Baik, tidak jadi. 🙂', 'Siap, saya tunggu instruksi berikutnya. 🫡', 'Oke, santai saja. 😊'];
-export const love = ['Aww, terima kasih! 💙', 'Denti juga senang bekerja bersama Anda! 💙', 'Hehe, jadi tersipu. 💙', 'Terima kasih! Denti sayang tim klinik ini juga. 🦷💙', 'Aww, hati Denti jadi hangat! 💖', 'Denti juga sayang semua tim klinik! 🤗', 'Uwu, terima kasih! 💙', 'Hehe, visor Denti jadi merah muda. 💗'];
+export const amazed = ['Hehe, keren kan? 😄', 'Wah juga! 😄 Ada yang bisa saya bantu?', 'Wow juga! ✨', 'Hehe, kaget ya? 😆', 'Seru, kan? 😄 Mau coba tanya yang lain?', 'Hehe, saya juga kaget! 😮', 'Wah, ada apa nih? 👀', 'Wow! Eira jadi penasaran. ✨'];
+export const decline = ['Oke, tidak masalah! 😊', 'Oke, siap. Kalau butuh sesuatu, panggil saja. 😊', 'Siap, tidak jadi. 👍', 'Baik, Eira standby saja. 🫡', 'Oke! Saya di sini kalau dibutuhkan. 😊', 'Baik, tidak jadi. 🙂', 'Siap, saya tunggu instruksi berikutnya. 🫡', 'Oke, santai saja. 😊'];
+export const love = ['Aww, terima kasih! 💙', 'Eira juga senang bekerja bersama Anda! 💙', 'Hehe, jadi tersipu. 💙', 'Terima kasih! Eira sayang tim klinik ini juga. 🦷💙', 'Aww, hati Eira jadi hangat! 💖', 'Eira juga sayang semua tim klinik! 🤗', 'Uwu, terima kasih! 💙', 'Hehe, visor Eira jadi merah muda. 💗'];
 export const wake = (s) => [
   `Saya sudah bangun${s}! ☀️ Ada yang bisa saya bantu?`, `Hoaam… sudah bangun! ☀️ Siap membantu${s}.`, 'Hah? Saya bangun! ☀️ Ada yang bisa dibantu?',
-  'Sudah bangun, sudah segar! ☀️', 'Saya di sini! 🙋 Ada yang bisa saya bantu?', 'Hadir! 🫡 Denti siap bertugas.',
-  'Denti sudah siaga! 🫡', 'Siap, mata sudah terbuka lebar! 👀 Ada apa?',
+  'Sudah bangun, sudah segar! ☀️', 'Saya di sini! 🙋 Ada yang bisa saya bantu?', 'Hadir! 🫡 Eira siap bertugas.',
+  'Eira sudah siaga! 🫡', 'Siap, mata sudah terbuka lebar! 👀 Ada apa?',
 ];
 
 export const confused = (afterAnswer) => (afterAnswer
@@ -160,8 +160,8 @@ export const date = (D) => [
 `Hari ini jatuh pada **${D}**. 📅`,
 ];
 
-export const HELP_INTROS = ['Ini yang bisa saya bantu:', 'Banyak, lho! Contohnya:', 'Siap! Kemampuan saya antara lain:', 'Berikut yang bisa Denti lakukan:',
-  'Dengan senang hati! Ini daftarnya:', 'Saya bisa bantu banyak hal, misalnya:', 'Ini keahlian Denti:', 'Coba yang mana dulu? Pilihannya:'];
+export const HELP_INTROS = ['Ini yang bisa saya bantu:', 'Banyak, lho! Contohnya:', 'Siap! Kemampuan saya antara lain:', 'Berikut yang bisa Eira lakukan:',
+  'Dengan senang hati! Ini daftarnya:', 'Saya bisa bantu banyak hal, misalnya:', 'Ini keahlian Eira:', 'Coba yang mana dulu? Pilihannya:'];
 export const HELP_BODY = [
   '- **Keuangan** — pendapatan, pengeluaran, laba, tagihan yang belum dibayar',
   '- **Perencanaan** — simulasi harga, titik impas (BEP), proyeksi arus kas',

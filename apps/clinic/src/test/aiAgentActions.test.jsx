@@ -1,4 +1,4 @@
-/** Denti Agen: kartu usulan di halaman Asisten AI — setujui, tolak, setujui semua, batalkan, galat, kedaluwarsa. */
+/** Eira Agen: kartu usulan di halaman Asisten AI — setujui, tolak, setujui semua, batalkan, galat, kedaluwarsa. */
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
@@ -109,7 +109,7 @@ describe('AgentActions (komponen)', () => {
   });
 });
 
-describe('Halaman Asisten AI menampilkan usulan dari jawaban Denti', () => {
+describe('Halaman Asisten AI menampilkan usulan dari jawaban Eira', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Element.prototype.scrollIntoView = vi.fn();

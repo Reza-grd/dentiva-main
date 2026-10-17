@@ -77,7 +77,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
     navigate('/admin/asisten-ai', { state: { ask: q } });
   };
 
-  // Ekspresi Denti mengikuti isi catatan; dicolek → reaksi lucu
+  // Ekspresi Eira mengikuti isi catatan; dicolek → reaksi lucu
   const dentiBase = refreshing || state.phase === 'loading' ? 'scan'
     : state.phase === 'ready' ? moodForBrief(state.brief)
       : state.phase === 'error' ? 'sorry' : 'wave';
@@ -99,12 +99,12 @@ export default function AiBriefCard({ variant = 'admin' }) {
       <div className="relative z-10 space-y-5">
         <header className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-          <button type="button" onClick={poke} className="ai-brief__denti" aria-label="Colek Denti" title="Colek Denti">
-            <DentiMascot state={denti.state} size={68} title="Denti, asisten AI Dentiva" />
+          <button type="button" onClick={poke} className="ai-brief__denti" aria-label="Colek Eira" title="Colek Eira">
+            <DentiMascot state={denti.state} size={68} title="Eira, asisten AI Dentiva" />
           </button>
           <div className="space-y-1.5 min-w-0">
             <p className="ai-brief__eyebrow flex items-center gap-2">
-              <Sparkles size={13} /> Denti · Asisten AI · {isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini'}
+              <Sparkles size={13} /> Eira · Asisten AI · {isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini'}
             </p>
             <h2 id="ai-brief-title" className="ai-brief__greeting">{greeting}</h2>
           </div>

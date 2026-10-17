@@ -1,4 +1,4 @@
-/* Denti pendamping Asisten AI — mengikuti warna aksen klinik, terang & gelap. */
+/* Eira pendamping Asisten AI — mengikuti warna aksen klinik, terang & gelap. */
 .denti-companion { display: flex; align-items: center; gap: 0.9rem; min-width: 0; }
 .denti-companion__avatar {
   flex: none; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 1.25rem;

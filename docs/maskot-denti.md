@@ -1,5 +1,8 @@
 # Denti — maskot AI Dentiva (konsep visual V3 + kerangka animasi)
 
+> **Nama baru (17 Okt 2026): maskot & asisten AI bernama _Eira_** (sebelumnya Denti). Semua teks yang terlihat pengguna sudah memakai "Eira"; nama internal kode (`DentiMascot`, `dentiSvg`, kelas `d-*`, `denti.css`) sengaja tidak diubah. Warna kembali ke **biru** (material teal A1c dibatalkan atas keputusan pemilik).
+
+
 Bentuk V3: kepala lebar membulat dengan **visor hitam besar** dan aksen sudut biru; **headphone** di kedua
 sisi (muka biru, cincin emas) dengan **antena sisi** berupa sirip cahaya lembut — **tanpa antena atas**;
 tubuh telur porselen dengan panel biru bawah dan **lampu dada** biru bercincin emas; **lengan terpisah**

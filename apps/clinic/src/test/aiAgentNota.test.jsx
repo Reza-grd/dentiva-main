@@ -1,4 +1,4 @@
-/** Denti Agen: alur pindai nota → pesan ke Denti (periksa duplikat, catat pengeluaran + stok masuk). */
+/** Eira Agen: alur pindai nota → pesan ke Eira (periksa duplikat, catat pengeluaran + stok masuk). */
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -66,7 +66,7 @@ describe('Halaman Asisten AI: tombol pindai nota', () => {
     fireEvent.change(input, { target: { files: [new File(['x'], 'nota.jpg', { type: 'image/jpeg' })] } });
   };
 
-  it('foto nota dipindai lalu dikirim sebagai pertanyaan ke Denti Agen', async () => {
+  it('foto nota dipindai lalu dikirim sebagai pertanyaan ke Eira Agen', async () => {
     ai.scanReceipt.mockResolvedValue({ success: true, data: { draft: DRAFT, status } });
     ai.ask.mockResolvedValue({ success: true, data: { answer: 'Saya baca **2 baris** dari nota CV Medika Jaya.', tools: ['cari_pengeluaran'], usage_id: 'u', actions: [], status } });
     wrap();
@@ -79,7 +79,7 @@ describe('Halaman Asisten AI: tombol pindai nota', () => {
     expect(await screen.findByText(/Saya baca/)).toBeInTheDocument();
   });
 
-  it('foto yang bukan nota tidak dikirim ke Denti', async () => {
+  it('foto yang bukan nota tidak dikirim ke Eira', async () => {
     ai.scanReceipt.mockResolvedValue({ success: true, data: { draft: { adalah_nota: false, items: [] }, status } });
     wrap();
     await pick();

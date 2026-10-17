@@ -21,4 +21,4 @@ Siapkan master bahan dan nota pembelian. Periksa satuan beli serta isi per kemas
 
 - [Menyiapkan master bahan dan satuan stok](master-bahan.md)
 - [Memeriksa kartu stok dan mencatat opname](opname-dan-kartu-stok.md)
-- [Menyetujui, menolak, dan membatalkan usulan Denti](usulan-denti.md)
+- [Menyetujui, menolak, dan membatalkan usulan Eira](usulan-denti.md)
