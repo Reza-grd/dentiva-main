@@ -1,0 +1,100 @@
+# Dipasang Ketua 17 Okt 2026 dari usulan A4/A4b (docs/tim/usulan-ci/e2e.yml) dengan penyesuaian:
+# izin token minimum, Node 22 (sama dengan ci.yml), versi @lhci/cli dikunci, batas waktu 20 menit.
+# Kunci anon di bawah adalah JWT demo publik Supabase (iss: supabase-demo), BUKAN rahasia; semua jaringan Supabase dimock fixture.
+# Usulan Workflow GitHub Actions — Paket A4 / A4b (Mutu Otomatis)
+# Lokasi usulan: docs/tim/usulan-ci/e2e.yml
+# Catatan: Sesuai pembagian wewenang tim, Antigravity tidak menyentuh .github/workflows/ secara langsung.
+# Ketua Tim dapat menyalin berkas ini ke .github/workflows/e2e.yml setelah meninjau hasil A4b.
+
+name: Mutu Otomatis (E2E, Visual, A11y & Lighthouse)
+
+on:
+  pull_request:
+    branches: [main, console]
+  push:
+    branches: [console]
+  workflow_dispatch:
+    inputs:
+      generate_linux_baselines:
+        description: 'Buat ulang baseline visual *-linux.png (jalankan --update-snapshots)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_E2E_ISOLATED_ENV: '1'
+  VITE_SUPABASE_URL: http://127.0.0.1:54321
+  VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+
+jobs:
+  e2e-visual-a11y:
+    name: Playwright E2E, Visual & Axe-Core
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Pasang browser Chromium untuk Playwright
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/clinic
+
+      - name: Buat baseline *-linux.png (hanya bila generate_linux_baselines diaktifkan)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_linux_baselines == true }}
+        run: npm run test:e2e:update-snapshots
+        working-directory: apps/clinic
+
+      - name: Jalankan suite E2E, regresi visual, dan audit axe-core
+        run: npm run test:e2e
+        working-directory: apps/clinic
+
+      - name: Unggah laporan Playwright & artefak hasil run (termasuk kandidat *-linux.png)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-clinic
+          path: |
+            apps/clinic/playwright-report/
+            apps/clinic/test-results/
+            apps/clinic/tests/e2e/__screenshots__/*-linux.png
+          retention-days: 14
+
+  lighthouse-budget:
+    name: Anggaran Lighthouse CI (Perf >= 90, A11y >= 95, BP >= 95)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repositori
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Pasang dependensi
+        run: npm ci
+
+      - name: Build aplikasi klinik ke dist-e2e (mode desktop tanpa Service Worker)
+        run: npx vite build --mode desktop --outDir dist-e2e
+        working-directory: apps/clinic
+
+      - name: Jalankan Lighthouse CI
+        run: npx @lhci/cli@0.14.0 autorun --config=apps/clinic/lighthouserc.cjs
