@@ -55,7 +55,7 @@ const TOOTH = 'M-24 -26 C-32 -18 -32 0 -26 12 C-22 22 -20 34 -14 34 C-8 34 -6 18
 const NOTE = 'M-7 0 A7 5.5 -20 1 0 7 0 A7 5.5 -20 1 0 -7 0 Z M5 -1 V-30 L17 -26 V-20 L7.5 -23.5 V-1 Z';
 const DROP = 'M0 -12 C6 -2 9 3 9 7 A9 9 0 0 1 -9 7 C-9 3 -6 -2 0 -12Z';
 
-/** Parameter ketebalan garis & detail berdasarkan LOD agar selalu ≥ 1 piksel fisik dan tajam. */
+/** Parameter ketebalan garis & detail berdasarkan LOD agar selalu ≥ 1 piksel fisik dan kontras tepi ≥ 3:1 terhadap putih. */
 const LOD_SPEC = {
   mini: {
     shellStroke: 5.5,
@@ -71,10 +71,11 @@ const LOD_SPEC = {
     mouthOStroke: 6,
     earGoldStroke: 5.5,
     armBandStroke: 6,
-    edgeTopColor: '#7a9ec9',
-    edgeTopOpacity: '0.88',
-    edgeBottomColor: '#43699e',
-    edgeBottomOpacity: '0.95',
+    // #567bb0 vs #ffffff = 4.30:1; #2e5288 vs #ffffff = 7.72:1 (jauh di atas syarat >= 3:1)
+    edgeTopColor: '#567bb0',
+    edgeTopOpacity: '1',
+    edgeBottomColor: '#2e5288',
+    edgeBottomOpacity: '1',
   },
   standar: {
     shellStroke: 3.2,
@@ -90,10 +91,11 @@ const LOD_SPEC = {
     mouthOStroke: 4.8,
     earGoldStroke: 4.6,
     armBandStroke: 5,
-    edgeTopColor: '#98b4da',
-    edgeTopOpacity: '0.82',
-    edgeBottomColor: '#567cb0',
-    edgeBottomOpacity: '0.88',
+    // #6488bc vs #ffffff = 3.57:1; #3b629b vs #ffffff = 6.03:1
+    edgeTopColor: '#6488bc',
+    edgeTopOpacity: '1',
+    edgeBottomColor: '#3b629b',
+    edgeBottomOpacity: '1',
   },
   hero: {
     shellStroke: 2.4,
@@ -109,15 +111,17 @@ const LOD_SPEC = {
     mouthOStroke: 4.2,
     earGoldStroke: 4.2,
     armBandStroke: 4.6,
-    edgeTopColor: '#b0c7e6',
-    edgeTopOpacity: '0.78',
-    edgeBottomColor: '#698ec0',
-    edgeBottomOpacity: '0.82',
+    // #6b8fc2 vs #ffffff = 3.30:1; #436aa3 vs #ffffff = 5.33:1
+    edgeTopColor: '#6b8fc2',
+    edgeTopOpacity: '1',
+    edgeBottomColor: '#436aa3',
+    edgeBottomOpacity: '1',
   },
 };
 
 export function dentiSvg(uid = 'd', lod = 'hero') {
   const cfg = LOD_SPEC[lod] || LOD_SPEC.hero;
+  const hasGlow = lod !== 'mini';
   const g = (n) => `${uid}-${n}`;
   const url = (n) => `url(#${g(n)})`;
   // posisi diletakkan di <g> pembungkus agar transform animasi CSS tidak menimpanya
@@ -209,6 +213,12 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
   <radialGradient id="${g('halo')}">
     <stop offset="0" stop-color="#5fbaff" stop-opacity=".55"/><stop offset=".6" stop-color="#5fbaff" stop-opacity=".18"/><stop offset="1" stop-color="#5fbaff" stop-opacity="0"/>
   </radialGradient>
+  <radialGradient id="${g('eyeGlow')}">
+    <stop offset="0" stop-color="#7ce8ff" stop-opacity=".52"/><stop offset=".5" stop-color="#38bdf8" stop-opacity=".2"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="${g('coreGlow')}">
+    <stop offset="0" stop-color="#8be8ff" stop-opacity=".75"/><stop offset=".52" stop-color="#38bdf8" stop-opacity=".28"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+  </radialGradient>
   <clipPath id="${g('bodyClip')}"><path d="${BODY}"/></clipPath>
   <clipPath id="${g('visorClip')}"><path d="${VISOR}"/></clipPath>
   <linearGradient id="${g('scan')}" x1="0" y1="0" x2="0" y2="1">
@@ -216,11 +226,11 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
   </linearGradient>
 </defs>
 
-<!-- cincin orbit (di belakang badan — gerak via CSS transform agar 0 layout thrash) -->
+<!-- cincin orbit (di belakang badan — gerak mengitari via CSS offset-path, tanpa SMIL) -->
 <g class="d-orbit" transform="rotate(-14 200 252)">
   <path id="${g('orbit')}" d="M22 252 a178 64 0 1 0 356 0 a178 64 0 1 0 -356 0" fill="none" stroke="#e6c698" stroke-width="1.8" opacity=".4"/>
-  <circle class="d-orbit-dot d-orbit-dot-1" cx="22" cy="252" r="4.5" fill="#fff1d6"/>
-  <circle class="d-orbit-dot d-orbit-dot-2" cx="378" cy="252" r="3.5" fill="#a9e4ff"/>
+  <circle class="d-orbit-dot d-orbit-dot-1" cx="0" cy="0" r="4.5" fill="#fff1d6"/>
+  <circle class="d-orbit-dot d-orbit-dot-2" cx="0" cy="0" r="3.5" fill="#a9e4ff"/>
 </g>
 
 <g class="d-shadow">
@@ -242,9 +252,10 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
       </g>
       <path d="M152 404 C174 424 226 424 248 404" stroke="#8faad4" stroke-width="${lod === 'mini' ? 3 : 2}" fill="none" opacity=".6"/>
       <g class="d-chest">
-        <circle cx="200" cy="336" r="35" fill="${url('halo')}"/>
+        ${hasGlow ? `<circle class="d-chest-glow" cx="200" cy="336" r="44" fill="${url('coreGlow')}"/>` : `<circle cx="200" cy="336" r="35" fill="${url('halo')}"/>`}
         <circle cx="200" cy="336" r="29" fill="#0b1324"/>
         <circle cx="200" cy="336" r="29" fill="none" stroke="${url('gold')}" stroke-width="${cfg.chestGoldStroke}"/>
+        ${hasGlow ? `<circle cx="200" cy="336" r="25" fill="${url('coreGlow')}"/>` : ''}
         <circle class="d-chest-core" cx="200" cy="336" r="20" fill="${url('core')}"/>
         <ellipse cx="193" cy="328" rx="6" ry="4" fill="#fff" opacity=".9"/>
         <g class="d-chest-heart">${at(200, 323, 1.15, `<path d="${HEART}" fill="#ff8fb8"/>`)}</g>
@@ -266,9 +277,11 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
 
       <g class="d-visor">
         <path d="${VISOR}" fill="${url('visor')}"/>
+        ${hasGlow ? `<ellipse class="d-visor-glow" cx="200" cy="166" rx="98" ry="64" fill="${url('eyeGlow')}" opacity=".58"/>` : ''}
         <path class="d-visor-rim" d="${VISOR}" fill="none" stroke="#5fbaff" stroke-width="${cfg.visorRimStroke}" opacity=".75"/>
         <path d="M128 112 C156 100 196 98 236 102" stroke="#fff" stroke-opacity=".22" stroke-width="8" fill="none" stroke-linecap="round"/>
         <g class="d-brackets" fill="none" stroke="#6fdcff" stroke-width="${cfg.bracketStroke}" stroke-linecap="round">
+          ${hasGlow ? `<g stroke="#38bdf8" stroke-opacity=".28" stroke-width="${cfg.bracketStroke + 6}"><path d="M120 134 v-10 q0 -8 8 -8 h10"/><path d="M280 134 v-10 q0 -8 -8 -8 h-10"/><path d="M120 194 v10 q0 8 8 8 h10"/><path d="M280 194 v10 q0 8 -8 8 h-10"/></g>` : ''}
           <path d="M120 134 v-10 q0 -8 8 -8 h10"/><path d="M280 134 v-10 q0 -8 -8 -8 h-10"/>
           <path d="M120 194 v10 q0 8 8 8 h10"/><path d="M280 194 v10 q0 8 -8 8 h-10"/>
         </g>
@@ -281,10 +294,12 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
       <g class="d-gaze">
       <g class="d-eyes">
         <g class="d-eye-open">
+          ${hasGlow ? `<ellipse class="d-eye-glow" cx="162" cy="160" rx="34" ry="40" fill="${url('eyeGlow')}"/><ellipse class="d-eye-glow" cx="238" cy="160" rx="34" ry="40" fill="${url('eyeGlow')}"/>` : ''}
           <ellipse class="d-eye d-eye-l" cx="162" cy="160" rx="17" ry="21" fill="${url('eye')}"/>
           <ellipse class="d-eye d-eye-r" cx="238" cy="160" rx="17" ry="21" fill="${url('eye')}"/>
         </g>
         <g class="d-eye-happy" fill="none" stroke="${url('eye')}" stroke-width="${cfg.eyeHappyStroke}" stroke-linecap="round">
+          ${hasGlow ? `<ellipse cx="162" cy="158" rx="34" ry="26" fill="${url('eyeGlow')}" stroke="none"/><ellipse cx="238" cy="158" rx="34" ry="26" fill="${url('eyeGlow')}" stroke="none"/>` : ''}
           <path d="M140 170 Q162 140 184 170"/><path d="M216 170 Q238 140 260 170"/>
         </g>
         <g class="d-eye-sleep" fill="none" stroke="${url('eye')}" stroke-width="${cfg.eyeSleepStroke}" stroke-linecap="round">
@@ -336,6 +351,7 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
       </g>
 
       <g class="d-gaze-soft"><g class="d-mouth">
+        ${hasGlow ? `<ellipse class="d-mouth-glow" cx="200" cy="202" rx="30" ry="18" fill="${url('eyeGlow')}"/>` : ''}
         <path class="d-mouth-smile" d="M184 196 Q200 210 216 196" fill="none" stroke="#9ee6ff" stroke-width="${cfg.mouthSmileStroke}" stroke-linecap="round"/>
         <ellipse class="d-mouth-talk" cx="200" cy="200" rx="11" ry="7" fill="#9ee6ff"/>
         <ellipse class="d-mouth-o" cx="200" cy="202" rx="7" ry="8" fill="none" stroke="#9ee6ff" stroke-width="${cfg.mouthOStroke}"/>
