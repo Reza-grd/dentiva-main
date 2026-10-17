@@ -75,5 +75,6 @@ _Diperbarui: 17 Okt 2026 (01.30 WIB)._ Status: ⬜ belum · 🟦 berjalan · �
 3. **Gelombang 3:** A3 (layar, bertahap) · A6, A7 · G6 (kapan saja) · L7, L9, L10.
 
 ## Catatan keputusan
+- **17 Okt 2026 — palet merek (keputusan pemilik):** navy (logo) + emas (logo) + **teal** aksen; violet dihapus bertahap. Urutan: **A1c** Denti teal (`prompts/antigravity/A1c-denti-teal.md`) → tinjau di produksi → **A2** token aplikasi → **A3** per layar. A4b berjalan paralel. Tambahan A4b (5): hasil run Playwright tidak boleh menimpa berkas bukti yang dilacak git.
 - Antigravity & GPT **tidak** menyentuh produksi/`main`/rahasia (lihat 03). Semua deploy lewat Ketua.
 - Posisi produk: premium & aman — jika ada konflik antara estetika dan keamanan, keamanan menang.
