@@ -248,7 +248,8 @@ export function normalizeChat(text, { aggressive = false } = {}) {
   // huruf ganda di akhir kata ("kerenn", "sipp", "okk"); vokal ganda di tengah ("maaf") dibiarkan
   t = t.replace(/([b-df-hj-kmnp-tv-z])\1+(?=\s|$)/g, '$1'); // tanpa "l" (well, all, still)
   t = t.split(' ').map((w) => SLANG[w] || w).map((w) => fuzzyWord(w, aggressive)).join(' ');
-  t = t.replace(/\b(denti|kak|kakak|min|mimin|bot)\b/g, ' ').replace(/\s+/g, ' ').trim();
+  // "eira" = nama baru (17 Okt 2026); "denti" tetap dikenali untuk pengguna yang masih memakai nama lama
+  t = t.replace(/\b(eira|denti|kak|kakak|min|mimin|bot)\b/g, ' ').replace(/\s+/g, ' ').trim();
   for (let i = 0; i < 3; i += 1) t = t.replace(/\s(ya|yah|yaa|ya|dong|deh|nih|sih|kok|lho|loh|banget|bgt|sekali|nya)$/, '').trim();
   return t;
 }
