@@ -1,6 +1,7 @@
 {
-  "versi": 1,
-  "commit_sumber": "df7f178c3ac8a9711f9a290e029fcfc5c14c9008",
+  "versi": 2,
+  "commit_sumber": "0e4805daedd55ffe4cecbc4ed6ee41a55d69320d",
+  "catatan": "Naskah utama ada pada artikel/*.md. Rujukan teknis hanya disimpan dalam metadata ini. Status layanan mengikuti tinjauan Ketua dan instruksi G7b; label layar bukan bukti kesiapan layanan.",
   "sha256_sumber": {
     "apps/clinic/src/components/common/Sidebar.jsx": "4931434330fff2ab3dc8b1b8f28af6417e60806a53eb06da2711c26fb487993a",
     "apps/clinic/src/components/dashboard/OnboardingChecklist.jsx": "9464bf50c50869f32ab8f987e24de93939f667d1a84bc3b6075af86c8932cd53",
@@ -9,7 +10,7 @@
     "apps/clinic/src/components/admin/UserManagementPage.jsx": "aec74c7d249266b4e79afa938675325968d6fad07944ad035b67065956756463",
     "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx": "d75abfe45b593a7d911f229918d23923eead1d6975b0ef0b88c488e1721fd1ed",
     "apps/clinic/src/components/layout/TopBar.jsx": "79d73ecec36107a771c078847e2fb154b216455ef54772f3cf910f47d6b770ff",
-    "apps/clinic/src/components/auth/LoginPage.jsx": "a514b83369e0d7da79a7b80d64bada2458deeb11e145e737476c80d06ef9cdfa",
+    "apps/clinic/src/components/auth/LoginPage.jsx": "4300d3fab4c2adb8325b70578b1ee31c782f1ccce7a11ed1080c8e0c87535c2f",
     "apps/clinic/src/components/patient/PatientList.jsx": "2e7d2c5b1561c5cf6f1ad2a586e455b6abda430da6c298f73601f554f6740aba",
     "apps/clinic/src/components/patient/PatientRegistration.jsx": "fc9b94454031bffa931535476bb7cec2399115705dae52e10471ac0e55cc111d",
     "apps/clinic/src/components/patient/PatientDetail.jsx": "291a8f1b8d9bc74f9a1c8f980bce615ed8e59f2e6a960c22d90e2cf5d13eb043",
@@ -44,6 +45,26 @@
     "apps/clinic/src/components/common/ErrorBoundary.jsx": "c7b9722587f7fe4b73230158a661d22aa023a3a2dafeb51aced5bf55ed8c919a",
     "apps/clinic/src/components/auth/ClinicUnavailable.jsx": "01228bcf46d3d2a42b6288fda6980a3281f7410b34cac07b2ecef8db8271792a"
   },
+  "konteks": [
+    {
+      "berkas": "docs/tim/04-papan-tugas.md",
+      "baris": 67,
+      "penanda": "G7 Pusat Bantuan diserahkan",
+      "sha256": "27ec8f3c6cf29cd84beb07be2793b7aaaad1626127fd987fb8350e53564196cb"
+    },
+    {
+      "berkas": "apps/desktop/src-tauri/tauri.conf.json",
+      "baris": 94,
+      "penanda": "GANTI_DENGAN_KUNCI_PUBLIK_UPDATER",
+      "sha256": "8de420346b41f3095b5c14c83d875b51d6e6e2dae7eef2c7fd619e2ccf894da3"
+    },
+    {
+      "berkas": "docs/desktop.md",
+      "baris": 86,
+      "penanda": "dialog cetak mungkin tidak muncul",
+      "sha256": "2e100712f5b4515e4d57d60b31fbc924df07e0dcea4ea304947f32cf37d4e474"
+    }
+  ],
   "langkah": [
     {
       "slug": "mulai-cepat-klinik-baru",
@@ -109,7 +130,7 @@
     {
       "slug": "mulai-cepat-klinik-baru",
       "langkah": 4,
-      "teks": "Buka **Kelola Pengguna → Tambah Staf** untuk membuat akun resepsionis. Isi formulir dan sandi awal secara privat, lalu **Simpan Staf**. Formulir saat ini hanya menawarkan peran resepsionis; untuk akun dokter, hubungi admin klinik yang mengoordinasikan penyediaan akun dengan tim Dentiva.",
+      "teks": "Buka **Kelola Pengguna → Tambah Staf** untuk membuat akun resepsionis. Isi formulir dan sandi awal secara privat, lalu **Simpan Staf**. Untuk akun dokter, ikuti [panduan bantuan akun dokter](status-layanan.md#akun-dokter).",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
@@ -174,17 +195,17 @@
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 188,
+          "baris": 209,
           "penanda": "register('email')"
         },
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 203,
+          "baris": 224,
           "penanda": "register('password')"
         },
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 214,
+          "baris": 235,
           "penanda": "Tampilkan password"
         }
       ]
@@ -196,7 +217,7 @@
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 245,
+          "baris": 266,
           "penanda": "Masuk ke Sistem"
         },
         {
@@ -260,7 +281,7 @@
     {
       "slug": "sandi-dan-mfa",
       "langkah": 2,
-      "teks": "Isi **Password saat ini**, **Password baru**, dan **Konfirmasi password baru**. Gunakan sandi panjang dan unik; ikuti penolakan atau persyaratan server bila muncul.",
+      "teks": "Isi **Password saat ini**, **Password baru**, dan **Konfirmasi password baru**. Ikuti petunjuk aplikasi bila sandi baru belum diterima.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
@@ -299,7 +320,7 @@
     {
       "slug": "sandi-dan-mfa",
       "langkah": 4,
-      "teks": "Untuk MFA, periksa bagian keamanan: tombol **Aktifkan 2FA (Nonaktif)** belum bisa digunakan. Hubungi admin klinik untuk status penerapan MFA; jangan mencari QR atau kode pemulihan di layar ini.",
+      "teks": "Untuk MFA, lihat [petunjuk pada status layanan](status-layanan.md#mfa-mandiri).",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
@@ -311,16 +332,16 @@
     {
       "slug": "sandi-dan-mfa",
       "langkah": 5,
-      "teks": "Jika lupa sandi atau tidak bisa masuk, hubungi admin klinik melalui kanal internal yang sudah dikenal. Tombol **Lupa password?** memang ada, tetapi pesan “tautan dikirim” belum membuktikan email diterima selama SMTP belum aktif.",
+      "teks": "Jika lupa sandi atau tidak bisa masuk, lihat [bantuan pengaturan ulang sandi](status-layanan.md#email-reset).",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 74,
+          "baris": 95,
           "penanda": "Lupa password?"
         },
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 232,
+          "baris": 253,
           "penanda": "resetState === 'sent'"
         }
       ]
@@ -894,7 +915,7 @@
     {
       "slug": "layanan-dokter",
       "langkah": 4,
-      "teks": "Isi dan simpan rekam medis sesuai pemeriksaan. Setelah pelayanan serta pencatatan selesai, periksa status; **Simpan Rekam Medis** juga mengirim status selesai pada kunjungan yang disimpan. Jika masih **Berlangsung**, gunakan **Selesai** pada kartu.",
+      "teks": "Isi dan simpan rekam medis sesuai pemeriksaan. Setelah pelayanan serta pencatatan selesai, periksa status; **Simpan Rekam Medis** juga menandai kunjungan yang disimpan sebagai selesai. Jika masih **Berlangsung**, gunakan **Selesai** pada kartu.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
@@ -1053,7 +1074,7 @@
     {
       "slug": "mengisi-rekam-medis",
       "langkah": 6,
-      "teks": "Bila banner draf muncul saat membuka kembali halaman, pilih **Pulihkan Draf** hanya setelah memastikan pasien dan isinya benar, lalu simpan ke server. Pilih **Abaikan** bila draf tidak tepat.",
+      "teks": "Bila banner draf muncul saat membuka kembali halaman, pilih **Pulihkan Draf** hanya setelah memastikan pasien dan isinya benar, lalu pilih **Simpan Rekam Medis**. Pilih **Abaikan** bila draf tidak tepat.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
@@ -1153,7 +1174,7 @@
     {
       "slug": "odontogram-dan-diagnosis",
       "langkah": 5,
-      "teks": "Lengkapi bidang rekam medis yang wajib, kemudian **Simpan Rekam Medis**. Periksa hasil penyimpanan; perubahan gambar sebelum simpan belum menjadi bukti perubahan di server.",
+      "teks": "Lengkapi bidang rekam medis yang wajib, kemudian **Simpan Rekam Medis**. Periksa hasil penyimpanan; perubahan gambar sebelum simpan belum berarti catatan sudah tersimpan.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
@@ -1505,7 +1526,7 @@
     {
       "slug": "invoice-dan-kwitansi",
       "langkah": 5,
-      "teks": "Jika dialog cetak tidak muncul pada desktop, buka aplikasi web resmi yang diberikan klinik melalui browser dan cari invoice yang sama. Jangan membuat pembayaran baru untuk mencoba mencetak ulang.",
+      "teks": "Jika dialog cetak tidak muncul pada desktop, lihat [bantuan pencetakan desktop](status-layanan.md#desktop-cetak).",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
@@ -1514,7 +1535,7 @@
         },
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 245,
+          "baris": 266,
           "penanda": "Masuk ke Sistem"
         },
         {
@@ -1561,7 +1582,7 @@
     {
       "slug": "master-bahan",
       "langkah": 3,
-      "teks": "Isi satuan beli dan faktor konversi sesuai kemasan yang diterima. Contoh sintetis: satu box berisi 100 pcs berarti faktor konversi 100; jangan memasukkan jumlah box sebagai isi per box.",
+      "teks": "Isi satuan beli dan faktor konversi sesuai kemasan yang diterima. Contoh perhitungan: satu box berisi 100 pcs berarti faktor konversi 100; jangan memasukkan jumlah box sebagai isi per box.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
@@ -2211,7 +2232,7 @@
     {
       "slug": "menggunakan-denti",
       "langkah": 3,
-      "teks": "Periksa pemakaian kuota, lalu tulis pertanyaan operasional yang jelas dan pilih **Kirim**. Contoh sintetis: “Bahan apa yang perlu dipesan ulang?”. Enter mengirim; Shift+Enter membuat baris baru.",
+      "teks": "Periksa pemakaian kuota, lalu tulis pertanyaan operasional yang jelas dan pilih **Kirim**. Contoh pertanyaan: “Bahan apa yang perlu dipesan ulang?”. Enter mengirim; Shift+Enter membuat baris baru.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
@@ -2375,7 +2396,7 @@
     {
       "slug": "usulan-denti",
       "langkah": 5,
-      "teks": "Untuk hasil yang masih dapat dibatalkan, pilih **Batalkan** pada kartu Dijalankan dan tunggu **Dibatalkan**. Tombol ini hanya muncul jika server menyatakan tindakan mendukung pembatalan; periksa hasil akhirnya melalui menu terkait.",
+      "teks": "Untuk hasil yang masih dapat dibatalkan, pilih **Batalkan** pada kartu Dijalankan dan tunggu **Dibatalkan**. Tombol ini hanya muncul untuk tindakan yang dapat dibatalkan; periksa hasil akhirnya melalui menu terkait.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
@@ -2423,7 +2444,7 @@
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 255,
+          "baris": 276,
           "penanda": "Unduh aplikasi desktop"
         }
       ]
@@ -2435,7 +2456,7 @@
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 245,
+          "baris": 266,
           "penanda": "Masuk ke Sistem"
         },
         {
@@ -2448,7 +2469,7 @@
     {
       "slug": "aplikasi-desktop",
       "langkah": 3,
-      "teks": "Jika kartu **Dentiva … tersedia** muncul, simpan semua pekerjaan dahulu. Pilih **Perbarui sekarang** hanya setelah admin memastikan kanal pembaruan siap, atau **Nanti** untuk melanjutkan pekerjaan.",
+      "teks": "Jika kartu **Dentiva … tersedia** muncul, simpan semua pekerjaan dahulu. Pilih **Perbarui sekarang** untuk memasang pembaruan, atau **Nanti** untuk melanjutkan pekerjaan.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
@@ -2497,7 +2518,7 @@
     {
       "slug": "aplikasi-desktop",
       "langkah": 5,
-      "teks": "Jika cetak invoice tidak membuka dialog di desktop, gunakan aplikasi web resmi melalui browser dan buka invoice yang sama dari **Pembayaran → Detail → Cetak Invoice**.",
+      "teks": "Untuk mencetak invoice, buka **Pembayaran → Detail → Cetak Invoice**; lihat [bantuan pencetakan desktop](status-layanan.md#desktop-cetak) bila dialog cetak tidak muncul.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
@@ -2580,7 +2601,7 @@
     {
       "slug": "privasi-dan-backup",
       "langkah": 4,
-      "teks": "Untuk pertanyaan backup, admin dapat membuka **Pengaturan → Database** dan membaca status yang ditampilkan. **Buat Backup Sekarang (Nonaktif)** dan **Pilih File Backup (Nonaktif)** belum bisa dipakai; hubungi admin klinik untuk diteruskan ke pengelola sistem.",
+      "teks": "Untuk bantuan cadangan atau pemulihan data, lihat [petunjuk pada status layanan](status-layanan.md#pemulihan-data).",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
@@ -2619,7 +2640,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 1,
-      "teks": "**Menu hilang atau Akses Ditolak?** Periksa peran di menu profil, lalu gunakan **Kembali ke Dashboard**. Hubungi admin klinik bila pembagian tugas tidak sesuai; jangan mencoba akun orang lain atau mengubah alamat untuk melewati izin.",
+      "teks": "Menu hilang atau Akses Ditolak? Periksa peran di menu profil, lalu gunakan **Kembali ke Dashboard**. Hubungi admin klinik bila pembagian tugas tidak sesuai; jangan mencoba akun orang lain atau mengubah alamat untuk melewati izin.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
@@ -2636,16 +2657,16 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 2,
-      "teks": "**Email reset tidak datang atau lupa sandi?** Hubungi admin klinik. **Lupa password?** masih dapat menampilkan pesan pengiriman, tetapi SMTP/email reset sandi belum aktif; jangan menunggu email sebagai satu-satunya jalur pemulihan.",
+      "teks": "Lupa sandi atau email bantuan tidak diterima? Lihat [bantuan pengaturan ulang sandi](status-layanan.md#email-reset).",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 74,
+          "baris": 95,
           "penanda": "Lupa password?"
         },
         {
           "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
-          "baris": 232,
+          "baris": 253,
           "penanda": "resetState === 'sent'"
         }
       ]
@@ -2653,7 +2674,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 3,
-      "teks": "**Halaman gagal dimuat?** Periksa jaringan terlebih dahulu. Pada galat daftar Pembayaran gunakan **Coba lagi**; pada layar **Aplikasi Mengalami Kendala** gunakan **Muat Ulang Halaman** setelah menilai pekerjaan yang belum tersimpan. Catat pesan galat tanpa data pasien bila tetap gagal.",
+      "teks": "Halaman gagal dimuat? Periksa jaringan terlebih dahulu. Pada galat daftar Pembayaran gunakan **Coba lagi**; pada layar **Aplikasi Mengalami Kendala** gunakan **Muat Ulang Halaman** setelah menilai pekerjaan yang belum tersimpan. Catat pesan galat tanpa data pasien bila tetap gagal.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
@@ -2675,7 +2696,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 4,
-      "teks": "**Pembayaran atau usulan Denti belum jelas hasilnya?** Buka detail transaksi atau menu hasil usulan dan periksa status. Pesan jawaban AI, QR yang tampil, atau tombol yang sudah ditekan belum membuktikan proses selesai. Jangan mengulang simpan atau Setujui sebelum memeriksa.",
+      "teks": "Pembayaran atau usulan Denti belum jelas hasilnya? Buka detail transaksi atau menu hasil usulan dan periksa status. Pesan jawaban AI, QR yang tampil, atau tombol yang sudah ditekan belum membuktikan proses selesai. Jangan mengulang simpan atau Setujui sebelum memeriksa.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
@@ -2697,7 +2718,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 5,
-      "teks": "**Denti sibuk, kuota habis, atau tidak menjawab?** Baca pesan di **Asisten AI** dan periksa kuota. Gunakan **Pengeluaran** atau **Biaya & Modal** untuk pekerjaan manual sesuai izin; coba AI kembali kemudian tanpa mengirim data pasien.",
+      "teks": "Denti sibuk, kuota habis, atau tidak menjawab? Baca pesan di **Asisten AI** dan periksa kuota. Gunakan **Pengeluaran** atau **Biaya & Modal** untuk pekerjaan manual sesuai izin; coba AI kembali kemudian tanpa mengirim data pasien.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
@@ -2724,7 +2745,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 6,
-      "teks": "**Backup atau pemulihan data diperlukan?** Hubungi admin klinik. Tombol backup/restore belum aktif, backup offsite belum aktif, dan pengelola perlu memeriksa cadangan serta pilihan pemulihan sebelum memberi keputusan.",
+      "teks": "Perlu bantuan pemulihan data? Lihat [petunjuk pemulihan data](status-layanan.md#pemulihan-data).",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
@@ -2741,7 +2762,7 @@
     {
       "slug": "faq-pemecahan-masalah",
       "langkah": 7,
-      "teks": "**Klinik ditangguhkan atau pendaftaran belum aktif?** Baca keterangan layar, hubungi admin klinik agar berkoordinasi dengan tim Dentiva, lalu pilih **Periksa lagi** setelah ada pembaruan status. Tombol ini memeriksa ulang, bukan mengaktifkan klinik sendiri.",
+      "teks": "Klinik ditangguhkan atau pendaftaran belum aktif? Baca keterangan layar, hubungi admin klinik agar berkoordinasi dengan tim Dentiva, lalu pilih **Periksa lagi** setelah ada pembaruan status. Tombol ini memeriksa ulang, bukan mengaktifkan klinik sendiri.",
       "rujukan": [
         {
           "berkas": "apps/clinic/src/components/auth/ClinicUnavailable.jsx",
@@ -2752,6 +2773,142 @@
           "berkas": "apps/clinic/src/components/auth/ClinicUnavailable.jsx",
           "baris": 28,
           "penanda": "refreshAccountStatus"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 1,
+      "teks": "Pengiriman email untuk mengatur ulang sandi belum tersedia. Minta admin klinik Anda membantu mengatur ulang sandi. Tombol **Lupa password?** dapat menampilkan pesan pengiriman; pesan itu belum memastikan email bantuan diterima. Jika Anda masih bisa masuk, gunakan panduan [mengganti sandi](sandi-dan-mfa.md).",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 95,
+          "penanda": "Lupa password?"
+        },
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 253,
+          "penanda": "resetState === 'sent'"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 2,
+      "teks": "Aktivasi MFA mandiri belum tersedia. Di **Pengaturan → Keamanan**, tombol **Aktifkan 2FA (Nonaktif)** belum dapat dipakai. Hubungi admin klinik untuk bantuan perlindungan akun; jangan membagikan sandi atau kode autentikator.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 810,
+          "penanda": "Aktifkan 2FA (Nonaktif)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 179,
+          "penanda": "navigate('/pengaturan')"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 3,
+      "teks": "Pembuatan dan pemulihan cadangan langsung dari aplikasi belum tersedia. Pada **Pengaturan → Database**, tombol **Buat Backup Sekarang (Nonaktif)** dan **Pilih File Backup (Nonaktif)** belum dapat dipakai. Hubungi admin klinik agar tim Dentiva memeriksa cadangan dan pilihan pemulihan yang tersedia. Jika data hilang atau salah, jangan membuat ulang catatan sebelum pemeriksaan selesai; hasil dan waktu pemulihan perlu dikonfirmasi terlebih dahulu.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1252,
+          "penanda": "Buat Backup Sekarang (Nonaktif)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1263,
+          "penanda": "Pilih File Backup (Nonaktif)"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 4,
+      "teks": "Ketersediaan pemasangan dan pembaruan desktop perlu dikonfirmasi admin klinik. Gunakan berkas pemasangan resmi yang diberikan admin. Jika kartu **Dentiva … tersedia** muncul, simpan pekerjaan dahulu dan ikuti [panduan pembaruan desktop](aplikasi-desktop.md) setelah mendapat petunjuk admin. Bila tidak ada penawaran pembaruan, hubungi admin; jangan memasang berkas dari sumber lain atau melewati peringatan keamanan perangkat.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 84,
+          "penanda": "Dentiva {update.version} tersedia"
+        },
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 101,
+          "penanda": "'Perbarui sekarang'"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 5,
+      "teks": "Dialog cetak invoice dapat tidak muncul pada aplikasi desktop. Bila ini terjadi, buka aplikasi web resmi klinik melalui browser, masuk dengan akun resepsionis, lalu buka invoice yang sama melalui **Pembayaran → Detail → Cetak Invoice**. Jangan membuat transaksi baru untuk mencoba mencetak ulang.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 326,
+          "penanda": "navigate(`/pembayaran/${payment.visit_id}`)"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 6,
+      "teks": "Alamat pada invoice dapat belum sesuai profil klinik. Periksa pratinjau setelah memilih **Cetak Invoice**; bila alamat keliru, hentikan pencetakan dan hubungi admin klinik untuk perbaikan sebelum menyerahkannya kepada pasien.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 334,
+          "penanda": "const klinikInfo ="
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 7,
+      "teks": "Pembuatan akun dokter langsung dari formulir staf belum tersedia. **Kelola Pengguna → Tambah Staf** digunakan untuk akun resepsionis. Untuk akun dokter, minta admin klinik berkoordinasi dengan tim Dentiva. Jangan mengganti peran staf lain untuk membuat akun dokter atau berbagi akun yang sudah ada.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 279,
+          "penanda": "Akun dokter dibuat dan diverifikasi"
+        },
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 273,
+          "penanda": "register('role')"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "langkah": 8,
+      "teks": "Koreksi pembayaran yang sudah lunas perlu dibantu admin klinik. Buka **Pembayaran → Detail**, periksa nomor invoice dan jelaskan koreksi yang diperlukan melalui kanal resmi klinik. Jangan membuat transaksi pengganti atau menjanjikan pengembalian dana sebelum penanggung jawab menyetujui penanganannya.",
+      "rujukan": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 734,
+          "penanda": "const isLocked = existingPayment?.status_pembayaran === 'paid'"
+        },
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentList.jsx",
+          "baris": 329,
+          "penanda": "Detail"
         }
       ]
     }

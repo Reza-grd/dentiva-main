@@ -1,33 +1,46 @@
 {
   "status": "lulus",
-  "commit_sumber": "df7f178c3ac8a9711f9a290e029fcfc5c14c9008",
-  "artikel": 25,
-  "langkah": 130,
-  "rujukan_langkah": 360,
-  "komponen_berhash": 41,
-  "tautan_lokal": 103,
-  "artikel_per_peran": {
-    "admin": 15,
-    "dokter": 11,
-    "resepsionis": 13
+  "commit_sumber": "0e4805daedd55ffe4cecbc4ed6ee41a55d69320d",
+  "artikel": 26,
+  "artikel_lama_diubah": 25,
+  "artikel_baru": 1,
+  "istilah_terlarang": {
+    "seluruh_artikel_termasuk_status": 0,
+    "temuan": []
   },
-  "pemeriksaan": [
-    "indeks JSON dan schema",
-    "slug unik dan artikel tepat sesuai indeks",
-    "judul, peran dan bagian wajib",
-    "130 langkah berurutan dan catatan kaki",
-    "teks langkah sama dengan manifest",
-    "setiap langkah memiliki rujukan komponen",
-    "baris dan penanda sumber cocok",
-    "SHA-256 komponen cocok",
-    "sumber sama dengan commit tercatat",
-    "tautan Markdown lokal ada",
-    "UTF-8 tanpa karakter pengganti",
-    "glosarium dan serah-terima tersedia"
+  "indeks_terurai": true,
+  "status_layanan_terindeks": true,
+  "tautan_lokal_valid": 139,
+  "tautan_dalam_artikel_valid": 93,
+  "tautan_rusak": 0,
+  "label": {
+    "kelompok_tebal": 201,
+    "segmen_diperiksa": 225,
+    "literal": 220,
+    "dinamis_terbukti": 5,
+    "tidak_ditemukan": 0
+  },
+  "langkah": 138,
+  "rujukan_langkah": 376,
+  "komponen_berhash": 41,
+  "penanda_status": [
+    "email-reset",
+    "mfa-mandiri",
+    "pemulihan-data",
+    "desktop-pembaruan",
+    "desktop-cetak",
+    "invoice-alamat",
+    "akun-dokter",
+    "koreksi-pembayaran"
   ],
+  "artikel_per_peran": {
+    "admin": 16,
+    "dokter": 12,
+    "resepsionis": 14
+  },
   "batasan": [
-    "Pembacaan kode; belum uji klik runtime, axe, atau backend produksi.",
-    "Validasi rujukan bukan pembuktian otomatis ketepatan makna.",
-    "Lint/typecheck/test/build aplikasi tidak dijalankan untuk paket dokumentasi ini."
+    "Validasi terhadap kode; bukan uji klik atau kesiapan layanan produksi.",
+    "Label literal diperiksa sebagai teks persis di komponen; label dinamis memiliki bukti perakitan.",
+    "Lint/typecheck/test/build aplikasi tidak dijalankan untuk revisi dokumentasi ini."
   ]
 }

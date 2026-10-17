@@ -1,0 +1,2951 @@
+{
+  "commit_sumber": "0e4805daedd55ffe4cecbc4ed6ee41a55d69320d",
+  "kelompok_tebal": 201,
+  "segmen_label": 225,
+  "ringkasan": {
+    "literal": 220,
+    "dinamis": 5
+  },
+  "bukti": [
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Dashboard",
+      "segmen": "Dashboard",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 275,
+          "penanda": "Dashboard"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Siapkan klinik Anda",
+      "segmen": "Siapkan klinik Anda",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/OnboardingChecklist.jsx",
+          "baris": 60,
+          "penanda": "Siapkan klinik Anda"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Pengaturan → Profil Klinik",
+      "segmen": "Pengaturan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/BottomNav.jsx",
+          "baris": 43,
+          "penanda": "Pengaturan"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Pengaturan → Profil Klinik",
+      "segmen": "Profil Klinik",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 374,
+          "penanda": "Profil Klinik"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Simpan Perubahan",
+      "segmen": "Simpan Perubahan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/profile/DoctorProfilePage.jsx",
+          "baris": 492,
+          "penanda": "Simpan Perubahan"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Tersimpan",
+      "segmen": "Tersimpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 701,
+          "penanda": "Tersimpan"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Master Treatment → Tambah Treatment",
+      "segmen": "Master Treatment",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 22,
+          "penanda": "Master Treatment"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Master Treatment → Tambah Treatment",
+      "segmen": "Tambah Treatment",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/treatments/TreatmentMaster.jsx",
+          "baris": 179,
+          "penanda": "Tambah Treatment"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Simpan",
+      "segmen": "Simpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "Simpan"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Kelola Pengguna → Tambah Staf",
+      "segmen": "Kelola Pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 39,
+          "penanda": "Kelola Pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Kelola Pengguna → Tambah Staf",
+      "segmen": "Tambah Staf",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 121,
+          "penanda": "Tambah Staf"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Simpan Staf",
+      "segmen": "Simpan Staf",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "Simpan Staf"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Jadwal Dokter → Tambah Jadwal",
+      "segmen": "Jadwal Dokter",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 29,
+          "penanda": "Jadwal Dokter"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Jadwal Dokter → Tambah Jadwal",
+      "segmen": "Tambah Jadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 246,
+          "penanda": "Tambah Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "mulai-cepat-klinik-baru",
+      "label_tebal": "Menu profil pengguna",
+      "segmen": "Menu profil pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "label_tebal": "Email",
+      "segmen": "Email",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 237,
+          "penanda": "Email"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "label_tebal": "Password",
+      "segmen": "Password",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 259,
+          "penanda": "Password"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "label_tebal": "Masuk ke Sistem",
+      "segmen": "Masuk ke Sistem",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 266,
+          "penanda": "Masuk ke Sistem"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "label_tebal": "Menu profil pengguna",
+      "segmen": "Menu profil pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "label_tebal": "Buka menu navigasi",
+      "segmen": "Buka menu navigasi",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 60,
+          "penanda": "Buka menu navigasi"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "label_tebal": "Menu profil pengguna → Keluar",
+      "segmen": "Menu profil pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "masuk-dan-keluar",
+      "label_tebal": "Menu profil pengguna → Keluar",
+      "segmen": "Keluar",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/ClinicUnavailable.jsx",
+          "baris": 68,
+          "penanda": "Keluar"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Menu profil pengguna → Pengaturan → Keamanan",
+      "segmen": "Menu profil pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Menu profil pengguna → Pengaturan → Keamanan",
+      "segmen": "Pengaturan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/BottomNav.jsx",
+          "baris": 43,
+          "penanda": "Pengaturan"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Menu profil pengguna → Pengaturan → Keamanan",
+      "segmen": "Keamanan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 383,
+          "penanda": "Keamanan"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Password saat ini",
+      "segmen": "Password saat ini",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 202,
+          "penanda": "Password saat ini"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Password baru",
+      "segmen": "Password baru",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/SetPasswordPage.jsx",
+          "baris": 80,
+          "penanda": "Password baru"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Konfirmasi password baru",
+      "segmen": "Konfirmasi password baru",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 189,
+          "penanda": "Konfirmasi password baru"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Update Password",
+      "segmen": "Update Password",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 852,
+          "penanda": "Update Password"
+        }
+      ]
+    },
+    {
+      "slug": "sandi-dan-mfa",
+      "label_tebal": "Password berhasil diganti!",
+      "segmen": "Password berhasil diganti!",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 215,
+          "penanda": "Password berhasil diganti!"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Data Pasien",
+      "segmen": "Data Pasien",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 48,
+          "penanda": "Data Pasien"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Daftar Pasien",
+      "segmen": "Daftar Pasien",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 58,
+          "penanda": "Daftar Pasien"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Pasien Baru",
+      "segmen": "Pasien Baru",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/ReceptionistDashboard.jsx",
+          "baris": 423,
+          "penanda": "Pasien Baru"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Identitas & Jaminan",
+      "segmen": "Identitas & Jaminan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 493,
+          "penanda": "Identitas & Jaminan"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Lanjutkan →",
+      "segmen": "Lanjutkan →",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1013,
+          "penanda": "Lanjutkan →"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Alamat Domisili",
+      "segmen": "Alamat Domisili",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 556,
+          "penanda": "Alamat Domisili"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Daftar Pasien",
+      "segmen": "Daftar Pasien",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 58,
+          "penanda": "Daftar Pasien"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Daftar & Jadwalkan",
+      "segmen": "Daftar & Jadwalkan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1036,
+          "penanda": "Daftar & Jadwalkan"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Lanjut ke Penjadwalan →",
+      "segmen": "Lanjut ke Penjadwalan →",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1186,
+          "penanda": "Lanjut ke Penjadwalan →"
+        }
+      ]
+    },
+    {
+      "slug": "mendaftarkan-pasien-baru",
+      "label_tebal": "Simpan Jadwal",
+      "segmen": "Simpan Jadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 930,
+          "penanda": "Simpan Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "label_tebal": "Data Pasien",
+      "segmen": "Data Pasien",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 48,
+          "penanda": "Data Pasien"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "label_tebal": "Semua Gender",
+      "segmen": "Semua Gender",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 227,
+          "penanda": "Semua Gender"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "label_tebal": "Semua Status",
+      "segmen": "Semua Status",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientList.jsx",
+          "baris": 245,
+          "penanda": "Semua Status"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "label_tebal": "Lihat Detail",
+      "segmen": "Lihat Detail",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordList.jsx",
+          "baris": 242,
+          "penanda": "Lihat Detail"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "label_tebal": "Edit Data",
+      "segmen": "Edit Data",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 375,
+          "penanda": "Edit Data"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "label_tebal": "Simpan",
+      "segmen": "Simpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "Simpan"
+        }
+      ]
+    },
+    {
+      "slug": "mencari-memperbarui-pasien",
+      "label_tebal": "Batal",
+      "segmen": "Batal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 292,
+          "penanda": "Batal"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "label_tebal": "Daftar Pasien → Pasien Lama",
+      "segmen": "Daftar Pasien",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 58,
+          "penanda": "Daftar Pasien"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "label_tebal": "Daftar Pasien → Pasien Lama",
+      "segmen": "Pasien Lama",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 28,
+          "penanda": "Pasien Lama"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "label_tebal": "Jadwal Kunjungan Baru",
+      "segmen": "Jadwal Kunjungan Baru",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 1141,
+          "penanda": "Jadwal Kunjungan Baru"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "label_tebal": "Jadwalkan Kunjungan",
+      "segmen": "Jadwalkan Kunjungan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 714,
+          "penanda": "Jadwalkan Kunjungan"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "label_tebal": "Jadwal",
+      "segmen": "Jadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 73,
+          "penanda": "Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "kunjungan-pasien-lama",
+      "label_tebal": "Terjadwal",
+      "segmen": "Terjadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/AdminDashboard.jsx",
+          "baris": 108,
+          "penanda": "Terjadwal"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Jadwal Dokter",
+      "segmen": "Jadwal Dokter",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 29,
+          "penanda": "Jadwal Dokter"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Semua Dokter",
+      "segmen": "Semua Dokter",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 259,
+          "penanda": "Semua Dokter"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Tambah Jadwal",
+      "segmen": "Tambah Jadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 246,
+          "penanda": "Tambah Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Jam Mulai",
+      "segmen": "Jam Mulai",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 426,
+          "penanda": "Jam Mulai"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Jam Selesai",
+      "segmen": "Jam Selesai",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 437,
+          "penanda": "Jam Selesai"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Jumlah Pasien per Hari",
+      "segmen": "Jumlah Pasien per Hari",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 465,
+          "penanda": "Jumlah Pasien per Hari"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Tambah Jadwal",
+      "segmen": "Tambah Jadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/DoctorSchedulePage.jsx",
+          "baris": 246,
+          "penanda": "Tambah Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Edit",
+      "segmen": "Edit",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 5,
+          "penanda": "Edit"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Simpan Perubahan",
+      "segmen": "Simpan Perubahan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/profile/DoctorProfilePage.jsx",
+          "baris": 492,
+          "penanda": "Simpan Perubahan"
+        }
+      ]
+    },
+    {
+      "slug": "jadwal-praktik-dokter",
+      "label_tebal": "Nonaktifkan",
+      "segmen": "Nonaktifkan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 193,
+          "penanda": "Nonaktifkan"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Booking Online",
+      "segmen": "Booking Online",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 62,
+          "penanda": "Booking Online"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Menunggu",
+      "segmen": "Menunggu",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/queue/QueueDisplay.jsx",
+          "baris": 296,
+          "penanda": "Menunggu"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Muat ulang",
+      "segmen": "Muat ulang",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 101,
+          "penanda": "Muat ulang"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Jadwal",
+      "segmen": "Jadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 73,
+          "penanda": "Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Konfirmasi",
+      "segmen": "Konfirmasi",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/RegisterClinicPage.jsx",
+          "baris": 75,
+          "penanda": "Konfirmasi"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Tolak",
+      "segmen": "Tolak",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 97,
+          "penanda": "Tolak"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Kabari via WA",
+      "segmen": "Kabari via WA",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/schedule/BookingRequests.jsx",
+          "baris": 136,
+          "penanda": "Kabari via WA"
+        }
+      ]
+    },
+    {
+      "slug": "booking-online",
+      "label_tebal": "Daftarkan pasien",
+      "segmen": "Daftarkan pasien",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientRegistration.jsx",
+          "baris": 56,
+          "penanda": "Daftarkan pasien"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Jadwal Hari Ini",
+      "segmen": "Jadwal Hari Ini",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 46,
+          "penanda": "Jadwal Hari Ini"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Profil",
+      "segmen": "Profil",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 149,
+          "penanda": "Profil"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Rekam Medis",
+      "segmen": "Rekam Medis",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 49,
+          "penanda": "Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Terjadwal",
+      "segmen": "Terjadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/AdminDashboard.jsx",
+          "baris": 108,
+          "penanda": "Terjadwal"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Mulai",
+      "segmen": "Mulai",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
+          "baris": 167,
+          "penanda": "Mulai"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Berlangsung",
+      "segmen": "Berlangsung",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/AdminDashboard.jsx",
+          "baris": 109,
+          "penanda": "Berlangsung"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Simpan Rekam Medis",
+      "segmen": "Simpan Rekam Medis",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Berlangsung",
+      "segmen": "Berlangsung",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/AdminDashboard.jsx",
+          "baris": 109,
+          "penanda": "Berlangsung"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Selesai",
+      "segmen": "Selesai",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/AdminDashboard.jsx",
+          "baris": 110,
+          "penanda": "Selesai"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Batalkan",
+      "segmen": "Batalkan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 106,
+          "penanda": "Batalkan"
+        }
+      ]
+    },
+    {
+      "slug": "layanan-dokter",
+      "label_tebal": "Dibatalkan",
+      "segmen": "Dibatalkan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 81,
+          "penanda": "Dibatalkan"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Data Pasien",
+      "segmen": "Data Pasien",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 48,
+          "penanda": "Data Pasien"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Rekam Medis",
+      "segmen": "Rekam Medis",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 49,
+          "penanda": "Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Keluhan Utama",
+      "segmen": "Keluhan Utama",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 485,
+          "penanda": "Keluhan Utama"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Histori Kunjungan & SOAP",
+      "segmen": "Histori Kunjungan & SOAP",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1310,
+          "penanda": "Histori Kunjungan & SOAP"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Tambah Kunjungan",
+      "segmen": "Tambah Kunjungan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/ReceptionistDashboard.jsx",
+          "baris": 151,
+          "penanda": "Tambah Kunjungan"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Keluhan (S)",
+      "segmen": "Keluhan (S)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 490,
+          "penanda": "Keluhan (S)"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Diagnosa (A)",
+      "segmen": "Diagnosa (A)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 491,
+          "penanda": "Diagnosa (A)"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Terapi/Tindakan (P)",
+      "segmen": "Terapi/Tindakan (P)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 492,
+          "penanda": "Terapi/Tindakan (P)"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Template SOAP",
+      "segmen": "Template SOAP",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1380,
+          "penanda": "Template SOAP"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Simpan Rekam Medis",
+      "segmen": "Simpan Rekam Medis",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Berhasil disimpan!",
+      "segmen": "Berhasil disimpan!",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 624,
+          "penanda": "Berhasil disimpan!"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Pulihkan Draf",
+      "segmen": "Pulihkan Draf",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 710,
+          "penanda": "Pulihkan Draf"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Simpan Rekam Medis",
+      "segmen": "Simpan Rekam Medis",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "mengisi-rekam-medis",
+      "label_tebal": "Abaikan",
+      "segmen": "Abaikan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 716,
+          "penanda": "Abaikan"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "label_tebal": "Bantuan Simbol",
+      "segmen": "Bantuan Simbol",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1227,
+          "penanda": "Bantuan Simbol"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "label_tebal": "Mode Bridge",
+      "segmen": "Mode Bridge",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/odontogram/Odontogram.jsx",
+          "baris": 297,
+          "penanda": "Mode Bridge"
+        }
+      ]
+    },
+    {
+      "slug": "odontogram-dan-diagnosis",
+      "label_tebal": "Simpan Rekam Medis",
+      "segmen": "Simpan Rekam Medis",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "label_tebal": "Histori Kunjungan & SOAP",
+      "segmen": "Histori Kunjungan & SOAP",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1310,
+          "penanda": "Histori Kunjungan & SOAP"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "label_tebal": "Cari nama obat...",
+      "segmen": "Cari nama obat...",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/PrescriptionEntry.jsx",
+          "baris": 153,
+          "penanda": "Cari nama obat..."
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "label_tebal": "Simpan Rekam Medis",
+      "segmen": "Simpan Rekam Medis",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1509,
+          "penanda": "Simpan Rekam Medis"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "label_tebal": "Cetak Resep",
+      "segmen": "Cetak Resep",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1368,
+          "penanda": "Cetak Resep"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "label_tebal": "Informed Consent",
+      "segmen": "Informed Consent",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/ConsentFormModal.jsx",
+          "baris": 122,
+          "penanda": "Informed Consent"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "label_tebal": "Simpan Persetujuan",
+      "segmen": "Simpan Persetujuan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/ConsentFormModal.jsx",
+          "baris": 214,
+          "penanda": "Simpan Persetujuan"
+        }
+      ]
+    },
+    {
+      "slug": "resep-dan-persetujuan",
+      "label_tebal": "Informed Consents",
+      "segmen": "Informed Consents",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/medical-record/MedicalRecordForm.jsx",
+          "baris": 1460,
+          "penanda": "Informed Consents"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Jadwal",
+      "segmen": "Jadwal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 73,
+          "penanda": "Jadwal"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Selesai",
+      "segmen": "Selesai",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/AdminDashboard.jsx",
+          "baris": 110,
+          "penanda": "Selesai"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Uang Diterima",
+      "segmen": "Uang Diterima",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 245,
+          "penanda": "Uang Diterima"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "TOTAL BAYAR",
+      "segmen": "TOTAL BAYAR",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 712,
+          "penanda": "TOTAL BAYAR"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Lunas",
+      "segmen": "Lunas",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/ReceptionistDashboard.jsx",
+          "baris": 302,
+          "penanda": "Lunas"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Bayar Sebagian",
+      "segmen": "Bayar Sebagian",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1205,
+          "penanda": "Bayar Sebagian"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Pending",
+      "segmen": "Pending",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/dashboard/ReceptionistDashboard.jsx",
+          "baris": 69,
+          "penanda": "Pending"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Simpan Pembayaran",
+      "segmen": "Simpan Pembayaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 1253,
+          "penanda": "Simpan Pembayaran"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Pembayaran",
+      "segmen": "Pembayaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 66,
+          "penanda": "Pembayaran"
+        }
+      ]
+    },
+    {
+      "slug": "pembayaran-kunjungan",
+      "label_tebal": "Detail",
+      "segmen": "Detail",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/PatientAvatar.jsx",
+          "baris": 8,
+          "penanda": "Detail"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "label_tebal": "Pembayaran",
+      "segmen": "Pembayaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 66,
+          "penanda": "Pembayaran"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "label_tebal": "Detail",
+      "segmen": "Detail",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/PatientAvatar.jsx",
+          "baris": 8,
+          "penanda": "Detail"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "label_tebal": "Cetak Invoice",
+      "segmen": "Cetak Invoice",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        }
+      ]
+    },
+    {
+      "slug": "invoice-dan-kwitansi",
+      "label_tebal": "Kirim Ulang Invoice WA",
+      "segmen": "Kirim Ulang Invoice WA",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 772,
+          "penanda": "Kirim Ulang Invoice WA"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "label_tebal": "Biaya & Modal → Master Bahan & Gudang",
+      "segmen": "Biaya & Modal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 23,
+          "penanda": "Biaya & Modal"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "label_tebal": "Biaya & Modal → Master Bahan & Gudang",
+      "segmen": "Master Bahan & Gudang",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 17,
+          "penanda": "Master Bahan & Gudang"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "label_tebal": "Tambah Bahan Baru",
+      "segmen": "Tambah Bahan Baru",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 187,
+          "penanda": "Tambah Bahan Baru"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "label_tebal": "Simpan",
+      "segmen": "Simpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "Simpan"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "label_tebal": "Stok Masuk",
+      "segmen": "Stok Masuk",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 18,
+          "penanda": "Stok Masuk"
+        }
+      ]
+    },
+    {
+      "slug": "master-bahan",
+      "label_tebal": "Lihat Batch & Expired",
+      "segmen": "Lihat Batch & Expired",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 237,
+          "penanda": "Lihat Batch & Expired"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "label_tebal": "Biaya & Modal → Stok Masuk",
+      "segmen": "Biaya & Modal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 23,
+          "penanda": "Biaya & Modal"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "label_tebal": "Biaya & Modal → Stok Masuk",
+      "segmen": "Stok Masuk",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 18,
+          "penanda": "Stok Masuk"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "label_tebal": "Pilih Bahan",
+      "segmen": "Pilih Bahan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 146,
+          "penanda": "Pilih Bahan"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "label_tebal": "Proses Pembelian",
+      "segmen": "Proses Pembelian",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MaterialPurchases.jsx",
+          "baris": 245,
+          "penanda": "Proses Pembelian"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-stok-masuk",
+      "label_tebal": "Kartu Stok",
+      "segmen": "Kartu Stok",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 19,
+          "penanda": "Kartu Stok"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Biaya & Modal → Kartu Stok",
+      "segmen": "Biaya & Modal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 23,
+          "penanda": "Biaya & Modal"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Biaya & Modal → Kartu Stok",
+      "segmen": "Kartu Stok",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 19,
+          "penanda": "Kartu Stok"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Stok Opname → Lakukan Opname Baru",
+      "segmen": "Stok Opname",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 20,
+          "penanda": "Stok Opname"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Stok Opname → Lakukan Opname Baru",
+      "segmen": "Lakukan Opname Baru",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 126,
+          "penanda": "Lakukan Opname Baru"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Stok Sistem (Saat Ini)",
+      "segmen": "Stok Sistem (Saat Ini)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 216,
+          "penanda": "Stok Sistem (Saat Ini)"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Stok Fisik Aktual",
+      "segmen": "Stok Fisik Aktual",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 222,
+          "penanda": "Stok Fisik Aktual"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Selisih",
+      "segmen": "Selisih",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockMovements.jsx",
+          "baris": 81,
+          "penanda": "Selisih"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Catatan",
+      "segmen": "Catatan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 275,
+          "penanda": "Catatan"
+        }
+      ]
+    },
+    {
+      "slug": "opname-dan-kartu-stok",
+      "label_tebal": "Simpan Opname",
+      "segmen": "Simpan Opname",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/StockOpname.jsx",
+          "baris": 254,
+          "penanda": "Simpan Opname"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Biaya & Modal → Biaya Operasional → Tambah Biaya Overhead",
+      "segmen": "Biaya & Modal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 23,
+          "penanda": "Biaya & Modal"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Biaya & Modal → Biaya Operasional → Tambah Biaya Overhead",
+      "segmen": "Biaya Operasional",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 15,
+          "penanda": "Biaya Operasional"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Biaya & Modal → Biaya Operasional → Tambah Biaya Overhead",
+      "segmen": "Tambah Biaya Overhead",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 279,
+          "penanda": "Tambah Biaya Overhead"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Simpan",
+      "segmen": "Simpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "Simpan"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Target & Alokasi Bulanan",
+      "segmen": "Target & Alokasi Bulanan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 186,
+          "penanda": "Target & Alokasi Bulanan"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Edit Target",
+      "segmen": "Edit Target",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 222,
+          "penanda": "Edit Target"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Estimasi Total Bobot Tindakan",
+      "segmen": "Estimasi Total Bobot Tindakan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 240,
+          "penanda": "Estimasi Total Bobot Tindakan"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Kunci Target",
+      "segmen": "Kunci Target",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/OverheadCosts.jsx",
+          "baris": 262,
+          "penanda": "Kunci Target"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Resep Bahan (BOM)",
+      "segmen": "Resep Bahan (BOM)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 16,
+          "penanda": "Resep Bahan (BOM)"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Tambah Bahan",
+      "segmen": "Tambah Bahan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/MasterBahan.jsx",
+          "baris": 187,
+          "penanda": "Tambah Bahan"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Wastage (%)",
+      "segmen": "Wastage (%)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 283,
+          "penanda": "Wastage (%)"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Bahan Wajib",
+      "segmen": "Bahan Wajib",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/TreatmentBOM.jsx",
+          "baris": 310,
+          "penanda": "Bahan Wajib"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Simpan",
+      "segmen": "Simpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "Simpan"
+        }
+      ]
+    },
+    {
+      "slug": "biaya-hpp-dan-margin",
+      "label_tebal": "Lap. Profitabilitas",
+      "segmen": "Lap. Profitabilitas",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/costing/CostingDashboard.jsx",
+          "baris": 21,
+          "penanda": "Lap. Profitabilitas"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Pengeluaran",
+      "segmen": "Pengeluaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 21,
+          "penanda": "Pengeluaran"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Tambah",
+      "segmen": "Tambah",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 121,
+          "penanda": "Tambah"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Pindai nota",
+      "segmen": "Pindai nota",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 304,
+          "penanda": "Pindai nota"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Simpan",
+      "segmen": "Simpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 302,
+          "penanda": "Simpan"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Tetap simpan",
+      "segmen": "Tetap simpan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 399,
+          "penanda": "Tetap simpan"
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Pengeluaran disimpan.",
+      "segmen": "Pengeluaran disimpan.",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 190,
+          "penanda": "Pengeluaran disimpan."
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Pengeluaran diperbarui.",
+      "segmen": "Pengeluaran diperbarui.",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/financial/ExpensesPage.jsx",
+          "baris": 190,
+          "penanda": "Pengeluaran diperbarui."
+        }
+      ]
+    },
+    {
+      "slug": "mencatat-pengeluaran",
+      "label_tebal": "Ubah",
+      "segmen": "Ubah",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/ICD10Picker.jsx",
+          "baris": 125,
+          "penanda": "Ubah"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "label_tebal": "Layar Antrean",
+      "segmen": "Layar Antrean",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 39,
+          "penanda": "Layar Antrean"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "label_tebal": "Buat tautan",
+      "segmen": "Buat tautan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 85,
+          "penanda": "Buat tautan"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "label_tebal": "Salin tautan",
+      "segmen": "Salin tautan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 72,
+          "penanda": "Salin tautan"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "label_tebal": "Tautan yang pernah dibuat → Cabut",
+      "segmen": "Tautan yang pernah dibuat",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 134,
+          "penanda": "Tautan yang pernah dibuat"
+        }
+      ]
+    },
+    {
+      "slug": "layar-antrean-tv",
+      "label_tebal": "Tautan yang pernah dibuat → Cabut",
+      "segmen": "Cabut",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/QueueDisplayLinks.jsx",
+          "baris": 57,
+          "penanda": "Cabut"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "label_tebal": "Buka Denti, pemandu Dentiva",
+      "segmen": "Buka Denti, pemandu Dentiva",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/DentiGuideWidget.jsx",
+          "baris": 210,
+          "penanda": "Buka Denti, pemandu Dentiva"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "label_tebal": "Kirim",
+      "segmen": "Kirim",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 732,
+          "penanda": "Kirim"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "label_tebal": "Asisten AI",
+      "segmen": "Asisten AI",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 464,
+          "penanda": "Asisten AI"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "label_tebal": "Kirim",
+      "segmen": "Kirim",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 732,
+          "penanda": "Kirim"
+        }
+      ]
+    },
+    {
+      "slug": "menggunakan-denti",
+      "label_tebal": "Pindai nota agar Denti mencatatnya",
+      "segmen": "Pindai nota agar Denti mencatatnya",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 722,
+          "penanda": "Pindai nota agar Denti mencatatnya"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Asisten AI",
+      "segmen": "Asisten AI",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 464,
+          "penanda": "Asisten AI"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Usulan tindakan Denti",
+      "segmen": "Usulan tindakan Denti",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 65,
+          "penanda": "Usulan tindakan Denti"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Tolak",
+      "segmen": "Tolak",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 97,
+          "penanda": "Tolak"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Ditolak",
+      "segmen": "Ditolak",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 80,
+          "penanda": "Ditolak"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Setujui",
+      "segmen": "Setujui",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 7,
+          "penanda": "Setujui"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Dijalankan",
+      "segmen": "Dijalankan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 79,
+          "penanda": "Dijalankan"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Setujui semua",
+      "segmen": "Setujui semua",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 120,
+          "penanda": "Setujui semua"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Lihat di Pengeluaran",
+      "segmen": "Lihat di Pengeluaran",
+      "jenis": "dinamis",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 104,
+          "penanda": "Lihat di {link.label}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 21,
+          "penanda": "label: 'Pengeluaran'"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Lihat di Master Treatment",
+      "segmen": "Lihat di Master Treatment",
+      "jenis": "dinamis",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 104,
+          "penanda": "Lihat di {link.label}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 22,
+          "penanda": "label: 'Master Treatment'"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Lihat di Biaya & Modal",
+      "segmen": "Lihat di Biaya & Modal",
+      "jenis": "dinamis",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 104,
+          "penanda": "Lihat di {link.label}"
+        },
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 23,
+          "penanda": "label: 'Biaya & Modal'"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Batalkan",
+      "segmen": "Batalkan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 106,
+          "penanda": "Batalkan"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Dibatalkan",
+      "segmen": "Dibatalkan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 81,
+          "penanda": "Dibatalkan"
+        }
+      ]
+    },
+    {
+      "slug": "usulan-denti",
+      "label_tebal": "Kedaluwarsa",
+      "segmen": "Kedaluwarsa",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 82,
+          "penanda": "Kedaluwarsa"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Unduh aplikasi desktop",
+      "segmen": "Unduh aplikasi desktop",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 276,
+          "penanda": "Unduh aplikasi desktop"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Masuk ke Sistem",
+      "segmen": "Masuk ke Sistem",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 266,
+          "penanda": "Masuk ke Sistem"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Dentiva … tersedia",
+      "segmen": "Dentiva … tersedia",
+      "jenis": "dinamis",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 84,
+          "penanda": "Dentiva {update.version} tersedia"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Perbarui sekarang",
+      "segmen": "Perbarui sekarang",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 101,
+          "penanda": "Perbarui sekarang"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Nanti",
+      "segmen": "Nanti",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 103,
+          "penanda": "Nanti"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Coba lagi",
+      "segmen": "Coba lagi",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 29,
+          "penanda": "Coba lagi"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Pembayaran → Detail → Cetak Invoice",
+      "segmen": "Pembayaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 66,
+          "penanda": "Pembayaran"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Pembayaran → Detail → Cetak Invoice",
+      "segmen": "Detail",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/PatientAvatar.jsx",
+          "baris": 8,
+          "penanda": "Detail"
+        }
+      ]
+    },
+    {
+      "slug": "aplikasi-desktop",
+      "label_tebal": "Pembayaran → Detail → Cetak Invoice",
+      "segmen": "Cetak Invoice",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "label_tebal": "Menu profil pengguna",
+      "segmen": "Menu profil pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "label_tebal": "Akses Ditolak",
+      "segmen": "Akses Ditolak",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/AccessDenied.jsx",
+          "baris": 18,
+          "penanda": "Akses Ditolak"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "label_tebal": "Kembali ke Dashboard",
+      "segmen": "Kembali ke Dashboard",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/AccessDenied.jsx",
+          "baris": 28,
+          "penanda": "Kembali ke Dashboard"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "label_tebal": "Catat Permintaan",
+      "segmen": "Catat Permintaan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/patient/PatientDetail.jsx",
+          "baris": 831,
+          "penanda": "Catat Permintaan"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "label_tebal": "Menu profil pengguna → Keluar",
+      "segmen": "Menu profil pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/layout/TopBar.jsx",
+          "baris": 136,
+          "penanda": "Menu profil pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "privasi-dan-backup",
+      "label_tebal": "Menu profil pengguna → Keluar",
+      "segmen": "Keluar",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/ClinicUnavailable.jsx",
+          "baris": 68,
+          "penanda": "Keluar"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Kembali ke Dashboard",
+      "segmen": "Kembali ke Dashboard",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/AccessDenied.jsx",
+          "baris": 28,
+          "penanda": "Kembali ke Dashboard"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Coba lagi",
+      "segmen": "Coba lagi",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 29,
+          "penanda": "Coba lagi"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Aplikasi Mengalami Kendala",
+      "segmen": "Aplikasi Mengalami Kendala",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/ErrorBoundary.jsx",
+          "baris": 32,
+          "penanda": "Aplikasi Mengalami Kendala"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Muat Ulang Halaman",
+      "segmen": "Muat Ulang Halaman",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/ErrorBoundary.jsx",
+          "baris": 41,
+          "penanda": "Muat Ulang Halaman"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Asisten AI",
+      "segmen": "Asisten AI",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 464,
+          "penanda": "Asisten AI"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Pengeluaran",
+      "segmen": "Pengeluaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 21,
+          "penanda": "Pengeluaran"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Biaya & Modal",
+      "segmen": "Biaya & Modal",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AgentActions.jsx",
+          "baris": 23,
+          "penanda": "Biaya & Modal"
+        }
+      ]
+    },
+    {
+      "slug": "faq-pemecahan-masalah",
+      "label_tebal": "Periksa lagi",
+      "segmen": "Periksa lagi",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/ClinicUnavailable.jsx",
+          "baris": 19,
+          "penanda": "Periksa lagi"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Lupa password?",
+      "segmen": "Lupa password?",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/auth/LoginPage.jsx",
+          "baris": 95,
+          "penanda": "Lupa password?"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pengaturan → Keamanan",
+      "segmen": "Pengaturan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/BottomNav.jsx",
+          "baris": 43,
+          "penanda": "Pengaturan"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pengaturan → Keamanan",
+      "segmen": "Keamanan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 383,
+          "penanda": "Keamanan"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Aktifkan 2FA (Nonaktif)",
+      "segmen": "Aktifkan 2FA (Nonaktif)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 810,
+          "penanda": "Aktifkan 2FA (Nonaktif)"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pengaturan → Database",
+      "segmen": "Pengaturan",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/BottomNav.jsx",
+          "baris": 43,
+          "penanda": "Pengaturan"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pengaturan → Database",
+      "segmen": "Database",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/ai/AiAssistantPage.jsx",
+          "baris": 5,
+          "penanda": "Database"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Buat Backup Sekarang (Nonaktif)",
+      "segmen": "Buat Backup Sekarang (Nonaktif)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1252,
+          "penanda": "Buat Backup Sekarang (Nonaktif)"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pilih File Backup (Nonaktif)",
+      "segmen": "Pilih File Backup (Nonaktif)",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/settings/SettingsPage.jsx",
+          "baris": 1263,
+          "penanda": "Pilih File Backup (Nonaktif)"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Dentiva … tersedia",
+      "segmen": "Dentiva … tersedia",
+      "jenis": "dinamis",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/DesktopUpdater.jsx",
+          "baris": 84,
+          "penanda": "Dentiva {update.version} tersedia"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pembayaran → Detail → Cetak Invoice",
+      "segmen": "Pembayaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 66,
+          "penanda": "Pembayaran"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pembayaran → Detail → Cetak Invoice",
+      "segmen": "Detail",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/PatientAvatar.jsx",
+          "baris": 8,
+          "penanda": "Detail"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pembayaran → Detail → Cetak Invoice",
+      "segmen": "Cetak Invoice",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Cetak Invoice",
+      "segmen": "Cetak Invoice",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/payment/PaymentForm.jsx",
+          "baris": 762,
+          "penanda": "Cetak Invoice"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Kelola Pengguna → Tambah Staf",
+      "segmen": "Kelola Pengguna",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 39,
+          "penanda": "Kelola Pengguna"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Kelola Pengguna → Tambah Staf",
+      "segmen": "Tambah Staf",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/admin/UserManagementPage.jsx",
+          "baris": 121,
+          "penanda": "Tambah Staf"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pembayaran → Detail",
+      "segmen": "Pembayaran",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/Sidebar.jsx",
+          "baris": 66,
+          "penanda": "Pembayaran"
+        }
+      ]
+    },
+    {
+      "slug": "status-layanan",
+      "label_tebal": "Pembayaran → Detail",
+      "segmen": "Detail",
+      "jenis": "literal",
+      "sumber": [
+        {
+          "berkas": "apps/clinic/src/components/common/PatientAvatar.jsx",
+          "baris": 8,
+          "penanda": "Detail"
+        }
+      ]
+    }
+  ]
+}

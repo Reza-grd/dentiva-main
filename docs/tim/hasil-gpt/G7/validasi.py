@@ -1,117 +1,195 @@
-"""Validasi editorial G7, tanpa dependency, jaringan, atau mutasi aplikasi."""
-from collections import Counter
+"""Periksa naskah terbit G7b: istilah, indeks/tautan, label UI, dan rujukan langkah."""
 from pathlib import Path
+from collections import Counter
 import hashlib
 import io
 import json
 import re
 import subprocess
+import unicodedata
 
 OUT = Path(__file__).resolve().parent
 ROOT = OUT.parents[3]
+# Istilah implementasi tidak menjadi bagian panduan staf, termasuk halaman status.
+FORBIDDEN = re.compile(
+    r"\b(?:SMTP|offsite|VPS|RLS|GoTrue|aal2|PGlite|Supabase|PostgREST|JWT|RPC|"
+    r"backend|frontend|sessionStorage|localStorage|placeholder|updater|"
+    r"deployment|deploy|worktree|commit|repo|repository|rasterisasi|"
+    r"server|snapshot|harness)\b|edge[ -]functions?|"
+    r"(?:apps|supabase|packages|infra|docs)/|"
+    r"\b[\w-]+\.(?:jsx|tsx|js|ts|py|sql|mjs|toml)\b|kode sumber",
+    re.I)
+TEMPORARY = re.compile(
+    r"(?:MFA|2FA).*(?:belum tersedia|\bNonaktif\b)|"
+    r"(?:email|cadangan|backup|pembaruan otomatis).*(?:belum aktif|belum tersedia|belum dijamin)|"
+    r"(?:kunci publik|alamat tetap|formulir saat ini hanya)", re.I)
+
 
 def load(name):
     return json.loads((OUT / name).read_text(encoding='utf-8'))
 
+
+def dump(name, data):
+    (OUT / name).write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
+
+
+def steps(text):
+    body = text.split('## Langkah\n', 1)[1].split('\n## ', 1)[0]
+    return [(int(n), value) for n, value in re.findall(r'^(\d+)\. (.+)$', body, re.M)]
+
+
+def anchors(text):
+    result = set(re.findall(r'<a id="([^"]+)"', text))
+    for title in re.findall(r'^#{1,6} (.+)$', text, re.M):
+        title = title.lower().replace(' ', '-')
+        result.add(''.join(c for c in title if unicodedata.category(c)[0] in 'LN' or c in '_-'))
+    return result
+
+
 def validate():
-    index = load('indeks.json')
-    manifest = load('sumber-langkah.json')
-    assert isinstance(index, list) and len(index) == 25
+    index, manifest = load('indeks.json'), load('sumber-langkah.json')
+    assert isinstance(index, list) and len(index) == 26
     slugs = [a['slug'] for a in index]
     assert len(set(slugs)) == len(slugs)
+    assert 'status-layanan' in slugs
     assert set(slugs) == {p.stem for p in (OUT / 'artikel').glob('*.md')}
-    valid_roles = {'admin', 'dokter', 'resepsionis'}
-    role_counts, steps, links, refs = Counter(), 0, 0, 0
-    evidence = {(s['slug'], s['langkah']): s for s in manifest['langkah']}
-    assert len(evidence) == len(manifest['langkah'])
-    used_sources = set()
+    articles = {s: (OUT / 'artikel' / (s + '.md')).read_text(encoding='utf-8') for s in slugs}
+    roles = Counter()
+    hits = []
+    for slug, text in articles.items():
+        hits.extend({'slug': slug, 'istilah': m.group(0)} for m in FORBIDDEN.finditer(text))
+        assert '[^langkah-' not in text and 'Rujukan langkah untuk peninjau' not in text
+        assert '\ufffd' not in text
+        if slug != 'status-layanan':
+            assert not TEMPORARY.search(text), (slug, 'Status sementara di luar halaman status')
+    assert not hits, hits
+    assert not FORBIDDEN.search((OUT / 'glosarium.md').read_text(encoding='utf-8'))
+    records = {(x['slug'], x['langkah']): x for x in manifest['langkah']}
+    assert len(records) == len(manifest['langkah'])
+    used, total_steps, ref_count = set(), 0, 0
     for a in index:
         assert set(a) == {'slug', 'judul', 'peran', 'kata_kunci'}
         assert re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', a['slug'])
-        assert a['judul'].strip() and a['peran'] and a['kata_kunci']
-        assert set(a['peran']) <= valid_roles
+        assert a['peran'] and set(a['peran']) <= {'admin', 'dokter', 'resepsionis'}
         assert len(a['peran']) == len(set(a['peran']))
-        assert all(isinstance(x, str) and x.strip() for x in a['kata_kunci'])
-        role_counts.update(a['peran'])
-        p = OUT / 'artikel' / (a['slug'] + '.md')
-        text = p.read_text(encoding='utf-8')
+        assert a['kata_kunci'] and all(isinstance(k, str) and k.strip() for k in a['kata_kunci'])
+        roles.update(a['peran'])
+        text = articles[a['slug']]
         assert text.startswith('# ' + a['judul'] + '\n')
         assert text.count('\n# ') == 0
-        for h in ['**Untuk siapa:**', '## Langkah', '## Catatan keamanan', '## Artikel terkait', '## Rujukan langkah untuk peninjau']:
-            assert h in text, (p.name, h)
+        for required in ['**Untuk siapa:**', '## Langkah', '## Catatan keamanan', '## Artikel terkait']:
+            assert required in text, (a['slug'], required)
         for role in a['peran']:
             assert role in text.split('**Untuk siapa:**', 1)[1].split('\n', 1)[0]
-        body = text.split('## Langkah\n', 1)[1].split('\n## ', 1)[0]
-        numbered = re.findall(r'^(\d+)\. (.+) \[\^langkah-(\d+)\]$', body, re.M)
+        numbered = steps(text)
         assert len(numbered) >= 3
-        assert len(numbered) == len(re.findall(r'^\d+\. ', body, re.M))
-        assert [int(n) for n, _, _ in numbered] == list(range(1, len(numbered) + 1))
-        assert len(re.findall(r'^\[\^langkah-\d+\]:', text, re.M)) == len(numbered)
-        for num, content, foot in numbered:
-            assert num == foot
-            key = (a['slug'], int(num))
-            record = evidence.pop(key)
-            assert record['teks'] == content
+        assert [n for n, _ in numbered] == list(range(1, len(numbered) + 1))
+        for n, content in numbered:
+            record = records.pop((a['slug'], n))
+            assert record['teks'] == content, (a['slug'], n)
             assert record['rujukan']
             assert any(r['berkas'].startswith('apps/clinic/src/components/') for r in record['rujukan'])
-            footnote = re.search(r'^\[\^langkah-' + num + r'\]: (.+)$', text, re.M).group(1)
             for r in record['rujukan']:
-                relative = r['berkas']
-                used_sources.add(relative)
-                lines = (ROOT / relative).read_text(encoding='utf-8').splitlines()
-                assert 1 <= r['baris'] <= len(lines)
-                assert r['penanda'] in lines[r['baris'] - 1], (key, r)
-                assert f"`{relative}:{r['baris']}`" in footnote
-                refs += 1
-            steps += 1
-        related = text.split('## Artikel terkait\n', 1)[1].split('\n## ', 1)[0]
+                used.add(r['berkas'])
+                lines = (ROOT / r['berkas']).read_text(encoding='utf-8').splitlines()
+                assert r['penanda'] in lines[r['baris'] - 1], (a['slug'], n, r)
+                ref_count += 1
+            total_steps += 1
+        related = text.split('## Artikel terkait\n', 1)[1]
         targets = re.findall(r'\]\(([^)]+)\)', related)
         assert len(targets) >= 2
-        assert all(t.endswith('.md') and Path(t).stem in slugs and Path(t).stem != a['slug'] for t in targets)
-    assert not evidence
-    assert used_sources == set(manifest['sha256_sumber'])
-    source_paths = list(manifest['sha256_sumber'])
-    objects = subprocess.check_output(
-        ['git', 'cat-file', '--batch'], cwd=ROOT,
-        input=''.join(manifest['commit_sumber'] + ':' + p + '\n' for p in source_paths).encode('utf-8'))
+        assert all(Path(t.split('#')[0]).stem in slugs and Path(t.split('#')[0]).stem != a['slug'] for t in targets)
+    assert not records
+    assert used == set(manifest['sha256_sumber'])
+    hashes = dict(manifest['sha256_sumber'])
+    for item in manifest['konteks']:
+        lines = (ROOT / item['berkas']).read_text(encoding='utf-8').splitlines()
+        assert item['penanda'] in lines[item['baris'] - 1]
+        hashes[item['berkas']] = item['sha256']
+    objects = subprocess.check_output(['git', 'cat-file', '--batch'], cwd=ROOT,
+        input=''.join(manifest['commit_sumber'] + ':' + p + '\n' for p in hashes).encode('utf-8'))
     stream = io.BytesIO(objects)
-    for relative, expected in manifest['sha256_sumber'].items():
-        data = (ROOT / relative).read_bytes()
-        assert hashlib.sha256(data).hexdigest() == expected, relative
-        # Git normalisasi LF; nomor baris dan isi harus cocok dengan snapshot tercatat.
+    for path, expected in hashes.items():
+        raw = (ROOT / path).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == expected, path
         header = stream.readline().decode('ascii').split()
-        assert len(header) == 3 and header[1] == 'blob', (relative, header)
+        assert len(header) == 3 and header[1] == 'blob'
         original = stream.read(int(header[2]))
         assert stream.read(1) == b'\n'
-        assert original.decode('utf-8').splitlines() == data.decode('utf-8').splitlines(), relative
+        assert original.decode('utf-8').splitlines() == raw.decode('utf-8').splitlines(), path
     assert stream.read() == b''
-    for p in OUT.rglob('*.md'):
-        t = p.read_text(encoding='utf-8')
-        assert '\ufffd' not in t, p
-        for target in re.findall(r'(?<!!)\[[^\]\n]+\]\(([^)]+)\)', t):
-            if re.match(r'\w+://|mailto:|#', target):
+    # Setiap label tebal diperiksa; hanya label dinamis yang dibuktikan boleh dirakit.
+    components = {p.relative_to(ROOT).as_posix(): p.read_text(encoding='utf-8')
+                  for p in sorted((ROOT / 'apps/clinic/src/components').rglob('*.jsx'))}
+    label_proof, counts, groups = [], Counter(), 0
+    for slug, text in articles.items():
+        for whole in re.findall(r'\*\*([^*\n]+)\*\*', text):
+            if whole == 'Untuk siapa:':
                 continue
-            local = target.split('#', 1)[0]
-            assert (p.parent / local).exists(), (p.name, target)
-            links += 1
-    assert (OUT / 'glosarium.md').exists()
-    assert (ROOT / 'docs/tim/serah-terima/G7.md').exists()
-    report = {
-        'status': 'lulus', 'commit_sumber': manifest['commit_sumber'],
-        'artikel': len(index), 'langkah': steps, 'rujukan_langkah': refs,
-        'komponen_berhash': len(used_sources), 'tautan_lokal': links,
-        'artikel_per_peran': dict(sorted(role_counts.items())),
-        'pemeriksaan': ['indeks JSON dan schema', 'slug unik dan artikel tepat sesuai indeks',
-                        'judul, peran dan bagian wajib', '130 langkah berurutan dan catatan kaki',
-                        'teks langkah sama dengan manifest', 'setiap langkah memiliki rujukan komponen',
-                        'baris dan penanda sumber cocok', 'SHA-256 komponen cocok',
-                        'sumber sama dengan commit tercatat', 'tautan Markdown lokal ada',
-                        'UTF-8 tanpa karakter pengganti', 'glosarium dan serah-terima tersedia'],
-        'batasan': ['Pembacaan kode; belum uji klik runtime, axe, atau backend produksi.',
-                    'Validasi rujukan bukan pembuktian otomatis ketepatan makna.',
-                    'Lint/typecheck/test/build aplikasi tidak dijalankan untuk paket dokumentasi ini.']
-    }
-    (OUT / 'validasi.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+            groups += 1
+            for label in re.split(r'\s+→\s+', whole):
+                found = next(((p, src) for p, src in components.items() if label in src), None)
+                if found:
+                    path, src = found
+                    line = next(i for i, s in enumerate(src.splitlines(), 1) if label in s)
+                    result = {'jenis': 'literal', 'sumber': [{'berkas': path, 'baris': line, 'penanda': label}]}
+                elif label == 'Dentiva … tersedia':
+                    path = 'apps/clinic/src/components/common/DesktopUpdater.jsx'
+                    anchor = 'Dentiva {update.version} tersedia'
+                    assert anchor in components[path]
+                    line = next(i for i, s in enumerate(components[path].splitlines(), 1) if anchor in s)
+                    result = {'jenis': 'dinamis', 'sumber': [{'berkas': path, 'baris': line, 'penanda': anchor}]}
+                elif label in ['Lihat di Pengeluaran', 'Lihat di Master Treatment', 'Lihat di Biaya & Modal']:
+                    path = 'apps/clinic/src/components/ai/AgentActions.jsx'
+                    parts = ['Lihat di {link.label}', "label: '" + label.removeprefix('Lihat di ') + "'"]
+                    refs = []
+                    for anchor in parts:
+                        assert anchor in components[path]
+                        line = next(i for i, s in enumerate(components[path].splitlines(), 1) if anchor in s)
+                        refs.append({'berkas': path, 'baris': line, 'penanda': anchor})
+                    result = {'jenis': 'dinamis', 'sumber': refs}
+                else:
+                    result = {'jenis': 'tidak_ditemukan', 'sumber': []}
+                counts[result['jenis']] += 1
+                label_proof.append({'slug': slug, 'label_tebal': whole, 'segmen': label, **result})
+    dump('bukti-label.json', {'commit_sumber': manifest['commit_sumber'], 'kelompok_tebal': groups,
+        'segmen_label': sum(counts.values()), 'ringkasan': dict(counts), 'bukti': label_proof})
+    assert not counts['tidak_ditemukan'], [x for x in label_proof if x['jenis'] == 'tidak_ditemukan']
+    link_count, article_links = 0, 0
+    for p in OUT.rglob('*.md'):
+        text = p.read_text(encoding='utf-8')
+        for target in re.findall(r'(?<!!)\[[^\]\n]+\]\(([^)]+)\)', text):
+            if re.match(r'\w+://|mailto:', target):
+                continue
+            local, _, fragment = target.partition('#')
+            dest = (p.parent / local) if local else p
+            assert dest.is_file(), (p.name, target)
+            if fragment:
+                assert fragment in anchors(dest.read_text(encoding='utf-8')), (p.name, target)
+            link_count += 1
+            if p.parent == OUT / 'artikel':
+                article_links += 1
+    status = articles['status-layanan']
+    markers = re.findall(r'<!-- STATUS:([a-z0-9-]+) -->', status)
+    assert len(markers) == len(set(markers)) == 8
+    assert set(markers) <= anchors(status)
+    readme = (OUT / 'README.md').read_text(encoding='utf-8')
+    assert '## Saat fitur aktif, ubah ini' in readme
+    assert all('`STATUS:' + m + '`' in readme for m in markers)
+    assert (ROOT / 'docs/tim/serah-terima/G7b.md').exists()
+    report = {'status': 'lulus', 'commit_sumber': manifest['commit_sumber'],
+        'artikel': len(index), 'artikel_lama_diubah': 25, 'artikel_baru': 1,
+        'istilah_terlarang': {'seluruh_artikel_termasuk_status': len(hits), 'temuan': hits},
+        'indeks_terurai': True, 'status_layanan_terindeks': True,
+        'tautan_lokal_valid': link_count, 'tautan_dalam_artikel_valid': article_links, 'tautan_rusak': 0,
+        'label': {'kelompok_tebal': groups, 'segmen_diperiksa': sum(counts.values()),
+                  'literal': counts['literal'], 'dinamis_terbukti': counts['dinamis'], 'tidak_ditemukan': 0},
+        'langkah': total_steps, 'rujukan_langkah': ref_count, 'komponen_berhash': len(used),
+        'penanda_status': markers, 'artikel_per_peran': dict(sorted(roles.items())),
+        'batasan': ['Validasi terhadap kode; bukan uji klik atau kesiapan layanan produksi.',
+                    'Label literal diperiksa sebagai teks persis di komponen; label dinamis memiliki bukti perakitan.',
+                    'Lint/typecheck/test/build aplikasi tidak dijalankan untuk revisi dokumentasi ini.']}
+    dump('validasi.json', report)
     print(json.dumps(report, ensure_ascii=False, indent=2))
 
 if __name__ == '__main__':
