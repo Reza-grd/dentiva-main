@@ -205,7 +205,7 @@ describe('Maskot Denti — polesan A1b (orbit, pegas lompat, glow hero, kontras 
     expect(mini.querySelector('.d-chest-glow')).toBeNull();
   });
 
-  it('(4) warna tepi (#edge) pada LOD mini memiliki rasio kontras WCAG >= 3:1 terhadap putih (#ffffff)', () => {
+  it('(4) kontras warna Denti Teal (A1c) memenuhi standar WCAG: outline terang vs #FFFFFF >= 3:1, tepi gelap vs #0B1220 >= 3:1, wajah #5EEAD4 vs visor #0B1220 >= 4.5:1', () => {
     const relLum = (hex) => {
       const n = parseInt(hex.replace('#', ''), 16);
       const chans = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
@@ -214,18 +214,62 @@ describe('Maskot Denti — polesan A1b (orbit, pegas lompat, glow hero, kontras 
       });
       return 0.2126 * chans[0] + 0.7152 * chans[1] + 0.0722 * chans[2];
     };
-    const contrastVsWhite = (hex) => (1.0 + 0.05) / (relLum(hex) + 0.05);
+    const contrast = (hexA, hexB) => {
+      const l1 = relLum(hexA);
+      const l2 = relLum(hexB);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    };
 
-    const { container } = render(<DentiMascot size={58} />);
-    const edgeGrad = [...container.querySelectorAll('linearGradient')].find((g) => g.id.endsWith('-edge'));
-    expect(edgeGrad).toBeDefined();
-    const stops = [...edgeGrad.querySelectorAll('stop')];
-    expect(stops.length).toBe(2);
-    for (const stop of stops) {
-      const color = stop.getAttribute('stop-color');
-      const opacity = Number(stop.getAttribute('stop-opacity') ?? '1');
-      expect(opacity).toBe(1);
-      expect(contrastVsWhite(color)).toBeGreaterThanOrEqual(3.0);
-    }
+    // 1. Outline tema terang (#163047) vs putih (#FFFFFF) >= 3:1 (aktual ~13.57:1) & vs enamel (#F8FAFC) >= 3:1
+    expect(contrast('#163047', '#FFFFFF')).toBeGreaterThanOrEqual(3.0);
+    expect(contrast('#163047', '#F8FAFC')).toBeGreaterThanOrEqual(3.0);
+
+    // 2. Tepi luar tema gelap (--d-outline: #5EEAD4) vs latar gelap (#0B1220) >= 3:1 (aktual ~12.66:1)
+    expect(css).toMatch(/\.dark\s+\.denti[^{]*\{[^}]*--d-outline:\s*#5EEAD4/i);
+    expect(contrast('#5EEAD4', '#0B1220')).toBeGreaterThanOrEqual(3.0);
+
+    // 3. Wajah/mata/mulut (#5EEAD4) vs visor (#0B1220) >= 4.5:1 (aktual ~12.66:1)
+    const { container } = render(<DentiMascot size={220} />);
+    const visorFill = container.querySelector('.d-visor > path').getAttribute('fill');
+    const eyeFill = container.querySelector('.d-eye-l').getAttribute('fill');
+    const smileStroke = container.querySelector('.d-mouth-smile').getAttribute('stroke');
+    expect(visorFill).toBe('#0B1220');
+    expect(eyeFill).toBe('#5EEAD4');
+    expect(smileStroke).toBe('#5EEAD4');
+    expect(contrast(eyeFill, visorFill)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it('(5) aturan LOD G1/A1c: 0 <filter> di semua LOD, mini 0 gradien & stroke >= 13, standar <= 1 gradien, hero <= 3 gradien, ID unik per instans', () => {
+    const { container: mini } = render(<DentiMascot size={58} />);
+    expect(mini.querySelectorAll('filter, [filter]').length).toBe(0);
+    expect(mini.querySelectorAll('linearGradient, radialGradient').length).toBe(0);
+    expect(Number(mini.querySelector('.d-body > path').getAttribute('stroke-width'))).toBeGreaterThanOrEqual(13);
+
+    const { container: standar } = render(<DentiMascot size={120} />);
+    expect(standar.querySelectorAll('filter, [filter]').length).toBe(0);
+    expect(standar.querySelectorAll('linearGradient, radialGradient').length).toBeLessThanOrEqual(1);
+    expect(Number(standar.querySelector('.d-body > path').getAttribute('stroke-width'))).toBe(7);
+
+    const { container: hero } = render(<DentiMascot size={220} />);
+    expect(hero.querySelectorAll('filter, [filter]').length).toBe(0);
+    expect(hero.querySelectorAll('linearGradient, radialGradient').length).toBeLessThanOrEqual(3);
+    expect(Number(hero.querySelector('.d-body > path').getAttribute('stroke-width'))).toBe(4);
+
+    // Dua instans Denti di satu halaman memiliki seluruh ID defs unik
+    const { container: dual } = render(<><DentiMascot size={220} /><DentiMascot size={220} /></>);
+    const allIds = [...dual.querySelectorAll('defs [id]')].map((el) => el.id);
+    expect(allIds.length).toBeGreaterThan(0);
+    expect(new Set(allIds).size).toBe(allIds.length);
+  });
+
+  it('(6) alis state sorry (.d-lids) dan worried (.d-brows-w) berupa garis lengkung ramah (#5EEAD4, fill="none"), bukan balok poligon gelap', () => {
+    const { container } = render(<DentiMascot state="sorry" size={220} />);
+    const lids = container.querySelector('.d-lids');
+    const browsW = container.querySelector('.d-brows-w');
+    expect(lids.getAttribute('fill')).toBe('none');
+    expect(lids.getAttribute('stroke')).toBe('#5EEAD4');
+    expect(browsW.getAttribute('fill')).toBe('none');
+    expect(browsW.getAttribute('stroke')).toBe('#5EEAD4');
   });
 });
+
