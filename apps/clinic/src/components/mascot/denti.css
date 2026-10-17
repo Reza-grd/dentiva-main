@@ -11,8 +11,7 @@
    Pengubah                 : data-kid="true" (mode anak)
    Sendi memakai koordinat viewBox (transform-box: view-box).
    ───────────────────────────────────────────────────────────── */
-.denti { --d-outline: #163047; --d-outline-inner: #163047; overflow: visible; display: block; }
-.dark .denti, .qd .denti, .denti[data-theme="dark"] { --d-outline: #5EEAD4; --d-outline-inner: #163047; }
+.denti { overflow: visible; display: block; }
 .denti * { transform-box: view-box; }
 
 /* Sendi */
@@ -1150,10 +1149,6 @@
 .denti[data-state="goodbye"] .d-tear-3, .denti[data-state="goodbye"] .d-tear-4, .denti[data-state="goodbye"] .d-tear-2, .denti[data-state="grateful"] .d-tear-3, .denti[data-state="grateful"] .d-tear-4 { display: none; }
 .denti[data-state="goodbye"] .d-tear, .denti[data-state="grateful"] .d-tear { animation: d-tear-fall 1.8s ease-in infinite; }
 
-.denti[data-state="sorry"] .d-eye, .denti[data-state="disappointed"] .d-eye, .denti[data-state="gloomy"] .d-eye, .denti[data-state="tired"] .d-eye, .denti[data-state="sick"] .d-eye { animation: none; transform: translateY(3px) scaleY(.78); }
-.denti[data-state="smug"] .d-eye, .denti[data-state="suspicious"] .d-eye { animation: none; transform: scaleY(.58); }
-.denti[data-state="smug"] .d-lids, .denti[data-state="suspicious"] .d-lids { transform: translateY(4px); }
-
 /* ═════ SISTEM LOD · Optimasi Ketajaman, Orbit CSS, & Performa CPU (A1d) ═════ */
 /* Saat idle, partikel orbit diam di lintasannya (animation: none) agar offset-path tidak memicu Layout/RecalcStyle di main thread.
    Gerak mengitari hanya diputar 1 kali (1,8 dtk ≤ 2 dtk, diskret steps(24)) saat state aktif (celebrate/wave/happy/cheer/party/excited/welcome) lalu berhenti. */
@@ -1193,11 +1188,8 @@
   to { offset-distance: 150%; }
 }
 
-/* Pada LOD mini (≤ 72px), sembunyikan elemen mikro (.d-orbit, .d-shadow, .d-brackets, .d-bubble, .d-sparks saat idle) sesuai lod-aturan.md agar siluet tajam & bebas artefak sub-piksel */
-.denti[data-lod="mini"] .d-orbit,
-.denti[data-lod="mini"] .d-shadow,
-.denti[data-lod="mini"] .d-brackets,
-.denti[data-lod="mini"] .d-bubble { opacity: 0; pointer-events: none; }
+/* Pada LOD mini (≤ 72px), sembunyikan partikel latar mikro (.d-orbit, .d-sparks saat idle) agar siluet tajam & bebas artefak sub-piksel */
+.denti[data-lod="mini"] .d-orbit { opacity: 0; pointer-events: none; }
 .denti[data-lod="mini"] .d-orbit-dot { animation: none; }
 .denti[data-lod="mini"][data-state="idle"] .d-sparks { opacity: 0; }
 .denti[data-lod="mini"] .d-spark { animation: none; }
