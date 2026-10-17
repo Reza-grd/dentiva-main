@@ -10,6 +10,7 @@ Tujuan: membawa Dentiva menjadi produk **profesional, berkeamanan tingkat tinggi
 | `03-aturan-kerja-tim.md` | Kepemilikan area, cabang, gerbang mutu, templat serah terima, larangan |
 | `04-papan-tugas.md` | Status semua paket + tugas tersimpan (mis. kunci Claude) + tugas Ketua |
 | `prompts/gpt/` | Pesan pembuka + prompt siap tempel G1–G6 |
+| `prompts/gpt/MASTER-G1-G6.md` | **Prompt tunggal** G1–G6 tanpa jeda (GPT mencari & membaca berkas sendiri) — dipakai bila GPT punya akses repo |
 | `prompts/antigravity/` | Aturan misi + misi siap tempel A1–A7 |
 | `hasil-gpt/`, `serah-terima/`, `usulan-ci/`, `usulan-infra/` | Tempat menyimpan hasil (dibuat sesuai kebutuhan) |
 

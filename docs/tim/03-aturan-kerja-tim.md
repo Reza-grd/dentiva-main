@@ -30,7 +30,7 @@ cd D:/dentiva/antigravity-<kode>        # semua pekerjaan, npm install, tes, com
 ```
 Tambahan: jangan `git checkout/switch` di folder utama; jalankan `git branch --show-current` sebelum setiap commit dan pastikan cabangnya milik paketmu.
 
-- GPT tidak ber-commit (pengguna menyimpan hasilnya). Antigravity memakai cabang `antigravity/<kode>-<topik>` (mis. `antigravity/A1-denti-hd`), **satu cabang per paket tugas**, dibuat dari `console` terbaru.
+- GPT: bila punya akses berkas, ber-commit LOKAL di worktree & cabang `gpt/<topik>` miliknya sendiri (tanpa push); bila tidak, pengguna menyimpan hasilnya. Antigravity memakai cabang `antigravity/<kode>-<topik>` (mis. `antigravity/A1-denti-hd`), **satu cabang per paket tugas**, dibuat dari `console` terbaru.
 - Pesan commit Bahasa Indonesia, gaya `feat(ui): …`, `fix(mascot): …`, `test(e2e): …`, `chore(ci): …`. Satu tujuan per commit.
 - Jangan *force-push*, jangan menggabungkan cabang sendiri. Ketua yang meninjau dan menggabungkan.
 
