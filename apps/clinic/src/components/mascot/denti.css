@@ -1154,17 +1154,43 @@
 .denti[data-state="smug"] .d-eye, .denti[data-state="suspicious"] .d-eye { animation: none; transform: scaleY(.58); }
 .denti[data-state="smug"] .d-lids, .denti[data-state="suspicious"] .d-lids { transform: translateY(4px); }
 
-/* ═════ SISTEM LOD · Optimasi Ketajaman, Orbit CSS, & Performa ═════ */
+/* ═════ SISTEM LOD · Optimasi Ketajaman, Orbit CSS, & Performa CPU (A1d) ═════ */
+/* Saat idle, partikel orbit diam di lintasannya (animation: none) agar offset-path tidak memicu Layout/RecalcStyle di main thread.
+   Gerak mengitari hanya diputar 1 kali (1,8 dtk ≤ 2 dtk, diskret steps(24)) saat state aktif (celebrate/wave/happy/cheer/party/excited/welcome) lalu berhenti. */
 .denti .d-orbit-dot {
   offset-path: path('M22 252 a178 64 0 1 0 356 0 a178 64 0 1 0 -356 0');
   offset-rotate: 0deg;
-  animation: d-orbit-move 9s linear infinite;
+  animation: none;
 }
 .denti .d-orbit-dot-1 { offset-distance: 0%; }
-.denti .d-orbit-dot-2 { offset-distance: 50%; animation-delay: -4.5s; }
+.denti .d-orbit-dot-2 { offset-distance: 50%; }
+
+.denti[data-state="celebrate"] .d-orbit-dot-1,
+.denti[data-state="wave"] .d-orbit-dot-1,
+.denti[data-state="happy"] .d-orbit-dot-1,
+.denti[data-state="cheer"] .d-orbit-dot-1,
+.denti[data-state="party"] .d-orbit-dot-1,
+.denti[data-state="excited"] .d-orbit-dot-1,
+.denti[data-state="welcome"] .d-orbit-dot-1 {
+  animation: d-orbit-move 1.8s steps(24, end) 1;
+}
+.denti[data-state="celebrate"] .d-orbit-dot-2,
+.denti[data-state="wave"] .d-orbit-dot-2,
+.denti[data-state="happy"] .d-orbit-dot-2,
+.denti[data-state="cheer"] .d-orbit-dot-2,
+.denti[data-state="party"] .d-orbit-dot-2,
+.denti[data-state="excited"] .d-orbit-dot-2,
+.denti[data-state="welcome"] .d-orbit-dot-2 {
+  animation: d-orbit-move-2 1.8s steps(24, end) 1;
+}
+
 @keyframes d-orbit-move {
   from { offset-distance: 0%; }
   to { offset-distance: 100%; }
+}
+@keyframes d-orbit-move-2 {
+  from { offset-distance: 50%; }
+  to { offset-distance: 150%; }
 }
 
 /* Pada LOD mini (≤ 72px), sembunyikan elemen mikro (.d-orbit, .d-shadow, .d-brackets, .d-bubble, .d-sparks saat idle) sesuai lod-aturan.md agar siluet tajam & bebas artefak sub-piksel */
@@ -1176,6 +1202,19 @@
 .denti[data-lod="mini"][data-state="idle"] .d-sparks { opacity: 0; }
 .denti[data-lod="mini"] .d-spark { animation: none; }
 
+/* Penghematan CPU saat tidak terlihat (IntersectionObserver / tab tersembunyi) atau setelah 20 dtk idle tanpa interaksi */
+.denti[data-idle-deep="true"] .d-spark,
+.denti[data-idle-deep="true"] .d-orbit-dot,
+.denti[data-idle-deep="true"] .d-brackets {
+  animation: none !important;
+}
+.denti[data-animate="off"],
+.denti[data-animate="off"] * {
+  animation: none !important;
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .denti, .denti * { animation: none !important; transition: none !important; }
 }
+
