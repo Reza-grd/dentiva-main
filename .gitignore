@@ -15,6 +15,7 @@ node_modules/
 
 # Production Build
 dist/
+dist-e2e/
 build/
 
 # Environment Variables (CRITICAL)
@@ -67,6 +68,7 @@ storybook-static/
 # Playwright
 apps/*/playwright-report/
 apps/*/test-results/
+apps/*/dist-e2e/
 
 # Deno (lock dibuat lokal saat deno check)
 deno.lock

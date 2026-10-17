@@ -6,7 +6,11 @@ import { setupSyntheticClinic, runAxeAudit } from './fixtures/syntheticClinic.js
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const VISUAL_DIR = path.resolve(__dirname, '../../../../docs/tim/serah-terima/A4/visual');
+// Keluaran runtime diarahkan ke folder test-results/ (masuk .gitignore) agar eksekusi tes
+// tidak pernah menimpa atau mengotori berkas bukti yang dilacak git.
+const ARTIFACT_DIR = path.resolve(__dirname, '../../test-results/a4-artifacts');
+const VISUAL_DIR = path.join(ARTIFACT_DIR, 'visual');
+const LINUX_CANDIDATES_DIR = path.join(ARTIFACT_DIR, 'linux-baselines');
 
 const TARGET_PAGES = [
   {
@@ -61,6 +65,7 @@ const VIEWPORTS = [
 test.describe('Audit Aksesibilitas (axe-core) & Regresi Visual (Terang/Gelap × 375px/1440px)', () => {
   test.beforeAll(() => {
     fs.mkdirSync(VISUAL_DIR, { recursive: true });
+    fs.mkdirSync(LINUX_CANDIDATES_DIR, { recursive: true });
   });
 
   for (const item of TARGET_PAGES) {
@@ -120,29 +125,39 @@ test.describe('Audit Aksesibilitas (axe-core) & Regresi Visual (Terang/Gelap × 
           const stat = fs.statSync(outPath);
           expect(stat.size).toBeGreaterThan(5_000);
 
-          // Pastikan direktori __screenshots__ tersedia dan cek apakah baseline spesifik platform (win32/linux/darwin) sudah ada
           const screenshotsDir = path.resolve(__dirname, '__screenshots__');
-          fs.mkdirSync(screenshotsDir, { recursive: true });
           const platformSnapshotPath = path.join(screenshotsDir, `${baseName}-${process.platform}.png`);
           const win32FallbackPath = path.join(screenshotsDir, `${baseName}-win32.png`);
           const hasNativePlatformBaseline = fs.existsSync(platformSnapshotPath);
+          const isUpdatingSnapshots =
+            process.argv.includes('--update-snapshots') || process.argv.includes('-u');
 
-          if (!hasNativePlatformBaseline && fs.existsSync(win32FallbackPath)) {
-            // Saat pertama kali berjalan di CI Linux sebelum baseline *-linux.png di-commit:
-            // salin baseline referensi sebagai pembanding lintas-OS dan simpan hasil render asli platform ke folder bukti visual
+          // [SEMENTARA SAMPAI *-linux.png DI-COMMIT DARI ARTEFAK CI PERTAMA]
+          // Bila berjalan di Linux CI sebelum *-linux.png di-commit (dan bukan mode --update-snapshots):
+          // 1) Simpan tangkapan layar asli Linux ke test-results/a4-artifacts/linux-baselines/*-linux.png (diunggah CI).
+          // 2) Salin sementara *-win32.png untuk perbandingan 6% lalu hapus kembali di blok finally agar git tetap bersih.
+          let tempCopiedBaseline = false;
+          if (!hasNativePlatformBaseline && !isUpdatingSnapshots && fs.existsSync(win32FallbackPath)) {
+            fs.copyFileSync(
+              outPath,
+              path.join(LINUX_CANDIDATES_DIR, `${baseName}-${process.platform}.png`)
+            );
             fs.copyFileSync(win32FallbackPath, platformSnapshotPath);
-            fs.copyFileSync(outPath, path.join(VISUAL_DIR, `${baseName}-${process.platform}.png`));
+            tempCopiedBaseline = true;
           }
 
-          // Bandingkan terhadap baseline per-platform ({arg}-{platform}.png):
-          // - 2% maxDiffPixelRatio (threshold 0.2) jika baseline native platform sudah ada
-          // - 6% maxDiffPixelRatio (threshold 0.3) jika membandingkan lintas-OS (DirectWrite Windows vs FreeType Linux)
-          await expect(page).toHaveScreenshot(filename, {
-            fullPage: false,
-            animations: 'disabled',
-            maxDiffPixelRatio: hasNativePlatformBaseline ? 0.02 : 0.06,
-            threshold: hasNativePlatformBaseline ? 0.2 : 0.3,
-          });
+          try {
+            await expect(page).toHaveScreenshot(filename, {
+              fullPage: false,
+              animations: 'disabled',
+              maxDiffPixelRatio: hasNativePlatformBaseline ? 0.02 : 0.06,
+              threshold: hasNativePlatformBaseline ? 0.2 : 0.3,
+            });
+          } finally {
+            if (tempCopiedBaseline && fs.existsSync(platformSnapshotPath)) {
+              fs.unlinkSync(platformSnapshotPath);
+            }
+          }
         }
       });
     }
@@ -187,7 +202,7 @@ test.describe('Audit Aksesibilitas (axe-core) & Regresi Visual (Terang/Gelap × 
     expect(metrics.doctype).toBe(true);
     expect(axeResult.seriousOrCritical).toEqual([]);
 
-    const reportPath = path.resolve(VISUAL_DIR, '../audit-ringkasan.json');
+    const reportPath = path.join(ARTIFACT_DIR, 'audit-ringkasan.json');
     fs.writeFileSync(
       reportPath,
       JSON.stringify(

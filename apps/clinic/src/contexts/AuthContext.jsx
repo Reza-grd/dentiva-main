@@ -286,8 +286,16 @@ export const AuthProvider = ({ children }) => {
 
       return { success: true, data };
     } catch (error) {
-      setError(error.message);
-      return { success: false, error: error.message };
+      const status = error?.status;
+      const code = error?.code || '';
+      let rawMessage = error?.message || 'Terjadi kesalahan saat login';
+      if (status === 429 || code.includes('rate_limit')) {
+        rawMessage = `429: ${rawMessage}`;
+      } else if (error?.name === 'AuthRetryableFetchError' || status === 0) {
+        rawMessage = `Failed to fetch: ${rawMessage}`;
+      }
+      setError(rawMessage);
+      return { success: false, error: rawMessage, status, code };
     } finally {
       setLoading(false);
     }

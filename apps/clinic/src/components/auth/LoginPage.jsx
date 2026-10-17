@@ -25,17 +25,38 @@ const loginSchema = z.object({
 });
 
 const GENERIC_LOGIN_ERROR = 'Email atau password salah.';
+const NETWORK_LOGIN_ERROR = 'Tidak dapat terhubung ke server. Periksa koneksi Anda.';
+const RATE_LIMIT_LOGIN_ERROR = 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.';
 
-const normalizeLoginError = (msg) => {
+export const normalizeLoginError = (msg) => {
   if (!msg) return '';
-  if (
-    msg.includes('Akun Anda tidak aktif') ||
-    msg.includes('data profil belum ada') ||
-    msg.includes('Isi email Anda di kolom Email')
-  ) {
-    return msg;
+  const text = String(msg);
+
+  // 1. Batas laju (HTTP 429 / over_request_rate_limit)
+  if (/429|rate[_\s-]?limit|too many requests|terlalu banyak percobaan/i.test(text)) {
+    return RATE_LIMIT_LOGIN_ERROR;
   }
-  return GENERIC_LOGIN_ERROR;
+
+  // 2. Galat jaringan (fetch gagal / koneksi terputus / server tidak terjangkau)
+  if (
+    /failed to fetch|networkerror|fetch failed|load failed|network request failed|tidak dapat terhubung|err_internet|err_connection|err_name_not_resolved/i.test(
+      text
+    )
+  ) {
+    return NETWORK_LOGIN_ERROR;
+  }
+
+  // 3. Galat kredensial (HTTP 400 invalid login credentials / invalid_grant / user not found)
+  if (
+    /invalid login credentials|invalid_credentials|invalid_grant|email not confirmed|user not found|invalid email or password|email atau password salah/i.test(
+      text
+    )
+  ) {
+    return GENERIC_LOGIN_ERROR;
+  }
+
+  // 4. Pesan status akun / validasi form lain (mis. akun ditangguhkan, lupa password tanpa isi email)
+  return text;
 };
 
 const LoginPage = () => {
@@ -60,10 +81,10 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     setServerError('');
     try {
-      const { success } = await signIn(data.email, data.password);
-      if (!success) setServerError(GENERIC_LOGIN_ERROR);
+      const { success, error: signInError } = await signIn(data.email, data.password);
+      if (!success) setServerError(normalizeLoginError(signInError || GENERIC_LOGIN_ERROR));
     } catch (err) {
-      setServerError('Terjadi kesalahan. Silakan coba lagi.');
+      setServerError(normalizeLoginError(err?.message || 'Terjadi kesalahan. Silakan coba lagi.'));
       toast.error(err.message || 'Terjadi kesalahan saat login');
     }
   };

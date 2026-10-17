@@ -14,6 +14,9 @@ if (process.env.VITE_ENCRYPTION_KEY) {
 // Mode "desktop" (Tauri): tanpa service worker PWA — pembaruan lewat updater Tauri,
 // dan dev server tidak membuka browser.
 export default defineConfig(({ mode }) => ({
+  // Saat build E2E (VITE_E2E_ISOLATED_ENV=1), arahkan envDir ke folder fixture tanpa .env
+  // agar berkas .env/.env.local produksi di mesin pengembang tidak pernah ikut terbaca.
+  envDir: process.env.VITE_E2E_ISOLATED_ENV ? './tests/e2e/fixtures' : undefined,
   plugins: [
     react(),
     mode !== 'desktop' && VitePWA({
@@ -73,6 +76,6 @@ export default defineConfig(({ mode }) => ({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.js',
-    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**']
+    exclude: ['tests/e2e/**', 'node_modules/**', 'dist/**', 'dist-e2e/**']
   }
 }))

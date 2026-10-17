@@ -12,7 +12,6 @@ export default defineConfig({
   workers: 2,
   timeout: 60_000,
   snapshotPathTemplate: '{testDir}/__screenshots__/{arg}-{platform}{ext}',
-  updateSnapshots: 'missing',
   expect: {
     timeout: 20_000,
     toHaveScreenshot: {
@@ -43,13 +42,16 @@ export default defineConfig({
     },
   ],
   webServer: {
+    // KESELAMATAN: Jangan pernah memakai ulang dist/ yang mungkin berisi URL produksi (api.dentiva.id).
+    // Selalu build segar ke dist-e2e dengan env sintetis terisolasi (VITE_E2E_ISOLATED_ENV=1) lalu preview dari dist-e2e.
     command:
-      'node -e "if (!require(\'fs\').existsSync(\'dist/index.html\')) require(\'child_process\').execSync(\'npx vite build --mode desktop\', { stdio: \'inherit\' })" && npx vite preview --port 3000 --strictPort',
+      'npx vite build --mode desktop --outDir dist-e2e && npx vite preview --outDir dist-e2e --port 3000 --strictPort',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
     env: {
       ...process.env,
+      VITE_E2E_ISOLATED_ENV: '1',
       VITE_SUPABASE_URL: SUPABASE_SYNTHETIC_URL,
       VITE_SUPABASE_ANON_KEY: SUPABASE_SYNTHETIC_ANON_KEY,
     },

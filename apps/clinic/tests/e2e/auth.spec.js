@@ -63,6 +63,73 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await expect(page.getByRole('alert')).toContainText('Email atau password salah.');
   });
 
+  test('Login saat galat jaringan menampilkan pesan "Tidak dapat terhubung ke server. Periksa koneksi Anda."', async ({
+    page,
+  }) => {
+    await setupSyntheticClinic(page, { authErrorMode: 'network' });
+
+    await page.goto('/login');
+    await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
+    await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/login$/);
+    const alertBox = page.getByRole('alert');
+    await expect(alertBox).toBeVisible();
+    await expect(alertBox).toContainText('Tidak dapat terhubung ke server. Periksa koneksi Anda.');
+  });
+
+  test('Login saat terkena batas laju (429) menampilkan pesan "Terlalu banyak percobaan. Coba lagi beberapa menit lagi."', async ({
+    page,
+  }) => {
+    await setupSyntheticClinic(page, { authErrorMode: 'rate_limit' });
+
+    await page.goto('/login');
+    await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
+    await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/login$/);
+    const alertBox = page.getByRole('alert');
+    await expect(alertBox).toBeVisible();
+    await expect(alertBox).toContainText('Terlalu banyak percobaan. Coba lagi beberapa menit lagi.');
+  });
+
+  test('Pemblokir host non-localhost memastikan 0 permintaan keluar saat login & navigasi serta memblokir akses ke api.dentiva.id', async ({
+    page,
+  }) => {
+    const fx = await setupSyntheticClinic(page);
+
+    await page.goto('/login');
+    await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
+    await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
+    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+
+    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();
+
+    // Pastikan selama alur login dan pemuatan dashboard tidak ada satu pun permintaan keluar ke host non-localhost
+    expect(
+      fx.getBlockedRequests(),
+      `Terdeteksi permintaan keluar ke host non-localhost: ${JSON.stringify(fx.getBlockedRequests())}`
+    ).toEqual([]);
+
+    // Verifikasi bahwa percobaan paksa memanggil host produksi (api.dentiva.id) langsung di-abort dan tercatat oleh pemblokir
+    const externalAttemptFailed = await page.evaluate(async () => {
+      try {
+        await fetch('https://api.dentiva.id/auth/v1/token?grant_type=password', {
+          method: 'POST',
+        });
+        return false;
+      } catch {
+        return true;
+      }
+    });
+    expect(externalAttemptFailed).toBe(true);
+    expect(fx.getBlockedRequests().length).toBe(1);
+    expect(fx.getBlockedRequests()[0].url).toContain('https://api.dentiva.id/auth/v1/token');
+  });
+
   test('Simulasi tantangan MFA TOTP ketika bendera fitur MFA aktif memverifikasi faktor aal2', async ({ page }) => {
     await setupSyntheticClinic(page, { role: 'admin', mfaEnabled: true });
 

@@ -403,12 +403,18 @@ export async function setupSyntheticClinic(page, options = {}) {
     currentRole: null,
     mfaEnabled: false,
     currentAal: 'aal1',
+    authErrorMode: null,
+    blockedRequests: [],
     routed: false,
   };
   ctrl.state = createInitialState(todayStr);
   ctrl.currentRole = options.role || null;
   ctrl.mfaEnabled = Boolean(options.mfaEnabled);
   ctrl.currentAal = options.initialAal || 'aal1';
+  ctrl.authErrorMode = options.authErrorMode || null;
+  if (!options.preserveBlockedRequests) {
+    ctrl.blockedRequests = [];
+  }
   page._syntheticCtrl = ctrl;
 
   const state = ctrl.state;
@@ -472,7 +478,34 @@ export async function setupSyntheticClinic(page, options = {}) {
   if (!ctrl.routed) {
     ctrl.routed = true;
 
-    // Cegat Google Fonts eksternal agar event window.load tidak pernah tertahan koneksi internet
+    // KESELAMATAN: Pemblokir semua permintaan keluar ke host non-localhost (mis. api.dentiva.id / *.supabase.co).
+    // Didaftarkan pertama sebagai fallback paling bawah di tumpukan route Playwright (LIFO).
+    await page.route('**', async (route, request) => {
+      const reqUrl = request.url();
+      try {
+        const parsed = new URL(reqUrl);
+        const isLocal =
+          parsed.hostname === 'localhost' ||
+          parsed.hostname === '127.0.0.1' ||
+          parsed.protocol === 'data:' ||
+          parsed.protocol === 'blob:' ||
+          parsed.protocol === 'about:';
+        if (isLocal) {
+          return route.continue();
+        }
+      } catch {
+        return route.continue();
+      }
+
+      ctrl.blockedRequests.push({
+        method: request.method(),
+        url: reqUrl,
+        resourceType: request.resourceType(),
+      });
+      return route.abort('blockedbyclient');
+    });
+
+    // Cegat Google Fonts dari <link> di index.html dengan CSS kosong lokal agar tidak pernah keluar jaringan
     await page.route('https://fonts.googleapis.com/**', (route) =>
       route.fulfill({ status: 200, contentType: 'text/css; charset=utf-8', body: '/* synthetic fonts */' })
     );
@@ -509,6 +542,22 @@ export async function setupSyntheticClinic(page, options = {}) {
 
       // ─── 1. AUTH ENDPOINTS ──────────────────────────────────────────────────
       if (pathname.startsWith('/auth/v1/token')) {
+        if (ctrl.authErrorMode === 'network') {
+          return route.abort('failed');
+        }
+        if (ctrl.authErrorMode === 'rate_limit') {
+          return respondJson(
+            route,
+            {
+              error: 'over_request_rate_limit',
+              error_code: 'over_request_rate_limit',
+              error_description: 'Request rate limit reached',
+              message: 'Request rate limit reached',
+            },
+            429
+          );
+        }
+
         const grantType = url.searchParams.get('grant_type');
         if (grantType === 'password') {
           const email = String(body.email || '').trim().toLowerCase();
@@ -1207,6 +1256,15 @@ export async function setupSyntheticClinic(page, options = {}) {
     clinic: SYNTHETIC_CLINIC,
     setRole(newRole) {
       ctrl.currentRole = newRole;
+    },
+    setAuthErrorMode(mode) {
+      ctrl.authErrorMode = mode;
+    },
+    getBlockedRequests() {
+      return [...ctrl.blockedRequests];
+    },
+    clearBlockedRequests() {
+      ctrl.blockedRequests = [];
     },
   };
 }

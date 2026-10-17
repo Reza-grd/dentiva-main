@@ -1,7 +1,7 @@
-# Usulan Workflow GitHub Actions — Paket A4 (Mutu Otomatis)
+# Usulan Workflow GitHub Actions — Paket A4 / A4b (Mutu Otomatis)
 # Lokasi usulan: docs/tim/usulan-ci/e2e.yml
 # Catatan: Sesuai pembagian wewenang tim, Antigravity tidak menyentuh .github/workflows/ secara langsung.
-# Ketua Tim dapat menyalin berkas ini ke .github/workflows/e2e.yml setelah meninjau hasil A4.
+# Ketua Tim dapat menyalin berkas ini ke .github/workflows/e2e.yml setelah meninjau hasil A4b.
 
 name: Mutu Otomatis (E2E, Visual, A11y & Lighthouse)
 
@@ -10,12 +10,20 @@ on:
     branches: [main, console]
   push:
     branches: [console]
+  workflow_dispatch:
+    inputs:
+      generate_linux_baselines:
+        description: 'Buat ulang baseline visual *-linux.png (jalankan --update-snapshots)'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 env:
+  VITE_E2E_ISOLATED_ENV: '1'
   VITE_SUPABASE_URL: http://127.0.0.1:54321
   VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
 
@@ -41,11 +49,16 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: apps/clinic
 
+      - name: Buat baseline *-linux.png (hanya bila generate_linux_baselines diaktifkan)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.generate_linux_baselines == true }}
+        run: npm run test:e2e:update-snapshots
+        working-directory: apps/clinic
+
       - name: Jalankan suite E2E, regresi visual, dan audit axe-core
         run: npm run test:e2e
         working-directory: apps/clinic
 
-      - name: Unggah laporan Playwright, baseline platform, & tangkapan layar
+      - name: Unggah laporan Playwright & artefak hasil run (termasuk kandidat *-linux.png)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -53,8 +66,7 @@ jobs:
           path: |
             apps/clinic/playwright-report/
             apps/clinic/test-results/
-            apps/clinic/tests/e2e/__screenshots__/
-            docs/tim/serah-terima/A4/visual/
+            apps/clinic/tests/e2e/__screenshots__/*-linux.png
           retention-days: 14
 
   lighthouse-budget:
@@ -74,8 +86,8 @@ jobs:
       - name: Pasang dependensi
         run: npm ci
 
-      - name: Build aplikasi klinik (mode desktop tanpa Service Worker)
-        run: npx vite build --mode desktop
+      - name: Build aplikasi klinik ke dist-e2e (mode desktop tanpa Service Worker)
+        run: npx vite build --mode desktop --outDir dist-e2e
         working-directory: apps/clinic
 
       - name: Jalankan Lighthouse CI
