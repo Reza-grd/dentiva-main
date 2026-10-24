@@ -7,6 +7,7 @@ import { buildAndSyncConditions } from "../_shared/resources/condition.ts";
 import { buildAndSyncProcedures } from "../_shared/resources/procedure.ts";
 import { buildAndSyncMedicationRequests } from "../_shared/resources/medicationRequest.ts";
 import { buildAndSyncComposition } from "../_shared/resources/composition.ts";
+import { buildAndSyncDentalObservations } from "../_shared/resources/dentalObservation.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -179,11 +180,23 @@ serve(async (req) => {
       callingUserId
     );
 
+    // 5b. Modul Gigi: OHIS & odontogram (Observation). Gagal di sini tidak menggagalkan resume medis;
+    // item gagal tercatat di satusehat_outbox dan dicoba ulang oleh prosesor.
+    let observationIds: string[] = [];
+    try {
+      observationIds = await buildAndSyncDentalObservations(
+        supabaseAdmin, visitId, patientSId, practitionerSId, encounterId, isoTimestamp, undefined, callingUserId
+      );
+    } catch (e: any) {
+      console.error('Dental Observation sync failed:', e?.message);
+    }
+
     // Save mapping list of successfully synced resources
     const resourceIds = {
       conditions: conditionIds,
       procedures: procedureIds,
-      medicationRequests: medicationRequestIds
+      medicationRequests: medicationRequestIds,
+      observations: observationIds
     };
     
     await supabaseAdmin
@@ -219,6 +232,7 @@ serve(async (req) => {
           conditionIds,
           procedureIds,
           medicationRequestIds,
+          observationIds,
           compositionId
         }
       }),

@@ -10,6 +10,7 @@ import { syncPatient } from "../_shared/resources/patient.ts";
 import { buildAndSyncEncounter } from "../_shared/resources/encounter.ts";
 import { buildAndSyncConditions } from "../_shared/resources/condition.ts";
 import { buildAndSyncProcedures } from "../_shared/resources/procedure.ts";
+import { buildAndSyncDentalObservations } from "../_shared/resources/dentalObservation.ts";
 import { buildAndSyncMedicationRequests } from "../_shared/resources/medicationRequest.ts";
 import { buildAndSyncComposition } from "../_shared/resources/composition.ts";
 
@@ -112,6 +113,7 @@ serve(async (req) => {
           case 'Condition':
           case 'Procedure':
           case 'MedicationRequest':
+          case 'Observation':
           case 'Composition': {
             if (!item.related_visit_id) {
               console.warn(`Outbox item ${item.id} of type ${item.resource_type} missing related_visit_id. Cannot auto-retry.`);
@@ -152,6 +154,11 @@ serve(async (req) => {
               const code = item.payload?.medicationCodeableConcept?.coding?.[0]?.code;
               const existingOutboxIds = code ? { [code]: item.id } : undefined;
               await buildAndSyncMedicationRequests(supabaseAdmin, visit.id, patientSId, encounterId, isoTimestamp, existingOutboxIds, callingUserId);
+            } else if (item.resource_type === 'Observation') {
+              // Odontogram/OHIS dibangun ulang per kunjungan; identifier yang sama memakai outbox yang sama.
+              const idValue = item.payload?.identifier?.[0]?.value;
+              const existingOutboxIds = idValue ? { [idValue]: item.id } : undefined;
+              await buildAndSyncDentalObservations(supabaseAdmin, visit.id, patientSId, practitionerSId, encounterId, isoTimestamp, existingOutboxIds, callingUserId);
             } else if (item.resource_type === 'Composition') {
               const syncedIds = visit.satusehat_resource_ids || {};
               const conditionIds = syncedIds.conditions || [];
