@@ -60,6 +60,15 @@ export function parseEvents(payload: any, phoneNumberId?: string): { statuses: W
   return { statuses, messages }
 }
 
+/**
+ * Hanya pesan yang benar-benar dikirim pengguna yang boleh dibalas otomatis — bukan pesan sistem
+ * (user_changed_number/user_changed_user_id), reaksi emoji, atau jenis yang tidak didukung (spesifikasi
+ * github.com/facebook/openapi, business-messaging-api_v23.0).
+ */
+export function isReplyable(type: string): boolean {
+  return !['system', 'reaction', 'unsupported', 'unknown', 'errors'].includes(type)
+}
+
 /** Balasan berhenti berlangganan: hanya kata kunci itu sendiri (bukan kalimat yang kebetulan memuatnya). */
 export function isOptOut(text: string): boolean {
   return /^\s*(berhenti|stop|unsubscribe|unreg|jangan kirim lagi)\s*[.!]*\s*$/i.test(text)

@@ -12,7 +12,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { recipientHash, sendWhatsApp } from "../_shared/whatsapp.ts"
-import { autoReplyText, type ClinicContact, isOptOut, optOutReplyText, parseEvents, type WaInboundEvent, type WaStatusEvent } from "../_shared/waWebhook.ts"
+import { autoReplyText, type ClinicContact, isOptOut, isReplyable, optOutReplyText, parseEvents, type WaInboundEvent, type WaStatusEvent } from "../_shared/waWebhook.ts"
 
 const encoder = new TextEncoder()
 const RETENSI_HARI = 90
@@ -141,7 +141,7 @@ async function handleInbound(db: any, m: WaInboundEvent, outcome: Record<string,
   }
 
   let action: 'none' | 'auto_reply' | 'opt_out' = optOut ? 'opt_out' : 'none'
-  if (Deno.env.get('WA_BALAS_OTOMATIS') === 'true') {
+  if (Deno.env.get('WA_BALAS_OTOMATIS') === 'true' && (optOut || isReplyable(m.type))) {
     // Balasan otomatis paling banyak sekali per pengirim per 24 jam (konfirmasi BERHENTI selalu dikirim).
     const { count } = await db.from('whatsapp_inbound').select('id', { count: 'exact', head: true })
       .eq('sender_hash', senderHash).eq('action', 'auto_reply')

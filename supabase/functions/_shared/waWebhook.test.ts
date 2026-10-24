@@ -1,5 +1,16 @@
 import { assertEquals } from "https://deno.land/std@0.168.0/testing/asserts.ts";
-import { autoReplyText, isOptOut, optOutReplyText, parseEvents } from "./waWebhook.ts";
+import { autoReplyText, isOptOut, isReplyable, optOutReplyText, parseEvents } from "./waWebhook.ts";
+
+Deno.test("isReplyable: pesan sistem (ganti nomor), reaksi & jenis tak didukung tidak dibalas otomatis", () => {
+  // Contoh "User Changed Number System Message" dari spesifikasi Meta (business-messaging-api_v23.0)
+  const { messages } = parseEvents(payload({
+    messages: [{ from: "16505551234", id: "wamid.SYS", timestamp: "1700000000", type: "system",
+      system: { body: "User A changed from 16505551234 to 12195555358", wa_id: "12195555358", type: "user_changed_number" } }],
+  }));
+  assertEquals(messages.map((m) => m.type), ["system"]);
+  for (const t of ["system", "reaction", "unsupported", "unknown"]) assertEquals(isReplyable(t), false, t);
+  for (const t of ["text", "button", "interactive", "image", "audio", "document"]) assertEquals(isReplyable(t), true, t);
+});
 
 // Bentuk payload mengikuti contoh "messages" dari dashboard Meta (v26.0).
 const payload = (value: Record<string, unknown>, field = "messages") => ({
