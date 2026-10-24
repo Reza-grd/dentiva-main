@@ -2,7 +2,7 @@ import { requireActiveAccount } from "../_shared/activeAccount.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
-import { configProblem, sendWhatsApp } from "../_shared/whatsapp.ts"
+import { configProblem, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -180,7 +180,7 @@ Pesan ini dikirim dari menu Pengaturan.`
       }
     }
 
-    const waProblem = configProblem()
+    const waProblem = configProblem(Deno.env, 'manual')
     if (waProblem) {
       return new Response(JSON.stringify({ error: waProblem }), {
         status: 400,
@@ -275,7 +275,7 @@ Pesan ini dikirim dari menu Pengaturan.`
     if (isTest) msgType = 'test';
     if (!msgType) msgType = 'manual';
 
-    const result = await sendWhatsApp({ to: finalPhone, text: message })
+    const result = await sendWhatsApp({ to: finalPhone, text: message, kind: 'manual' })
     console.log(`[WA] ${result.provider ?? '-'} type=${msgType} ok=${result.ok}`)
 
     if (!isTest && (finalPatientId || visitId)) {
@@ -285,7 +285,8 @@ Pesan ini dikirim dari menu Pengaturan.`
         message_type: msgType,
         status: result.ok ? 'sent' : 'failed',
         gateway_response: JSON.stringify(result.ok ? { provider: result.provider, id: result.id } : { provider: result.provider, error: result.error }).slice(0, 500),
-        triggered_by: triggeredBy || null
+        triggered_by: triggeredBy || null,
+        ...(result.ok ? await sentLogFields(result, finalPhone) : {}),
       });
     }
 

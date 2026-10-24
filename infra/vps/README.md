@@ -41,6 +41,7 @@ lalu buka `http://localhost:3000` (Studio tidak pernah dibuka ke internet).
 | `buat-vault.sh` | Rahasia Vault `dentiva_project_url` & `dentiva_service_role_key` dari `.env` (tanpa menampilkan nilai). **Tidak** membuat jadwal pg_cron |
 | `reset-gladi.sh --ya-hapus-semua [--simpan-rahasia]` | Kosongkan DB & storage VPS; tanpa `--simpan-rahasia` juga membuat ulang semua rahasia server |
 | `isi-rahasia-functions.sh` | Dijalankan pemilik: isi rahasia/konfigurasi edge function (prompt tersembunyi) → `functions.env` (600) |
+| `atur-whatsapp-meta.sh` | Dijalankan pemilik: token Meta (diuji ke Graph API), Phone number ID, template, jalur per jenis pesan → `functions.env` |
 | `pasang-functions.sh` | Terima arsip edge function dari `infra/vps/deploy-functions.sh` (laptop, dari commit HEAD) dan pasang |
 | `jadwal-cron.sql`, `buat-jadwal-cron.sh --pindah-resmi` | 6 jadwal pg_cron (salinan persis Cloud) — hanya saat pindah resmi |
 | `backup-harian.sh` | Backup harian 01:30 WIB (crontab user `dentiva`), terenkripsi `age` ke kunci publik pemilik; simpan 14 hari di `/opt/dentiva/backup` |
@@ -105,12 +106,11 @@ Satu pintu pengirim di `supabase/functions/_shared/whatsapp.ts`, dipilih lewat `
   4. Chromium gagal start setelah container dibuat ulang karena kunci profil `Singleton*` dari hostname lama. Kini kunci itu dibersihkan sebelum start, hostname dibuat tetap, dan `/health` menjawab 503 kalau macet.
 - **Teruji:** restart dan pembuatan ulang container tersambung lagi otomatis ±15 detik tanpa QR. Memori ±750 MB.
 
-**Mengaktifkan mode resmi Meta** setelah pendaftaran disetujui:
-1. Isi `META_WA_TOKEN` (token System User permanen) dan `META_WA_PHONE_NUMBER_ID`.
-2. Buat template **Utility** berbahasa `id` dengan nama sesuai `META_WA_TEMPLATE_PENGINGAT`, misalnya `pengingat_jadwal`. Isinya: *"Halo {{1}}, Anda memiliki jadwal kunjungan pada {{2}} pukul {{3}} dengan {{4}} di {{5}}. Mohon hadir tepat waktu. Hubungi {{6}} jika perlu menjadwal ulang."*
-3. Webhook Meta mengarah ke `https://api.dentiva.id/functions/v1/whatsapp-webhook`, dengan `WHATSAPP_VERIFY_TOKEN` dan `WHATSAPP_APP_SECRET`.
-4. Ubah `WA_PROVIDER=meta`, lalu jalankan `docker compose up -d --force-recreate functions`.
-5. Untuk pesan bebas (misalnya dari kasir) di luar jendela 24 jam, Meta menolak. Pesan seperti itu perlu template tersendiri.
+**Mode resmi Meta**: panduan lengkap, draf template, dan urutan aktivasi ada di [docs/whatsapp-cloud-api.md](../../docs/whatsapp-cloud-api.md).
+- Webhook `https://api.dentiva.id/functions/v1/whatsapp-webhook` sudah terverifikasi Meta pada 24 Okt 2026.
+- Pindah ke Meta dilakukan **per jenis pesan** lewat `atur-whatsapp-meta.sh`. Pengingat bisa pindah setelah template disetujui.
+- Struk dan edukasi tetap lewat sidecar.
+- **Jangan** mengubah `WA_PROVIDER=meta` secara global, karena struk dan edukasi berupa teks bebas yang ditolak Meta di luar jendela 24 jam.
 
 ## Backup
 - Kunci pembuka hanya di laptop pemilik: `~/.ssh/dentiva_backup` (ed25519) — **salin juga ke USB/brankas**;

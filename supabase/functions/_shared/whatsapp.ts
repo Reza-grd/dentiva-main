@@ -1,17 +1,21 @@
 /**
  * Pengirim WhatsApp Dentiva — satu pintu untuk semua penyedia.
  *
- *   sidecar : layanan Node.js milik Dentiva di VPS (Baileys, nomor ditautkan lewat QR) — TIDAK resmi.
+ *   sidecar : layanan Node.js milik Dentiva di VPS (whatsapp-web.js, nomor ditautkan lewat QR) — TIDAK resmi.
  *             WA_SIDECAR_URL (mis. http://wa-sidecar:3000) + WA_SIDECAR_KEY.
  *   meta    : WhatsApp Cloud API RESMI. META_WA_TOKEN + META_WA_PHONE_NUMBER_ID
- *             (+ META_WA_API_VERSION, bawaan v22.0). Di luar jendela 24 jam sejak pasien terakhir
+ *             (+ META_WA_API_VERSION, bawaan v26.0). Di luar jendela 24 jam sejak pasien terakhir
  *             membalas, Meta hanya mengizinkan template yang sudah disetujui — pengingat memakai
- *             META_WA_TEMPLATE_PENGINGAT (lihat infra/vps/README.md).
+ *             META_WA_TEMPLATE_PENGINGAT (lihat docs/whatsapp-cloud-api.md).
  *   whapi   : Whapi.cloud (lama). WHAPI_TOKEN.
  *
  * Pilih lewat WA_PROVIDER; bila kosong dipakai yang pertama terkonfigurasi: sidecar → meta → whapi.
+ * Per jenis pesan bisa ditimpa: WA_PROVIDER_REMINDER, WA_PROVIDER_RECEIPT, WA_PROVIDER_EDUCATION, WA_PROVIDER_MANUAL
+ * (mis. pengingat lewat Meta, struk & edukasi tetap lewat sidecar sampai template-nya disetujui).
  */
 export type WaProviderName = 'sidecar' | 'meta' | 'whapi'
+/** Jenis pesan — menentukan penyedia (WA_PROVIDER_<JENIS>) dan syarat template Meta. */
+export type WaKind = 'reminder' | 'receipt' | 'education' | 'manual'
 
 export interface WaTemplate {
   name: string
@@ -26,6 +30,8 @@ export interface WaSendInput {
   template?: WaTemplate
   /** Kunci peristiwa+jenis pesan: sidecar tidak mengirim dua kali untuk kunci yang sama. */
   idempotencyKey?: string
+  /** Jenis pesan; tanpa jenis dipakai WA_PROVIDER. */
+  kind?: WaKind
 }
 
 export interface WaSendResult {
@@ -35,6 +41,8 @@ export interface WaSendResult {
   error?: string
   /** true = gangguan sementara (belum tersambung, batas kirim, jaringan) → boleh dicoba lagi nanti. */
   retryable?: boolean
+  /** Kode galat Meta (mis. 131047 = di luar jendela 24 jam). */
+  errorCode?: number
   detail?: unknown
 }
 
@@ -45,6 +53,8 @@ interface Env {
 interface Options {
   env?: Env
   fetch?: typeof fetch
+  /** Paksa penyedia tertentu (mis. balasan otomatis webhook Meta harus lewat Meta). */
+  provider?: WaProviderName
 }
 
 const PROVIDERS: WaProviderName[] = ['sidecar', 'meta', 'whapi']
@@ -56,7 +66,9 @@ export function normalizePhone(phone: string): string {
   return d
 }
 
-export function pickProvider(env: Env = Deno.env): WaProviderName | null {
+export function pickProvider(env: Env = Deno.env, kind?: WaKind): WaProviderName | null {
+  const perKind = (kind ? env.get(`WA_PROVIDER_${kind.toUpperCase()}`) ?? '' : '').trim().toLowerCase() as WaProviderName
+  if (PROVIDERS.includes(perKind)) return perKind
   const explicit = (env.get('WA_PROVIDER') ?? '').trim().toLowerCase() as WaProviderName
   if (PROVIDERS.includes(explicit)) return explicit
   if (env.get('WA_SIDECAR_URL')) return 'sidecar'
@@ -66,8 +78,8 @@ export function pickProvider(env: Env = Deno.env): WaProviderName | null {
 }
 
 /** Pesan kesalahan konfigurasi, atau null bila penyedia siap dipakai. */
-export function configProblem(env: Env = Deno.env): string | null {
-  const p = pickProvider(env)
+export function configProblem(env: Env = Deno.env, kind?: WaKind, forced?: WaProviderName): string | null {
+  const p = forced ?? pickProvider(env, kind)
   if (!p) return 'Pengirim WhatsApp belum dikonfigurasi (isi WA_PROVIDER beserta kuncinya)'
   const need: Record<WaProviderName, string[]> = {
     sidecar: ['WA_SIDECAR_URL', 'WA_SIDECAR_KEY'],
@@ -75,7 +87,15 @@ export function configProblem(env: Env = Deno.env): string | null {
     whapi: ['WHAPI_TOKEN'],
   }
   const missing = need[p].filter((k) => !env.get(k))
-  return missing.length ? `WhatsApp (${p}): ${missing.join(', ')} belum diisi` : null
+  if (missing.length) return `WhatsApp (${p}): ${missing.join(', ')} belum diisi`
+  // Meta menolak teks bebas di luar jendela 24 jam: pesan yang dimulai klinik wajib template yang disetujui.
+  if (p === 'meta' && kind === 'reminder' && !env.get('META_WA_TEMPLATE_PENGINGAT')?.trim()) {
+    return 'WhatsApp (meta): pengingat butuh template yang disetujui — isi META_WA_TEMPLATE_PENGINGAT'
+  }
+  if (p === 'meta' && (kind === 'receipt' || kind === 'education')) {
+    return `WhatsApp (meta): ${kind === 'receipt' ? 'struk' : 'edukasi'} belum punya template Meta — atur WA_PROVIDER_${kind.toUpperCase()}=sidecar`
+  }
+  return null
 }
 
 /** Template pengingat Meta bila dikonfigurasi (urutan parameter: nama, tanggal, jam, dokter, klinik, telepon). */
@@ -85,11 +105,79 @@ export function reminderTemplate(params: string[], env: Env = Deno.env): WaTempl
   return { name, language: env.get('META_WA_TEMPLATE_LANG')?.trim() || 'id', params }
 }
 
+/**
+ * Sidik nomor penerima (HMAC-SHA256) — mencocokkan balasan pasien di webhook dengan pesan yang pernah dikirim
+ * tanpa menyimpan nomornya. Kunci: WA_HASH_KEY, cadangan SUPABASE_SERVICE_ROLE_KEY.
+ */
+export async function recipientHash(phone: string, env: Env = Deno.env): Promise<string | null> {
+  const to = normalizePhone(phone)
+  const secret = env.get('WA_HASH_KEY') || env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!to || !secret) return null
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(to))
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+/**
+ * Kolom notification_logs untuk pesan yang berhasil dikirim: penyedia, ID pesan penyedia (dicocokkan dengan
+ * status dari webhook Meta) dan sidik nomor penerima.
+ */
+export async function sentLogFields(r: WaSendResult, phone: string, env: Env = Deno.env) {
+  return {
+    provider: r.provider,
+    provider_message_id: r.id ?? null,
+    recipient_hash: await recipientHash(phone, env),
+    delivery_status: r.provider === 'meta' ? 'accepted' : null,
+  }
+}
+
+// Kode galat Meta yang umum → [boleh dicoba lagi nanti, keterangan untuk staf].
+// https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes
+const META_ERRORS: Record<number, [boolean, string]> = {
+  1: [true, 'Layanan Meta sedang bermasalah'],
+  2: [true, 'Layanan Meta sedang bermasalah'],
+  4: [true, 'Batas panggilan API Meta tercapai'],
+  80007: [true, 'Batas kirim akun WhatsApp tercapai'],
+  130429: [true, 'Batas kecepatan kirim tercapai'],
+  131000: [true, 'Galat sementara di Meta'],
+  131016: [true, 'Layanan WhatsApp sedang tidak tersedia'],
+  131056: [true, 'Terlalu banyak pesan ke nomor yang sama dalam waktu singkat'],
+  133004: [true, 'Server WhatsApp sementara tidak tersedia'],
+  10: [false, 'Izin token Meta tidak cukup'],
+  100: [false, 'Parameter permintaan tidak valid'],
+  190: [false, 'Token Meta kedaluwarsa atau dicabut'],
+  200: [false, 'Izin token Meta tidak cukup'],
+  368: [false, 'Akun diblokir sementara oleh Meta karena pelanggaran kebijakan'],
+  131026: [false, 'Pesan tidak dapat dikirim ke nomor ini (bukan pengguna WhatsApp atau aplikasinya terlalu lama)'],
+  131030: [false, 'Nomor penerima belum ada di daftar uji Meta'],
+  131031: [false, 'Akun WhatsApp Business terkunci'],
+  131042: [false, 'Masalah pembayaran akun WhatsApp Business'],
+  131047: [false, 'Di luar jendela 24 jam — pesan harus memakai template yang disetujui'],
+  131049: [false, 'Meta memutuskan tidak mengirim pesan ini'],
+  131051: [false, 'Jenis pesan tidak didukung'],
+  132000: [false, 'Jumlah parameter template tidak cocok'],
+  132001: [false, 'Template tidak ada atau belum disetujui untuk bahasa ini'],
+  132005: [false, 'Teks template terlalu panjang'],
+  132007: [false, 'Isi template melanggar kebijakan Meta'],
+  132012: [false, 'Format parameter template tidak cocok'],
+  132015: [false, 'Template dijeda karena kualitas rendah'],
+  132016: [false, 'Template dinonaktifkan'],
+  133010: [false, 'Nomor pengirim belum terdaftar di Cloud API'],
+}
+
+/** Tafsir galat Graph API. Kode tak dikenal: HTTP 429/5xx dianggap sementara. */
+export function metaErrorInfo(code: number | undefined, status: number, fallback: string): { retryable: boolean; message: string } {
+  const known = code !== undefined ? META_ERRORS[code] : undefined
+  if (known) return { retryable: known[0], message: `${known[1]} (Meta ${code})` }
+  return { retryable: temporary(status), message: code !== undefined ? `${fallback} (Meta ${code})` : fallback }
+}
+
 export async function sendWhatsApp(input: WaSendInput, opts: Options = {}): Promise<WaSendResult> {
   const env = opts.env ?? Deno.env
   const f = opts.fetch ?? fetch
-  const provider = pickProvider(env)
-  const problem = configProblem(env)
+  const provider = opts.provider ?? pickProvider(env, input.kind)
+  const problem = configProblem(env, input.kind, opts.provider)
   if (problem) return { ok: false, provider, error: problem }
 
   const to = normalizePhone(input.to)
@@ -107,7 +195,9 @@ export async function sendWhatsApp(input: WaSendInput, opts: Options = {}): Prom
   }
 }
 
-const temporary = (status: number) => status === 429 || status >= 500
+function temporary(status: number) {
+  return status === 429 || status >= 500
+}
 
 async function readJson(res: Response): Promise<any> {
   const raw = await res.text()
@@ -134,7 +224,7 @@ async function viaSidecar(f: typeof fetch, env: Env, to: string, text: string, k
 }
 
 async function viaMeta(f: typeof fetch, env: Env, to: string, input: WaSendInput): Promise<WaSendResult> {
-  const version = env.get('META_WA_API_VERSION')?.trim() || 'v22.0'
+  const version = env.get('META_WA_API_VERSION')?.trim() || 'v26.0'
   const phoneId = env.get('META_WA_PHONE_NUMBER_ID')!
   const t = input.template
   const body = t
@@ -161,7 +251,9 @@ async function viaMeta(f: typeof fetch, env: Env, to: string, input: WaSendInput
   const data = await readJson(res)
   const id = data?.messages?.[0]?.id
   if (!res.ok || !id) {
-    return { ok: false, provider: 'meta', retryable: temporary(res.status), error: data?.error?.message || `Meta HTTP ${res.status}`, detail: data }
+    const code = typeof data?.error?.code === 'number' ? data.error.code : undefined
+    const info = metaErrorInfo(code, res.status, data?.error?.message || `Meta HTTP ${res.status}`)
+    return { ok: false, provider: 'meta', retryable: info.retryable, error: info.message, errorCode: code, detail: data }
   }
   return { ok: true, provider: 'meta', id, detail: data }
 }

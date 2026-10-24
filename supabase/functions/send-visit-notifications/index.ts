@@ -16,7 +16,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { requireActiveAccount } from "../_shared/activeAccount.ts"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
-import { configProblem, sendWhatsApp } from "../_shared/whatsapp.ts"
+import { configProblem, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 import { KINDS, parseTypes, type Kind } from "../_shared/notificationInput.ts"
 import { buildEducation, buildReceipt, doctorDisplayName } from "../_shared/visitMessages.ts"
 
@@ -159,6 +159,9 @@ async function processVisit(
       continue
     }
     if (opt.dryRun) { outcomes.push({ type, status: "would_send", length: message.length }); continue }
+    // Penyedia untuk jenis ini belum siap (mis. diarahkan ke Meta tanpa template): tidak dicatat → dicoba lagi oleh sweep.
+    const kindProblem = configProblem(Deno.env, type)
+    if (kindProblem) { outcomes.push({ type, status: "not_configured", detail: kindProblem }); continue }
 
     // Kirim ulang struk dibatasi: satu per kunjungan per 5 menit, dan maks. 30 per klinik per jam (cegah spam ke pasien).
     if (opt.resend) {
@@ -180,11 +183,13 @@ async function processVisit(
     }
 
     // Kunci per klaim: percobaan ulang untuk klaim yang sama tidak mengirim dobel; kirim ulang manual = klaim baru.
-    const r = await sendWhatsApp({ to: noWa, text: message, idempotencyKey: `${logType}:${visitId}:${claim.id}` })
+    const r = await sendWhatsApp({ to: noWa, text: message, idempotencyKey: `${logType}:${visitId}:${claim.id}`, kind: type })
     if (r.ok) {
       // Pesan SUDAH terkirim: kegagalan mencatat tidak boleh memicu kirim ulang. Klaim dibiarkan 'sending' (lalu
       // ditandai 'uncertain' oleh sweep, yang tidak dicoba lagi) dan kegagalan dicatat di log server.
-      const { error: upErr } = await db.from("notification_logs").update({ status: "sent", gateway_response: JSON.stringify({ provider: r.provider, id: r.id }) }).eq("id", claim.id)
+      const { error: upErr } = await db.from("notification_logs").update({
+        status: "sent", gateway_response: JSON.stringify({ provider: r.provider, id: r.id }), ...(await sentLogFields(r, noWa)),
+      }).eq("id", claim.id)
       if (upErr) console.error("send-visit-notifications: pesan terkirim tetapi log gagal diperbarui:", upErr.message)
       if (type === "receipt") {
         const { error: wErr } = await db.from("payments").update({ wa_sent: true }).eq("id", payment.id)

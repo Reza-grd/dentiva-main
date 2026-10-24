@@ -414,5 +414,48 @@ await db.exec(`update public.master_bahan set kode_kfa = '93009999' where id = '
 ok((await one(`select kfa_verified_at is null as v from public.master_bahan where id = '${mb.id}'`)).v, "kode KFA diubah dari browser → status verifikasi dihapus");
 await logout();
 
+// WhatsApp Cloud API: status Meta & pesan masuk hanya ditulis server; pesan masuk hanya terlihat admin kliniknya.
+console.log("\n11. WhatsApp Cloud API");
+await db.exec(`alter table public.patients add column if not exists wa_consent boolean`); // ada di produksi, tidak di baseline sintetis
+const pB1 = (await one(`select id from public.patients where no_rm = 'B-1'`)).id;
+await db.exec(`update public.patients set wa_consent = true where id = '${pB1}'`);
+await db.exec(`insert into public.notification_logs (clinic_id, patient_id, message_type, status, provider, provider_message_id, recipient_hash, delivery_status)
+  values ('${B}', '${pB1}', 'reminder_day', 'sent', 'meta', 'wamid.T1', 'sidik-b1', 'accepted')`);
+await loginAs(uB);
+// Aman bila insert ditolak RLS, atau diterima dengan kolom Meta dikosongkan trigger.
+const palsu = await one(`insert into public.notification_logs (clinic_id, message_type, status, provider_message_id, delivery_status)
+  values ('${B}', 'manual', 'sent', 'wamid.PALSU', 'read') returning provider_message_id, delivery_status`).catch(() => null);
+await logout();
+ok((palsu === null || (palsu.provider_message_id === null && palsu.delivery_status === null))
+  && (await one(`select count(*)::int as n from public.notification_logs where provider_message_id = 'wamid.PALSU'`)).n === 0,
+  "browser tidak bisa mengisi ID pesan / status pengiriman Meta");
+// Produksi mengizinkan staf mencatat log sendiri (kebijakan lama) — trigger tetap harus mengosongkan kolom Meta.
+await db.exec(`alter table public.notification_logs disable row level security; grant insert, select, update on public.notification_logs to authenticated`);
+await loginAs(uB);
+const lolos = await one(`insert into public.notification_logs (clinic_id, message_type, status, provider, provider_message_id, recipient_hash, delivery_status)
+  values ('${B}', 'manual', 'sent', 'meta', 'wamid.PALSU2', 'x', 'read') returning id, provider, provider_message_id, recipient_hash, delivery_status`);
+ok([lolos.provider, lolos.provider_message_id, lolos.recipient_hash, lolos.delivery_status].every((v) => v === null), "trigger mengosongkan kolom Meta pada insert dari browser");
+await db.exec(`update public.notification_logs set delivery_status = 'failed', provider_message_id = 'wamid.T1' where provider_message_id = 'wamid.T1' or id = '${lolos.id}'`);
+await logout();
+ok((await one(`select delivery_status from public.notification_logs where provider_message_id = 'wamid.T1'`)).delivery_status === "accepted", "trigger menolak perubahan status Meta dari browser");
+await db.exec(`delete from public.notification_logs where id = '${lolos.id}'; alter table public.notification_logs enable row level security`);
+await loginAs(uB);
+await expectError(`select public.wa_catat_status('wamid.T1', 'read', now())`, /permission denied|42501/, "browser tidak bisa memanggil wa_catat_status");
+await expectError(`select public.wa_cabut_persetujuan('sidik-b1')`, /permission denied|42501/, "browser tidak bisa memanggil wa_cabut_persetujuan");
+await logout();
+ok((await one(`select public.wa_catat_status('wamid.T1', 'read', now()) as r`)).r === true, "server mencatat status 'read'");
+ok((await one(`select public.wa_catat_status('wamid.T1', 'delivered', now()) as r`)).r === false, "status tidak mundur (delivered setelah read diabaikan)");
+ok((await one(`select delivery_status from public.notification_logs where provider_message_id = 'wamid.T1'`)).delivery_status === "read", "status tetap 'read'");
+ok((await one(`select public.wa_catat_status('wamid.TIDAK-ADA', 'read', now()) as r`)).r === false, "status untuk pesan tak dikenal diabaikan");
+await db.exec(`insert into public.whatsapp_inbound (wamid, clinic_id, patient_id, sender_hash, message_type) values
+  ('wamid.IN-B', '${B}', '${pB1}', 'sidik-b1', 'text'), ('wamid.IN-A', '${A}', null, 'sidik-a', 'text')`);
+await expectError(`insert into public.whatsapp_inbound (wamid, sender_hash, message_type) values ('wamid.IN-B', 'x', 'text')`, /duplicate|23505/, "pesan masuk yang sama tidak tercatat dua kali");
+await loginAs(uB);
+ok((await q(`select wamid from public.whatsapp_inbound`)).map((r) => r.wamid).join() === "wamid.IN-B", "admin klinik B hanya melihat pesan masuk kliniknya");
+await expectError(`insert into public.whatsapp_inbound (wamid, clinic_id, sender_hash, message_type) values ('wamid.X', '${B}', 'x', 'text')`, /permission denied|row-level security|42501/, "browser tidak bisa menulis pesan masuk");
+await logout();
+ok((await one(`select public.wa_cabut_persetujuan('sidik-b1') as n`)).n === 1, "BERHENTI mencabut persetujuan pasien yang dikirimi pesan");
+ok((await one(`select wa_consent from public.patients where id = '${pB1}'`)).wa_consent === false, "wa_consent pasien menjadi false");
+
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.168.0/testing/asserts.ts";
-import { configProblem, normalizePhone, pickProvider, reminderTemplate, sendWhatsApp } from "./whatsapp.ts";
+import { configProblem, metaErrorInfo, normalizePhone, pickProvider, recipientHash, reminderTemplate, sendWhatsApp, sentLogFields } from "./whatsapp.ts";
 
 const envOf = (vars: Record<string, string>) => ({ get: (k: string) => vars[k] });
 
@@ -130,4 +130,72 @@ Deno.test("jaringan putus → ok:false, bukan exception", async () => {
   assertEquals(r.ok, false);
   assertEquals(r.error, "Jaringan ke penyedia WhatsApp gagal: ECONNREFUSED");
   assertEquals(r.retryable, true);
+});
+
+Deno.test("per jenis: WA_PROVIDER_<JENIS> menimpa WA_PROVIDER", () => {
+  const env = envOf({ WA_PROVIDER: "sidecar", WA_PROVIDER_REMINDER: "meta", WA_SIDECAR_URL: "u", WA_SIDECAR_KEY: "k" });
+  assertEquals(pickProvider(env, "reminder"), "meta");
+  assertEquals(pickProvider(env, "receipt"), "sidecar");
+  assertEquals(pickProvider(env), "sidecar");
+});
+
+Deno.test("configProblem: Meta untuk pengingat wajib template; struk/edukasi ditolak", () => {
+  const meta = { META_WA_TOKEN: "t", META_WA_PHONE_NUMBER_ID: "1", WA_PROVIDER: "meta" };
+  assertEquals(configProblem(envOf(meta), "reminder"), "WhatsApp (meta): pengingat butuh template yang disetujui — isi META_WA_TEMPLATE_PENGINGAT");
+  assertEquals(configProblem(envOf({ ...meta, META_WA_TEMPLATE_PENGINGAT: "pengingat_jadwal" }), "reminder"), null);
+  assertEquals(configProblem(envOf(meta), "receipt"), "WhatsApp (meta): struk belum punya template Meta — atur WA_PROVIDER_RECEIPT=sidecar");
+  assertEquals(configProblem(envOf({ ...meta, WA_PROVIDER_EDUCATION: "sidecar", WA_SIDECAR_URL: "u", WA_SIDECAR_KEY: "k" }), "education"), null);
+  assertEquals(configProblem(envOf(meta), "manual"), null);
+});
+
+Deno.test("sendWhatsApp: jenis pesan memilih penyedia; struk tidak pernah dikirim lewat Meta tanpa template", async () => {
+  const env = envOf({
+    WA_SIDECAR_URL: "http://s", WA_SIDECAR_KEY: "k", META_WA_TOKEN: "t", META_WA_PHONE_NUMBER_ID: "1",
+    WA_PROVIDER_REMINDER: "meta", META_WA_TEMPLATE_PENGINGAT: "pengingat_jadwal", WA_PROVIDER_RECEIPT: "meta",
+  });
+  const { fn, calls } = fakeFetch({ body: { messages: [{ id: "wamid.9" }] } });
+  const ok = await sendWhatsApp({ to: "081234567890", text: "x", kind: "reminder", template: reminderTemplate(["a"], env) }, { env, fetch: fn });
+  assertEquals([ok.ok, ok.provider], [true, "meta"]);
+  const blocked = await sendWhatsApp({ to: "081234567890", text: "struk", kind: "receipt" }, { env, fetch: fn });
+  assertEquals([blocked.ok, blocked.provider], [false, "meta"]);
+  assertEquals(calls.length, 1);
+});
+
+Deno.test("meta: kode galat dipetakan (131047 permanen, 130429 sementara)", async () => {
+  const env = envOf({ META_WA_TOKEN: "t", META_WA_PHONE_NUMBER_ID: "1" });
+  const outside = fakeFetch({ status: 400, body: { error: { message: "Re-engagement message", code: 131047 } } });
+  const r1 = await sendWhatsApp({ to: "081234567890", text: "x" }, { env, fetch: outside.fn });
+  assertEquals([r1.retryable, r1.errorCode], [false, 131047]);
+  assertEquals(r1.error, "Di luar jendela 24 jam — pesan harus memakai template yang disetujui (Meta 131047)");
+  const busy = fakeFetch({ status: 400, body: { error: { message: "Rate limit hit", code: 130429 } } });
+  assertEquals((await sendWhatsApp({ to: "081234567890", text: "x" }, { env, fetch: busy.fn })).retryable, true);
+  assertEquals(metaErrorInfo(999999, 503, "aneh"), { retryable: true, message: "aneh (Meta 999999)" });
+  assertEquals(metaErrorInfo(undefined, 400, "aneh"), { retryable: false, message: "aneh" });
+});
+
+Deno.test("paksa penyedia: balasan webhook selalu lewat Meta", async () => {
+  const env = envOf({ WA_SIDECAR_URL: "http://s", WA_SIDECAR_KEY: "k", META_WA_TOKEN: "t", META_WA_PHONE_NUMBER_ID: "77" });
+  const { fn, calls } = fakeFetch({ body: { messages: [{ id: "wamid.r" }] } });
+  const r = await sendWhatsApp({ to: "6281234567890", text: "balas" }, { env, fetch: fn, provider: "meta" });
+  assertEquals(r.provider, "meta");
+  assertEquals(calls[0].url, "https://graph.facebook.com/v26.0/77/messages");
+});
+
+Deno.test("recipientHash: tetap untuk nomor yang sama (format apa pun), beda kunci beda hasil", async () => {
+  const env = envOf({ WA_HASH_KEY: "rahasia" });
+  const a = await recipientHash("0812-3456-7890", env);
+  assertEquals(a, await recipientHash("+62 812 3456 7890", env));
+  assertEquals(a?.length, 64);
+  assertEquals(a === (await recipientHash("081234567890", envOf({ WA_HASH_KEY: "lain" }))), false);
+  assertEquals(await recipientHash("", env), null);
+  assertEquals(await recipientHash("081234567890", envOf({})), null);
+});
+
+Deno.test("sentLogFields: ID pesan & status awal hanya untuk Meta", async () => {
+  const env = envOf({ SUPABASE_SERVICE_ROLE_KEY: "srk" });
+  const meta = await sentLogFields({ ok: true, provider: "meta", id: "wamid.1" }, "081234567890", env);
+  assertEquals([meta.provider, meta.provider_message_id, meta.delivery_status], ["meta", "wamid.1", "accepted"]);
+  const side = await sentLogFields({ ok: true, provider: "sidecar" }, "081234567890", env);
+  assertEquals([side.provider_message_id, side.delivery_status], [null, null]);
+  assertEquals(side.recipient_hash, meta.recipient_hash);
 });
