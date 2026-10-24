@@ -14,7 +14,7 @@ Ada informasi material yang belum terverifikasi (KBLI, lokasi pusat data, email 
 | Data Pribadi yang diproses | inventaris data | — | — | ✅ |
 | Lokasi pengelolaan/pemrosesan/penyimpanan | profil teknis §4 | Lokasi pusat data Biznet belum dikonfirmasi | Ambil bukti lokasi dari akun/kontrak Biznet Gio | ⚠️ |
 | Pernyataan pemberian akses | SOP permintaan akses | Pengesahan direksi | Tanda tangani SOP | ⚠️ |
-| Keamanan informasi | audit keamanan | H1 (data lama polos), H3 (backup luar server), H4 (peringatan) | Jalankan skrip enkripsi; putuskan tujuan backup; isi nomor peringatan | ⚠️ |
+| Keamanan informasi | audit keamanan | H3 (backup luar server), H4 (peringatan) — H1 selesai | Putuskan tujuan backup; isi nomor peringatan | ⚠️ |
 | Pelindungan Data Pribadi | 3 halaman legal tayang di dentiva.id | Email kontak tidak berfungsi; retensi log/AI belum ditetapkan | Aktifkan email; tetapkan masa simpan | ⚠️ |
 | Uji kelaikan | laporan uji internal | Uji penetrasi, uji beban, staging; kewajiban uji formal belum dipastikan | Tanyakan ke Komdigi apakah uji kelaikan formal diwajibkan untuk kategori ini | ⚠️ |
 | Akun pse.komdigi.go.id / OSS PB-UMKU | permohonan dimulai pemilik | — | Lanjutkan setelah prioritas 1 | ⏳ |

@@ -34,6 +34,29 @@
         "D:/dentiva/dentiva_website"
       ],
       "port": 4000
+    },
+    {
+      "name": "website-cleanurls",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "-y",
+        "serve@14",
+        "-l",
+        "4010",
+        "D:/dentiva/dentiva_website"
+      ],
+      "port": 4010
+    },
+    {
+      "name": "eira-pameran",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "D:/dentiva/eira-pameran",
+        "run",
+        "dev"
+      ],
+      "port": 5180
     }
   ]
 }
