@@ -56,7 +56,7 @@ describe('Penilaian jawaban Asisten AI', () => {
     fireEvent.change(screen.getByLabelText('Apa yang kurang tepat'), { target: { value: 'periodenya salah' } });
     fireEvent.click(screen.getByRole('button', { name: /Tanyakan ulang/ }));
     await waitFor(() => expect(ai.feedback).toHaveBeenCalledWith('u1', false, 'periodenya salah'));
-    await waitFor(() => expect(ai.ask).toHaveBeenLastCalledWith('Berapa pendapatan bulan lalu?', [], { retry: true, note: 'periodenya salah' }));
+    await waitFor(() => expect(ai.ask).toHaveBeenLastCalledWith('Berapa pendapatan bulan lalu?', [], expect.objectContaining({ retry: true, note: 'periodenya salah' })));
     expect(await screen.findByText('Jawaban perbaikan.')).toBeInTheDocument();
     expect(screen.getByText('Jawaban diperbaiki')).toBeInTheDocument();
     expect(screen.getByText(/Dinilai kurang tepat/)).toBeInTheDocument();

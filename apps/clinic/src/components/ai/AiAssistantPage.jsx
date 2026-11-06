@@ -154,6 +154,7 @@ export default function AiAssistantPage() {
   const [messages, setMessages] = useState(loadChat);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [draft, setDraft] = useState('');
   const [agree, setAgree] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [provider, setProvider] = useState(null);
@@ -287,6 +288,7 @@ export default function AiAssistantPage() {
   }, [status?.aktif, name, react]);
   useEffect(() => { aiService.getProvider().then((r) => r.success && setProvider(r.data)); }, []);
   useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy, typing]);
+  useEffect(() => { if (draft) endRef.current?.scrollIntoView({ block: 'end' }); }, [draft]);
 
   const typeahead = React.useMemo(() => {
     const q = input.toLowerCase().trim();
@@ -300,6 +302,18 @@ export default function AiAssistantPage() {
     usageId: data.usage_id || null, cached: Boolean(data.cached), fast: Boolean(data.fast), references: data.references || 0,
     actions: (data.actions || []).map((a) => ({ ...a, state: 'pending', at: Date.now(), error: '' })), ...extra,
   });
+
+  // Jawaban tampil bertahap di draft; animasi masuk dilewati bila teksnya sudah terlihat.
+  const askStreaming = async (question, history, opts) => {
+    let streamed = false;
+    const res = await aiService.ask(question, history, {
+      ...opts,
+      onDelta: (text) => { streamed = true; setDraft((d) => d + text); },
+      onReset: () => { streamed = false; setDraft(''); },
+    });
+    setDraft('');
+    return { res, fresh: !streamed };
+  };
 
   // Pindai nota → Eira memeriksa duplikat lalu menyiapkan usulan pengeluaran + stok masuk
   const notaRef = useRef(null);
@@ -389,10 +403,10 @@ export default function AiAssistantPage() {
     setDentiLine(lineForQuestion(question));
     settle();
     setBusy(true);
-    const res = await aiService.ask(question, history);
+    const { res, fresh } = await askStreaming(question, history);
     setBusy(false);
     if (res.success) {
-      setMessages((m) => [...m, toAssistant(res.data, question)]);
+      setMessages((m) => [...m, toAssistant(res.data, question, { fresh })]);
       if (res.data.status) setStatus(res.data.status);
       const mood = moodForAnswer(res.data.answer);
       const blocks = (String(res.data.answer).match(/\n\s*\n|\n\s*[-*\d|]/g) || []).length + 1;
@@ -433,10 +447,10 @@ export default function AiAssistantPage() {
     const qIdx = messages.slice(0, idx).map((m) => m.role).lastIndexOf('user');
     const history = messages.slice(0, Math.max(qIdx, 0)).filter((m) => !m.error && !m.local).map(({ role, content }) => ({ role, content }));
     setBusy(true);
-    const res = await aiService.ask(msg.question, history, { retry: true, note });
+    const { res, fresh } = await askStreaming(msg.question, history, { retry: true, note });
     setBusy(false);
     if (res.success) {
-      setMessages((m) => [...m, toAssistant(res.data, msg.question, { revised: true })]);
+      setMessages((m) => [...m, toAssistant(res.data, msg.question, { revised: true, fresh })]);
       if (res.data.status) setStatus(res.data.status);
       react('happy', 'Sudah saya perbaiki. Semoga kali ini tepat!', 3000);
     } else {
@@ -679,7 +693,17 @@ export default function AiAssistantPage() {
               </div>
             )}
 
-            {busy && (
+            {busy && draft && (
+              <div className="flex gap-3">
+                <div className="w-8 h-8 shrink-0 rounded-xl grid place-items-center bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)]">
+                  <Sparkles size={16} className="text-[var(--color-accent)]" />
+                </div>
+                <div className="min-w-0 flex-1 rounded-2xl rounded-tl-md px-4 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm">
+                  <Answer text={draft} />
+                </div>
+              </div>
+            )}
+            {busy && !draft && (
               <div className="flex gap-3 items-center text-sm text-gray-500">
                 <div className="w-8 h-8 rounded-xl grid place-items-center bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)]">
                   <Sparkles size={16} className="text-[var(--color-accent)]" />

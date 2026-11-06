@@ -334,7 +334,7 @@ export function isBriefingRequest(normalizedQuestion: string): boolean {
 }
 
 /** Pembuka pertanyaan murni (informasi/analisis) — tidak butuh alat usulan. */
-const INFO_START = /^(berapa|apa|apakah|siapa|kenapa|mengapa|bagaimana|gimana|kapan|dimana|di mana|mana|ada|jelaskan|kalau|jika|andai|seandainya|bandingkan|tampilkan|lihat|cek|tunjukkan)( |$)/;
+const INFO_START = /^(strategi|saran|tips|ide|rekomendasi|analisis|analisa|evaluasi|berapa|apa|apakah|siapa|kenapa|mengapa|bagaimana|gimana|kapan|dimana|di mana|mana|ada|jelaskan|kalau|jika|andai|seandainya|bandingkan|tampilkan|lihat|cek|tunjukkan)( |$)/;
 
 /**
  * Alat usulan (tulis) disodorkan KECUALI pertanyaan jelas bersifat informasi. Dulu gerbangnya terlalu ketat: pada "lidocain masuk 3 box 55rb"

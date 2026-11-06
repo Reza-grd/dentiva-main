@@ -18,6 +18,28 @@ async function callAgent(body) {
   return { success: true, data };
 }
 
+/** Baca aliran jawaban ai-assistant; hasilnya peristiwa "done", atau null bila koneksi putus sebelum selesai. */
+export async function readAnswerStream(response, { onDelta, onReset } = {}) {
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let done = null;
+  for (;;) {
+    const chunk = await reader.read();
+    if (chunk.done) return done;
+    buffer += decoder.decode(chunk.value, { stream: true });
+    const parts = buffer.split('\n\n');
+    buffer = parts.pop();
+    for (const part of parts) {
+      if (!part.startsWith('data: ')) continue;
+      const event = JSON.parse(part.slice(6));
+      if (event.type === 'delta') onDelta?.(event.text);
+      else if (event.type === 'reset') onReset?.();
+      else if (event.type === 'done') done = event;
+    }
+  }
+}
+
 export const aiService = {
   /** { paket, tersedia_di_paket, aktif, kuota_bulanan, terpakai_bulan_ini } */
   async getStatus() {
@@ -44,16 +66,26 @@ export const aiService = {
    * Tanya Asisten Keuangan.
    * history: [{ role: 'user'|'assistant', content: string }] — percakapan sebelumnya (teks saja).
    * opts.retry + opts.note: minta jawaban ulang karena jawaban sebelumnya dinilai kurang tepat.
+   * opts.onDelta + opts.onReset: terima jawaban bertahap; penyedia tanpa aliran langsung mengirim hasil akhir.
    * Hasil: { answer, tools, usage_id, cached?, references?, status }.
    */
   async ask(question, history = [], opts = {}) {
     const body = { question, history, ...(opts.retry ? { retry: true, retry_note: opts.note || '' } : {}) };
-    const { data, error } = await supabase.functions.invoke('ai-assistant', { body });
+    const headers = opts.onDelta ? { Accept: 'text/event-stream' } : undefined;
+    const { data, error } = await supabase.functions.invoke('ai-assistant', { body, headers });
     if (error) {
       const e = await invokeError(error);
       return { success: false, error: e.message, status: e.status };
     }
-    return { success: true, data };
+    if (!(data instanceof Response)) return { success: true, data };
+    try {
+      const done = await readAnswerStream(data, opts);
+      if (!done) return { success: false, error: 'Koneksi ke Asisten AI terputus. Coba lagi.' };
+      if (done.status >= 400) return { success: false, error: done.data?.error || 'Asisten AI tidak dapat dihubungi.', status: done.data?.status };
+      return { success: true, data: done.data };
+    } catch {
+      return { success: false, error: 'Koneksi ke Asisten AI terputus. Coba lagi.' };
+    }
   },
 
   /** Nilai jawaban: tepat → disimpan sebagai jawaban terverifikasi; kurang tepat → tidak dipakai ulang. */
