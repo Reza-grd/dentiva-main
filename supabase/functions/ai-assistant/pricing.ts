@@ -27,6 +27,10 @@ export function costUsd(model: string, u: { input: number; output: number; cache
 /** Haiku 5.5 tidak punya fallback refusal sisi-server: parameter `fallbacks`/beta tidak boleh dikirim. */
 export const supportsServerFallback = (model: string): boolean => !/haiku/i.test(model);
 
+/** Kredit habis datang sebagai 402 billing_error atau 400 "credit balance is too low"; keduanya tidak bisa dicoba ulang. */
+export const isCreditExhausted = (status: number | undefined, message: string): boolean =>
+  status === 402 || (status === 400 && /credit balance/i.test(message));
+
 /** Model untuk percakapan dan untuk tugas ringan, dari nilai secret (kosong = bawaan). */
 export function anthropicModels(chatEnv?: string, lightEnv?: string): { chat: string; light: string } {
   const clean = (v?: string) => v?.trim().replace(/^["']|["']$/g, "").trim() || "";

@@ -27,7 +27,7 @@ Pengguna klinik (browser / aplikasi desktop Windows-macOS)
             • dentiva-wa (perangkat WhatsApp tertaut / sidecar)
           Cron: backup harian terenkripsi 01.30 WIB, pemantauan 5 menit, jadwal pg_cron
           │
-          ├──► Google Gemini API ........ asisten AI (data operasional, tanpa identitas pasien)
+          ├──► Anthropic Claude API ..... asisten AI (data operasional, tanpa identitas pasien)
           ├──► Meta WhatsApp Cloud API ... dikonfigurasi, belum dipakai mengirim ke pasien
           ├──► jaringan WhatsApp ........ lewat sidecar (saat ini jalur pengiriman notifikasi pasien)
           ├──► Midtrans .................. pembayaran langganan (mode sandbox)
@@ -63,7 +63,7 @@ Lain-lain:
 | Seluruh database (pasien, rekam medis, akun, pembayaran, audit) | VPS Biznet, Indonesia | VPS Biznet, Indonesia | Sumber kebenaran tunggal |
 | Berkas (foto profil, unduhan installer; bucket klinis tersedia) | disk VPS, Indonesia | VPS | per 24 Okt: 1 avatar, 9 installer, 0 berkas klinis |
 | Backup harian (terenkripsi age, 14 hari) | **disk VPS yang sama**, Indonesia | VPS | tidak ada salinan di luar server (temuan H3) |
-| Pertanyaan asisten AI + data operasional ringkas | jawaban dan pertanyaan dicatat di `ai_usage` (VPS) | **Google (Gemini API), dapat di luar Indonesia** | dirancang tanpa identitas atau rekam medis pasien |
+| Pertanyaan asisten AI + data operasional ringkas | jawaban dan pertanyaan dicatat di `ai_usage` (VPS) | **Anthropic (Claude API), dapat di luar Indonesia** | dirancang tanpa identitas atau rekam medis pasien |
 | Pesan WhatsApp ke pasien | log tanpa isi di VPS; sesi perangkat tertaut (riwayat chat) di VPS | jaringan WhatsApp/Meta, **dapat di luar Indonesia** | lihat inventaris data |
 | Berkas aplikasi web dan log akses | Vercel | Vercel, global | tidak menyimpan data pasien |
 | Pembayaran langganan | Midtrans | Indonesia | mode sandbox per 24 Okt 2026 |

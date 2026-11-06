@@ -44,7 +44,7 @@ import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.t
 import { fastAnswer } from "./fast.ts";
 import { CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
 import { ALL_TOOLS, READ_TOOLS, runTool, SYSTEM, type Tool } from "./core.ts";
-import { anthropicModels, costUsd, supportsServerFallback } from "./pricing.ts";
+import { anthropicModels, costUsd, isCreditExhausted, supportsServerFallback } from "./pricing.ts";
 
 const MAX_TOOL_ROUNDS = 10;
 const MAX_QUESTION = 1000;
@@ -235,6 +235,9 @@ const textOf = (response: any): string =>
 function apiErrorMessage(err: unknown): string {
   const isApi = err instanceof Anthropic.APIError || err instanceof GeminiError || err instanceof GroqError;
   console.error("ai-assistant error:", isApi ? `${(err as { status?: number }).status} ${(err as Error).message}` : err);
+  if (err instanceof Anthropic.APIError && isCreditExhausted(err.status, err.message)) {
+    return "Kredit AI Dentiva habis. Pengelola Dentiva perlu mengisi ulang kredit penyedia AI.";
+  }
   const busy = err instanceof Anthropic.RateLimitError ||
     ((err instanceof GeminiError || err instanceof GroqError) && err.status === 429);
   const keyRejected = err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError ||
@@ -337,11 +340,14 @@ const anthropicCommon = (model: string) => ({
   ...(supportsServerFallback(model) ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
 });
 
+// Batas 90 detik per panggilan: bawaan SDK 10 menit membuat permintaan yang macet menggantung di halaman admin.
+const anthropicClient = (p: Provider) => new Anthropic({ apiKey: p.key, timeout: 90_000, maxRetries: 1 });
+
 /** Model yang dipakai untuk satu tugas: tugas ringan (catatan dashboard, template) memakai model murah bila tersedia. */
 const lightOf = (p: Provider) => p.lightModel ?? p.model;
 
 async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx, effort: "medium" | "high" = "medium"): Promise<ChatResult> {
-  const client = new Anthropic({ apiKey: p.key });
+  const client = anthropicClient(p);
   const messages: Anthropic.Beta.BetaMessageParam[] = turns.map((t) => ({ role: t.role, content: t.content }));
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     // deno-lint-ignore no-explicit-any
@@ -349,6 +355,8 @@ async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[],
       ...anthropicCommon(p.model),
       max_tokens: 16000,
       output_config: { effort },
+      // Titik cache otomatis mengikuti ekor percakapan, jadi data & hasil alat tidak dibayar penuh di setiap putaran alat.
+      cache_control: { type: "ephemeral" },
       system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
       tools: ctx.writeTools === false ? READ_TOOLS : ALL_TOOLS,
       messages,
@@ -530,7 +538,7 @@ async function structured(p: Provider, input: StructuredInput, usage: Usage): Pr
     if (r.failed) throw new GeminiError(502, `interaction ${r.status}`);
     return { text: r.text, refused: false };
   }
-  const client = new Anthropic({ apiKey: p.key });
+  const client = anthropicClient(p);
   // deno-lint-ignore no-explicit-any
   const response: any = await client.beta.messages.create({
     ...anthropicCommon(input.light ? lightOf(p) : p.model),
