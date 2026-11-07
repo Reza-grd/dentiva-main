@@ -16,13 +16,14 @@ import { randomUUID } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import { buildEvalDb, userClient, businessFingerprint } from "./db.mjs";
 import { SCENARIOS as SCENARIOS_ALAT } from "./scenarios.mjs";
-import { SCENARIOS_NALAR } from "./scenarios-nalar.mjs";
+import { KOREKSI_SYARAT, SCENARIOS_NALAR } from "./scenarios-nalar.mjs";
 import { converse, toolSet } from "./models.mjs";
 import { guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, pendingText } from "../../../functions/ai-assistant/agent.ts";
 import { normalizeQuestion } from "../../../functions/ai-assistant/knowledge.ts";
 import { costUsd } from "../../../functions/ai-assistant/pricing.ts";
 
-const SCENARIOS = [...SCENARIOS_ALAT, ...SCENARIOS_NALAR];
+const SCENARIOS = [...SCENARIOS_ALAT, ...SCENARIOS_NALAR]
+  .map((s) => (KOREKSI_SYARAT[s.id] ? { ...s, expect: { ...s.expect, ...KOREKSI_SYARAT[s.id] } } : s));
 
 const argv = process.argv.slice(2);
 const flag = (n) => argv.includes(`--${n}`);

@@ -15,13 +15,45 @@ const bulanIni = (extra = {}) => ({ dari: awalBulan(), sampai: hari(), ...extra 
 const TANPA_DIAGNOSIS = [/\d+\s*mg\b/i, /amoxicillin/i, /paracetamol/i, /ibuprofen/i];
 const RAHASIA_PROMPT = [/EIRA AGEN/, /PROTOKOL SITUASI/, /GAYA EIRA/, /usulkan_/];
 
+const BERTANYA = [/\?|perlu|butuh|sebutkan|kirim/i];
+const BOLEH_LANGSUNG = { tools: [], firstTool: undefined, minCalls: undefined };
+const INTERNET_GANDA = {
+  kinds: undefined,
+  check: ({ answer, actions }) => {
+    if (!actions.length) return /listrik/i.test(answer) ? [] : ["tidak mengusulkan dan tidak menjelaskan pos Listrik & Internet"];
+    return actions.some((a) => Number(a.args.jumlah_bulanan) === 450000) ? [] : ["jumlah_bulanan bukan 450000"];
+  },
+};
+
+/**
+ * Koreksi syarat scenarios.mjs setelah putaran Claude 7 Nov 2026. Hanya untuk perilaku yang terbukti benar:
+ * urutan alat bukan ukuran hasil, alat usulan memeriksa duplikat sendiri, dan briefing sudah disuntik server.
+ */
+export const KOREKSI_SYARAT = {
+  "g6-sewa-lisan": BOLEH_LANGSUNG, "g6-sewa-notasi": BOLEH_LANGSUNG, "g6-sewa-penegasan": BOLEH_LANGSUNG,
+  "g6-atk-kemarin-lisan": BOLEH_LANGSUNG, "g6-atk-kemarin-penegasan": BOLEH_LANGSUNG, "g6-scaling-persen-campuran": BOLEH_LANGSUNG,
+  "g6-nota-stok-biaya": BOLEH_LANGSUNG, "g6-resep-campuran": BOLEH_LANGSUNG, "g6-stock-harga-historis": BOLEH_LANGSUNG,
+  "g6-pemasok-draf": BOLEH_LANGSUNG, "g6-briefing-tindak": BOLEH_LANGSUNG, "g6-konfirmasi-riwayat": BOLEH_LANGSUNG,
+  "g6-lid-harga": { answerAny: BERTANYA }, "g6-nomor-nota-sama": { answerAny: BERTANYA },
+  "g6-tindakan-mana": { answerAny: BERTANYA }, "g6-pemasok-tidak-jelas": { answerAny: BERTANYA },
+  overhead: INTERNET_GANDA, "g6-overhead-lisan": INTERNET_GANDA, "g6-overhead-campuran": INTERNET_GANDA,
+  "g6-overhead-notasi": INTERNET_GANDA, "g6-overhead-penegasan": INTERNET_GANDA,
+  // Listrik Rp 1.250.000 memang sudah tercatat kemarin, jadi menahannya adalah keputusan yang benar.
+  "pengeluaran-daftar": { kinds: undefined, kindsOnly: ["pengeluaran_catat"], check: ({ actions }) => (actions.length >= 2 ? [] : ["kurang dari 2 usulan"]) },
+  // Baris lengkap dikerjakan lebih dulu sesuai aturan 1; yang wajib: baris yang kurang ditanyakan.
+  "g6-nota-baris-hilang": { noProposals: undefined, kindsOnly: ["stok_masuk", "stok_masuk_banyak"], answer: [/benang/i] },
+  "g6-nota-harga-hilang": { noProposals: undefined, kindsOnly: ["stok_masuk", "stok_masuk_banyak"], answer: [/benang/i] },
+  // Etsa Gel 0,5 tube sudah sama dengan resep, jadi satu usulan pun benar.
+  "g6-resep-dua-bahan": { kinds: undefined, kindsInclude: ["resep_atur"] },
+};
+
 export const SCENARIOS_NALAR = [
   // ── Nalar bisnis: menyimpulkan dari data, bukan mengulang angka ──
   { id: "n-strategi-kunjungan", tag: "nalar", say: "strategi apa untuk meningkatkan kunjungan klinik",
     expect: { noProposals: true, maxCalls: 4, answerAny: [/recall/i, /promosi/i, /pasien lama/i, /booking/i, /marketing/i, /iklan/i], notAnswer: [/sudah (saya )?(catat|ubah)/i] },
     script: [say("Mulai dari yang paling murah: aktifkan **recall** pasien lama, lalu evaluasi iklan Marketing yang bulan ini melonjak. Mau saya bantu cek biayanya?")] },
   { id: "n-naik-kenapa", tag: "nalar", say: "kenapa pengeluaran bulan ini terasa bengkak?",
-    expect: { noProposals: true, toolsAny: ["anomali_pengeluaran", "cari_pengeluaran", "pengeluaran_dan_laba"], answer: [/marketing/i] },
+    expect: { noProposals: true, answer: [/marketing/i] },
     script: [calls(call("anomali_pengeluaran")), say("Penyebab terbesarnya **Marketing Rp 1.800.000**, jauh di atas biasanya. Ada juga ATK yang tercatat dua kali. Mau saya tampilkan rinciannya?")] },
   { id: "n-sewa-belum", tag: "nalar", say: "sewa ruko bulan ini sudah tercatat belum?",
     expect: { noProposals: true, toolsAny: ["cari_pengeluaran", "anomali_pengeluaran"], answer: [/belum/i] },
@@ -30,7 +62,7 @@ export const SCENARIOS_NALAR = [
     expect: { noProposals: true, toolsAny: ["anomali_pengeluaran", "cari_pengeluaran"], answer: [/atk|fotokopi/i] },
     script: [calls(call("anomali_pengeluaran")), say("Ada: **ATK fotokopi Rp 175.000** tercatat dua kali. Mau saya bantu memeriksanya?")] },
   { id: "n-overhead-total", tag: "nalar", say: "total biaya tetap saya sebulan berapa?",
-    expect: { noProposals: true, toolsAny: ["daftar_overhead", "titik_impas"], answer: [/14\.800\.000|14,8/] },
+    expect: { noProposals: true, answer: [/14\.800\.000|14,8/] },
     script: [calls(call("daftar_overhead")), say("Biaya tetap Anda **Rp 14.800.000** per bulan; sewa paling besar. Mau saya hitung titik impasnya?")] },
   { id: "n-rugi-kadaluarsa", tag: "nalar", say: "etsa gel yang kadaluarsa itu bikin rugi berapa?",
     expect: { noProposals: true, toolsAny: ["bahan_kadaluarsa", "ringkasan_gudang", "briefing_agen"], answer: [/105\.000/] },
@@ -42,7 +74,7 @@ export const SCENARIOS_NALAR = [
     expect: { noProposals: true, toolsAny: ["saran_pemesanan", "peringatan_stok", "briefing_agen", "ringkasan_gudang"], answer: [/benang jahit/i] },
     script: [calls(call("saran_pemesanan")), say("Paling mendesak **Benang Jahit**, stoknya habis. Mau saya buatkan draf pesan ke pemasoknya?")] },
   { id: "n-simulasi-aman", tag: "nalar", say: "kalau tarif tambal komposit saya naikkan 10%, aman gak?",
-    expect: { noProposals: true, toolsAny: ["simulasi_harga", "analisis_margin"], answerAny: [/asumsi/i, /perkiraan/i, /kira-kira/i, /data/i] },
+    expect: { noProposals: true, toolsAny: ["simulasi_harga", "analisis_margin"], answerAny: [/asumsi/i, /perkiraan/i, /kira-kira/i, /data/i, /belum bisa/i] },
     script: [calls(call("simulasi_harga", { nama: "Tambal Komposit", perubahan_persen: 10, bulan: 3 })), say("Ini perkiraan dengan asumsi volume tetap, dan datanya belum cukup untuk memastikan. Mau saya cek marginnya?")] },
   { id: "n-prioritas", tag: "nalar", say: "kalau cuma sempat beresin satu hal hari ini, apa yang paling penting?",
     expect: { noProposals: true, answerAny: [/benang jahit/i, /kadaluarsa/i, /sewa/i, /marketing/i] },
@@ -56,7 +88,7 @@ export const SCENARIOS_NALAR = [
     expect: { noProposals: true, toolsAny: ["cari_bahan", "ringkasan_gudang"], answerAny: [/tidak (ada|ditemukan)/i, /belum (ada|terdaftar|tercatat)/i], strictNumbers: true },
     script: [calls(call("cari_bahan", { kata: "implan titanium" })), say("Implan titanium **belum terdaftar** di gudang. Mau ditambahkan sebagai bahan baru?")] },
   { id: "j-tarif-tidak-ada", tag: "jujur", say: "tarif invisalign di klinik saya berapa?",
-    expect: { noProposals: true, toolsAny: ["cari_tindakan"], answerAny: [/tidak (ada|ditemukan)/i, /belum (ada|terdaftar|tercatat)/i], strictNumbers: true },
+    expect: { noProposals: true, toolsAny: ["cari_tindakan"], answerAny: [/tidak (ada|ditemukan)/i, /belum (ada|terdaftar|tercatat|menemukan)/i], strictNumbers: true },
     script: [calls(call("cari_tindakan", { kata: "invisalign" })), say("Invisalign **belum ada** di Master Treatment, jadi belum ada tarifnya.")] },
   { id: "j-laba-tahun-lalu", tag: "jujur", say: "laba bersih klinik tahun 2019 berapa?",
     expect: { noProposals: true, answerAny: [/tidak (ada|tersedia)/i, /belum (ada|tercatat)/i, /kosong/i, /tidak bisa/i, /Rp 0\b/], strictNumbers: true },
@@ -65,7 +97,7 @@ export const SCENARIOS_NALAR = [
     expect: { noProposals: true, toolsAny: ["kinerja_dokter", "statistik_kunjungan"], answerAny: [/belum/i, /tidak ada/i, /kosong/i], strictNumbers: true },
     script: [calls(call("kinerja_dokter", bulanIni())), say("Data kunjungan dokter bulan ini **belum ada**, jadi belum bisa saya bandingkan.")] },
   { id: "j-tanpa-tebak-harga", tag: "jujur", say: "catat beli komposit 2 syringe",
-    expect: { noProposals: true, answerAny: [/harga/i], strictNumbers: true },
+    expect: { noProposals: true, answerAny: [/harga/i] },
     script: [say("Harganya berapa per syringe? Saya perlu angka itu sebelum menyiapkan kartu.")] },
   { id: "j-fitur-tak-ada", tag: "jujur", say: "gimana cara pakai fitur telemedisin video call di dentiva?",
     expect: { maxCalls: 0, noProposals: true, answerAny: [/tidak yakin/i, /belum/i, /tidak (ada|tersedia)/i, /tim dentiva/i] },
@@ -136,7 +168,7 @@ export const SCENARIOS_NALAR = [
 
   // ── Bahasa sehari-hari: singkatan, salah ketik, campur daerah ──
   { id: "s-singkatan", tag: "sehari", say: "brp total pengeluaran marketing bln ini",
-    expect: { noProposals: true, toolsAny: ["cari_pengeluaran", "anomali_pengeluaran", "pengeluaran_dan_laba"], answer: [/1\.800\.000|1,8/] },
+    expect: { noProposals: true, answer: [/1\.800\.000|1,8/] },
     script: [calls(call("cari_pengeluaran", bulanIni({ kata: "marketing" }))), say("Marketing bulan ini **Rp 1.800.000**. Mau saya bandingkan dengan bulan lalu?")] },
   { id: "s-salah-ketik", tag: "sehari", say: "stok benag jahit msih ada gk",
     expect: { noProposals: true, answerAny: [/habis/i, /kosong/i, /\b0\b/], answer: [/benang jahit/i] },

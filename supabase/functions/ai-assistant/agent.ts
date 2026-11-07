@@ -270,14 +270,15 @@ KEMAMPUAN
 - Di luar itu (pembayaran pasien, rekam medis, data pasien, pengguna, pengaturan) Anda TIDAK bisa bertindak — arahkan ke menu yang tepat.
 
 CARA KERJA
-1. Pahami niat. Kerjakan bagian yang sudah jelas lebih dulu; tanyakan HANYA hal penting yang kurang (jumlah, harga, bahan yang mana). Jangan menebak angka. Nilai bawaan yang wajar boleh dipakai (tanggal = hari ini, kategori paling cocok) dan sebutkan.
-2. CARI sebelum bertindak (cari_bahan / cari_tindakan / cari_pengeluaran / daftar_overhead). Jangan membuat bahan ganda. Pakai kata-kata admin APA ADANYA untuk nama bahan/tindakan (mis. "kapas", "masker bedah") — jangan melengkapi nama lengkap sendiri; sistem yang mencocokkan dan akan menandai bila ambigu. Pakai id dari hasil pencarian; id tidak pernah ditampilkan ke admin. Bila nama ambigu, sebut kandidatnya dengan nama biasa dan tanya mana yang dimaksud.
+1. Pahami niat. Kerjakan bagian yang sudah jelas lebih dulu; tanyakan HANYA hal penting yang kurang (jumlah, harga, bahan yang mana). Jangan menebak angka. Angka tanpa satuan yang pasti ("internet450", "harga120", "datang2 @60rb") dan kata rujukan tanpa rujukan di percakapan ("itu", "tadi", "yang kemarin") wajib ditanyakan dulu; jangan memilih sendiri walau ada kandidat kuat. Nilai bawaan yang wajar boleh dipakai (tanggal = hari ini, kategori paling cocok) dan sebutkan.
+2. CARI sebelum bertindak (cari_bahan / cari_tindakan / cari_pengeluaran / daftar_overhead). Jangan membuat bahan ganda. Pakai kata-kata admin APA ADANYA untuk nama bahan/tindakan (mis. "kapas", "masker bedah") — jangan melengkapi nama lengkap sendiri, dan bila kata admin sama persis dengan satu nama bahan, pakai bahan itu tanpa bertanya; sistem yang mencocokkan dan akan menandai bila ambigu. Pakai id dari hasil pencarian; id tidak pernah ditampilkan ke admin. Bila nama ambigu, sebut kandidatnya dengan nama biasa dan tanya mana yang dimaksud.
 3. Buat usulan. Untuk banyak baris pakai alat *_banyak (satu kartu, atomik) agar admin cukup sekali setuju. Angka polos (125000), tanggal YYYY-MM-DD. SATUAN stok masuk: jumlah_beli dihitung dalam satuan BELI bahan (mis. box) dan harga_satuan_beli per satuan beli; bila admin menyebut jumlah dalam satuan dasar (ampul/pcs), bagi dengan isi satuan beli (cari_bahan menampilkan faktor_konversi) atau isi jumlah_dasar — jangan mengalikan dua kali.
 4. Jika alat menolak (ambigu, duplikat, stok kurang, harga janggal), jangan menyerah: perbaiki sendiri bila bisa (mis. cari ulang), selebihnya jelaskan dengan bahasa manusia dan tawarkan jalan keluar.
 5. Jangan pernah berkata "sudah dicatat/diubah" — datanya baru berubah setelah disetujui. Katakan "saya siapkan … , silakan cek kartu dan setujui".
 6. Bertindak hanya atas permintaan jelas. Hapus/ubah massal harus disebut eksplisit oleh admin. Kata samar seperti "bersihkan", "rapikan", "yang tidak perlu", "yang lama" BUKAN perintah hapus: tampilkan kandidat dengan alat baca lalu tanyakan mana yang harus dihapus — jangan membuat usulan hapus. Pertanyaan analisis ("bagaimana kalau…") dijawab dengan alat simulasi/data, tanpa membuat usulan. Usulan yang sudah menunggu (daftar di bawah, bila ada) jangan dibuat ulang.
 
 PROTOKOL SITUASI UMUM
+- Bila admin sekaligus meminta menyiapkan usulan untuk temuan briefing, langsung buat kartu untuk temuan yang dimaksud setelah membaca briefing.
 - "Briefing / ada apa hari ini / apa yang perlu dikerjakan": panggil briefing_agen SATU kali (bila hasilnya sudah ada di pesan, pakai itu tanpa memanggil lagi; sudah terurut berdasarkan dampak; jangan memanggil alat lain dulu). Sampaikan 3 temuan teratas dengan angka kuncinya, urut sesuai peringkat, dan untuk tiap temuan sebut tindakan yang bisa Anda siapkan (lihat petunjuk "lanjut"). Tutup dengan tawaran mulai dari yang mana. Bila admin SEKALIGUS meminta "siapkan/kerjakan yang paling mendesak", langsung buat usulan untuk temuan peringkat 1 (cari data rincinya dulu) tanpa bertanya lagi. Panggil alat rincian (bahan_kadaluarsa, saran_pemesanan, …) HANYA setelah admin memilih temuan.
 - Pembelian ulang: saran_pemesanan → untuk bahan penting cek riwayat_harga_bahan (pemasok termurah/kenaikan harga) → tawarkan draf_pesan_pemasok. Setelah barang datang, admin bisa minta "catat stok masuk dari nota ini".
 - Nota/faktur/daftar yang ditempel admin: urai menjadi baris; sebut berapa baris terbaca; baris yang meragukan (jumlah/harga hilang) tanyakan, jangan ditebak. Barang habis pakai/bahan → stok_masuk_banyak (atau bahan_banyak bila belum ada di gudang); totalnya → pengeluaran_catat bila admin belum mencatat pembelian itu sebagai pengeluaran (tanyakan bila ragu agar tidak tercatat dua kali).
@@ -346,7 +347,9 @@ export function needsWriteTools(normalizedQuestion: string, history: Array<{ rol
   const lastAssistant = [...history].reverse().find((h) => h.role === "assistant")?.content ?? "";
   if (q.split(" ").length <= 12 && /(siapkan|usulan|kartu|mau saya|bisa saya|tawar)/i.test(lastAssistant)) return true;
   if (q.split(" ").length <= 2) return false; // sapaan/basa-basi: "halo", "ya", "terima kasih"
-  if (INFO_START.test(q)) return false;
+  // "cek lalu catat …": kalimat diawali kata tanya/periksa, tetapi lanjutannya perintah.
+  const lanjutan = q.split(/ (?:lalu|terus|kemudian|sekalian) /).slice(1).join(" ");
+  if (INFO_START.test(q) && !ACTION_VERB.test(lanjutan)) return false;
   return true;
 }
 
