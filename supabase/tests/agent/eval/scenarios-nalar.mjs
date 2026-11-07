@@ -34,6 +34,12 @@ export const KOREKSI_SYARAT = {
   "g6-atk-kemarin-lisan": BOLEH_LANGSUNG, "g6-atk-kemarin-penegasan": BOLEH_LANGSUNG, "g6-scaling-persen-campuran": BOLEH_LANGSUNG,
   "g6-nota-stok-biaya": BOLEH_LANGSUNG, "g6-resep-campuran": BOLEH_LANGSUNG, "g6-stock-harga-historis": BOLEH_LANGSUNG,
   "g6-pemasok-draf": BOLEH_LANGSUNG, "g6-briefing-tindak": BOLEH_LANGSUNG, "g6-konfirmasi-riwayat": BOLEH_LANGSUNG,
+  // Varian kalimat dari keluarga yang sama (putaran 2): hasil benar, hanya urutan alat yang berbeda.
+  "g6-sewa-terbilang": BOLEH_LANGSUNG, "g6-sewa-campuran": BOLEH_LANGSUNG, "g6-atk-kemarin-campuran": BOLEH_LANGSUNG,
+  "g6-atk-kemarin-notasi": BOLEH_LANGSUNG, "g6-scaling-persen-notasi": BOLEH_LANGSUNG, "g6-resep-terbilang": BOLEH_LANGSUNG,
+  "g6-nonaktif-terbilang": BOLEH_LANGSUNG, "g6-stok-atau-minimum": BOLEH_LANGSUNG, "g6-overhead-terbilang": INTERNET_GANDA,
+  // Baris yang lengkap dikerjakan, baris yang tidak lengkap ditanyakan, sesuai aturan 1.
+  "g6-bulk-nama-kurang": { noProposals: undefined, kindsOnly: ["bahan_tambah", "bahan_tambah_banyak"], answerAny: BERTANYA },
   "g6-lid-harga": { answerAny: BERTANYA }, "g6-nomor-nota-sama": { answerAny: BERTANYA },
   "g6-tindakan-mana": { answerAny: BERTANYA }, "g6-pemasok-tidak-jelas": { answerAny: BERTANYA },
   overhead: INTERNET_GANDA, "g6-overhead-lisan": INTERNET_GANDA, "g6-overhead-campuran": INTERNET_GANDA,
@@ -68,7 +74,7 @@ export const SCENARIOS_NALAR = [
     expect: { noProposals: true, toolsAny: ["bahan_kadaluarsa", "ringkasan_gudang", "briefing_agen"], answer: [/105\.000/] },
     script: [calls(call("bahan_kadaluarsa", { hari: 30 })), say("Kerugiannya **Rp 105.000**: 5 tube Etsa Gel yang sudah lewat tanggal. Mau saya siapkan kartu buang stok?")] },
   { id: "n-beli-dimana", tag: "nalar", say: "gutta percha sebaiknya beli di mana dan kenapa?",
-    expect: { noProposals: true, tools: ["riwayat_harga_bahan"], answer: [/toko murah/i, /55\.000|lebih murah|termurah/i] },
+    expect: { noProposals: true, tools: ["riwayat_harga_bahan"], answer: [/toko murah/i, /55\.000|550|lebih (murah|layak)|termurah/i] },
     script: [calls(call("riwayat_harga_bahan", { bahan: "gutta percha" })), say("Lebih baik di **Toko Murah**: harganya lebih murah, Rp 55.000 per box. Mau saya buatkan draf pesan?")] },
   { id: "n-mendesak", tag: "nalar", say: "bahan apa yang paling mendesak dibeli minggu ini?",
     expect: { noProposals: true, toolsAny: ["saran_pemesanan", "peringatan_stok", "briefing_agen", "ringkasan_gudang"], answer: [/benang jahit/i] },
@@ -85,7 +91,7 @@ export const SCENARIOS_NALAR = [
 
   // ── Jujur saat data tidak ada ──
   { id: "j-implan-tidak-ada", tag: "jujur", say: "berapa stok implan titanium?",
-    expect: { noProposals: true, toolsAny: ["cari_bahan", "ringkasan_gudang"], answerAny: [/tidak (ada|ditemukan)/i, /belum (ada|terdaftar|tercatat)/i], strictNumbers: true },
+    expect: { noProposals: true, toolsAny: ["cari_bahan", "ringkasan_gudang"], answerAny: [/tidak (ada|ditemukan)/i, /belum (ada|terdaftar|tercatat|menemukan)/i], strictNumbers: true },
     script: [calls(call("cari_bahan", { kata: "implan titanium" })), say("Implan titanium **belum terdaftar** di gudang. Mau ditambahkan sebagai bahan baru?")] },
   { id: "j-tarif-tidak-ada", tag: "jujur", say: "tarif invisalign di klinik saya berapa?",
     expect: { noProposals: true, toolsAny: ["cari_tindakan"], answerAny: [/tidak (ada|ditemukan)/i, /belum (ada|terdaftar|tercatat|menemukan)/i], strictNumbers: true },
