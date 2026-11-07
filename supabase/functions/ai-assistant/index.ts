@@ -960,7 +960,8 @@ function streamed(req: Request): Response {
       try { controller.close(); } catch { /* klien sudah pergi */ }
     },
   });
-  return new Response(body, { headers: { ...cors(req), "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "X-Accel-Buffering": "no" } });
+  // no-transform mematikan gzip otomatis Deno, yang menahan teks jawaban sampai aliran selesai.
+  return new Response(body, { headers: { ...cors(req), "Content-Type": "text/event-stream", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
 }
 
 Deno.serve((req) => {
