@@ -11,7 +11,22 @@ const GlobalSearch = () => {
   const [isOpen, setIsOpen] = useState(false);
   
   const wrapperRef = useRef(null);
+  const inputRef = useRef(null);
   const navigate = useNavigate();
+  const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '');
+
+  // Ctrl+K / ⌘+K memfokuskan pencarian dari halaman mana pun (petunjuk ini sudah tampil di kotak pencarian).
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key?.toLowerCase() === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+        setIsOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   // Debounce search term
   useEffect(() => {
@@ -72,6 +87,7 @@ const GlobalSearch = () => {
           <Search className="h-[18px] w-[18px] text-gray-400 group-focus-within:text-[var(--color-accent)] transition-colors" />
         </div>
         <input
+          ref={inputRef}
           type="text"
           value={searchTerm}
           onChange={(e) => {
@@ -85,7 +101,7 @@ const GlobalSearch = () => {
         {!searchTerm && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-400 bg-gray-200/50 dark:bg-gray-700/50 rounded-lg">
-              <span className="text-xs">⌘</span>K
+              <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>K
             </kbd>
           </div>
         )}
