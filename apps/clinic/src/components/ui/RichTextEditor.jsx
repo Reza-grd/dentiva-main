@@ -14,7 +14,7 @@ const modules = {
 
 const formats = [
   'bold', 'italic', 'underline', 'strike',
-  'list', 'bullet'
+  'list'
 ];
 
 export function RichTextEditor({ value, onChange, placeholder, className, error }) {

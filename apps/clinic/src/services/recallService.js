@@ -9,7 +9,7 @@ export const recallService = {
   async candidates(months = 6, limit = 300) {
     const { data, error } = await supabase.rpc('recall_candidates', { p_bulan: months, p_limit: limit });
     if (error) return { success: false, error: error.message };
-    const rows = data || [];
+    const rows = Array.isArray(data) ? data : [];
     const plain = await encryptionService.decryptBatch(rows.flatMap((r) => [r.nama_lengkap, r.no_wa]));
     return {
       success: true,

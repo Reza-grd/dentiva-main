@@ -4,7 +4,7 @@ import { useToast } from '../common/ToastNotification';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
-import { User, Phone, Shield, Save, Camera, FileText, Briefcase, Sparkles, Loader } from 'lucide-react';
+import { User, Phone, Shield, Save, Camera, FileText, Briefcase, Sparkles, Loader, Calendar } from 'lucide-react';
 import { satusehatService } from '../../services/satusehatService';
 
 const DoctorProfilePage = () => {

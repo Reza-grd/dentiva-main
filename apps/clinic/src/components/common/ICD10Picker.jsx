@@ -189,7 +189,7 @@ const ICD10Picker = ({ value = '', onChange, disabled = false, id }) => {
       {isOpen && query.trim().length >= 1 && results.length === 0 && (
         <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl">
           <p className="px-3 py-3 text-xs text-gray-400 text-center">
-            Tidak ada kode yang cocok untuk "<span className="font-mono">{query}</span>"
+            Tidak ada kode yang cocok untuk “<span className="font-mono">{query}</span>”
           </p>
         </div>
       )}

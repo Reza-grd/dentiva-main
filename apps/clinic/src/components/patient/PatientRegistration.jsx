@@ -957,7 +957,7 @@ const PatientRegistration = () => {
               <div className="mt-6 p-4 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-blue-100 dark:border-blue-900/30">
                 <div className="flex items-start gap-2 text-sm text-[var(--color-accent)]">
                   <Clock className="w-5 h-5 flex-shrink-0" />
-                  <p>Jadwal kunjungan pertama pasien akan ditandai dengan status "Terjadwal" dan masuk ke antrean klinik.</p>
+                  <p>Jadwal kunjungan pertama pasien akan ditandai dengan status “Terjadwal” dan masuk ke antrean klinik.</p>
                 </div>
               </div>
             </CardContent>
@@ -1102,7 +1102,7 @@ const PatientRegistration = () => {
 
             {!isSearchingOld && searchOldTerm.trim().length >= 2 && oldSearchResults.length === 0 && !selectedOldPatient && (
               <div className="text-center py-8 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl">
-                Tidak ditemukan pasien dengan kata kunci "{searchOldTerm}"
+                Tidak ditemukan pasien dengan kata kunci “{searchOldTerm}”
               </div>
             )}
 

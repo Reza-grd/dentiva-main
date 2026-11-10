@@ -205,7 +205,7 @@ export default function PricingPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                        <span>{isUnlimited(p.max_patients) ? <strong>Pasien tanpa batas</strong> : <>Hingga <strong>{p.max_patients.toLocaleString("id-ID")} Pasien</strong></>}</span>
+                        <span>{isUnlimited(p.max_patients) ? <strong>Pasien tanpa batas</strong> : <>Hingga <strong>{Number(p.max_patients ?? 1000).toLocaleString("id-ID")} Pasien</strong></>}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />

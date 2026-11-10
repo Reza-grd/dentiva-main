@@ -68,6 +68,27 @@ const ReportsPage = () => {
     setLoading(false);
   };
 
+  // Perbandingan nyata dengan bulan lalu (dulu angka 12% / 5% / 18% ditulis mati dan selalu tampil).
+  const bulanLalu = (() => {
+    const kini = new Date();
+    if (Number(selectedYear) !== kini.getFullYear() || kini.getMonth() === 0) return null; // Januari: bulan lalu ada di tahun lain
+    return (reportData?.monthly || [])[kini.getMonth() - 1] || null;
+  })();
+  const tren = (nilaiKini, kunci, naikBaik = true) => {
+    const lalu = Number(bulanLalu?.[kunci] || 0);
+    if (!bulanLalu || lalu === 0) return { teks: 'Belum ada pembanding bulan lalu', kelas: 'text-text-muted' };
+    const persen = ((Number(nilaiKini || 0) - lalu) / Math.abs(lalu)) * 100;
+    if (Math.abs(persen) < 0.5) return { teks: 'Sama dengan bulan lalu', kelas: 'text-text-muted' };
+    const baik = persen > 0 === naikBaik;
+    return {
+      teks: `${persen > 0 ? '↑' : '↓'} ${Math.abs(persen).toLocaleString('id-ID', { maximumFractionDigits: 0 })}% vs bulan lalu`,
+      kelas: baik ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400',
+    };
+  };
+  const trenPendapatan = tren(reportData?.stats?.monthRevenue, 'totalRevenue');
+  const trenPengeluaran = tren(reportData?.stats?.monthExpenses, 'totalExpenses', false);
+  const trenLaba = tren(reportData?.stats?.monthNetIncome, 'netIncome');
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -318,7 +339,7 @@ const ReportsPage = () => {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatCurrency(reportData?.stats?.monthRevenue || 0)}
           </p>
-          <p className="text-xs text-green-600 dark:text-green-400 mt-1">↑ 12% vs bulan lalu</p>
+          <p className={`text-xs mt-1 ${trenPendapatan.kelas}`}>{trenPendapatan.teks}</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-red-500">
@@ -329,7 +350,7 @@ const ReportsPage = () => {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatCurrency(reportData?.stats?.monthExpenses || 0)}
           </p>
-          <p className="text-xs text-red-600 dark:text-red-400 mt-1">↑ 5% vs bulan lalu</p>
+          <p className={`text-xs mt-1 ${trenPengeluaran.kelas}`}>{trenPengeluaran.teks}</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-[var(--color-accent)]">
@@ -340,7 +361,7 @@ const ReportsPage = () => {
           <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {formatCurrency(reportData?.stats?.monthNetIncome || 0)}
           </p>
-          <p className="text-xs text-[var(--color-accent)] mt-1">↑ 18% vs bulan lalu</p>
+          <p className={`text-xs mt-1 ${trenLaba.kelas}`}>{trenLaba.teks}</p>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-purple-500">

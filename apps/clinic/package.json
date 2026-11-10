@@ -10,7 +10,7 @@
     "dev:desktop": "vite --mode desktop",
     "build:desktop": "vite build --mode desktop",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint . --ext .js,.jsx",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:update-snapshots": "playwright test tests/e2e/visual-a11y.spec.js --update-snapshots",

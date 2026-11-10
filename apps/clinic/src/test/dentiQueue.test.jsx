@@ -6,7 +6,7 @@ import { dentiScene, isClosed, delayMinutes, DENTI_TIPS, SORRY_TEXT, SLEEP_TEXT 
 
 const rpc = vi.fn();
 vi.mock('../services/supabase', () => ({ supabase: { rpc: (...a) => rpc(...a) } }));
-// eslint-disable-next-line import/first
+// Impor sengaja ditaruh setelah vi.mock di atas.
 import QueueDisplay from '../components/queue/QueueDisplay';
 
 const at = (h, m = 0) => new Date(2026, 9, 10, h, m);

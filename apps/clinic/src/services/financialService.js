@@ -83,7 +83,8 @@ export const financialService = {
         return { success: true, data: aggregated };
       }
 
-      return { success: true, data };
+      // Selalu array: komponen langsung memanggil .map(), dan null (mis. respons kosong) membuat halaman crash.
+      return { success: true, data: data ?? [] };
     } catch (error) {
       console.error('Error fetching revenue by period:', error);
       return { success: false, error: error.message };

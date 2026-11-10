@@ -151,7 +151,7 @@ const GlobalSearch = () => {
             </div>
           ) : (
             <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-              Tidak ada pasien ditemukan untuk "{searchTerm}"
+              Tidak ada pasien ditemukan untuk “{searchTerm}”
             </div>
           )}
         </div>

@@ -50,7 +50,7 @@ const SetPasswordPage = () => {
           <CardContent className="p-8 text-center">
             <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Tautan tidak valid atau kedaluwarsa</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Minta admin klinik atau tim Dentiva mengirim ulang undangan, atau gunakan "Lupa password" di halaman login.
+              Minta admin klinik atau tim Dentiva mengirim ulang undangan, atau gunakan “Lupa password” di halaman login.
             </p>
             <Button onClick={() => navigate('/login', { replace: true })} className="w-full">Ke halaman login</Button>
           </CardContent>

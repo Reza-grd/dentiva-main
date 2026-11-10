@@ -273,7 +273,7 @@ const DoctorSchedulePage = () => {
         <div className="text-center py-20 text-gray-400">
           <Clock size={48} className="mx-auto mb-3 opacity-30" />
           <p className="text-lg font-medium">Belum ada jadwal</p>
-          <p className="text-sm mt-1">Klik "Tambah Jadwal" untuk mulai mengatur jadwal praktek.</p>
+          <p className="text-sm mt-1">Klik “Tambah Jadwal” untuk mulai mengatur jadwal praktek.</p>
         </div>
       ) : (
         <div className="space-y-6">

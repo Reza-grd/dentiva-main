@@ -13,7 +13,7 @@ export const costingService = {
         .order('kategori', { ascending: true })
         .order('nama_biaya', { ascending: true });
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data ?? [] };
     } catch (error) {
       logger.error('Error fetching overhead costs:', error);
       return { success: false, error: error.message };
