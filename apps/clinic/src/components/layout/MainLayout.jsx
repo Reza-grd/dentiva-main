@@ -4,6 +4,7 @@ import TopBar from './TopBar';
 import BottomNav from '../common/BottomNav';
 import AnnouncementBanner from './AnnouncementBanner';
 import DentiGuideWidget from '../ai/DentiGuideWidget';
+import EiraTour from '../tour/EiraTour';
 
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,6 +47,9 @@ const MainLayout = ({ children }) => {
 
       {/* Eira Pemandu: pendamping mengambang untuk semua peran (otak lokal, tanpa kuota AI) */}
       <DentiGuideWidget />
+
+      {/* Tur pengenalan bersama Eira untuk pengguna baru (bisa diulang dari menu profil) */}
+      <EiraTour />
     </div>
   );
 };

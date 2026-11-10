@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette, Bell, ChevronDown } from 'lucide-react';
+import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette, Bell, ChevronDown, Compass } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
 import GlobalSearch from './GlobalSearch';
+import { mulaiTur } from '../tour/EiraTour';
 import ThemeGallery from '../common/ThemeGallery';
 
 const ROUTE_LABELS = {
@@ -71,7 +72,7 @@ const TopBar = ({ onMenuClick }) => {
         </div>
 
         {/* Center: Global Search */}
-        <div className="flex-1 w-full max-w-sm md:max-w-md xl:max-w-lg mx-4 flex justify-center">
+        <div data-tur="cari" className="flex-1 w-full max-w-sm md:max-w-md xl:max-w-lg mx-4 flex justify-center">
           <GlobalSearch />
         </div>
 
@@ -178,6 +179,9 @@ const TopBar = ({ onMenuClick }) => {
                     </button>
                     <button onClick={() => { setShowUserMenu(false); navigate('/pengaturan'); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-primary hover:bg-background rounded-xl transition-colors">
                       <Settings size={16} className="text-text-muted" /> Pengaturan
+                    </button>
+                    <button onClick={() => { setShowUserMenu(false); mulaiTur(); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-primary hover:bg-background rounded-xl transition-colors">
+                      <Compass size={16} className="text-text-muted" /> Tur pengenalan
                     </button>
                   </div>
                   <div className="p-2 border-t border-border">

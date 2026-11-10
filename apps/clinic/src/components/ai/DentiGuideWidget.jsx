@@ -8,8 +8,10 @@ import { smallTalk, followUps } from '../../utils/dentiMood';
 import { chatContext } from '../../utils/dentiChatContext';
 import { pageHints } from '../../utils/dentiPageHints';
 import { getGreeting } from '../../utils/dateUtils';
+import { namaPanggilan } from '../../utils/stringUtils';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { mulaiTur } from '../tour/EiraTour';
 import './ai-assistant.css';
 import './denti-widget.css';
 
@@ -21,6 +23,8 @@ import './denti-widget.css';
 const STORE_KEY = 'dentiva-denti-widget';
 const MAX_KEEP = 30;
 const MAX_LEN = 300;
+// "mulai tur", "ulangi perkenalan", "tur pengenalan" … → buka tur pengenalan Eira
+const MINTA_TUR = /^(tolong |coba |aku mau |saya mau )?((mulai|ulangi|ulang|buka|tampilkan|ikuti|lihat)( lagi)? )?(tur|tour|perkenalan|pengenalan)( pengenalan| aplikasi| dentiva| lagi)*[.!?]*$/i;
 
 const HINTS = {
   admin: ['Checklist harian', 'Ajarkan cara mengatur template pengingat', 'Apa itu HPP?', 'Buka laporan'],
@@ -35,10 +39,7 @@ const loadChat = () => {
 const saveChat = (msgs) => {
   try { sessionStorage.setItem(STORE_KEY, JSON.stringify(msgs.slice(-MAX_KEEP).map(({ fresh, ...m }) => m))); } catch { /* penyimpanan penuh/dimatikan */ }
 };
-const firstName = (profile) => {
-  const n = (profile?.full_name || '').trim().split(/\s+/)[0] || '';
-  return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
-};
+const firstName = (profile) => namaPanggilan(profile?.full_name);
 
 function Bubble({ text }) {
   const html = DOMPurify.sanitize(miniMarkdown(text));
@@ -105,6 +106,13 @@ export default function DentiGuideWidget() {
     if (!text || typing) return;
     idleRef.current = Date.now();
     setInput('');
+    if (MINTA_TUR.test(text)) {
+      setMessages((m) => [...m, { role: 'user', content: text, local: true },
+        { role: 'assistant', local: true, intent: 'tur', fresh: true, content: 'Baik, saya mulai **tur pengenalan** sekarang. Anda bisa melewatinya kapan saja.' }]);
+      play('bow', DENTI_DURATIONS.bow);
+      later(() => { setOpen(false); mulaiTur(); }, 900);
+      return;
+    }
     const ctx = chatContext(messages);
     const chat = smallTalk(text, { name, greeting: getGreeting(), seed: messages.length, now: new Date(), role, ...ctx });
     setMessages((m) => [...m, { role: 'user', content: text, local: true }]);

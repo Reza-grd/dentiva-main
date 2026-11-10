@@ -128,6 +128,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                data-tur={item.path}
                 end={item.path === `/${role}`}
                 onClick={() => !isDesktop && onClose()}
                 style={({ isActive }) => 
