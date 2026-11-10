@@ -36,7 +36,7 @@ export const CYCLES_V4 = [
       ['buka edukasi perawatan', 'navigate', '/admin/pengaturan?tab=treatment-education'], ['buka template soap', 'navigate', '/admin/pengaturan?tab=soap-templates'],
       ['buka profil klinik', 'navigate', '/admin/pengaturan?tab=profile'], ['buka notifikasi', 'navigate', '/admin/pengaturan?tab=notifications'],
       ['buka tab whatsapp', 'navigate', '/admin/pengaturan?tab=whatsapp'], ['open settings', 'navigate', '/admin/pengaturan'], ['buka jadwal praktik', 'navigate', '/admin/jadwal-dokter'],
-      ['bawa aku ke pengaturan', 'navigate', '/admin/pengaturan'], ['buka pengaturn', 'navigate', '/admin/pengaturan'], ['buka keuagan', 'navigate', '/keuangan'],
+      ['bawa aku ke pengaturan', 'navigate', '/admin/pengaturan'], ['buka pengaturn', 'navigate', '/admin/pengaturan'], ['buka keuagan', 'navigate', '/admin/laporan?tab=keuangan'],
     ],
     replies: [['buka laporan', 'Laporan'], ['buka layar antrean', 'Layar Antrean'], ['buka template pengingat', 'WhatsApp']],
   },
@@ -129,7 +129,7 @@ export const CYCLES_V4 = [
     actions: [
       ['bagaimana cara mengubah teks pesan pengingat', 'offer', '/admin/pengaturan?tab=whatsapp'], ['cara membuat layar antrean', 'offer', '/layar-antrean'],
       ['cara menambah staf baru', 'offer', '/admin/pengguna'], ['cara memasang qris', 'offer', '/admin/pengaturan?tab=payments'], ['cara mencatat pengeluaran', 'offer', '/admin/pengeluaran'],
-      ['cara melihat laporan keuangan', 'offer', '/keuangan'], ['cara upgrade paket', 'offer', '/admin/pengaturan?tab=billing'],
+      ['cara melihat laporan keuangan', 'offer', '/admin/laporan'], ['cara upgrade paket', 'offer', '/admin/pengaturan?tab=billing'],
     ],
   },
   {
@@ -139,11 +139,11 @@ export const CYCLES_V4 = [
         ['ya', { offer: { to: '/layar-antrean', label: 'Layar Antrean' } }], ['iya dong', { offer: { to: '/layar-antrean', label: 'Layar Antrean' } }],
         ['boleh', { offer: { to: '/admin/laporan', label: 'Laporan' } }], ['oke buka', { offer: { to: '/admin/laporan', label: 'Laporan' } }], ['silakan', { offer: { to: '/admin/laporan', label: 'Laporan' } }],
         ['yuk', { offer: { to: '/admin/pengguna', label: 'Kelola Pengguna' } }], ['gas', { offer: { to: '/admin/pengguna', label: 'Kelola Pengguna' } }],
-        ['mau', { offer: { to: '/admin/pengguna', label: 'Kelola Pengguna' } }], ['buka aja', { offer: { to: '/keuangan', label: 'Keuangan' } }], ['sip', { offer: { to: '/keuangan', label: 'Keuangan' } }],
+        ['mau', { offer: { to: '/admin/pengguna', label: 'Kelola Pengguna' } }], ['buka aja', { offer: { to: '/admin/laporan?tab=keuangan', label: 'Laporan › Keuangan' } }], ['sip', { offer: { to: '/admin/laporan?tab=keuangan', label: 'Laporan › Keuangan' } }],
       ],
       offerNo: [
         ['tidak', { offer: { to: '/layar-antrean', label: 'Layar Antrean' } }], ['nggak usah', { offer: { to: '/layar-antrean', label: 'Layar Antrean' } }],
-        ['nanti aja', { offer: { to: '/admin/laporan', label: 'Laporan' } }], ['jangan dulu', { offer: { to: '/admin/laporan', label: 'Laporan' } }], ['belum', { offer: { to: '/keuangan', label: 'Keuangan' } }],
+        ['nanti aja', { offer: { to: '/admin/laporan', label: 'Laporan' } }], ['jangan dulu', { offer: { to: '/admin/laporan', label: 'Laporan' } }], ['belum', { offer: { to: '/admin/laporan?tab=keuangan', label: 'Laporan › Keuangan' } }],
       ],
     },
     actions: [['ya', 'navigate', '/layar-antrean', { offer: { to: '/layar-antrean', label: 'Layar Antrean' } }], ['boleh', 'navigate', '/admin/laporan', { offer: { to: '/admin/laporan', label: 'Laporan' } }]],

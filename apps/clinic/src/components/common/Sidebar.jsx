@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles, Receipt, BellRing, Monitor,
+  ClipboardList, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles, Receipt, BellRing, Monitor,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -30,12 +30,11 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: Monitor,         label: 'Layar Antrean',    path: '/layar-antrean' },
         { group: 'KEUANGAN' },
         { icon: Receipt,         label: 'Pengeluaran',      path: `${baseUrl}/pengeluaran` },
-        { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
+        { icon: BarChart3,       label: 'Laporan',          path: `${baseUrl}/laporan` },
         { icon: Sparkles,        label: 'Asisten AI',       path: `${baseUrl}/asisten-ai` },
         { group: 'LAINNYA' },
         { icon: Package,         label: 'Master Treatment', path: `${baseUrl}/treatments` },
         { icon: DollarSign,      label: 'Biaya & Modal',    path: `${baseUrl}/costing` },
-        { icon: TrendingUp,      label: 'Laporan',          path: `${baseUrl}/laporan` },
         { icon: Users,           label: 'Kelola Pengguna',  path: `${baseUrl}/pengguna` },
         { icon: Shield,          label: 'Audit Log',        path: `${baseUrl}/audit-log` },
         { icon: Settings,        label: 'Pengaturan',       path: `${baseUrl}/pengaturan` },

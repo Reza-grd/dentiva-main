@@ -44,7 +44,7 @@ export const PAGES = [
   { id: 'jadwaldokter', label: 'Jadwal Dokter', aliases: ['jadwal dokter', 'jadwal praktik', 'jadwal praktek', 'jam praktik', 'jam praktek', 'jadwal praktik dokter', 'shift dokter', 'kalender dokter'],
     to: '/admin/jadwal-dokter', roles: ['admin'], deny: { dokter: 'Jadwal praktik diatur **admin**. Jadwal harian Anda ada di **Jadwal**.', resepsionis: 'Jadwal praktik diatur **admin**.' }, where: 'Menu samping (admin) → Jadwal Dokter' },
   { id: 'keuangan', label: 'Keuangan', aliases: ['keuangan', 'dashboard keuangan', 'finance', 'lap keuangan', 'laporan keuangan'],
-    to: '/keuangan', roles: ['admin'], deny: { dokter: 'Laporan keuangan dilihat **admin**.', resepsionis: 'Laporan keuangan dilihat **admin**.' }, where: 'Menu samping (admin) → Lap. Keuangan' },
+    to: '/admin/laporan?tab=keuangan', roles: ['admin'], deny: { dokter: 'Laporan keuangan dilihat **admin**.', resepsionis: 'Laporan keuangan dilihat **admin**.' }, where: 'Menu samping (admin) → Laporan → tab Keuangan' },
   { id: 'tindakan', label: 'Master Tindakan', aliases: ['tindakan', 'master tindakan', 'daftar tindakan', 'treatment', 'treatments', 'harga tindakan', 'daftar harga', 'price list'],
     to: '/admin/treatments', roles: ['admin'], deny: {}, where: 'Menu samping (admin) → Master Treatment' },
   { id: 'costing', label: 'Biaya & Modal', aliases: ['biaya dan modal', 'biaya modal', 'costing', 'modal', 'hpp', 'hp', 'harga pokok', 'overhead', 'biaya operasional'],
@@ -52,7 +52,7 @@ export const PAGES = [
   { id: 'pengeluaran', label: 'Pengeluaran', aliases: ['pengeluaran', 'expenses', 'biaya keluar', 'catat pengeluaran'],
     to: '/admin/pengeluaran', roles: ['admin'], deny: {}, where: 'Menu samping (admin) → Pengeluaran' },
   { id: 'laporan', label: 'Laporan', aliases: ['laporan', 'report', 'reports', 'laporan bulanan'],
-    to: '/admin/laporan', roles: ['admin'], deny: {}, where: 'Menu samping (admin) → Laporan' },
+    to: '/admin/laporan', roles: ['admin'], deny: {}, where: 'Menu samping (admin) → Laporan (tab Keuangan atau Tahunan & Kunjungan)' },
   { id: 'asisten', label: 'Asisten AI', aliases: ['asisten ai', 'asisten', 'chat ai', 'ngobrol dengan ai'],
     to: '/admin/asisten-ai', roles: ['admin'], deny: {}, where: 'Menu samping (admin) → Asisten AI' },
   { id: 'pengguna', label: 'Kelola Pengguna', aliases: ['pengguna', 'user', 'users', 'staf', 'karyawan', 'akun pengguna', 'kelola pengguna', 'kelola staf', 'daftar staf', 'pegawai'],
@@ -205,8 +205,8 @@ const TUTORIALS = [
     title: 'mencatat pengeluaran klinik', to: '/admin/pengeluaran', label: 'Pengeluaran', roles: ['admin'],
     steps: ['Buka **Pengeluaran**.', 'Klik tambah, pilih kategori, isi jumlah, tanggal, dan keterangan.', 'Simpan. Angkanya langsung masuk ke Laporan Keuangan.'], tip: 'Catat rutin agar laba bersih di laporan akurat.' },
   { id: 'laporan', re: /(lihat|baca|buka|cek)( laporan| rekap)( keuangan| bulanan| pendapatan)?|laporan (keuangan|bulanan) (dilihat|dibaca)|(laporan|keuangan|pendapatan) (di mana|dimana|gimana|bagaimana) (lihatnya|caranya)/,
-    title: 'melihat laporan keuangan & kunjungan', to: '/keuangan', label: 'Keuangan', roles: ['admin'],
-    steps: ['Buka **Lap. Keuangan** untuk pendapatan, pengeluaran, dan laba bersih per periode.', 'Buka **Laporan** untuk grafik kunjungan bulanan, tindakan terpopuler, dan ringkasan tahunan.', 'Semua angka bersifat ringkasan — **tanpa nama pasien**.'],
+    title: 'melihat laporan keuangan & kunjungan', to: '/admin/laporan', label: 'Laporan', roles: ['admin'],
+    steps: ['Buka **Laporan** → tab **Keuangan** untuk pendapatan, pengeluaran, dan laba bersih per periode.', 'Pindah ke tab **Tahunan & Kunjungan** untuk grafik kunjungan bulanan, tindakan terpopuler, ringkasan tahunan, dan unduh PDF.', 'Semua angka bersifat ringkasan — **tanpa nama pasien**.'],
     tip: 'Mau analisis cepat? Tanya saya, misalnya *"Ringkas kondisi klinik hari ini"*.' },
   { id: 'qris', re: /(atur|pasang|setting|isi|aktifkan)( metode)? (qris|pembayaran qris|rekening)|qris (diatur|dipasang|diaktifkan)|cara (pasang|setting) qris/,
     title: 'memasang QRIS & metode pembayaran', to: '/admin/pengaturan?tab=payments', label: 'Pengaturan › Pembayaran & QRIS', roles: ['admin'],
@@ -288,7 +288,7 @@ const TUTORIALS = [
 // ── Checklist harian (sadar peran) ───────────────────────────────────────────
 const DAILY = {
   admin: { title: 'checklist harian admin', to: '/admin', label: 'Dashboard', items: [
-    'Buka **Dashboard**: lihat antrean hari ini dan ringkasan pendapatan.', 'Pantau **Lap. Keuangan** bila ada transaksi besar.',
+    'Buka **Dashboard**: lihat antrean hari ini dan ringkasan pendapatan.', 'Pantau **Laporan → Keuangan** bila ada transaksi besar.',
     'Cek **Pengaturan → WhatsApp**: pastikan sakelar invoice, edukasi, dan pengingat aktif.', 'Catat **Pengeluaran** hari ini.',
     'Seminggu sekali, tengok **Audit Log** untuk aktivitas tak biasa.'] },
   dokter: { title: 'checklist harian dokter', to: '/dokter/jadwal', label: 'Jadwal Hari Ini', items: [

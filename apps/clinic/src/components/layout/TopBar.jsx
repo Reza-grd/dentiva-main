@@ -14,7 +14,7 @@ const ROUTE_LABELS = {
   '/resepsionis': 'Dashboard Resepsionis',
   '/pasien': 'Data Pasien',
   '/pasien/daftar': 'Daftar Pasien',
-  '/keuangan': 'Laporan Keuangan',
+  '/admin/laporan': 'Laporan',
   '/profil': 'Profil Saya',
   '/dokter/profil-dokter': 'Profil Dokter',
   '/pengaturan': 'Pengaturan',
