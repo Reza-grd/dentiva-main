@@ -1,4 +1,4 @@
-/** Eira Pemandu (widget mengambang) — tersedia untuk semua peran, memakai otak lokal tanpa kuota AI. */
+/** Eira (widget mengambang) — semua peran memakai otak lokal; admin dengan Asisten AI aktif juga dijawab AI di tempat. */
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -6,8 +6,20 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 
 const auth = vi.hoisted(() => ({ profile: { role: 'admin', full_name: 'Rina Sari' } }));
 vi.mock('../contexts/AuthContext', () => ({ useAuth: () => ({ userProfile: auth.profile }) }));
+// Asisten AI dikendalikan tes: bawaan = belum aktif (seperti klinik yang belum menyalakan AI)
+const ai = vi.hoisted(() => ({ status: { aktif: false, tersedia_di_paket: true, kuota_bulanan: 300, terpakai_bulan_ini: 0 }, ask: null }));
+vi.mock('../services/aiService', () => ({
+  aiService: {
+    getStatus: () => Promise.resolve({ success: true, data: ai.status }),
+    ask: (...a) => ai.ask(...a),
+    applyActions: () => Promise.resolve({ success: true, data: { applied: [] } }),
+    rejectActions: () => Promise.resolve({ success: true }),
+    undoAction: () => Promise.resolve({ success: true }),
+  },
+}));
 
 import DentiGuideWidget from '../components/ai/DentiGuideWidget';
+import { ToastProvider } from '../components/common/ToastNotification';
 
 function Where() {
   const loc = useLocation();
@@ -18,7 +30,7 @@ function Where() {
     </>
   );
 }
-const wrap = (path = '/admin') => render(<MemoryRouter initialEntries={[path]}><DentiGuideWidget /><Where /></MemoryRouter>);
+const wrap = (path = '/admin') => render(<ToastProvider><MemoryRouter initialEntries={[path]}><DentiGuideWidget /><Where /></MemoryRouter></ToastProvider>);
 const where = () => screen.getByTestId('where').textContent;
 const openPanel = () => fireEvent.click(screen.getByRole('button', { name: /Buka Eira/ }));
 async function say(text) {
@@ -30,6 +42,8 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = vi.fn();
   sessionStorage.clear();
   auth.profile = { role: 'admin', full_name: 'Rina Sari' };
+  ai.status = { aktif: false, tersedia_di_paket: true, kuota_bulanan: 300, terpakai_bulan_ini: 0 };
+  ai.ask = vi.fn();
 });
 
 describe('Eira Pemandu', () => {
@@ -103,6 +117,41 @@ describe('Eira Pemandu', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Tanya Asisten AI/ }));
     expect(where()).toBe('/admin/asisten-ai');
     expect(JSON.parse(screen.getByTestId('state').textContent)).toEqual({ ask: 'berapa pendapatan bulan ini' });
+  });
+
+  it('admin dengan Asisten AI aktif: pertanyaan data dijawab AI di widget (bertahap) + kartu usulan', async () => {
+    ai.status = { aktif: true, tersedia_di_paket: true, kuota_bulanan: 300, terpakai_bulan_ini: 12 };
+    ai.ask = vi.fn(async (q, history, opts) => {
+      opts.onDelta('Pendapatan bulan ini ');
+      opts.onDelta('**Rp 12.500.000**.');
+      return { success: true, data: {
+        answer: 'Pendapatan bulan ini **Rp 12.500.000**. Saya siapkan pencatatan stok masuk.',
+        status: { aktif: true, tersedia_di_paket: true, kuota_bulanan: 300, terpakai_bulan_ini: 13 },
+        actions: [{ id: 'a1', jenis: 'stok_masuk', pratinjau: { judul: 'Stok masuk Lidocaine 2 box', risiko: 'rendah' } }],
+      } };
+    });
+    wrap('/admin/costing');
+    openPanel();
+    expect(await screen.findByText(/AI 12\/300 bulan ini/)).toBeInTheDocument();
+    await say('berapa pendapatan bulan ini');
+    await waitFor(() => expect(ai.ask).toHaveBeenCalledTimes(1));
+    expect(ai.ask.mock.calls[0][0]).toBe('berapa pendapatan bulan ini');
+    expect((await screen.findAllByText(/Rp 12\.500\.000/)).length).toBeGreaterThan(0);
+    expect(await screen.findByText(/Stok masuk Lidocaine 2 box/)).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /Setujui/ }).length).toBeGreaterThan(0);
+    expect(screen.queryByRole('button', { name: /Tanya Asisten AI/ })).toBeNull();
+    expect(where()).toBe('/admin/costing'); // tetap di halaman yang sama
+    expect(await screen.findByText(/AI 13\/300 bulan ini/)).toBeInTheDocument();
+  });
+
+  it('admin dengan Asisten AI aktif: navigasi & istilah tetap lokal (tanpa kuota)', async () => {
+    ai.status = { aktif: true, tersedia_di_paket: true, kuota_bulanan: 300, terpakai_bulan_ini: 0 };
+    wrap('/admin');
+    openPanel();
+    await screen.findByText(/AI 0\/300 bulan ini/);
+    await say('apa itu HPP');
+    expect((await screen.findAllByText(/Harga Pokok Penjualan/)).length).toBeGreaterThan(0);
+    expect(ai.ask).not.toHaveBeenCalled();
   });
 
   it('pertanyaan data: dokter tidak ditawari Asisten AI, malah diberi arahan', async () => {

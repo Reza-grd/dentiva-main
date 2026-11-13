@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { X, Send, ArrowRight, RotateCcw } from 'lucide-react';
+import AgentActions from './AgentActions';
+import { aiService } from '../../services/aiService';
+import { useToast } from '../common/ToastNotification';
 import DentiMascot, { useDentiDirector, DENTI_DURATIONS } from '../mascot/DentiMascot';
 import { miniMarkdown } from '../../utils/miniMarkdown';
 import { smallTalk, followUps } from '../../utils/dentiMood';
@@ -16,9 +19,11 @@ import './ai-assistant.css';
 import './denti-widget.css';
 
 /**
- * Eira Pemandu — pendamping mengambang untuk SEMUA peran (admin, dokter, resepsionis).
- * Hanya memakai otak lokal Eira (tanpa AI, tanpa kuota): membuka halaman/tab, "di mana …", tutorial langkah demi langkah,
- * kamus istilah, checklist harian, kuis, dan hiburan. Pertanyaan data klinik diarahkan ke Asisten AI (khusus admin).
+ * Eira — pendamping mengambang di SEMUA halaman untuk semua peran.
+ * 1. Otak lokal lebih dulu (instan, tanpa kuota): membuka halaman/tab, "di mana …", tutorial, istilah, checklist, tur.
+ * 2. Admin dengan Asisten AI aktif: pertanyaan yang tidak dikuasai otak lokal (data klinik, analisis, permintaan tindakan)
+ *    langsung dijawab AI di sini — jawaban bertahap + kartu usulan yang dijalankan setelah disetujui.
+ *    Dokter & resepsionis tetap memakai otak lokal (server hanya mengizinkan Asisten AI untuk admin).
  */
 const STORE_KEY = 'dentiva-denti-widget';
 const MAX_KEEP = 30;
@@ -27,7 +32,7 @@ const MAX_LEN = 300;
 const MINTA_TUR = /^(tolong |coba |aku mau |saya mau )?((mulai|ulangi|ulang|buka|tampilkan|ikuti|lihat)( lagi)? )?(tur|tour|perkenalan|pengenalan)( pengenalan| aplikasi| dentiva| lagi)*[.!?]*$/i;
 
 const HINTS = {
-  admin: ['Checklist harian', 'Ajarkan cara mengatur template pengingat', 'Apa itu HPP?', 'Buka laporan'],
+  admin: ['Briefing hari ini', 'Bahan apa yang perlu dipesan?', 'Tindakan mana yang margin-nya tipis?', 'Checklist harian', 'Apa itu HPP?'],
   dokter: ['Checklist harian', 'Ajarkan cara mengisi rekam medis', 'Apa itu odontogram?', 'Buka jadwal hari ini'],
   resepsionis: ['Checklist harian', 'Ajarkan cara memproses booking', 'Apa itu recall?', 'Buka layar antrean'],
 };
@@ -57,6 +62,11 @@ export default function DentiGuideWidget() {
   const [messages, setMessages] = useState(loadChat);
   const [input, setInput] = useState('');
   const [typing, setTyping] = useState(false);
+  const [draft, setDraft] = useState(''); // jawaban AI yang sedang mengalir
+  const [ai, setAi] = useState(null); // status Asisten AI (admin): { aktif, tersedia_di_paket, kuota_bulanan, terpakai_bulan_ini }
+  const toast = useToast();
+  const isAdmin = role === 'admin';
+  const aiSiap = Boolean(isAdmin && ai?.aktif && ai?.tersedia_di_paket && ai.terpakai_bulan_ini < ai.kuota_bulanan);
   const denti = useDentiDirector('idle');
   const { play } = denti;
   const timers = useRef([]);
@@ -68,6 +78,12 @@ export default function DentiGuideWidget() {
   useEffect(() => { saveChat(messages); }, [messages]);
   useEffect(() => { endRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'end' }); }, [messages, typing, open]);
   useEffect(() => { if (open) inputRef.current?.focus(); }, [open]);
+  useEffect(() => { if (draft) endRef.current?.scrollIntoView?.({ block: 'end' }); }, [draft]);
+  // Status Asisten AI dibaca sekali saat panel dibuka (tanpa memakai kuota)
+  useEffect(() => {
+    if (!open || !isAdmin || ai) return;
+    aiService.getStatus().then((r) => setAi(r.success ? r.data : { aktif: false, gagal: r.error }));
+  }, [open, isAdmin, ai]);
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
@@ -89,8 +105,10 @@ export default function DentiGuideWidget() {
 
   const welcome = useCallback(() => ({
     role: 'assistant', local: true, intent: 'welcome', fresh: true,
-    content: `${getGreeting()}${name ? `, ${name}` : ''}! 👋 Saya **Eira**, pemandu Dentiva: bisa membuka halaman, mengajarkan cara memakai fitur, menjelaskan istilah, dan memberi checklist harian. Coba salah satu tombol di bawah, atau ketik bebas. 👇`,
-  }), [name]);
+    content: isAdmin
+      ? `${getGreeting()}${name ? `, ${name}` : ''}! 👋 Saya **Eira**. Di halaman mana pun, Anda bisa menanyakan **data klinik** (pendapatan, stok, margin, piutang), meminta **briefing**, atau meminta saya **menyiapkan tindakan** yang baru dijalankan setelah Anda setujui. Saya juga bisa membuka halaman dan mengajarkan fitur. 👇`
+      : `${getGreeting()}${name ? `, ${name}` : ''}! 👋 Saya **Eira**, pemandu Dentiva: bisa membuka halaman, mengajarkan cara memakai fitur, menjelaskan istilah, dan memberi checklist harian. Coba salah satu tombol di bawah, atau ketik bebas. 👇`,
+  }), [name, isAdmin]);
 
   const toggle = () => {
     setOpen((v) => !v);
@@ -115,6 +133,8 @@ export default function DentiGuideWidget() {
     }
     const ctx = chatContext(messages);
     const chat = smallTalk(text, { name, greeting: getGreeting(), seed: messages.length, now: new Date(), role, ...ctx });
+    // Tidak dikuasai otak lokal → admin dengan AI aktif dijawab Asisten AI langsung di sini
+    if (!chat && aiSiap) { tanyaAi(text); return; }
     setMessages((m) => [...m, { role: 'user', content: text, local: true }]);
     setTyping(true);
     const reply = chat?.reply || '';
@@ -122,7 +142,11 @@ export default function DentiGuideWidget() {
       setTyping(false);
       if (!chat) {
         const content = role === 'admin'
-          ? 'Hmm, itu sepertinya **pertanyaan data klinik** — paling tepat ditanyakan ke **Asisten AI**. Atau coba perintah yang saya kuasai di bawah. 🤔'
+          ? (ai && !ai.tersedia_di_paket
+            ? 'Pertanyaan data klinik dijawab oleh **Asisten AI**, yang tersedia di paket **Pro** dan **Enterprise**. Sementara itu saya bisa membantu soal menu, tutorial, dan istilah. 👇'
+            : ai && ai.aktif && ai.terpakai_bulan_ini >= ai.kuota_bulanan
+              ? 'Kuota **Asisten AI** bulan ini sudah habis, jadi pertanyaan data klinik belum bisa saya jawab. Saya tetap bisa membantu soal menu, tutorial, dan istilah. 👇'
+              : 'Itu pertanyaan **data klinik**. Agar saya bisa menjawabnya di halaman mana pun, **aktifkan Asisten AI** sekali di halamannya. 🤔')
           : 'Hmm, saya belum paham maksudnya. 🤔 Saya paling pandai soal **cara memakai Dentiva**: menu, tutorial langkah demi langkah, istilah, dan checklist harian. Coba salah satu di bawah.';
         setMessages((m) => [...m, {
           role: 'assistant', local: true, intent: 'unknown', content,
@@ -147,6 +171,33 @@ export default function DentiGuideWidget() {
     }, Math.min(500, 180 + reply.length * 1.1));
   };
 
+  const setActions = (idx, next) => setMessages((list) => list.map((m, i) => (i === idx ? { ...m, actions: next } : m)));
+
+  /** Tanya Asisten AI dari widget: jawaban mengalir bertahap; usulan tampil sebagai kartu Setujui/Tolak. */
+  const tanyaAi = async (text) => {
+    const history = messages.filter((m) => !m.local && !m.error && m.content).map(({ role: r, content }) => ({ role: r, content }));
+    setMessages((m) => [...m, { role: 'user', content: text }]);
+    setTyping(true);
+    play('think', 3200);
+    const res = await aiService.ask(text, history, {
+      onDelta: (t) => { setTyping(false); setDraft((d) => d + t); },
+      onReset: () => setDraft(''),
+    });
+    setDraft('');
+    setTyping(false);
+    if (res.success) {
+      const d = res.data;
+      if (d.status) setAi(d.status);
+      const actions = (d.actions || []).map((a) => ({ ...a, state: 'pending', at: Date.now(), error: '' }));
+      setMessages((m) => [...m, { role: 'assistant', content: d.answer, ai: true, actions, fresh: true }]);
+      play(actions.length ? 'point' : 'nod', 2400);
+    } else {
+      setMessages((m) => [...m, { role: 'assistant', content: res.error || 'Asisten AI belum dapat dihubungi. Coba lagi sebentar.', error: true }]);
+      play('sorry', DENTI_DURATIONS.sorry ?? 2400);
+      setAi(null); // baca ulang status (mis. kuota) saat pertanyaan berikutnya
+    }
+  };
+
   const openAi = (text) => {
     navigate('/admin/asisten-ai', { state: { ask: text } });
     setOpen(false);
@@ -165,12 +216,12 @@ export default function DentiGuideWidget() {
   return (
     <div className="denti-widget print:hidden" data-open={open}>
       {open && (
-        <section className="denti-widget__panel" role="dialog" aria-label="Eira, pemandu Dentiva">
+        <section className={`denti-widget__panel${isAdmin ? ' denti-widget__panel--ai' : ''}`} role="dialog" aria-label="Eira, asisten Dentiva">
           <header className="denti-widget__head">
             <DentiMascot state={denti.state} size={64} track title="Eira, pemandu Dentiva" />
             <div className="denti-widget__title">
               <strong>Eira</strong>
-              <span>Pemandu Dentiva · tanpa kuota</span>
+              <span>{aiSiap ? `Asisten klinik · AI ${ai.terpakai_bulan_ini}/${ai.kuota_bulanan} bulan ini` : 'Pemandu Dentiva'}</span>
             </div>
             <button type="button" className="denti-widget__icon" onClick={() => setMessages([welcome()])} aria-label="Mulai percakapan baru" title="Mulai baru"><RotateCcw size={15} /></button>
             <button type="button" className="denti-widget__icon" onClick={() => setOpen(false)} aria-label="Tutup Eira"><X size={17} /></button>
@@ -183,6 +234,15 @@ export default function DentiGuideWidget() {
                 : (
                   <div key={i} className="denti-widget__row">
                     <Bubble text={m.content} />
+                    {m.actions?.length > 0 && (
+                      <div className="denti-widget__actions">
+                        <AgentActions
+                          actions={m.actions}
+                          onChange={(next) => setActions(i, next)}
+                          onApplied={(applied) => toast.success(applied.length > 1 ? `${applied.length} tindakan dijalankan.` : 'Tindakan dijalankan.')}
+                        />
+                      </div>
+                    )}
                     {(m.action?.type === 'navigate' || m.action?.type === 'offer') && (
                       <button type="button" className="ai-chip ai-chip--action" onClick={() => { navigate(m.action.to); if (window.innerWidth < 768) setOpen(false); }}>
                         Buka {m.action.label} <ArrowRight size={13} />
@@ -196,7 +256,8 @@ export default function DentiGuideWidget() {
                   </div>
                 )
             ))}
-            {typing && <div className="denti-widget__row"><span className="ai-dots" aria-label="Eira sedang mengetik"><span /><span /><span /></span></div>}
+            {draft && <div className="denti-widget__row"><Bubble text={draft} /></div>}
+            {typing && !draft && <div className="denti-widget__row"><span className="ai-dots" aria-label="Eira sedang mengetik"><span /><span /><span /></span></div>}
             {chips.length > 0 && (
               <div className="denti-widget__chips" aria-label="Saran">
                 {chips.map((c) => <button key={c} type="button" className="ai-chip" onClick={() => ask(c)}>{c}</button>)}
