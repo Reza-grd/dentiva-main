@@ -628,7 +628,7 @@ const SchedulePage = () => {
                   {isAdminOrResepsionis && visit.status === 'completed' && (
                     <button
                       onClick={() => navigate(`/pembayaran/${visit.id}`)}
-                      className="text-xs px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary font-semibold hover:bg-accent-primary/15"
                     >
                       Pembayaran
                     </button>
@@ -637,7 +637,7 @@ const SchedulePage = () => {
                   {isDokter && visit.status === 'scheduled' && (
                     <button
                       onClick={() => handleUpdateStatus(visit.id, 'ongoing')}
-                      className="text-xs px-3 py-1.5 bg-yellow-50 text-yellow-700 border border-yellow-200 rounded-lg hover:bg-yellow-100"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary font-semibold hover:bg-accent-primary/15"
                     >
                       Mulai
                     </button>
@@ -646,7 +646,7 @@ const SchedulePage = () => {
                   {isDokter && visit.status === 'ongoing' && (
                     <button
                       onClick={() => handleUpdateStatus(visit.id, 'completed')}
-                      className="text-xs px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-lg hover:bg-green-100"
+                      className="text-xs px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary font-semibold hover:bg-accent-primary/15"
                     >
                       Selesai
                     </button>

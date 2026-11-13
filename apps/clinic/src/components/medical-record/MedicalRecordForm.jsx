@@ -662,7 +662,6 @@ const MedicalRecordForm = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => window.print()} className="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm"><Printer size={18} /><span className="hidden sm:inline">Cetak</span></button>
           <button onClick={() => setShowLegend(true)} className="px-4 py-2 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm"><Info size={18} /><span className="hidden sm:inline">Legenda</span></button>
         </div>
       </div>

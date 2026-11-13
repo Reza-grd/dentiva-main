@@ -26,7 +26,7 @@ export default {
         '3xl': '16px',
       },
       colors: {
-        gold: 'var(--color-gold)',
+        gold: 'color-mix(in srgb, var(--color-gold) calc(<alpha-value> * 100%), transparent)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

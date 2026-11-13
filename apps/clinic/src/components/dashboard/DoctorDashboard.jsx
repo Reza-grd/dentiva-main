@@ -224,7 +224,7 @@ const DoctorDashboard = () => {
                               <button
                                 onClick={() => updateStatus(visit.id, 'ongoing')}
                                 disabled={updatingId === visit.id}
-                                className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                                className="px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/15 text-xs font-semibold transition-colors disabled:opacity-50"
                               >
                                 {updatingId === visit.id ? '...' : 'Mulai'}
                               </button>
@@ -233,7 +233,7 @@ const DoctorDashboard = () => {
                               <button
                                 onClick={() => updateStatus(visit.id, 'completed')}
                                 disabled={updatingId === visit.id}
-                                className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
+                                className="px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/15 text-xs font-semibold transition-colors disabled:opacity-50"
                               >
                                 {updatingId === visit.id ? '...' : 'Selesai'}
                               </button>

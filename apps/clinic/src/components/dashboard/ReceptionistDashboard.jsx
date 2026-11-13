@@ -192,7 +192,7 @@ const ReceptionistDashboard = () => {
                 <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Antrean Langsung</CardTitle>
               </div>
               <Badge variant="default" className="bg-gray-100 text-gray-500">
-                {todayVisits.length} antrian
+                {todayVisits.length} antrean
               </Badge>
             </CardHeader>
             <CardContent className="p-0">
@@ -211,7 +211,7 @@ const ReceptionistDashboard = () => {
             ) : todayVisits.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-14 text-gray-400 dark:text-gray-500 gap-3">
                 <Calendar size={44} className="opacity-30" />
-                <p className="text-sm font-medium">Belum ada antrian hari ini</p>
+                <p className="text-sm font-medium">Belum ada antrean hari ini</p>
                 <Button onClick={() => navigate('/pasien/daftar')} className="mt-1">
                   + Daftarkan Pasien
                 </Button>
@@ -257,7 +257,7 @@ const ReceptionistDashboard = () => {
                             {visit.status === 'scheduled' && (
                               <button
                                 onClick={() => handleUpdateStatus(visit.id, 'ongoing')}
-                                className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded-lg transition-colors"
+                                className="px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/15 text-xs font-semibold transition-colors disabled:opacity-50"
                               >
                                 Mulai Perawatan
                               </button>
@@ -265,7 +265,7 @@ const ReceptionistDashboard = () => {
                             {visit.status === 'ongoing' && (
                               <button
                                 onClick={() => handleUpdateStatus(visit.id, 'completed')}
-                                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg transition-colors"
+                                className="px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/15 text-xs font-semibold transition-colors disabled:opacity-50"
                               >
                                 Selesai Perawatan
                               </button>
@@ -273,7 +273,7 @@ const ReceptionistDashboard = () => {
                             {visit.status === 'completed' && visit.payments?.[0]?.status_pembayaran !== 'paid' && (
                               <button
                                 onClick={() => navigate(`/pembayaran/${visit.id}`)}
-                                className="px-3 py-1.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white text-xs font-semibold rounded-lg transition-colors"
+                                className="px-3 py-1.5 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/15 text-xs font-semibold transition-colors disabled:opacity-50"
                               >
                                 Bayar
                               </button>

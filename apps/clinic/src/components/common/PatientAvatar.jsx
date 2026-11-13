@@ -15,7 +15,7 @@ const PatientAvatar = ({
   src,
   name = '',
   size = 'md',    // 'sm' | 'md' | 'lg'
-  gender = '',
+  gender: _gender = '',
   className = '',
 }) => {
   const [imgError, setImgError] = useState(false);
@@ -49,12 +49,9 @@ const PatientAvatar = ({
     ? name.trim().split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase()
     : '';
 
-  // Warna background berdasarkan gender
-  const bgColor = gender === 'Perempuan'
-    ? 'bg-pink-500/15 text-pink-800 dark:text-pink-300'
-    : gender === 'Laki-laki'
-      ? 'bg-sky-500/15 text-sky-800 dark:text-sky-300'
-      : 'bg-background text-text-muted border border-border';
+  // Satu warna netral untuk semua pasien (jenis kelamin tidak dikodekan dengan warna).
+  // Prop `gender` dipertahankan agar pemanggil lama tetap jalan.
+  const bgColor = 'bg-accent-primary/10 text-accent-primary';
 
   const showImage = resolvedUrl && !imgError;
 

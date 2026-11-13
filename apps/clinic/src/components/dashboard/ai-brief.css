@@ -73,3 +73,12 @@
 
 /* Desain v3: tanpa cahaya dekoratif */
 .ai-brief__glow { display: none; }
+
+/* Ponsel: maskot lebih kecil agar kartu tidak memenuhi layar */
+.ai-brief__toggle { display: none; }
+@media (max-width: 639px) {
+  .ai-brief__toggle { display: inline-flex; }
+  .ai-brief__ask[data-ringkas="true"] { display: none; }
+  .ai-brief__denti svg { width: 46px !important; height: auto !important; }
+  .ai-brief__greeting { font-size: 1.3rem; }
+}
