@@ -12,6 +12,7 @@ import {
 import { Button } from "@dentiva/ui";
 import { Badge } from "@dentiva/ui";
 import { CreditCard, Calendar, Users, ShieldAlert, Sparkles, CheckCircle2 } from "lucide-react";
+import { BILLING } from "../../utils/billingConfig";
 
 export default function BillingSettings() {
   const navigate = useNavigate();
@@ -134,7 +135,7 @@ export default function BillingSettings() {
 
         <CardFooter className="flex justify-between border-t border-gray-100 dark:border-gray-800 pt-4">
           <div className="text-xs text-gray-500">
-            Dikelola via Midtrans Snap Payment Gateway
+            {BILLING.mode === "midtrans" ? "Dikelola via Midtrans Snap Payment Gateway" : "Pembayaran via transfer bank, diverifikasi tim Dentiva"}
           </div>
           <Button variant="primary" onClick={() => navigate("/pricing")}>
             <Sparkles className="w-4 h-4 mr-2" /> Upgrade / Ubah Paket

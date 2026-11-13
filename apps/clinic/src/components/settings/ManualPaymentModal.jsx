@@ -1,0 +1,106 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { Building2, Check, Copy, MessageCircle, Mail, ShieldCheck, X } from 'lucide-react';
+import { BILLING, rekeningSiap, tautanKonfirmasi } from '../../utils/billingConfig';
+
+const rupiah = (n) => `Rp ${Math.round(Number(n) || 0).toLocaleString('id-ID')}`;
+
+function Salin({ nilai, label }) {
+  const [ok, setOk] = useState(false);
+  const salin = async () => {
+    try { await navigator.clipboard.writeText(nilai); setOk(true); setTimeout(() => setOk(false), 1800); } catch { /* clipboard ditolak */ }
+  };
+  return (
+    <button type="button" onClick={salin} aria-label={`Salin ${label}`}
+      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-accent-primary hover:bg-accent-primary/10 transition-colors">
+      {ok ? <Check size={13} /> : <Copy size={13} />} {ok ? 'Tersalin' : 'Salin'}
+    </button>
+  );
+}
+
+/**
+ * Langkah bayar langganan lewat transfer manual: transfer → konfirmasi WhatsApp → diaktifkan tim Dentiva.
+ * Props: plan {name}, siklus 'monthly'|'yearly', nominal, klinik, admin, onClose.
+ */
+export default function ManualPaymentModal({ plan, siklus, nominal, klinik, admin, onClose }) {
+  const tombolRef = useRef(null);
+  const konfirmasi = tautanKonfirmasi({ klinik, paket: plan?.name, siklus, nominal, admin });
+  const siap = rekeningSiap();
+
+  useEffect(() => {
+    tombolRef.current?.focus();
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 backdrop-blur-sm p-4" role="presentation" onClick={onClose}>
+      <section
+        role="dialog" aria-modal="true" aria-labelledby="bayar-judul" onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto rounded-3xl border border-border bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+      >
+        <button type="button" onClick={onClose} aria-label="Tutup"
+          className="absolute right-4 top-4 rounded-xl p-1.5 text-text-muted hover:bg-background hover:text-text-primary transition-colors">
+          <X size={18} />
+        </button>
+
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-primary">Pembayaran langganan</p>
+        <h2 id="bayar-judul" className="mt-1 text-xl font-bold text-text-primary">Paket {plan?.name}</h2>
+        <div className="mt-3 flex items-baseline justify-between rounded-2xl bg-background px-4 py-3 border border-border">
+          <span className="text-sm text-text-muted">{siklus === 'yearly' ? 'Tagihan tahunan' : 'Tagihan bulanan'}</span>
+          <span className="text-2xl font-bold tracking-tight text-text-primary">{rupiah(nominal)}</span>
+        </div>
+
+        <ol className="mt-5 space-y-4">
+          <li className="flex gap-3">
+            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-bold text-accent-primary">1</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-text-primary">Transfer ke rekening Dentiva</p>
+              {siap ? (
+                <div className="mt-2 rounded-2xl border border-border p-3 text-sm">
+                  <div className="flex items-center gap-2 text-text-muted"><Building2 size={15} /> {BILLING.bank}</div>
+                  <div className="mt-1 flex items-center justify-between gap-2">
+                    <span className="font-mono text-lg font-semibold tracking-wide text-text-primary">{BILLING.rekening}</span>
+                    <Salin nilai={BILLING.rekening.replace(/\s/g, '')} label="nomor rekening" />
+                  </div>
+                  <div className="text-text-muted">a.n. <span className="font-medium text-text-primary">{BILLING.atasNama}</span></div>
+                  <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
+                    <span className="text-text-muted">Nominal</span>
+                    <span className="flex items-center gap-1 font-semibold text-text-primary">{rupiah(nominal)} <Salin nilai={String(Math.round(nominal))} label="nominal" /></span>
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-1 text-sm text-text-muted">Detail rekening akan dikirim tim Dentiva setelah Anda menghubungi kami di langkah 2.</p>
+              )}
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-bold text-accent-primary">2</span>
+            <div>
+              <p className="text-sm font-semibold text-text-primary">Kirim konfirmasi & bukti transfer</p>
+              <p className="mt-0.5 text-sm text-text-muted">Pesan berisi nama klinik, paket, dan nominal sudah kami siapkan.</p>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-bold text-accent-primary">3</span>
+            <div>
+              <p className="text-sm font-semibold text-text-primary">Paket diaktifkan tim Dentiva</p>
+              <p className="mt-0.5 text-sm text-text-muted">Setelah dana terverifikasi, paket aktif dan invoice resmi dikirimkan.</p>
+            </div>
+          </li>
+        </ol>
+
+        <a
+          ref={tombolRef} href={konfirmasi.href} target="_blank" rel="noopener noreferrer"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent-primary to-accent-secondary px-4 py-3 text-sm font-semibold text-white shadow-lg hover:opacity-95 transition-opacity"
+        >
+          {konfirmasi.jenis === 'wa' ? <MessageCircle size={17} /> : <Mail size={17} />}
+          {konfirmasi.jenis === 'wa' ? 'Konfirmasi via WhatsApp' : 'Konfirmasi via email'}
+        </a>
+        <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-text-muted">
+          <ShieldCheck size={13} /> Pastikan nama penerima sesuai sebelum mentransfer.
+        </p>
+      </section>
+    </div>
+  );
+}
