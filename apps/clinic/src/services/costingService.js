@@ -235,7 +235,7 @@ export const costingService = {
       if (error) throw error;
       
       // Filter out invalid joins (if any)
-      const validData = data.filter(d => d.visit_treatment && d.visit_treatment.visit);
+      const validData = (data ?? []).filter(d => d.visit_treatment && d.visit_treatment.visit);
       return { success: true, data: validData };
     } catch (error) {
       logger.error('Error fetching profitability report:', error);

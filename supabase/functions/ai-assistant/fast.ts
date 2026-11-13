@@ -140,7 +140,7 @@ const INTENTS: Intent[] = [
         parts.push(`**${num(exp.length)} batch** kedaluwarsa dalam 60 hari:\n` +
           exp.slice(0, 10).map((b: Snap) => `- ${b.bahan ?? b.nama ?? "Bahan"} — ${b.tanggal_kadaluarsa ?? b.kadaluarsa ?? ""}`).join("\n"));
       }
-      parts.push("Lakukan pembelian lewat **Biaya & Modal → Stok Masuk**.");
+      parts.push("Lakukan pembelian lewat **Biaya & Modal → Gudang → Stok Masuk**.");
       return parts.join("\n\n");
     },
   },
@@ -247,7 +247,7 @@ const GUIDES: Guide[] = [
   {
     id: "hpp",
     match: (q) => has(q, /\b(hpp|margin|modal|bom|resep bahan|overhead|biaya operasional)\b/),
-    answer: "Agar HPP dan margin tindakan terhitung:\n1. **Biaya & Modal → Master Bahan & Gudang**: isi bahan beserta harga dan satuannya.\n2. **Stok Masuk**: catat pembelian bahan.\n3. **Resep Bahan (BOM)**: tentukan bahan yang dipakai tiap tindakan.\n4. **Biaya Operasional**: isi overhead bulanan (sewa, gaji, listrik, dll.).\n5. Hasilnya tampil di **Lap. Profitabilitas**, dan Asisten AI dapat menghitung margin serta titik impas.",
+    answer: "Agar HPP dan margin tindakan terhitung:\n1. **Biaya & Modal → Gudang → Daftar Bahan**: isi bahan beserta harga dan satuannya.\n2. **Gudang → Stok Masuk**: catat pembelian bahan.\n3. **Resep & HPP → Resep Bahan**: tentukan bahan yang dipakai tiap tindakan.\n4. **Biaya Operasional**: isi overhead bulanan (sewa, gaji, listrik, dll.).\n5. Hasilnya tampil di **Resep & HPP → Profitabilitas**, dan Asisten AI dapat menghitung margin serta titik impas.",
   },
   {
     id: "pengeluaran",
@@ -277,7 +277,7 @@ const GUIDES: Guide[] = [
   {
     id: "stok_masuk",
     match: (q) => has(q, /\b(stok|bahan|obat)\b/),
-    answer: "Cara mengelola stok bahan:\n1. **Biaya & Modal → Master Bahan & Gudang**: daftar bahan, satuan, dan stok minimum.\n2. **Stok Masuk**: catat setiap pembelian (termasuk tanggal kedaluwarsa).\n3. **Stok Opname**: sesuaikan stok dengan hitungan fisik.\n4. **Kartu Stok**: riwayat keluar-masuk tiap bahan.",
+    answer: "Cara mengelola stok bahan di **Biaya & Modal → Gudang**:\n1. **Daftar Bahan**: bahan, satuan, dan stok minimum.\n2. **Stok Masuk** (atau tombol **Catat stok masuk**): catat setiap pembelian, termasuk tanggal kedaluwarsa.\n3. **Stok Opname**: sesuaikan stok dengan hitungan fisik.\n4. **Kartu Stok**: riwayat keluar-masuk tiap bahan.",
   },
 ];
 
