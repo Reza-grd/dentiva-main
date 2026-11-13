@@ -13,7 +13,7 @@ import {
 import { Card, CardContent } from '@dentiva/ui';
 import { Input } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
-import { UserPlus, Save, X, CheckCircle, Calendar, Clock, ChevronLeft, Search, Loader2 } from 'lucide-react';
+import { Save, X, CheckCircle, Calendar, Clock, ChevronLeft, Search, Loader2 } from 'lucide-react';
 
 const AGAMA_OPTIONS = ['Islam','Kristen','Katolik','Hindu','Budha','Konghucu'];
 const PENDIDIKAN_OPTIONS = ['SD','SLTP','SLTA','D3','S1','Sp/S2','S3'];
@@ -452,8 +452,7 @@ const PatientRegistration = () => {
         </button>
         <div>
           <div className="flex items-center gap-3">
-            <UserPlus size={28} className="text-[var(--color-accent)]" />
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Pendaftaran Pasien</h1>
+            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Pendaftaran Pasien</h1>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Isi form di bawah untuk mendaftarkan pasien baru ke sistem</p>
         </div>
@@ -506,7 +505,7 @@ const PatientRegistration = () => {
               onClick={() => handleStepClick(s.step)}
               className="flex items-center gap-2.5 focus:outline-none group text-left disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs transition-all ${
                 currentStep === s.step
                   ? 'bg-[var(--color-accent)] text-white ring-4 ring-[var(--color-accent)]/15 scale-105'
                   : currentStep > s.step
@@ -516,10 +515,10 @@ const PatientRegistration = () => {
                 {currentStep > s.step ? '✓' : s.step}
               </div>
               <div className="hidden sm:block">
-                <p className={`text-xs font-bold transition-colors ${
+                <p className={`text-xs font-semibold transition-colors ${
                   currentStep === s.step ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'
                 }`}>{s.title}</p>
-                <p className="text-[10px] text-gray-450 dark:text-gray-500 font-medium leading-none mt-0.5">{s.subtitle}</p>
+                <p className="text-xs text-gray-450 dark:text-gray-500 font-medium leading-none mt-0.5">{s.subtitle}</p>
               </div>
             </button>
           </React.Fragment>
@@ -533,7 +532,7 @@ const PatientRegistration = () => {
           <div className="space-y-6">
             <Card>
             <CardContent className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Data Diri Pasien</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Data Diri Pasien</h2>
 
               <div className="flex justify-center mb-8">
                 <div className="text-center">
@@ -728,7 +727,7 @@ const PatientRegistration = () => {
 
             <Card>
             <CardContent className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Kontak & Jaminan Kesehatan</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Kontak & Jaminan Kesehatan</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">No. WhatsApp <span className="text-red-500">*</span></label>
@@ -782,7 +781,7 @@ const PatientRegistration = () => {
         {currentStep === 2 && (
           <Card>
             <CardContent className="p-6">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Alamat Domisili</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Alamat Domisili</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Provinsi</label>
@@ -854,15 +853,15 @@ const PatientRegistration = () => {
               <div className="p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-900/30 rounded-xl mb-2 flex items-center gap-3">
                 <CheckCircle className="text-emerald-500" size={24} />
                 <div>
-                  <p className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Menjadwalkan Pasien Baru:</p>
-                  <p className="text-lg font-bold text-gray-900 dark:text-white">{registeredPatientData.nama_lengkap} ({registeredPatientData.no_rm})</p>
+                  <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">Menjadwalkan Pasien Baru:</p>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white">{registeredPatientData.nama_lengkap} ({registeredPatientData.no_rm})</p>
                 </div>
               </div>
             )}
 
             <Card>
             <CardContent className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Dokter Keluarga & Rujukan</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Dokter Keluarga & Rujukan</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Dokter Keluarga</label>
@@ -888,7 +887,7 @@ const PatientRegistration = () => {
 
             <Card>
             <CardContent className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Keluhan Awal</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Keluhan Awal</h2>
               <textarea name="keluhan_awal" value={formData.keluhan_awal}
                 onChange={handleChange} disabled={loading}
                 className="glass-input w-full px-4 py-2.5 rounded-xl resize-none" rows="3"
@@ -898,7 +897,7 @@ const PatientRegistration = () => {
 
             <Card>
             <CardContent className="p-6 border border-blue-200 dark:border-blue-900/50 bg-blue-50/30 dark:bg-blue-900/10">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white cursor-pointer flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white cursor-pointer flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-[var(--color-accent)]" />
                 Jadwal Kunjungan Pertama
               </h2>
@@ -974,7 +973,7 @@ const PatientRegistration = () => {
             <button
               type="button"
               onClick={handleReset}
-              className="px-5 py-2.5 rounded-xl font-bold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shadow-sm"
+              className="px-5 py-2.5 rounded-xl font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-850 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shadow-sm"
               disabled={loading}
             >
               Reset Form
@@ -984,7 +983,7 @@ const PatientRegistration = () => {
             <button
               type="button"
               onClick={prevStep}
-              className="px-5 py-2.5 rounded-xl font-bold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-sm"
+              className="px-5 py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors shadow-sm"
             >
               ← Kembali
             </button>
@@ -1008,7 +1007,7 @@ const PatientRegistration = () => {
             <button
               type="button"
               onClick={nextStep}
-              className="px-6 py-2.5 rounded-xl font-bold text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] transition-colors shadow-sm"
+              className="px-6 py-2.5 rounded-xl font-semibold text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] transition-colors shadow-sm"
             >
               Lanjutkan →
             </button>
@@ -1020,7 +1019,7 @@ const PatientRegistration = () => {
                 type="button"
                 onClick={() => handleRegisterPatient(false)}
                 disabled={loading}
-                className="px-6 py-2.5 rounded-xl font-bold text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-250 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors shadow-sm"
+                className="px-6 py-2.5 rounded-xl font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-250 dark:bg-gray-800 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors shadow-sm"
               >
                 {loading && !isDaftarDanJadwalkan ? 'Mendaftar...' : 'Daftar Pasien'}
               </button>
@@ -1028,7 +1027,7 @@ const PatientRegistration = () => {
                 type="button"
                 onClick={() => handleRegisterPatient(true)}
                 disabled={loading}
-                className="px-6 py-2.5 rounded-xl font-bold text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] transition-colors shadow-sm flex items-center gap-2"
+                className="px-6 py-2.5 rounded-xl font-semibold text-white bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] transition-colors shadow-sm flex items-center gap-2"
               >
                 {loading && isDaftarDanJadwalkan ? (
                   <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Menyimpan...</>
@@ -1044,7 +1043,7 @@ const PatientRegistration = () => {
               type="button"
               onClick={handleSaveSchedule}
               disabled={loading}
-              className="px-6 py-2.5 rounded-xl font-bold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-sm flex items-center gap-2"
+              className="px-6 py-2.5 rounded-xl font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors shadow-sm flex items-center gap-2"
             >
               {loading ? (
                 <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Menyimpan...</>
@@ -1061,7 +1060,7 @@ const PatientRegistration = () => {
         <div className="space-y-6 animate-fade-in">
           <Card>
             <CardContent className="p-6">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Cari Pasien Terdaftar</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Cari Pasien Terdaftar</h2>
             
             <div className="relative mb-6">
               <input
@@ -1111,22 +1110,22 @@ const PatientRegistration = () => {
                 <button onClick={() => setSelectedOldPatient(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
                   <X size={20} />
                 </button>
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3">Pasien Terpilih</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Pasien Terpilih</h3>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">Nama</span>
+                    <span className="block text-gray-500 text-xs mb-1">Nama</span>
                     <span className="font-medium text-gray-900 dark:text-white">{selectedOldPatient.nama_lengkap}</span>
                   </div>
                   <div>
-                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">No. RM</span>
+                    <span className="block text-gray-500 text-xs mb-1">No. RM</span>
                     <span className="font-mono font-medium text-[var(--color-accent)]">{selectedOldPatient.no_rm}</span>
                   </div>
                   <div>
-                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">No. WhatsApp</span>
+                    <span className="block text-gray-500 text-xs mb-1">No. WhatsApp</span>
                     <span className="font-medium text-gray-900 dark:text-white">{selectedOldPatient.no_wa || '-'}</span>
                   </div>
                   <div>
-                    <span className="block text-gray-500 text-xs uppercase tracking-wider mb-1">Umur</span>
+                    <span className="block text-gray-500 text-xs mb-1">Umur</span>
                     <span className="font-medium text-gray-900 dark:text-white">{selectedOldPatient.umur ? `${selectedOldPatient.umur} tahun` : '-'}</span>
                   </div>
                 </div>
@@ -1138,7 +1137,7 @@ const PatientRegistration = () => {
           {selectedOldPatient && (
             <Card>
             <CardContent className="p-6 animate-fade-in">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Jadwal Kunjungan Baru</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-2">Jadwal Kunjungan Baru</h2>
               <form onSubmit={handleOldPatientSubmit}>
                 <ScheduleVisitForm 
                   scheduleForm={scheduleData} 
@@ -1167,21 +1166,21 @@ const PatientRegistration = () => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-scale-in">
             <div className="bg-emerald-500 px-6 py-4">
-              <h2 className="text-white text-lg font-bold text-center">Pendaftaran Berhasil</h2>
+              <h2 className="text-white text-lg font-semibold text-center">Pendaftaran Berhasil</h2>
             </div>
             <div className="p-6 space-y-6 text-center">
               <div>
                 <p className="text-gray-500 text-sm font-medium mb-1">Nama Pasien</p>
-                <p className="text-xl font-bold text-gray-900">{successModalData.nama_lengkap}</p>
+                <p className="text-xl font-semibold text-gray-900">{successModalData.nama_lengkap}</p>
               </div>
               <div>
                 <p className="text-gray-500 text-sm font-medium mb-1">Nomor RM</p>
-                <p className="font-mono text-lg font-bold text-[var(--color-accent)]">{successModalData.no_rm}</p>
+                <p className="font-mono text-lg font-semibold text-[var(--color-accent)]">{successModalData.no_rm}</p>
               </div>
               <button
                 type="button"
                 onClick={handleConfirmRegistration}
-                className="w-full py-3 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-bold rounded-xl transition-colors shadow-sm"
+                className="w-full py-3 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-semibold rounded-xl transition-colors shadow-sm"
               >
                 {isDaftarDanJadwalkan ? 'Lanjut ke Penjadwalan →' : 'Selesai'}
               </button>
@@ -1194,27 +1193,27 @@ const PatientRegistration = () => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-scale-in">
             <div className="bg-emerald-500 px-6 py-4">
-              <h2 className="text-white text-lg font-bold text-center">Pasien Berhasil Dijadwalkan</h2>
+              <h2 className="text-white text-lg font-semibold text-center">Pasien Berhasil Dijadwalkan</h2>
             </div>
             <div className="p-6 space-y-6 text-center">
               <div>
                 <p className="text-gray-500 text-sm font-medium mb-1">Dokter Gigi Pemeriksa</p>
-                <p className="text-xl font-bold text-gray-900">{scheduleSuccessModalData.dokter_name}</p>
+                <p className="text-xl font-semibold text-gray-900">{scheduleSuccessModalData.dokter_name}</p>
               </div>
               <div className="grid grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-100 dark:border-gray-800 text-left">
                 <div>
-                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Tanggal</p>
+                  <p className="text-gray-500 text-xs font-semibold">Tanggal</p>
                   <p className="font-semibold text-gray-900 text-sm">{scheduleSuccessModalData.tanggal_kunjungan}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Jam</p>
+                  <p className="text-gray-500 text-xs font-semibold">Jam</p>
                   <p className="font-semibold text-gray-900 text-sm">{scheduleSuccessModalData.waktu_kunjungan} WIB</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={handleConfirmSchedule}
-                className="w-full py-3 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-bold rounded-xl transition-colors shadow-sm"
+                className="w-full py-3 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-semibold rounded-xl transition-colors shadow-sm"
               >
                 Kembali ke Dashboard
               </button>
@@ -1227,7 +1226,7 @@ const PatientRegistration = () => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#14171F] rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-gray-100 dark:border-gray-800">
             <div className="bg-red-500 px-6 py-4">
-              <h2 className="text-white text-lg font-bold text-center">Pendaftaran Gagal</h2>
+              <h2 className="text-white text-lg font-semibold text-center">Pendaftaran Gagal</h2>
             </div>
             <div className="p-6 space-y-4 text-center">
               <div className="text-gray-700 dark:text-gray-300 font-medium text-sm leading-relaxed">
@@ -1238,7 +1237,7 @@ const PatientRegistration = () => {
                   <button
                     type="button"
                     onClick={() => { setErrorModalMsg(null); navigate('/pricing'); }}
-                    className="w-full py-3 bg-[var(--color-accent)] hover:brightness-110 text-white font-bold rounded-xl transition-all shadow-md text-sm"
+                    className="w-full py-3 bg-[var(--color-accent)] hover:brightness-110 text-white font-semibold rounded-xl transition-all shadow-md text-sm"
                   >
                     Upgrade Paket Sekarang
                   </button>
@@ -1246,7 +1245,7 @@ const PatientRegistration = () => {
                 <button
                   type="button"
                   onClick={() => setErrorModalMsg(null)}
-                  className="w-full py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors text-sm"
+                  className="w-full py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-colors text-sm"
                 >
                   Tutup
                 </button>

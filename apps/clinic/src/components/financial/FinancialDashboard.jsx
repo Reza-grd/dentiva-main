@@ -5,7 +5,8 @@ import { financialService } from '../../services/financialService';
 import { paymentService } from '../../services/paymentService';
 import { parseDateLocal } from '../../utils/dateUtils';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, DollarSign, TrendingDown, Calendar, Download, RefreshCw } from 'lucide-react';
+import { Download, RefreshCw } from 'lucide-react';
+import StatCard from '../ui/StatCard';
 
 const FinancialDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -82,9 +83,8 @@ const FinancialDashboard = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <TrendingUp size={32} className="text-accent-primary" />
           <div>
-            <h1 className="text-xl md:text-3xl font-bold text-text-primary">Dashboard Keuangan</h1>
+            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Dashboard Keuangan</h1>
             <p className="text-text-muted">Laporan dan analisa keuangan klinik</p>
           </div>
         </div>
@@ -128,14 +128,14 @@ const FinancialDashboard = () => {
             className="flex items-center gap-2 px-3 py-2 rounded-xl glass-input text-sm text-text-primary hover:bg-background transition-colors shadow-sm"
           >
             <RefreshCw size={16} />
-            <span className="hidden sm:inline">Refresh</span>
+            <span className="hidden sm:inline">Muat ulang</span>
           </button>
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-accent-primary to-accent-secondary text-white text-sm font-semibold transition-colors shadow-sm border-0 hover:opacity-90"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-accent-primary text-white text-sm font-semibold transition-colors shadow-sm border-0 hover:opacity-90"
           >
             <Download size={16} />
-            <span className="hidden sm:inline">Export (Cetak)</span>
+            <span className="hidden sm:inline">Cetak</span>
           </button>
         </div>
       </div>
@@ -146,73 +146,13 @@ const FinancialDashboard = () => {
         <>
           {/* Financial Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="glass-panel p-5 relative overflow-hidden group">
-              <div className="absolute -right-4 -top-4 opacity-5 dark:opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none text-emerald-500">
-                <TrendingUp size={100} />
-              </div>
-              <div className="flex items-center justify-between relative z-10">
-                <div>
-                  <p className="text-sm text-text-muted mb-1">Total Revenue</p>
-                  <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                    {formatCurrency(stats?.totalRevenue)}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={24} />
-                </div>
-              </div>
-            </div>
+            <StatCard label="Total Pendapatan" value={formatCurrency(stats?.totalRevenue)} tone="baik" />
 
-            <div className="glass-panel p-5 relative overflow-hidden group">
-              <div className="absolute -right-4 -top-4 opacity-5 dark:opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none text-rose-500">
-                <TrendingDown size={100} />
-              </div>
-              <div className="flex items-center justify-between relative z-10">
-                <div>
-                  <p className="text-sm text-text-muted mb-1">Total Expenses</p>
-                  <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">
-                    {formatCurrency(stats?.totalExpenses)}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center">
-                  <TrendingDown className="text-rose-600 dark:text-rose-400" size={24} />
-                </div>
-              </div>
-            </div>
+            <StatCard label="Total Pengeluaran" value={formatCurrency(stats?.totalExpenses)} />
 
-            <div className="glass-panel p-5 relative overflow-hidden group">
-              <div className="absolute -right-4 -top-4 opacity-5 dark:opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none text-accent-primary">
-                <DollarSign size={100} />
-              </div>
-              <div className="flex items-center justify-between relative z-10">
-                <div>
-                  <p className="text-sm text-text-muted mb-1">Net Income</p>
-                  <p className="text-2xl font-bold text-accent-primary">
-                    {formatCurrency(stats?.netIncome)}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-accent-primary/10 rounded-xl flex items-center justify-center">
-                  <DollarSign className="text-accent-primary" size={24} />
-                </div>
-              </div>
-            </div>
+            <StatCard label="Laba Bersih" value={formatCurrency(stats?.netIncome)} />
 
-            <div className="glass-panel p-5 relative overflow-hidden group">
-              <div className="absolute -right-4 -top-4 opacity-5 dark:opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none text-amber-500">
-                <Calendar size={100} />
-              </div>
-              <div className="flex items-center justify-between relative z-10">
-                <div>
-                  <p className="text-sm text-text-muted mb-1">Profit Margin</p>
-                  <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                    {stats?.profitMargin?.toFixed(1)}%
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center">
-                  <Calendar className="text-amber-600 dark:text-amber-400" size={24} />
-                </div>
-              </div>
-            </div>
+            <StatCard label="Margin Laba" value={`${(stats?.profitMargin ?? 0).toFixed(1)}%`} />
           </div>
 
           {/* Revenue Chart */}
@@ -235,7 +175,7 @@ const FinancialDashboard = () => {
                   dataKey="revenue"
                   stroke="var(--color-accent)"
                   strokeWidth={3}
-                  name="Revenue"
+                  name="Pendapatan"
                   dot={{ fill: 'var(--color-accent)' }}
                   activeDot={{ r: 8 }}
                 />
@@ -243,18 +183,18 @@ const FinancialDashboard = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Revenue vs Expenses Bar Chart & Expenses Pie Chart */}
+          {/* Grafik pendapatan vs pengeluaran & pengeluaran per kategori */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Bar Chart */}
             <div className="glass-panel p-6">
-              <h3 className="text-lg font-semibold text-text-primary mb-6">Revenue vs Expenses</h3>
+              <h3 className="text-lg font-semibold text-text-primary mb-6">Pendapatan vs Pengeluaran</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={[
                   {
-                    name: 'Financial',
-                    Revenue: stats?.totalRevenue || 0,
-                    Expenses: stats?.totalExpenses || 0,
-                    'Net Income': stats?.netIncome || 0
+                    name: 'Periode ini',
+                    Pendapatan: stats?.totalRevenue || 0,
+                    Pengeluaran: stats?.totalExpenses || 0,
+                    'Laba Bersih': stats?.netIncome || 0
                   }
                 ]}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" opacity={0.5} />
@@ -266,16 +206,16 @@ const FinancialDashboard = () => {
                     cursor={{fill: 'var(--color-bg)'}}
                   />
                   <Legend />
-                  <Bar dataKey="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Net Income" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Pendapatan" fill="#059669" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Pengeluaran" fill="#dc2626" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Laba Bersih" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             {/* Pie Chart - Expenses by Category */}
             <div className="glass-panel p-6">
-              <h3 className="text-lg font-semibold text-text-primary mb-6">Expenses by Category</h3>
+              <h3 className="text-lg font-semibold text-text-primary mb-6">Pengeluaran per Kategori</h3>
               {expensesByCategory.length === 0 ? (
                 <p className="text-center text-text-muted py-12">Tidak ada data pengeluaran</p>
               ) : (
@@ -328,7 +268,7 @@ const FinancialDashboard = () => {
               </h3>
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Operating Ratio:</span>
+                  <span className="text-text-muted">Rasio Operasional:</span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                     {stats?.totalRevenue > 0
                       ? ((stats?.totalExpenses / stats?.totalRevenue) * 100).toFixed(1)
@@ -336,7 +276,7 @@ const FinancialDashboard = () => {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Profit Margin:</span>
+                  <span className="text-text-muted">Margin Laba:</span>
                   <span className="font-semibold text-emerald-600 dark:text-emerald-400">
                     {stats?.profitMargin?.toFixed(1)}%
                   </span>
@@ -359,20 +299,20 @@ const FinancialDashboard = () => {
               </h3>
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Total Revenue:</span>
+                  <span className="text-text-muted">Total Pendapatan:</span>
                   <span className="font-semibold text-accent-primary">
                     {formatCurrency(stats?.totalRevenue)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Total Expenses:</span>
+                  <span className="text-text-muted">Total Pengeluaran:</span>
                   <span className="font-semibold text-rose-600 dark:text-rose-400">
                     {formatCurrency(stats?.totalExpenses)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t border-accent-primary/20">
-                  <span className="text-text-primary font-semibold">Net Income:</span>
-                  <span className="font-bold text-lg text-accent-primary">
+                  <span className="text-text-primary font-semibold">Laba Bersih:</span>
+                  <span className="font-semibold text-lg text-accent-primary">
                     {formatCurrency(stats?.netIncome)}
                   </span>
                 </div>

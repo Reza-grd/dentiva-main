@@ -2,7 +2,7 @@ import { useToast } from '../common/ToastNotification';
 import React, { useState, useEffect } from 'react';
 import { usePermission } from '../../contexts/PermissionsContext';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Download, Calendar, BarChart3, Users, DollarSign, Lock, Sparkles } from 'lucide-react';
+import { TrendingUp, Download, BarChart3, Users, DollarSign, Lock, Sparkles } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { financialService } from '../../services/financialService';
@@ -220,22 +220,19 @@ const ReportsPage = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-xl md:text-3xl font-bold text-text-primary mb-2 flex items-center gap-3">
-          <TrendingUp className="text-accent-primary" size={32} />
-          Laporan & Analisis
-        </h1>
+        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Laporan & Analisis</h1>
         <p className="text-text-muted">Dashboard analisis bisnis klinik</p>
       </div>
 
       {/* Upgrade Banner for Starter Plan */}
       {!canCustomReport && (
-        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-indigo-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
               <Lock size={20} />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-text-primary flex items-center gap-1.5">
+              <h3 className="font-semibold text-sm text-text-primary flex items-center gap-1.5">
                 Fitur Laporan Kustom & Ekspor Terkunci
               </h3>
               <p className="text-xs text-text-muted">
@@ -245,7 +242,7 @@ const ReportsPage = () => {
           </div>
           <button
             onClick={() => navigate('/pricing')}
-            className="px-4 py-2 bg-gradient-to-r from-accent-primary to-accent-secondary text-white text-xs font-bold rounded-xl shadow-md hover:opacity-90 transition-all whitespace-nowrap flex items-center gap-1.5 border-0"
+            className="px-4 py-2 bg-accent-primary text-white text-xs font-semibold rounded-xl shadow-md hover:opacity-90 transition-all whitespace-nowrap flex items-center gap-1.5 border-0"
           >
             <Sparkles size={14} /> Upgrade Sekarang
           </button>
@@ -317,7 +314,7 @@ const ReportsPage = () => {
               }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors shadow-lg ${
                 canCustomReport
-                  ? 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-secondary)] shadow-[var(--color-accent)]/20'
+                  ? 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-secondary)]'
                   : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 shadow-none cursor-pointer'
               }`}
             >
@@ -331,45 +328,45 @@ const ReportsPage = () => {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-green-500">
+        <div className="glass-panel p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Revenue</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pendapatan</p>
             <DollarSign className="text-green-500" size={20} />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
             {formatCurrency(reportData?.stats?.monthRevenue || 0)}
           </p>
           <p className={`text-xs mt-1 ${trenPendapatan.kelas}`}>{trenPendapatan.teks}</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-red-500">
+        <div className="glass-panel p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Expenses</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengeluaran</p>
             <DollarSign className="text-red-500" size={20} />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
             {formatCurrency(reportData?.stats?.monthExpenses || 0)}
           </p>
           <p className={`text-xs mt-1 ${trenPengeluaran.kelas}`}>{trenPengeluaran.teks}</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-[var(--color-accent)]">
+        <div className="glass-panel p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Net Profit</p>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Laba Bersih</p>
             <TrendingUp className="text-[var(--color-accent)]" size={20} />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
             {formatCurrency(reportData?.stats?.monthNetIncome || 0)}
           </p>
           <p className={`text-xs mt-1 ${trenLaba.kelas}`}>{trenLaba.teks}</p>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border-l-4 border-l-purple-500">
+        <div className="glass-panel p-5 rounded-2xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pasien</p>
             <Users className="text-purple-500" size={20} />
           </div>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
             {reportData?.stats?.totalPatients || 0}
           </p>
           <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">+{reportData?.stats?.todayVisits || 0} hari ini</p>
@@ -380,9 +377,9 @@ const ReportsPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Revenue vs Expenses — BUG K-02 + K-01 FIX: pakai monthlyRevenue dari state, field totalRevenue/totalExpenses */}
         <div className="glass-panel p-5 sm:p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <BarChart3 size={20} className="text-[var(--color-accent)]" />
-            Revenue vs Expenses
+            Pendapatan vs Pengeluaran
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={monthlyRevenue}>
@@ -396,15 +393,15 @@ const ReportsPage = () => {
               />
               <Legend wrapperStyle={{ paddingTop: '20px' }} />
               {/* BUG K-01 FIX: dataKey pakai totalRevenue & totalExpenses */}
-              <Bar dataKey="totalRevenue" name="Revenue" fill="#10b981" radius={[4,4,0,0]} />
-              <Bar dataKey="totalExpenses" name="Expenses" fill="#ef4444" radius={[4,4,0,0]} />
+              <Bar dataKey="totalRevenue" name="Pendapatan" fill="#059669" radius={[4,4,0,0]} />
+              <Bar dataKey="totalExpenses" name="Pengeluaran" fill="#dc2626" radius={[4,4,0,0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Treatment Distribution — BUG S-01 FIX: pakai state treatmentDistribution */}
         <div className="glass-panel p-5 sm:p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <BarChart3 size={20} className="text-[var(--color-accent)]" />
             Distribusi Treatment
           </h3>
@@ -436,7 +433,7 @@ const ReportsPage = () => {
       <div className="grid grid-cols-1 gap-6 mb-6">
         {/* Patient Growth — BUG S-01 FIX: pakai state patientGrowth */}
         <div className="glass-panel p-5 sm:p-6 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <Users size={20} className="text-[var(--color-accent)]" />
             Pertumbuhan Pasien
           </h3>
@@ -472,17 +469,17 @@ const ReportsPage = () => {
       {/* Summary Table */}
       <div className="glass-panel overflow-hidden rounded-2xl">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-          <h3 className="font-bold text-lg text-gray-900 dark:text-white">Ringkasan Bulanan</h3>
+          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Ringkasan Bulanan</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50/80 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Bulan</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Revenue</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Expenses</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Net Profit</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pasien</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Bulan</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Pendapatan</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Pengeluaran</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Laba Bersih</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Pasien</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-transparent">
@@ -498,7 +495,7 @@ const ReportsPage = () => {
                   <td className="px-6 py-4 text-sm text-red-600 dark:text-red-400 font-semibold">
                     {formatCurrency(item.totalExpenses)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-[var(--color-accent)] font-bold bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10">
+                  <td className="px-6 py-4 text-sm text-[var(--color-accent)] font-semibold bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10">
                     {formatCurrency(item.totalRevenue - item.totalExpenses)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 font-medium">

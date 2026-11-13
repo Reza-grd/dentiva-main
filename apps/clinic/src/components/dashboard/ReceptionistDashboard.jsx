@@ -18,6 +18,8 @@ import { Badge } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
 import PageTransition from '../common/PageTransition';
 import AiBriefCard from './AiBriefCard';
+import StandarStat from '../ui/StatCard';
+import { namaPanggilan } from '../../utils/stringUtils';
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 const StatusBadge = ({ status }) => {
@@ -36,31 +38,10 @@ const StatusBadge = ({ status }) => {
 };
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
-const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor, loading, subtitle }) => (
-  <Card className="group relative overflow-hidden border-0 bg-white/60 dark:bg-gray-900/60 shadow-sm backdrop-blur-xl h-full">
-    <div className="absolute -right-2 -top-2 opacity-[0.03] dark:opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-      <Icon size={80} />
-    </div>
-    <CardContent className="p-5">
-      {loading ? (
-        <div className="animate-pulse space-y-3">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-8 bg-gray-200 rounded w-1/2" />
-        </div>
-      ) : (
-        <div className="flex items-center justify-between relative z-10">
-          <div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
-            <p className={`text-2xl font-bold ${valueColor}`}>{value}</p>
-            {subtitle && <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{subtitle}</p>}
-          </div>
-          <div className={`w-12 h-12 ${iconBg} dark:bg-gray-800/50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm`}>
-            <Icon className={iconColor} size={22} />
-          </div>
-        </div>
-      )}
-    </CardContent>
-  </Card>
+// Kartu angka memakai komponen standar (tanpa lingkaran ikon / ikon samar). Warna lama → nada makna.
+const nadaDari = (c = '') => (/emerald|green/.test(c) ? 'baik' : /amber|orange|yellow/.test(c) ? 'waspada' : /red|rose/.test(c) ? 'bahaya' : 'netral');
+const StatCard = ({ label, value, valueColor, loading, subtitle, trend, trendLabel }) => (
+  <StandarStat label={label} value={value} hint={subtitle} tone={nadaDari(valueColor)} loading={loading} trend={trend} trendLabel={trendLabel} />
 );
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
@@ -137,8 +118,8 @@ const ReceptionistDashboard = () => {
           {/* ── Header ───────────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                {getGreeting()}, {userProfile?.full_name || 'Resepsionis'}! 👋
+              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">
+                {getGreeting()}, {namaPanggilan(userProfile?.full_name) || 'Resepsionis'}
               </h1>
               <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">{formatDateFull(new Date())}</p>
             </div>
@@ -165,7 +146,7 @@ const ReceptionistDashboard = () => {
           {/* ── Stats Row ────────────────────────────────────────── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
-              label="Antrian Hari Ini"
+              label="Antrean Hari Ini"
               value={todayVisits.length}
               icon={Calendar}
               iconBg="bg-indigo-50"
@@ -192,7 +173,7 @@ const ReceptionistDashboard = () => {
               loading={loading}
             />
             <StatCard
-              label="Total Pending"
+              label="Belum Lunas"
               value={formatRupiah(totalPending)}
               icon={DollarSign}
               iconBg="bg-red-50"
@@ -208,7 +189,7 @@ const ReceptionistDashboard = () => {
             <CardHeader className="flex flex-row items-center justify-between py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Antrian Real-time</CardTitle>
+                <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100">Antrean Langsung</CardTitle>
               </div>
               <Badge variant="default" className="bg-gray-100 text-gray-500">
                 {todayVisits.length} antrian
@@ -240,19 +221,19 @@ const ReceptionistDashboard = () => {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">No</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Pasien</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Jam</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Dokter</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Status</th>
-                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Aksi</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">No</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Pasien</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Jam</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Dokter</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Status</th>
+                      <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Aksi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
                     {todayVisits.map((visit, idx) => (
                       <tr key={visit.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                         <td className="px-5 py-3.5">
-                          <span className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-bold flex items-center justify-center">
+                          <span className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs font-semibold flex items-center justify-center">
                             {idx + 1}
                           </span>
                         </td>
@@ -326,7 +307,7 @@ const ReceptionistDashboard = () => {
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 py-4 border-b border-gray-100 dark:border-gray-800">
                 <AlertCircle size={18} className="text-amber-500" />
-                <CardTitle className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pembayaran Pending</CardTitle>
+                <CardTitle className="text-sm font-semibold text-gray-900 dark:text-gray-100">Pembayaran Belum Lunas</CardTitle>
                 {belumBayar > 0 && (
                   <Badge variant="secondary" className="ml-auto bg-amber-100 text-amber-700">
                     {belumBayar}
@@ -353,7 +334,7 @@ const ReceptionistDashboard = () => {
                         <p className="text-xs text-gray-400 dark:text-gray-500">{payment.invoice_number}</p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-sm font-bold text-amber-700 dark:text-amber-400">{formatRupiah(payment.total_bayar)}</p>
+                        <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">{formatRupiah(payment.total_bayar)}</p>
                         <button
                           onClick={() => navigate(`/pembayaran/${payment.visit_id}`)}
                           className="text-xs text-[var(--color-accent)] hover:underline font-medium"
@@ -392,7 +373,7 @@ const ReceptionistDashboard = () => {
                 <ResponsiveContainer width="100%" height={70}>
                   <BarChart data={weekData} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>
                     <Bar dataKey="kunjungan" fill="var(--color-accent)" radius={[4, 4, 0, 0]} maxBarSize={24} />
-                    <XAxis dataKey="day" tick={{ fill: '#9ca3af', fontSize: 10, fontFamily: 'Inter, sans-serif' }} tickLine={false} axisLine={false} />
+                    <XAxis dataKey="day" tick={{ fill: '#9ca3af', fontSize: 10, fontFamily: 'Onest, sans-serif' }} tickLine={false} axisLine={false} />
                     <YAxis hide />
                     <Tooltip
                       content={({ active, payload, label }) =>

@@ -112,7 +112,7 @@ const SoapTemplates = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Template SOAP Rekam Medis</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Template SOAP Rekam Medis</h2>
           <p className="text-sm text-gray-500 mt-1">Kelola template teks default untuk catatan medis (Keluhan, Pemeriksaan Fisik, Diagnosa, Terapi) berdasarkan tindakan.</p>
         </div>
         {!isAdding && !editingId && (
@@ -124,7 +124,7 @@ const SoapTemplates = () => {
 
       {(isAdding || editingId) && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm mb-6">
-          <h3 className="font-bold text-lg mb-4">{isAdding ? 'Tambah Template SOAP Baru' : 'Edit Template SOAP'}</h3>
+          <h3 className="font-semibold text-lg mb-4">{isAdding ? 'Tambah Template SOAP Baru' : 'Edit Template SOAP'}</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Nama Template / Jenis Tindakan</label>
@@ -204,23 +204,23 @@ const SoapTemplates = () => {
                 <Trash2 size={14} />
               </button>
             </div>
-            <h3 className="font-bold text-gray-900 dark:text-white mb-4 text-lg">{tmpl.treatment_type}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4 text-lg">{tmpl.treatment_type}</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                <span className="text-xs font-bold text-gray-500 uppercase">Keluhan (S):</span>
+                <span className="text-xs font-semibold text-gray-500">Keluhan (S):</span>
                 <p className="text-sm mt-1 whitespace-pre-wrap">{tmpl.keluhan || '-'}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                <span className="text-xs font-bold text-gray-500 uppercase">Pemeriksaan Fisik (O):</span>
+                <span className="text-xs font-semibold text-gray-500">Pemeriksaan Fisik (O):</span>
                 <p className="text-sm mt-1 whitespace-pre-wrap">{tmpl.pemeriksaan_fisik || '-'}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                <span className="text-xs font-bold text-gray-500 uppercase">Diagnosa (A):</span>
+                <span className="text-xs font-semibold text-gray-500">Diagnosa (A):</span>
                 <p className="text-sm mt-1 whitespace-pre-wrap">{tmpl.diagnosa || '-'}</p>
               </div>
               <div className="bg-white dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                <span className="text-xs font-bold text-gray-500 uppercase">Terapi (P):</span>
+                <span className="text-xs font-semibold text-gray-500">Terapi (P):</span>
                 <p className="text-sm mt-1 whitespace-pre-wrap">{tmpl.terapi || '-'}</p>
               </div>
             </div>

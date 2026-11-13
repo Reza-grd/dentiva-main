@@ -62,9 +62,9 @@ export default function BottomNav() {
               to={item.path}
               end={item.path === `/${role}`}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center flex-1 h-full rounded-xl text-[10px] font-medium transition-colors ${
+                `flex flex-col items-center justify-center flex-1 h-full rounded-xl text-xs font-medium transition-colors ${
                   isActive
-                    ? "text-accent-primary font-bold"
+                    ? "text-accent-primary font-semibold"
                     : "text-text-muted hover:text-text-primary"
                 }`
               }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../services/supabase';
-import { Shield, Clock, User, AlertTriangle, Info, AlertOctagon, Search, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Shield, Clock, User, AlertTriangle, Info, AlertOctagon, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
 
 // ─── Risk Level Badge ─────────────────────────────────────────────────────────
 const RiskBadge = ({ level }) => {
@@ -90,10 +90,7 @@ const AuditLogPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-            <Shield size={24} className="text-accent-primary" />
-            Audit Log
-          </h1>
+          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Audit Log</h1>
           <p className="text-sm text-text-muted mt-1">
             Riwayat seluruh aksi yang tercatat di sistem — {totalCount.toLocaleString('id-ID')} entri total
           </p>
@@ -103,7 +100,7 @@ const AuditLogPage = () => {
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card border border-border text-sm font-medium hover:bg-background transition-colors shadow-sm text-text-primary"
         >
           <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-          Refresh
+          Muat ulang
         </button>
       </div>
 
@@ -172,16 +169,16 @@ const AuditLogPage = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider whitespace-nowrap">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted whitespace-nowrap">
                     <Clock size={12} className="inline mr-1" />Waktu
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted">
                     <User size={12} className="inline mr-1" />Pengguna
                   </th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Modul</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Aksi</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Pasien</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted uppercase tracking-wider">Risiko</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted">Modul</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted">Aksi</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted">Pasien</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-text-muted">Risiko</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">

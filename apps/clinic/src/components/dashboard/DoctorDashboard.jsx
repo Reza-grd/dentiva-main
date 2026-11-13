@@ -5,11 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../components/common/ToastNotification';
 import { getGreeting, formatDateFull, formatRupiah, formatDoctorName } from '../../utils/dateUtils';
 import PageTransition from '../common/PageTransition';
-import {
-  Calendar, Users, FileText, Clock, CheckCircle,
-  AlertCircle, ArrowRight, Stethoscope, RefreshCw,
-  Activity, TrendingUp,
-} from 'lucide-react';
+import StandarStat from '../ui/StatCard';
+import { Calendar, Users, FileText, Clock, CheckCircle, ArrowRight, Stethoscope, RefreshCw, Activity, TrendingUp } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid,
 } from 'recharts';
@@ -32,28 +29,10 @@ const StatusBadge = ({ status }) => {
 
 // ─── Stat Card ────────────────────────────────────────────────────────────────
 // ─── Stat Card ────────────────────────────────────────────────────────────────
-const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, valueColor, loading }) => (
-  <div className="glass-panel p-5 group relative overflow-hidden h-full">
-    <div className="absolute -right-2 -bottom-2 opacity-[0.03] dark:opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-      <Icon size={80} />
-    </div>
-    {loading ? (
-      <div className="animate-pulse space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-3/4" />
-        <div className="h-8 bg-gray-200 rounded w-1/2" />
-      </div>
-    ) : (
-      <div className="flex items-center justify-between relative z-10">
-        <div>
-          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
-          <p className={`text-3xl font-bold ${valueColor}`}>{value}</p>
-        </div>
-        <div className={`w-12 h-12 ${iconBg} dark:bg-gray-800/50 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm`}>
-          <Icon className={iconColor} size={22} />
-        </div>
-      </div>
-    )}
-  </div>
+// Kartu angka memakai komponen standar (tanpa lingkaran ikon / ikon samar). Warna lama → nada makna.
+const nadaDari = (c = '') => (/emerald|green/.test(c) ? 'baik' : /amber|orange|yellow/.test(c) ? 'waspada' : /red|rose/.test(c) ? 'bahaya' : 'netral');
+const StatCard = ({ label, value, valueColor, loading, subtitle, trend, trendLabel }) => (
+  <StandarStat label={label} value={value} hint={subtitle} tone={nadaDari(valueColor)} loading={loading} trend={trend} trendLabel={trendLabel} />
 );
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
@@ -118,8 +97,8 @@ const DoctorDashboard = () => {
           {/* ── Header ───────────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                {getGreeting()}, {formatDoctorName(userProfile) || 'Dokter'}! 👨‍⚕️
+              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">
+                {getGreeting()}, {formatDoctorName(userProfile) || 'Dokter'}
               </h1>
               <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                 {formatDateFull(new Date())}
@@ -132,10 +111,10 @@ const DoctorDashboard = () => {
             </div>
             <button
               onClick={loadTodayVisits}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl glass-input text-sm hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors shadow-sm self-start sm:self-auto"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border bg-card text-sm text-text-primary hover:bg-background transition-colors self-start sm:self-auto"
             >
               <RefreshCw size={14} />
-              Refresh
+              Muat ulang
             </button>
           </div>
 
@@ -213,7 +192,7 @@ const DoctorDashboard = () => {
                   <div key={visit.id} className="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     {/* Time */}
                     <div className="flex-shrink-0 w-14 text-center">
-                      <div className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                      <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                               {visit.jam_kunjungan
                                 ? visit.jam_kunjungan.slice(0, 5)
                                 : '—'}
@@ -222,7 +201,7 @@ const DoctorDashboard = () => {
                           </div>
 
                           {/* Avatar */}
-                          <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 text-sm font-bold text-primary-700">
+                          <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0 text-sm font-semibold text-primary-700">
                             {(visit.patient?.nama_lengkap || '?').charAt(0).toUpperCase()}
                           </div>
 
@@ -275,7 +254,7 @@ const DoctorDashboard = () => {
                 <TrendingUp size={18} className="text-[var(--color-accent)]" />
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Pasien Bulan Ini</h3>
               </div>
-              <p className="text-4xl font-bold text-[var(--color-accent)] mb-3">{todayVisits.length}</p>
+              <p className="text-4xl font-semibold text-[var(--color-accent)] mb-3">{todayVisits.length}</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Hari ini · data real-time</p>
               <ResponsiveContainer width="100%" height={60}>
                 <BarChart data={sparkData} margin={{ top: 0, right: 0, left: -30, bottom: 0 }}>

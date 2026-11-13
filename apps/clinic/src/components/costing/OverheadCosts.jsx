@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, CheckCircle, AlertCircle, RefreshCw, Calendar as CalendarIcon, Save } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle, AlertCircle, Calendar as CalendarIcon, Save } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { costingService } from '../../services/costingService';
 
@@ -213,7 +213,7 @@ const OverheadCosts = () => {
                   </div>
                   <div className="pt-3 border-t border-primary-200 dark:border-primary-800 flex justify-between items-center">
                     <span className="text-primary-700 dark:text-primary-400 font-medium text-sm">Alokasi per Unit</span>
-                    <span className="font-bold text-primary-700 dark:text-primary-400">{formatCurrency(target.overhead_per_unit_bobot)}</span>
+                    <span className="font-semibold text-primary-700 dark:text-primary-400">{formatCurrency(target.overhead_per_unit_bobot)}</span>
                   </div>
                   <button 
                     onClick={() => setIsEditingTarget(true)}
@@ -284,11 +284,11 @@ const OverheadCosts = () => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Biaya</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Jumlah (Rp)</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Kategori</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Nama Biaya</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Jumlah (Rp)</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -330,7 +330,7 @@ const OverheadCosts = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editTarget ? 'Edit Biaya Operasional' : 'Tambah Biaya Operasional'}
               </h3>
             </div>

@@ -134,7 +134,7 @@ export default function PricingPage() {
         <Badge variant="accent" className="px-3 py-1">
           <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> Dentiva SaaS Subscription
         </Badge>
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+        <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-gray-900 dark:text-gray-100">
           Pilih Paket Terbaik untuk Klinik Anda
         </h1>
         <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -149,7 +149,7 @@ export default function PricingPage() {
                 Bulanan
               </TabsTrigger>
               <TabsTrigger value="yearly" className="px-6">
-                Tahunan <span className="ml-1 text-[10px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">Hemat 16%</span>
+                Tahunan <span className="ml-1 text-xs bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-semibold">Hemat 16%</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -180,7 +180,7 @@ export default function PricingPage() {
                 }`}
               >
                 {isPopular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-md uppercase tracking-wider">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--color-accent)] text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-md uppercase tracking-wider">
                     Paling Populer
                   </div>
                 )}
@@ -188,7 +188,7 @@ export default function PricingPage() {
                 <div>
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                      <CardTitle className="text-xl font-bold">{p.name}</CardTitle>
+                      <CardTitle className="text-xl font-semibold">{p.name}</CardTitle>
                       {isCurrent && <Badge variant="success">Paket Aktif</Badge>}
                     </div>
                     <CardDescription className="mt-2">
@@ -201,7 +201,7 @@ export default function PricingPage() {
                   <CardContent className="space-y-6">
                     {/* Price */}
                     <div>
-                      <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+                      <div className="text-3xl font-semibold text-gray-900 dark:text-gray-100">
                         {formatIDR(price)}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">

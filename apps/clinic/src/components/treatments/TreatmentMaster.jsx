@@ -1,10 +1,11 @@
 import { useToast } from '../common/ToastNotification';
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Search, Package, DollarSign } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Package } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { treatmentService } from '../../services/treatmentService';
 import ICD9CMPicker from '../common/ICD9CMPicker';
 import { TREATMENT_TEMPLATES } from '../../data/treatmentTemplates';
+import StatCard from '../ui/StatCard';
 
 const TreatmentMaster = () => {
   const toast = useToast();
@@ -142,10 +143,7 @@ const TreatmentMaster = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-          <Package className="text-primary-600" size={32} />
-          Master Treatment
-        </h1>
+        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Master Treatment</h1>
         <p className="text-gray-600">Kelola daftar perawatan dan harga</p>
       </div>
 
@@ -191,50 +189,16 @@ const TreatmentMaster = () => {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Total Treatment</p>
-              <p className="text-xl md:text-3xl font-bold text-primary-600">{treatments.length}</p>
-            </div>
-            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-              <Package className="text-primary-600" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Total Treatment" value={treatments.length} />
 
-        <div className="card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Harga Rata-rata</p>
-              <p className="text-2xl font-bold text-green-600">
-                {formatCurrency(treatments.reduce((sum, t) => sum + t.harga_dasar, 0) / (treatments.length || 1))}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-              <DollarSign className="text-green-600" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Harga Rata-rata" value={formatCurrency(treatments.reduce((sum, t) => sum + t.harga_dasar, 0) / (treatments.length || 1))} />
 
-        <div className="card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">Harga Tertinggi</p>
-              <p className="text-2xl font-bold text-[var(--color-accent)]">
-                {formatCurrency(Math.max(...treatments.map(t => t.harga_dasar), 0))}
-              </p>
-            </div>
-            <div className="w-12 h-12 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-full flex items-center justify-center">
-              <DollarSign className="text-[var(--color-accent)]" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Harga Tertinggi" value={formatCurrency(Math.max(...treatments.map(t => t.harga_dasar), 0))} />
       </div>
 
       {/* Treatment List */}
       <div className="card">
-        <h2 className="text-xl font-bold mb-4">Daftar Treatment</h2>
+        <h2 className="text-xl font-semibold mb-4">Daftar Treatment</h2>
         {loading ? (
           <LoadingSpinner />
         ) : filteredTreatments.length === 0 ? (
@@ -247,12 +211,12 @@ const TreatmentMaster = () => {
             <table className="table">
               <thead className="table-header">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Treatment</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ICD-9 / SNOMED</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Harga</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Kode</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Nama Treatment</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Kategori</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">ICD-9 / SNOMED</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Harga</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Aksi</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -310,7 +274,7 @@ const TreatmentMaster = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6">
+              <h2 className="text-2xl font-semibold mb-6">
                 {editingTreatment ? 'Edit Treatment' : 'Tambah Treatment Baru'}
               </h2>
 

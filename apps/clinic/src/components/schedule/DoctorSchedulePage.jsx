@@ -229,7 +229,7 @@ const DoctorSchedulePage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Jadwal Praktek Dokter</h1>
+          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Jadwal Praktek Dokter</h1>
           <p className="text-sm text-gray-500 mt-1">Kelola hari & jam praktek setiap dokter</p>
         </div>
         <div className="flex gap-2">
@@ -237,7 +237,7 @@ const DoctorSchedulePage = () => {
             onClick={loadAll}
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
           >
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} /> Muat ulang
           </button>
           <button
             onClick={openAdd}
@@ -368,7 +368,7 @@ const DoctorSchedulePage = () => {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-bold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900">
                 {editTarget ? 'Edit Jadwal Praktek' : 'Tambah Jadwal Praktek'}
               </h2>
               <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">

@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Calendar as CalendarIcon, Clock, Users, Filter,
-  RefreshCw, Plus, X, Search, UserCheck, ChevronDown,
-  AlertCircle, CheckCircle2, Stethoscope,
-} from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Filter, RefreshCw, Plus, X, Search, UserCheck, AlertCircle, CheckCircle2, Stethoscope } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { visitService } from '../../services/visitService';
@@ -313,7 +309,7 @@ const SchedulePage = () => {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Jadwal Kunjungan</h1>
+          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Jadwal Kunjungan</h1>
           <p className="text-sm text-gray-500 mt-1">
             {getHariLabel(dayOfWeek(selectedDate))},{' '}
             {new Date(selectedDate + 'T00:00:00').toLocaleDateString('id-ID', {
@@ -326,12 +322,12 @@ const SchedulePage = () => {
             onClick={() => { loadVisits(); loadDaySchedules(); }}
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
-            <RefreshCw size={14} /> Refresh
+            <RefreshCw size={14} /> Muat ulang
           </button>
           {userProfile?.role !== 'resepsionis' && (
             <button
               onClick={openModal}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg text-sm hover:bg-[var(--color-accent-secondary)] transition-colors shadow-lg shadow-[var(--color-accent)]/20"
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg text-sm hover:bg-[var(--color-accent-secondary)] transition-colors shadow-lg"
             >
               <Plus size={14} /> Tambah Jadwal
             </button>
@@ -355,12 +351,12 @@ const SchedulePage = () => {
               onClick={() => setSelectedDate(dateStr)}
               className={`p-2.5 rounded-2xl border transition-all text-left flex flex-col justify-between h-full min-h-[110px] ${
                 isSelected
-                  ? 'bg-[var(--color-accent)] border-[var(--color-accent)] text-white shadow-lg shadow-[var(--color-accent)]/20'
+                  ? 'bg-[var(--color-accent)] border-[var(--color-accent)] text-white shadow-lg'
                   : 'glass-panel hover:bg-gray-50/50 dark:hover:bg-gray-850/50'
               }`}
             >
               <div className="w-full flex justify-between items-start">
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}>
                   {getDayLabelShort(dow)}
                 </span>
                 {isToday && (
@@ -368,7 +364,7 @@ const SchedulePage = () => {
                 )}
               </div>
               
-              <div className={`text-xl font-extrabold my-1 ${isSelected ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+              <div className={`text-xl font-semibold my-1 ${isSelected ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
                 {d.getDate()}
               </div>
 
@@ -393,7 +389,7 @@ const SchedulePage = () => {
                     return (
                       <div 
                         key={s.id} 
-                        className={`flex justify-between items-center text-[9px] px-1 py-0.5 rounded font-mono ${
+                        className={`flex justify-between items-center text-xs px-1 py-0.5 rounded font-mono ${
                           isSelected 
                             ? 'bg-black/25 text-white border-white/20' 
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
@@ -406,7 +402,7 @@ const SchedulePage = () => {
                   })}
                 </div>
               ) : (
-                <span className={`text-[9px] italic ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                <span className={`text-xs italic ${isSelected ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                   Libur
                 </span>
               )}
@@ -554,9 +550,9 @@ const SchedulePage = () => {
         {summaryStats.map(s => (
           <div
             key={s.label}
-            className={`glass-panel rounded-xl p-4 text-center border-l-4 border-l-${s.color}-500`}
+            className="glass-panel rounded-xl p-4 text-center"
           >
-            <p className={`text-2xl font-bold text-${s.color}-600 dark:text-${s.color}-400`}>{s.value}</p>
+            <p className={`text-2xl font-semibold text-${s.color}-600 dark:text-${s.color}-400`}>{s.value}</p>
             <p className={`text-xs text-gray-600 dark:text-gray-400 mt-1`}>{s.label}</p>
           </div>
         ))}
@@ -692,7 +688,7 @@ const SchedulePage = () => {
 
             {/* Modal header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-md z-10">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Tambah Jadwal Kunjungan</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Tambah Jadwal Kunjungan</h2>
               <button
                 onClick={() => { setShowModal(false); resetForm(); }}
                 className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"

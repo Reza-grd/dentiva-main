@@ -640,9 +640,9 @@ const MedicalRecordForm = () => {
     <div className="flex items-center justify-center h-[80vh]">
       <div className="glass-panel text-center p-8 max-w-md animate-scale-in">
         <Shield className="w-16 h-16 text-rose-500 mx-auto mb-4 opacity-80" />
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Akses Ditolak</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Akses Ditolak</h2>
         <p className="text-gray-500 dark:text-gray-400 mt-2 mb-6">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-        <button onClick={() => navigate('/')} className="px-6 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-bold rounded-xl transition-all shadow-sm">Kembali</button>
+        <button onClick={() => navigate('/')} className="px-6 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-semibold rounded-xl transition-all shadow-sm">Kembali</button>
       </div>
     </div>
   );
@@ -657,7 +657,7 @@ const MedicalRecordForm = () => {
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/pasien')} className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-colors"><ArrowLeft size={20} /></button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Rekam Medis Pasien</h1>
+            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Rekam Medis Pasien</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola data medis dan odontogram</p>
           </div>
         </div>
@@ -674,14 +674,14 @@ const MedicalRecordForm = () => {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <PatientAvatar src={patient.foto_profile} name={patient.nama_lengkap} gender={patient.jenis_kelamin} size="lg"/>
             <div className="flex-1 text-center md:text-left w-full">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{patient.nama_lengkap}</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">No. RM: <span className="font-bold text-[var(--color-accent)] px-2 py-0.5 bg-[var(--color-accent)]/10 rounded ml-1">{patient.no_rm}</span></p>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-1">{patient.nama_lengkap}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">No. RM: <span className="font-semibold text-[var(--color-accent)] px-2 py-0.5 bg-[var(--color-accent)]/10 rounded ml-1">{patient.no_rm}</span></p>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 bg-gray-50/50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-100 dark:border-gray-800 text-left">
-                <div className="flex items-center gap-3"><Calendar className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Umur</p><p className="font-semibold text-gray-900 dark:text-white text-sm">{patient.umur} thn</p></div></div>
-                <div className="flex items-center gap-3"><User className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Gender</p><p className="font-semibold text-gray-900 dark:text-white text-sm capitalize">{patient.jenis_kelamin}</p></div></div>
-                <div className="flex items-center gap-3"><Phone className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">WhatsApp</p><p className="font-semibold text-gray-900 dark:text-white text-sm">{patient.no_wa || '-'}</p></div></div>
-                <div className="flex items-center gap-3"><Shield className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Gol. Darah</p><p className="font-semibold text-gray-900 dark:text-white text-sm">{patient.golongan_darah || '-'}</p></div></div>
-                <div className="flex items-center gap-3"><Stethoscope className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wider">Dokter Pemeriksa</p><p className="font-semibold text-gray-900 dark:text-white text-sm truncate" title={formatDoctorName(userProfile)}>{formatDoctorName(userProfile) || '-'}</p></div></div>
+                <div className="flex items-center gap-3"><Calendar className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Umur</p><p className="font-semibold text-gray-900 dark:text-white text-sm">{patient.umur} thn</p></div></div>
+                <div className="flex items-center gap-3"><User className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Jenis Kelamin</p><p className="font-semibold text-gray-900 dark:text-white text-sm capitalize">{patient.jenis_kelamin}</p></div></div>
+                <div className="flex items-center gap-3"><Phone className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">WhatsApp</p><p className="font-semibold text-gray-900 dark:text-white text-sm">{patient.no_wa || '-'}</p></div></div>
+                <div className="flex items-center gap-3"><Shield className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Gol. Darah</p><p className="font-semibold text-gray-900 dark:text-white text-sm">{patient.golongan_darah || '-'}</p></div></div>
+                <div className="flex items-center gap-3"><Stethoscope className="w-5 h-5 text-[var(--color-accent)]"/><div><p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Dokter Pemeriksa</p><p className="font-semibold text-gray-900 dark:text-white text-sm truncate" title={formatDoctorName(userProfile)}>{formatDoctorName(userProfile) || '-'}</p></div></div>
               </div>
             </div>
           </div>
@@ -729,7 +729,7 @@ const MedicalRecordForm = () => {
         {userProfile?.role !== 'dokter' ? (
           <div className="glass-panel p-12 text-center flex flex-col items-center justify-center animate-scale-in w-full h-96">
             <Shield className="w-16 h-16 text-rose-500 mb-4 opacity-80" />
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Data Medis Rahasia</h3>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Data Medis Rahasia</h3>
             <p className="text-gray-500 dark:text-gray-400">Rincian rekam medis hanya dapat dilihat dan diisi oleh Dokter yang berwenang.</p>
           </div>
         ) : (
@@ -738,7 +738,7 @@ const MedicalRecordForm = () => {
                 {/* Riwayat Penyakit Medis */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Riwayat Penyakit Medis</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Riwayat Penyakit Medis</h3>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
@@ -756,17 +756,17 @@ const MedicalRecordForm = () => {
                 </div>
                 {medicalHistory.alergi && (
                   <div className="mb-5">
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Detail Alergi</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Detail Alergi</label>
                     <input type="text" value={medicalHistory.alergi_detail} onChange={e => setMedicalHistory({...medicalHistory, alergi_detail: e.target.value})} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="Sebutkan jenis obat/makanan pemicu alergi..."/>
                   </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Konsumsi Obat Saat Ini</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Konsumsi Obat Saat Ini</label>
                     <textarea value={medicalHistory.konsumsi_obat} onChange={e => setMedicalHistory({...medicalHistory, konsumsi_obat: e.target.value})} className="glass-input w-full px-4 py-2.5 rounded-xl resize-none h-24" placeholder="Misal: Amlodipine, Metformin, Warfarin, dll."/>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Riwayat Penyakit Lainnya</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Riwayat Penyakit Lainnya</label>
                     <textarea value={medicalHistory.riwayat_lain} onChange={e => setMedicalHistory({...medicalHistory, riwayat_lain: e.target.value})} className="glass-input w-full px-4 py-2.5 rounded-xl resize-none h-24" placeholder="Tuliskan riwayat penyakit sistemik lainnya..."/>
                   </div>
                 </div>
@@ -776,12 +776,12 @@ const MedicalRecordForm = () => {
             {/* Keluhan Utama (Chief Complaint) */}
             <div className="glass-panel overflow-hidden mb-6">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Keluhan Utama (Chief Complaint)</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Keluhan Utama (Chief Complaint)</h3>
               </div>
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
                       Keluhan Utama <span className="text-rose-500">*</span>
                     </label>
                     <RichTextEditor 
@@ -792,7 +792,7 @@ const MedicalRecordForm = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Keluhan Tambahan</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Keluhan Tambahan</label>
                     <RichTextEditor 
                       value={clinicalData.additional_complaint} 
                       onChange={(value) => setClinicalData({...clinicalData, additional_complaint: value})} 
@@ -803,13 +803,13 @@ const MedicalRecordForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Pemeriksaan Ekstra Oral (Wajah)</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Pemeriksaan Ekstra Oral (Wajah)</label>
                     <div className="flex gap-6 mt-2">
                       <span className="text-sm text-gray-500 dark:text-gray-400 italic">Lihat bagian Pemeriksaan Extra Oral di bawah</span>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Riwayat Perawatan Gigi</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Riwayat Perawatan Gigi</label>
                     <div className="flex gap-6 mt-2 mb-3">
                       {['belum_dirawat', 'pernah_dirawat'].map(v => (
                         <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -832,7 +832,7 @@ const MedicalRecordForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Kebiasaan Buruk</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Kebiasaan Buruk</label>
                     <div className="grid grid-cols-2 gap-3 mt-2">
                       {['Bruxism', 'Mengisap Jari', 'Bernapas Mulut', 'Gigit Bibir/Kuku'].map(h => (
                         <label key={h} className="flex items-center gap-2 cursor-pointer bg-gray-50/50 dark:bg-gray-800/30 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -846,7 +846,7 @@ const MedicalRecordForm = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Riwayat Sosial</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Riwayat Sosial</label>
                     <div className="grid grid-cols-2 gap-3 mt-2">
                       {['Merokok', 'Alkohol', 'Kopi/Teh Berlebih', 'Pola Makan Manis'].map(s => (
                         <label key={s} className="flex items-center gap-2 cursor-pointer bg-gray-50/50 dark:bg-gray-800/30 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
@@ -863,7 +863,7 @@ const MedicalRecordForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Lain-lain</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Lain-lain</label>
                     <textarea 
                       value={clinicalData.other_notes || ''} 
                       onChange={e => setClinicalData({...clinicalData, other_notes: e.target.value})} 
@@ -872,7 +872,7 @@ const MedicalRecordForm = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Keterangan</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Keterangan</label>
                     <textarea 
                       value={clinicalData.remarks || ''} 
                       onChange={e => setClinicalData({...clinicalData, remarks: e.target.value})} 
@@ -887,12 +887,12 @@ const MedicalRecordForm = () => {
             {/* Pemeriksaan Extra Oral */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Pemeriksaan Extra Oral</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Pemeriksaan Extra Oral</h3>
               </div>
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Wajah</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Wajah</label>
                     <div className="flex flex-wrap gap-4 mt-2">
                       {['simetri', 'asimetri', 'ada_kelainan'].map(v => (
                         <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -906,7 +906,7 @@ const MedicalRecordForm = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Bibir</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Bibir</label>
                     <div className="flex flex-wrap gap-4 mt-2">
                       {['sehat', 'ada_kelainan'].map(v => (
                         <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -923,7 +923,7 @@ const MedicalRecordForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">KGB Submandibula Kanan</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">KGB Submandibula Kanan</label>
                     <div className="flex gap-4 mt-2 mb-3">
                       {['tidak_teraba', 'teraba'].map(v => (
                         <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -949,7 +949,7 @@ const MedicalRecordForm = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">KGB Submandibula Kiri</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">KGB Submandibula Kiri</label>
                     <div className="flex gap-4 mt-2 mb-3">
                       {['tidak_teraba', 'teraba'].map(v => (
                         <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -977,11 +977,11 @@ const MedicalRecordForm = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Kelenjar Lainnya</label>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Kelenjar Lainnya</label>
                   <input type="text" value={clinicalData.extra_oral?.kelenjar_lainnya || ''} onChange={e => setClinicalData({...clinicalData, extra_oral: {...clinicalData.extra_oral, kelenjar_lainnya: e.target.value}})} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="Kelenjar lainnya..." />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Kelainan Lainnya</label>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Kelainan Lainnya</label>
                   <textarea value={clinicalData.extra_oral?.kelainan_lainnya || ''} onChange={e => setClinicalData({...clinicalData, extra_oral: {...clinicalData.extra_oral, kelainan_lainnya: e.target.value}})} className="glass-input w-full px-4 py-2.5 rounded-xl resize-none h-24" placeholder="Kelainan ekstra oral lainnya..." />
                 </div>
               </div>
@@ -990,20 +990,20 @@ const MedicalRecordForm = () => {
             {/* Keadaan Umum (Vital Signs Inputs) */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Keadaan Umum (Tanda Vital)</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Keadaan Umum (Tanda Vital)</h3>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Tekanan Darah</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Tekanan Darah</label>
                     <input type="text" value={clinicalData.general_condition?.tekanan_darah || ''} onChange={e => setClinicalData({...clinicalData, general_condition: {...clinicalData.general_condition, tekanan_darah: e.target.value}})} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="mmHg" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Nadi</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Nadi</label>
                     <input type="text" value={clinicalData.general_condition?.nadi || ''} onChange={e => setClinicalData({...clinicalData, general_condition: {...clinicalData.general_condition, nadi: e.target.value}})} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="x/menit" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Pernapasan</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Pernapasan</label>
                     <input type="text" value={clinicalData.general_condition?.pernapasan || ''} onChange={e => setClinicalData({...clinicalData, general_condition: {...clinicalData.general_condition, pernapasan: e.target.value}})} className="glass-input w-full px-4 py-2.5 rounded-xl" placeholder="x/menit" />
                   </div>
                 </div>
@@ -1013,7 +1013,7 @@ const MedicalRecordForm = () => {
             {/* Keadaan Umum Intra Oral */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Keadaan Umum Intra Oral</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Keadaan Umum Intra Oral</h3>
               </div>
               <div className="p-6 space-y-5">
                 
@@ -1039,11 +1039,11 @@ const MedicalRecordForm = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-5 mt-2 border-t border-gray-100 dark:border-gray-800">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">pH Plak</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">pH Plak</label>
                     <input type="text" value={clinicalData.intra_oral?.ph_plak || ''} onChange={e => setClinicalData({...clinicalData, intra_oral: {...clinicalData.intra_oral, ph_plak: e.target.value}})} className="glass-input w-full px-4 py-2.5 rounded-xl" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">pH Saliva</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">pH Saliva</label>
                     <input type="text" value={clinicalData.intra_oral?.ph_saliva || ''} onChange={e => setClinicalData({...clinicalData, intra_oral: {...clinicalData.intra_oral, ph_saliva: e.target.value}})} className="glass-input w-full px-4 py-2.5 rounded-xl" />
                   </div>
                 </div>
@@ -1071,7 +1071,7 @@ const MedicalRecordForm = () => {
                 </div>
 
                 <div className="pt-5 mt-2 border-t border-gray-100 dark:border-gray-800">
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Hubungan Rahang</label>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Hubungan Rahang</label>
                   <div className="flex flex-wrap gap-6 mt-2">
                     {['ortognati', 'retrognati', 'prognati', 'ada_kelainan_lain'].map(v => (
                       <label key={v} className="flex items-center gap-2 cursor-pointer">
@@ -1090,24 +1090,24 @@ const MedicalRecordForm = () => {
             {/* Pemeriksaan Periodontal & OHIS */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Pemeriksaan Periodontal & OHIS</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Pemeriksaan Periodontal & OHIS</h3>
               </div>
               <div className="p-6 space-y-6">
                 
                 {/* OHIS Grid */}
                 <div>
-                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wide">Skor Debris & Kalkulus (Gigi Indeks: 16, 11, 26, 46, 31, 36)</h4>
+                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4">Skor Debris & Kalkulus (Gigi Indeks: 16, 11, 26, 46, 31, 36)</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Debris Section */}
                     <div className="bg-gray-50/50 dark:bg-gray-800/20 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
-                      <h5 className="text-sm font-bold text-gray-800 dark:text-gray-200 flex justify-between items-center">
+                      <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex justify-between items-center">
                         <span>Debris Score</span>
                         <span className="text-xs bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 text-[var(--color-accent)] px-2 py-0.5 rounded-full font-mono">DI: {getOhisCalculation(ohisSubscores).di}</span>
                       </h5>
                       <div className="grid grid-cols-6 gap-2">
                         {['16', '11', '26', '46', '31', '36'].map(tooth => (
                           <div key={tooth} className="text-center">
-                            <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1">{tooth}</label>
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">{tooth}</label>
                             <select
                               value={ohisSubscores.debris[tooth] || 0}
                               onChange={e => handleOhisChange('debris', tooth, e.target.value)}
@@ -1125,14 +1125,14 @@ const MedicalRecordForm = () => {
 
                     {/* Calculus Section */}
                     <div className="bg-gray-50/50 dark:bg-gray-800/20 p-4 rounded-2xl border border-gray-100 dark:border-gray-800 space-y-3">
-                      <h5 className="text-sm font-bold text-gray-800 dark:text-gray-200 flex justify-between items-center">
+                      <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex justify-between items-center">
                         <span>Calculus Score</span>
                         <span className="text-xs bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 px-2 py-0.5 rounded-full font-mono">CI: {getOhisCalculation(ohisSubscores).ci}</span>
                       </h5>
                       <div className="grid grid-cols-6 gap-2">
                         {['16', '11', '26', '46', '31', '36'].map(tooth => (
                           <div key={tooth} className="text-center">
-                            <label className="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1">{tooth}</label>
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">{tooth}</label>
                             <select
                               value={ohisSubscores.calculus[tooth] || 0}
                               onChange={e => handleOhisChange('calculus', tooth, e.target.value)}
@@ -1152,14 +1152,14 @@ const MedicalRecordForm = () => {
                   {/* Calculation Result */}
                   <div className="mt-4 p-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl flex justify-between items-center">
                     <div>
-                      <h5 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">Hasil Penghitungan OHIS</h5>
+                      <h5 className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">Hasil Penghitungan OHIS</h5>
                       <p className="text-xs text-emerald-700 dark:text-emerald-400/80 mt-0.5">OhiS = Debris Index (DI) + Calculus Index (CI)</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-lg font-extrabold text-emerald-800 dark:text-emerald-300 font-mono">
+                      <span className="text-lg font-semibold text-emerald-800 dark:text-emerald-300 font-mono">
                         {getOhisCalculation(ohisSubscores).ohis}
                       </span>
-                      <span className={`ml-2 px-2.5 py-1 text-xs font-bold uppercase rounded-full tracking-wider ${
+                      <span className={`ml-2 px-2.5 py-1 text-xs font-semibold rounded-full ${
                         getOhisCalculation(ohisSubscores).category === 'Baik' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
                         getOhisCalculation(ohisSubscores).category === 'Sedang' ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400' :
                         'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
@@ -1172,41 +1172,41 @@ const MedicalRecordForm = () => {
 
                 {/* Periodontal Metrics Grid */}
                 <div className="pt-6 border-t border-gray-100 dark:border-gray-800">
-                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wide">Parameter Periodontal Lainnya</h4>
+                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-4">Parameter Periodontal Lainnya</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Plak Indeks</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Plak Indeks</label>
                       <input type="text" value={periodontalData.plakIndeks || ''} onChange={e => setPeriodontalData({...periodontalData, plakIndeks: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="%" />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">BOP (Bleeding on Probing)</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">BOP (Bleeding on Probing)</label>
                       <input type="text" value={periodontalData.bop || ''} onChange={e => setPeriodontalData({...periodontalData, bop: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="%" />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Mobility (Goyang Gigi)</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Mobility (Goyang Gigi)</label>
                       <input type="text" value={periodontalData.mobility || ''} onChange={e => setPeriodontalData({...periodontalData, mobility: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="Regio / derajat..." />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Pocket Depth</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Pocket Depth</label>
                       <input type="text" value={periodontalData.pocketDepth || ''} onChange={e => setPeriodontalData({...periodontalData, pocketDepth: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="mm..." />
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4">
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Keterlibatan Furkasi</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Keterlibatan Furkasi</label>
                       <input type="text" value={periodontalData.furkasi || ''} onChange={e => setPeriodontalData({...periodontalData, furkasi: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="Kelas..." />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Resesi Gingiva</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Resesi Gingiva</label>
                       <input type="text" value={periodontalData.resesiGingiva || ''} onChange={e => setPeriodontalData({...periodontalData, resesiGingiva: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="mm..." />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Kondisi Gingiva</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Kondisi Gingiva</label>
                       <input type="text" value={periodontalData.kondisiGingiva || ''} onChange={e => setPeriodontalData({...periodontalData, kondisiGingiva: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="Warna, konsistensi..." />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Kondisi Mukosa</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Kondisi Mukosa</label>
                       <input type="text" value={periodontalData.kondisiMukosa || ''} onChange={e => setPeriodontalData({...periodontalData, kondisiMukosa: e.target.value})} className="glass-input w-full px-3 py-2 rounded-xl text-sm" placeholder="Keterangan..." />
                     </div>
                   </div>
@@ -1221,7 +1221,7 @@ const MedicalRecordForm = () => {
             {/* Odontogram Section */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex justify-between items-center flex-wrap gap-4">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Odontogram Anak & Dewasa</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Odontogram Anak & Dewasa</h3>
                 <div className="flex gap-2">
                   <button onClick={() => setConfirmDialog({ isOpen: true, action: 'clearAllTooth', data: null })} className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:hover:bg-rose-500/20 text-xs font-semibold rounded-lg transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-800 no-print">Reset Semua Gigi</button>
                   <button onClick={() => setShowLegend(true)} className="px-3 py-1.5 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 text-xs font-semibold rounded-lg transition-colors border border-transparent hover:border-[var(--color-accent)]/20 dark:hover:border-gray-800 no-print">Bantuan Simbol</button>
@@ -1237,7 +1237,7 @@ const MedicalRecordForm = () => {
               <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Relasi Molar Kanan</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Relasi Molar Kanan</label>
                     <div className="flex gap-4 mt-1">
                       {['kls1','kls2','kls3'].map(v => (
                         <label key={v} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
@@ -1248,7 +1248,7 @@ const MedicalRecordForm = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Relasi Molar Kiri</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Relasi Molar Kiri</label>
                     <div className="flex gap-4 mt-1">
                       {['kls1','kls2','kls3'].map(v => (
                         <label key={v} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
@@ -1259,7 +1259,7 @@ const MedicalRecordForm = () => {
                     </div>
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Catatan Tambahan Odontogram</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Catatan Tambahan Odontogram</label>
                     <textarea 
                       value={odontogramMeta.catatan_odontogram || ''} 
                       onChange={(e) => setOdontogramMeta({...odontogramMeta, catatan_odontogram: e.target.value})} 
@@ -1290,15 +1290,15 @@ const MedicalRecordForm = () => {
             {/* Voice Input (Speech to SOAP) */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Catatan Suara Medis (Voice Dictation)</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Catatan Suara Medis (Voice Dictation)</h3>
               </div>
               <div className="p-6 flex flex-col md:flex-row items-start md:items-center gap-6">
-                <button onClick={isListening ? stopListening : startListening} className={`flex items-center justify-center w-40 gap-2 px-4 py-3 rounded-xl font-bold text-white transition-all shadow-md ${isListening ? 'bg-rose-500 hover:bg-rose-600 animate-pulse' : 'bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)]'}`}>
+                <button onClick={isListening ? stopListening : startListening} className={`flex items-center justify-center w-40 gap-2 px-4 py-3 rounded-xl font-semibold text-white transition-all shadow-md ${isListening ? 'bg-rose-500 hover:bg-rose-600 animate-pulse' : 'bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)]'}`}>
                   {isListening ? <MicOff size={20}/> : <Mic size={20}/>}
                   {isListening ? 'Stop Rekam' : 'Mulai Bicara'}
                 </button>
                 <div className="flex-1 glass-input rounded-xl p-4 min-h-[80px] w-full">
-                  <p className={`text-xs font-bold uppercase tracking-wider mb-2 ${isListening ? 'text-rose-500' : 'text-gray-400'}`}>{voiceStatus}</p>
+                  <p className={`text-xs font-semibold mb-2 ${isListening ? 'text-rose-500' : 'text-gray-400'}`}>{voiceStatus}</p>
                   <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{transcript || <span className="text-gray-400 dark:text-gray-500 italic">Teks hasil suara akan muncul di sini...</span>}</p>
                 </div>
               </div>
@@ -1307,7 +1307,7 @@ const MedicalRecordForm = () => {
             {/* SOAP Histori Kunjungan */}
             <div className="glass-panel overflow-hidden mb-8 break-inside-avoid print:break-before-page">
               <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex justify-between items-center">
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2"><Calendar className="text-[var(--color-accent)]"/> Histori Kunjungan & SOAP</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2"><Calendar className="text-[var(--color-accent)]"/> Histori Kunjungan & SOAP</h3>
                 <button onClick={addVisit} className="px-4 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white text-sm font-semibold rounded-xl flex items-center gap-1.5 transition-colors no-print"><Plus size={16}/> Tambah Kunjungan</button>
               </div>
               <div className="p-6">
@@ -1322,13 +1322,13 @@ const MedicalRecordForm = () => {
                       <div key={visit.id} className="relative p-6 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-[var(--color-accent)]/30 transition-colors shadow-sm">
                         <div className="absolute w-4 h-4 rounded-full bg-[var(--color-accent)] border-4 border-white dark:border-gray-900 -left-[33px] top-7 shadow-sm"></div>
                         <div className="flex justify-between items-center mb-5 border-b border-gray-100 dark:border-gray-800 pb-3">
-                          <span className="font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-3 py-1 rounded-md text-xs uppercase tracking-wider">Kunjungan #{index + 1}</span>
+                          <span className="font-semibold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-3 py-1 rounded-md text-xs">Kunjungan #{index + 1}</span>
                           <div className="flex gap-2 no-print">
                             {!visit._isNew && !visit.is_locked && (
                               <button
                                 type="button"
                                 onClick={() => { setSelectedConsentVisit(visit); setShowConsentModal(true); }}
-                                className="px-2.5 py-1 text-xs font-bold text-teal-600 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-500/10 rounded-lg transition-colors flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-semibold text-teal-600 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-500/10 rounded-lg transition-colors flex items-center gap-1"
                               >
                                 <PenTool size={14} /> Informed Consent
                               </button>
@@ -1337,7 +1337,7 @@ const MedicalRecordForm = () => {
                               <button
                                 type="button"
                                 onClick={() => handleToggleLock(visit.id, visit.is_locked)}
-                                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors flex items-center gap-1 ${
+                                className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 ${
                                   visit.is_locked 
                                     ? 'text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10' 
                                     : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -1350,7 +1350,7 @@ const MedicalRecordForm = () => {
                               <button
                                 type="button"
                                 onClick={() => openVersionModal(visit.id)}
-                                className="px-2.5 py-1 text-xs font-bold text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 rounded-lg transition-colors"
+                                className="px-2.5 py-1 text-xs font-semibold text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10 rounded-lg transition-colors"
                               >
                                 Riwayat Versi
                               </button>
@@ -1363,7 +1363,7 @@ const MedicalRecordForm = () => {
                                   address: clinicSettings?.clinic_address || '',
                                   city: clinicSettings?.clinic_phone ? `Telp. ${clinicSettings.clinic_phone}` : '',
                                 })}
-                                className="px-2.5 py-1 text-xs font-bold text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 rounded-lg transition-colors flex items-center gap-1"
+                                className="px-2.5 py-1 text-xs font-semibold text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 rounded-lg transition-colors flex items-center gap-1"
                               >
                                 <Printer size={14} /> Cetak Resep
                               </button>
@@ -1398,11 +1398,11 @@ const MedicalRecordForm = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Tanggal</label>
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Tanggal</label>
                             <input type="date" value={visit.tanggal_kunjungan || ''} onChange={e => updateVisit(visit.id, 'tanggal_kunjungan', e.target.value)} className="glass-input w-full px-3 py-2 rounded-lg text-sm" disabled={visit.is_locked || saving}/>
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
                               Keluhan (S) <span className="text-rose-500">*</span>
                             </label>
                             <input 
@@ -1413,11 +1413,11 @@ const MedicalRecordForm = () => {
                               disabled={visit.is_locked || saving}
                             />
                             {validationErrors.visits?.[visit.id]?.keluhan && (
-                              <p className="text-rose-500 text-[10px] mt-1 font-medium">{validationErrors.visits[visit.id].keluhan}</p>
+                              <p className="text-rose-500 text-xs mt-1 font-medium">{validationErrors.visits[visit.id].keluhan}</p>
                             )}
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
                               Diagnosa (A) <span className="text-rose-500">*</span>
                             </label>
                             <input 
@@ -1428,7 +1428,7 @@ const MedicalRecordForm = () => {
                               disabled={visit.is_locked || saving}
                             />
                             {validationErrors.visits?.[visit.id]?.diagnosa && (
-                              <p className="text-rose-500 text-[10px] mb-2 font-medium">{validationErrors.visits[visit.id].diagnosa}</p>
+                              <p className="text-rose-500 text-xs mb-2 font-medium">{validationErrors.visits[visit.id].diagnosa}</p>
                             )}
                             <ICD10Picker
                               value={visit.kode_icd10 || ''}
@@ -1438,7 +1438,7 @@ const MedicalRecordForm = () => {
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
                               Terapi/Tindakan (P) <span className="text-rose-500">*</span>
                             </label>
                             <input 
@@ -1449,7 +1449,7 @@ const MedicalRecordForm = () => {
                               disabled={visit.is_locked || saving}
                             />
                             {validationErrors.visits?.[visit.id]?.terapi && (
-                              <p className="text-rose-500 text-[10px] mt-1 font-medium">{validationErrors.visits[visit.id].terapi}</p>
+                              <p className="text-rose-500 text-xs mt-1 font-medium">{validationErrors.visits[visit.id].terapi}</p>
                             )}
                           </div>
                         </div>
@@ -1457,7 +1457,7 @@ const MedicalRecordForm = () => {
                         {/* Consents List */}
                         {consents.filter(c => c.visit_id === visit.id).length > 0 && (
                           <div className="mb-4 bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
-                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">Informed Consents</span>
+                            <span className="text-xs font-semibold text-gray-500 block mb-2">Informed Consents</span>
                             <div className="flex flex-wrap gap-2">
                               {consents.filter(c => c.visit_id === visit.id).map(c => (
                                 <button
@@ -1496,16 +1496,16 @@ const MedicalRecordForm = () => {
       {/* Pinned action wrapper for saving / printing */}
       {/* Sticky Bottom Actions Bar */}
       <div className="sticky bottom-6 z-10 flex flex-col md:flex-row justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] print:hidden gap-4">
-        <button onClick={() => setShowReferralModal(true)} className="w-full md:w-auto px-6 py-2.5 bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)] font-bold rounded-xl flex items-center justify-center gap-2 transition-colors">
+        <button onClick={() => setShowReferralModal(true)} className="w-full md:w-auto px-6 py-2.5 bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)] font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors">
           <FileText size={18} /> Tambah Surat Rujukan
         </button>
         
         <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
-          <button onClick={handleReset} className="w-full md:w-auto px-6 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl transition-colors">Batal (Reset)</button>
-          <button onClick={() => window.print()} className="w-full md:w-auto px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors">
+          <button onClick={handleReset} className="w-full md:w-auto px-5 py-2.5 rounded-lg border border-border bg-card text-text-primary hover:bg-background font-semibold flex items-center justify-center gap-2 transition-colors">Batal (Reset)</button>
+          <button onClick={() => window.print()} className="w-full md:w-auto px-5 py-2.5 rounded-lg border border-border bg-card text-text-primary hover:bg-background font-semibold flex items-center justify-center gap-2 transition-colors">
             <Printer size={18} /> Cetak (PDF)
           </button>
-          <button onClick={handleSaveAll} className="w-full md:w-auto px-8 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors" disabled={saving}>
+          <button onClick={handleSaveAll} className="w-full md:w-auto px-6 py-2.5 bg-accent-primary hover:brightness-110 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors" disabled={saving}>
             {saving ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"/>Menyimpan...</> : <><Save size={18}/> Simpan Rekam Medis</>}
           </button>
         </div>
@@ -1576,25 +1576,25 @@ const MedicalRecordForm = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
           <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto shadow-2xl animate-scale-in text-gray-900 dark:text-white">
             <div className="flex justify-between items-center mb-6 border-b pb-4 dark:border-gray-800">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2"><Info className="text-[var(--color-accent)]"/> Legenda Simbol Odontogram v4.0</h3>
-              <button onClick={() => setShowLegend(false)} className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors font-bold text-gray-500">✕</button>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2"><Info className="text-[var(--color-accent)]"/> Legenda Simbol Odontogram v4.0</h3>
+              <button onClick={() => setShowLegend(false)} className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors font-semibold text-gray-500">✕</button>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               {CODE_CATEGORIES.map(group => (
                 <div key={group.key} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                  <h4 className="font-bold text-gray-800 mb-3 uppercase text-xs tracking-wider flex items-center gap-2">
+                  <h4 className="font-semibold text-gray-800 mb-3 text-xs flex items-center gap-2">
                     <span>{group.icon}</span> {group.label}
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {group.codes.map(sym => (
                       <div key={sym.code} className="flex items-center gap-3 p-2 bg-white border border-gray-100 rounded-lg shadow-sm">
                         {sym.swatch ? (
-                          <div className="w-6 h-6 rounded shadow-inner flex items-center justify-center font-bold text-[10px]" style={{ backgroundColor: sym.warna, color: '#000' }}>{sym.swatch}</div>
+                          <div className="w-6 h-6 rounded shadow-inner flex items-center justify-center font-semibold text-xs" style={{ backgroundColor: sym.warna, color: '#000' }}>{sym.swatch}</div>
                         ) : (
-                          <div className="w-6 h-6 rounded shadow-inner flex items-center justify-center font-bold text-[10px] bg-white border" style={{ borderColor: sym.border || sym.warna, color: sym.warna }}>{sym.text}</div>
+                          <div className="w-6 h-6 rounded shadow-inner flex items-center justify-center font-semibold text-xs bg-white border" style={{ borderColor: sym.border || sym.warna, color: sym.warna }}>{sym.text}</div>
                         )}
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold text-gray-900">{sym.code}</span>
+                          <span className="text-sm font-semibold text-gray-900">{sym.code}</span>
                           <span className="text-xs text-gray-500 leading-tight">{sym.nama}</span>
                         </div>
                       </div>
@@ -1625,7 +1625,7 @@ const MedicalRecordForm = () => {
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
               <div>
-                <h3 className="font-bold text-lg text-gray-900 dark:text-white">Riwayat Versi Rekam Medis</h3>
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Riwayat Versi Rekam Medis</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Setiap perubahan rekam medis tercatat secara permanen di bawah ini.</p>
               </div>
               <button 
@@ -1640,7 +1640,7 @@ const MedicalRecordForm = () => {
             <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Left Column: Version list */}
               <div className="md:col-span-1 border-r border-gray-100 dark:border-gray-800 pr-4 space-y-3">
-                <h4 className="font-bold text-xs text-gray-400 uppercase tracking-wide mb-2">Daftar Versi</h4>
+                <h4 className="font-semibold text-xs text-gray-400 mb-2">Daftar Versi</h4>
                 {versionModal.loading ? (
                   <p className="text-sm text-gray-500 animate-pulse">Memuat...</p>
                 ) : versionModal.versions.length === 0 ? (
@@ -1657,12 +1657,12 @@ const MedicalRecordForm = () => {
                       }`}
                     >
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-sm">Versi #{v.version}</span>
-                        <span className="text-[10px] text-gray-400">{new Date(v.changed_at).toLocaleDateString('id-ID')}</span>
+                        <span className="font-semibold text-sm">Versi #{v.version}</span>
+                        <span className="text-xs text-gray-400">{new Date(v.changed_at).toLocaleDateString('id-ID')}</span>
                       </div>
-                      <span className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1">{v.change_summary || 'Perubahan tersimpan'}</span>
-                      <span className="text-[10px] font-semibold text-gray-400 mt-1">Oleh: {v.users?.full_name || 'System'}</span>
-                      {v.reason && <span className="text-[10px] text-gray-500 italic line-clamp-2">Alasan: {v.reason}</span>}
+                      <span className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{v.change_summary || 'Perubahan tersimpan'}</span>
+                      <span className="text-xs font-semibold text-gray-400 mt-1">Oleh: {v.users?.full_name || 'System'}</span>
+                      {v.reason && <span className="text-xs text-gray-500 italic line-clamp-2">Alasan: {v.reason}</span>}
                     </button>
                   ))
                 )}
@@ -1670,18 +1670,18 @@ const MedicalRecordForm = () => {
 
               {/* Right Column: Version Details & Diff */}
               <div className="md:col-span-2 space-y-4">
-                <h4 className="font-bold text-xs text-gray-400 uppercase tracking-wide">Detail Konten Rekam Medis</h4>
+                <h4 className="font-semibold text-xs text-gray-400">Detail Konten Rekam Medis</h4>
                 {selectedVersion ? (
                   <div className="bg-gray-50/50 dark:bg-gray-800/20 p-5 rounded-xl border border-gray-100 dark:border-gray-800 space-y-4">
                     <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-3">
                       <div>
-                        <span className="font-bold text-sm text-gray-800 dark:text-white">Versi #{selectedVersion.version}</span>
-                        <p className="text-[10px] text-gray-400 mt-0.5">Diedit pada {new Date(selectedVersion.changed_at).toLocaleString('id-ID')}</p>
+                        <span className="font-semibold text-sm text-gray-800 dark:text-white">Versi #{selectedVersion.version}</span>
+                        <p className="text-xs text-gray-400 mt-0.5">Diedit pada {new Date(selectedVersion.changed_at).toLocaleString('id-ID')}</p>
                       </div>
                       {['admin', 'dokter'].includes(userProfile?.role) && (
                       <button
                         onClick={() => handleRestoreVersion(selectedVersion.version)}
-                        className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg transition-colors active:scale-95 shadow-sm"
+                        className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-lg transition-colors active:scale-95 shadow-sm"
                       >
                         Pulihkan ke Versi Ini
                        </button>
@@ -1690,27 +1690,27 @@ const MedicalRecordForm = () => {
 
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                        <div>
-                         <span className="text-[10px] font-bold text-gray-400 uppercase">Keluhan (S)</span>
+                         <span className="text-xs font-semibold text-gray-400">Keluhan (S)</span>
                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.keluhan || '-'}</p>
                        </div>
                        <div>
-                         <span className="text-[10px] font-bold text-gray-400 uppercase">Pemeriksaan Fisik (O)</span>
+                         <span className="text-xs font-semibold text-gray-400">Pemeriksaan Fisik (O)</span>
                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.pemeriksaan_fisik || '-'}</p>
                        </div>
                        <div>
-                         <span className="text-[10px] font-bold text-gray-400 uppercase">Diagnosa (A)</span>
+                         <span className="text-xs font-semibold text-gray-400">Diagnosa (A)</span>
                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.diagnosa || '-'}</p>
                        </div>
                        <div>
-                         <span className="text-[10px] font-bold text-gray-400 uppercase">Terapi (P)</span>
+                         <span className="text-xs font-semibold text-gray-400">Terapi (P)</span>
                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.terapi || '-'}</p>
                        </div>
                        <div>
-                         <span className="text-[10px] font-bold text-gray-400 uppercase">Kode ICD-10</span>
+                         <span className="text-xs font-semibold text-gray-400">Kode ICD-10</span>
                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.kode_icd10 || '-'}</p>
                        </div>
                        <div>
-                         <span className="text-[10px] font-bold text-gray-400 uppercase">Catatan Dokter</span>
+                         <span className="text-xs font-semibold text-gray-400">Catatan Dokter</span>
                          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-0.5">{selectedVersion.catatan_dokter || '-'}</p>
                        </div>
                      </div>

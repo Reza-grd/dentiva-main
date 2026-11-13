@@ -186,7 +186,7 @@ const Tooth = ({ number, conditions = {}, isSelected, isBridgeTarget, onClick, o
     >
       {/* Number — above for upper jaw */}
       {upper && (
-        <span className={`font-bold text-gray-700 mb-0.5 leading-none select-none ${primary ? 'text-[9px] text-indigo-600' : 'text-[10px]'}`}>
+        <span className={`font-semibold text-gray-700 mb-0.5 leading-none select-none ${primary ? 'text-xs text-indigo-600' : 'text-xs'}`}>
           {number}
         </span>
       )}
@@ -290,7 +290,7 @@ const Tooth = ({ number, conditions = {}, isSelected, isBridgeTarget, onClick, o
 
       {/* Number — below for lower jaw */}
       {!upper && (
-        <span className={`font-bold text-gray-700 mt-0.5 leading-none select-none ${primary ? 'text-[9px] text-indigo-600' : 'text-[10px]'}`}>
+        <span className={`font-semibold text-gray-700 mt-0.5 leading-none select-none ${primary ? 'text-xs text-indigo-600' : 'text-xs'}`}>
           {number}
         </span>
       )}

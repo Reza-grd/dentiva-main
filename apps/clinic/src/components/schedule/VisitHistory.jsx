@@ -87,7 +87,7 @@ const VisitDetailModal = ({ visitId, onClose, navigate, role }) => {
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-gray-100 dark:border-gray-800">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <ClipboardList size={20} className="text-[var(--color-accent)]" />
             Detail Kunjungan
           </h2>
@@ -113,7 +113,7 @@ const VisitDetailModal = ({ visitId, onClose, navigate, role }) => {
                   <User size={24} className="text-[var(--color-accent)]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 dark:text-white text-lg">{detail.patient?.nama_lengkap}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-lg">{detail.patient?.nama_lengkap}</p>
                   <p className="text-sm text-[var(--color-accent)] font-mono font-medium">{detail.patient?.no_rm}</p>
                   {detail.patient?.no_wa && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{detail.patient.no_wa}</p>
@@ -172,7 +172,7 @@ const VisitDetailModal = ({ visitId, onClose, navigate, role }) => {
                       </div>
                     ))}
                     <div className="flex justify-end pt-3 border-t border-gray-100 dark:border-gray-800 mt-2">
-                      <p className="font-bold text-[var(--color-accent)] text-lg">
+                      <p className="font-semibold text-[var(--color-accent)] text-lg">
                         Total: {formatCurrency(detail.treatments.reduce((s, t) => s + (t.subtotal || 0), 0))}
                       </p>
                     </div>
@@ -185,12 +185,12 @@ const VisitDetailModal = ({ visitId, onClose, navigate, role }) => {
                 {detail.payment ? (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between py-1">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Invoice</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">No. Tagihan</span>
                       <span className="font-mono text-sm font-semibold text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">{detail.payment.invoice_number}</span>
                     </div>
                     <div className="flex items-center justify-between py-1">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Total Bayar</span>
-                      <span className="font-bold text-lg text-emerald-600 dark:text-emerald-400">{formatCurrency(detail.payment.total_bayar)}</span>
+                      <span className="font-semibold text-lg text-emerald-600 dark:text-emerald-400">{formatCurrency(detail.payment.total_bayar)}</span>
                     </div>
                     <div className="flex items-center justify-between py-1">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Metode</span>
@@ -257,15 +257,15 @@ const InfoBox = ({ icon: Icon, label, value }) => (
   <div className="bg-gray-50/50 dark:bg-gray-800/30 rounded-xl p-4 border border-gray-100 dark:border-gray-800">
     <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mb-2">
       <Icon size={16} />
-      <span className="text-xs font-medium uppercase tracking-wider">{label}</span>
+      <span className="text-xs font-medium">{label}</span>
     </div>
-    <p className="font-bold text-gray-900 dark:text-white text-base">{value || '-'}</p>
+    <p className="font-semibold text-gray-900 dark:text-white text-base">{value || '-'}</p>
   </div>
 );
 
 const Section = ({ title, icon: Icon, children }) => (
   <div className="mb-2">
-    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200 flex items-center gap-2 mb-3 uppercase tracking-wide">
+    <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2 mb-3">
       <Icon size={16} className="text-[var(--color-accent)]" />
       {title}
     </h3>
@@ -318,7 +318,7 @@ const TimelineItem = ({ visit, isFirst, isLast, onViewDetail, role }) => {
                 <StatusBadge status={visit.status} />
                 {payment && <StatusBadge status={payment.status_pembayaran} type="payment" />}
               </div>
-              <p className="font-bold text-gray-900 dark:text-white text-base truncate flex items-center gap-2">
+              <p className="font-semibold text-gray-900 dark:text-white text-base truncate flex items-center gap-2">
                 {visit.patient?.nama_lengkap}
                 <span className="text-xs font-mono font-medium text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-1.5 py-0.5 rounded">{visit.patient?.no_rm}</span>
               </p>
@@ -342,7 +342,7 @@ const TimelineItem = ({ visit, isFirst, isLast, onViewDetail, role }) => {
                     <div className="flex items-center gap-2 mb-1">
                       <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Diagnosa</p>
                       {visit.kode_icd10 && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20">
+                        <span className="px-1.5 py-0.5 rounded text-xs font-mono font-semibold bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20">
                           {visit.kode_icd10}
                         </span>
                       )}
@@ -368,7 +368,7 @@ const TimelineItem = ({ visit, isFirst, isLast, onViewDetail, role }) => {
                 {payment && (
                   <div>
                     <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Pembayaran</p>
-                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                    <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(payment.total_bayar)}
                       <span className="text-xs font-medium text-gray-500 ml-1.5 px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded capitalize">
                         {payment.metode_pembayaran || '-'}
@@ -525,11 +525,8 @@ const VisitHistory = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
-            <ClipboardList className="text-[var(--color-accent)]" size={24} />
-          </div>
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Riwayat Kunjungan</h1>
+            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Riwayat Kunjungan</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Timeline lengkap semua kunjungan pasien</p>
           </div>
         </div>
@@ -546,7 +543,7 @@ const VisitHistory = () => {
             {groupByPatient ? 'Per Pasien ✓' : 'Kelompokkan per Pasien'}
           </button>
           <button onClick={loadData} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm">
-            <RefreshCw size={16} /> Refresh
+            <RefreshCw size={16} /> Muat ulang
           </button>
         </div>
       </div>
@@ -554,7 +551,7 @@ const VisitHistory = () => {
       {/* Filters */}
       <div className="glass-panel p-6 space-y-5">
         <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
-          <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2 text-sm uppercase tracking-wide">
+          <h2 className="font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2 text-sm">
             <Filter size={16} className="text-[var(--color-accent)]" /> Filter Pencarian
           </h2>
           {hasActiveFilters && (
@@ -566,7 +563,7 @@ const VisitHistory = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Pencarian</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Pencarian</label>
             <Search size={16} className="absolute left-3 top-[28px] text-gray-400" />
             <input
               type="text"
@@ -578,7 +575,7 @@ const VisitHistory = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Pasien</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Pasien</label>
             <select
               value={patientFilter}
               onChange={(e) => setPatientFilter(e.target.value)}
@@ -592,7 +589,7 @@ const VisitHistory = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Dokter</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Dokter</label>
             <select
               value={dokterFilter}
               onChange={(e) => { setDokterFilter(e.target.value); setPage(1); }}
@@ -608,7 +605,7 @@ const VisitHistory = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Dari Tanggal</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Dari Tanggal</label>
             <input
               type="date"
               value={dateFrom}
@@ -617,7 +614,7 @@ const VisitHistory = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Sampai Tanggal</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Sampai Tanggal</label>
             <input
               type="date"
               value={dateTo}
@@ -626,7 +623,7 @@ const VisitHistory = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Status Kunjungan</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Status Kunjungan</label>
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="glass-input w-full px-3 py-2 rounded-xl text-sm appearance-none">
               <option value="all">Semua Status</option>
               <option value="scheduled">Terjadwal</option>
@@ -636,7 +633,7 @@ const VisitHistory = () => {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Status Bayar</label>
+            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Status Bayar</label>
             <select value={paymentStatusFilter} onChange={(e) => setPaymentStatusFilter(e.target.value)} className="glass-input w-full px-3 py-2 rounded-xl text-sm appearance-none">
               <option value="all">Semua</option>
               <option value="paid">Lunas</option>
@@ -672,15 +669,15 @@ const VisitHistory = () => {
           { label: 'Belum Bayar', value: stats.unpaid, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50/50 dark:bg-rose-900/10' },
         ].map(({ label, value, color, bg }) => (
           <div key={label} className={`glass-panel p-4 text-center border-none ${bg}`}>
-            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mt-1">{label}</p>
+            <p className={`text-2xl font-semibold ${color}`}>{value}</p>
+            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">{label}</p>
           </div>
         ))}
       </div>
 
       {/* Timeline */}
       <div className="glass-panel p-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3">
           <div className="flex items-center gap-2">
             <Calendar size={20} className="text-[var(--color-accent)]" />
             Timeline Kunjungan
@@ -693,7 +690,7 @@ const VisitHistory = () => {
         ) : error ? (
           <div className="text-center py-16">
             <AlertCircle size={48} className="mx-auto mb-4 text-rose-500 opacity-80" />
-            <p className="font-bold text-gray-900 dark:text-white text-lg">Gagal memuat data</p>
+            <p className="font-semibold text-gray-900 dark:text-white text-lg">Gagal memuat data</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{error}</p>
             <button onClick={loadData} className="mt-6 px-5 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-xl font-semibold transition-colors text-gray-900 dark:text-white">Coba Lagi</button>
           </div>
@@ -702,7 +699,7 @@ const VisitHistory = () => {
             <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
               <ClipboardList size={32} className="text-gray-400 dark:text-gray-500" />
             </div>
-            <p className="text-lg font-bold text-gray-900 dark:text-white">Tidak ada kunjungan ditemukan</p>
+            <p className="text-lg font-semibold text-gray-900 dark:text-white">Tidak ada kunjungan ditemukan</p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Coba ubah filter pencarian Anda</p>
           </div>
         ) : groupByPatient && groupedVisits ? (
@@ -714,7 +711,7 @@ const VisitHistory = () => {
                     <User size={20} className="text-[var(--color-accent)]" />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-900 dark:text-white">{patient?.nama_lengkap}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white">{patient?.nama_lengkap}</p>
                     <p className="text-xs font-mono font-medium text-[var(--color-accent)]">{patient?.no_rm} <span className="text-gray-400 mx-1">•</span> {pVisits.length} kunjungan</p>
                   </div>
                 </div>

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarCheck, Check, X, MessageCircle, UserPlus, RefreshCw } from 'lucide-react';
+import { Check, X, MessageCircle, UserPlus, RefreshCw } from 'lucide-react';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
 import { supabase } from '../../services/supabase';
 import { encryptionService } from '../../services/encryptionService';
@@ -87,9 +87,7 @@ export default function BookingRequests() {
     <div className="space-y-5 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <CalendarCheck className="text-[var(--color-accent)]" /> Booking Online
-          </h1>
+          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Booking Online</h1>
           <p className="text-sm text-gray-500">Permintaan jadwal dari pasien lewat halaman booking klinik.</p>
         </div>
         <div className="flex gap-2 flex-wrap">

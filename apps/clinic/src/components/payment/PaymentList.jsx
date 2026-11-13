@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Search, Calendar, Filter, CheckCircle, Clock, XCircle, FileText } from 'lucide-react';
+import { DollarSign, Search, Calendar, Filter, CheckCircle, Clock, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { paymentService } from '../../services/paymentService';
+import StatCard from '../ui/StatCard';
 
 const PaymentList = () => {
   const [payments, setPayments] = useState([]);
@@ -81,7 +82,7 @@ const PaymentList = () => {
       cancelled: 'bg-rose-100 text-rose-800 dark:bg-rose-500/10 dark:text-rose-400 border-rose-200 dark:border-rose-800'
     };
     const labels = {
-      pending: 'Pending',
+      pending: 'Belum lunas',
       paid: 'Lunas',
       partial: 'Cicilan',
       cancelled: 'Dibatalkan'
@@ -147,11 +148,8 @@ const PaymentList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center">
-            <DollarSign className="text-accent-primary" size={24} />
-          </div>
           <div>
-            <h1 className="text-2xl font-bold text-text-primary">Pembayaran & Kasir</h1>
+            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Pembayaran & Kasir</h1>
             <p className="text-sm text-text-muted mt-1">
               Kelola transaksi pembayaran, faktur, dan kwitansi
             </p>
@@ -161,49 +159,13 @@ const PaymentList = () => {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 flex items-center justify-between group">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Transaksi</p>
-            <p className="text-2xl font-bold text-text-primary mt-1">{stats.count}</p>
-          </div>
-          <div className="w-12 h-12 bg-accent-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-            <FileText className="text-accent-primary" size={24} />
-          </div>
-        </div>
+        <StatCard label="Total Transaksi" value={stats.count} />
 
-        <div className="glass-panel p-5 flex items-center justify-between group">
-          <div>
-            <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Total Pendapatan</p>
-            <p className="text-xl font-bold text-accent-primary mt-1">{formatCurrency(stats.total)}</p>
-          </div>
-          <div className="w-12 h-12 bg-accent-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-            <DollarSign className="text-accent-primary" size={24} />
-          </div>
-        </div>
+        <StatCard label="Total Pendapatan" value={formatCurrency(stats.total)} />
 
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Sudah Lunas</p>
-              <p className="text-xl font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(stats.paid)}</p>
-            </div>
-            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CheckCircle className="text-emerald-600 dark:text-emerald-400" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Sudah Lunas" value={formatCurrency(stats.paid)} tone="baik" />
 
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium mb-1">Pending</p>
-              <p className="text-xl font-bold text-amber-700 dark:text-amber-400">{formatCurrency(stats.pending)}</p>
-            </div>
-            <div className="w-12 h-12 bg-amber-50 dark:bg-amber-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Clock className="text-amber-600 dark:text-amber-400" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Belum Lunas" value={formatCurrency(stats.pending)} tone="waspada" />
       </div>
 
       {/* Main List */}
@@ -253,7 +215,7 @@ const PaymentList = () => {
                 className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none"
               >
                 <option value="all">Semua Status</option>
-                <option value="pending">Pending</option>
+                <option value="pending">Belum lunas</option>
                 <option value="paid">Lunas</option>
                 <option value="partial">Cicilan</option>
                 <option value="cancelled">Dibatalkan</option>
@@ -280,10 +242,10 @@ const PaymentList = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-600 dark:text-gray-400 uppercase bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
+              <thead className="text-xs text-gray-600 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
                 <tr>
                   <th className="px-6 py-4 font-semibold">Tanggal</th>
-                  <th className="px-6 py-4 font-semibold">Invoice</th>
+                  <th className="px-6 py-4 font-semibold">No. Tagihan</th>
                   <th className="px-6 py-4 font-semibold">Pasien</th>
                   <th className="px-6 py-4 font-semibold">Total</th>
                   <th className="px-6 py-4 font-semibold">Metode</th>
@@ -340,7 +302,7 @@ const PaymentList = () => {
         {!loading && totalCount > 0 && (
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 dark:border-gray-800 pt-6">
             <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Menampilkan <span className="text-gray-900 dark:text-white font-bold">{(page - 1) * pageSize + 1}</span> - <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * pageSize, totalCount)}</span> dari <span className="text-gray-900 dark:text-white font-bold">{totalCount}</span> pembayaran
+              Menampilkan <span className="text-gray-900 dark:text-white font-semibold">{(page - 1) * pageSize + 1}</span> - <span className="text-gray-900 dark:text-white font-semibold">{Math.min(page * pageSize, totalCount)}</span> dari <span className="text-gray-900 dark:text-white font-semibold">{totalCount}</span> pembayaran
             </div>
             
             <div className="flex items-center gap-1.5">

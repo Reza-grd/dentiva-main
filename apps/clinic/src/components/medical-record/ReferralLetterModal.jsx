@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Printer, Save, FileText, User } from 'lucide-react';
+import { X, Printer, FileText } from 'lucide-react';
 import { patientService } from '../../services/patientService';
 import { useToast } from '../common/ToastNotification';
 import { formatDoctorName } from '../../utils/dateUtils';
@@ -106,7 +106,7 @@ const ReferralLetterModal = ({ isOpen, onClose, patient, userProfile }) => {
           
           {/* Header (Screen Only) */}
           <div className="flex justify-between items-center p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 rounded-t-2xl print:hidden">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <FileText className="text-[var(--color-accent)]" /> Form Surat Rujukan
             </h2>
             <button onClick={onClose} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
@@ -119,13 +119,13 @@ const ReferralLetterModal = ({ isOpen, onClose, patient, userProfile }) => {
             
             {/* PRINT HEADER: Only visible when printing */}
             <div className="hidden print:block mb-8 border-b-2 border-gray-900 pb-4">
-              <h1 className="text-2xl font-bold text-center uppercase tracking-widest">Dentiva Clinic</h1>
+              <h1 className="text-2xl font-medium text-center uppercase tracking-widest">Dentiva Clinic</h1>
               <p className="text-center text-sm">Jl. Raya Tg. Morawa No. 123, Sumatera Utara</p>
               <p className="text-center text-sm">Telp: (061) 1234567 | Web: www.Dentiva.com</p>
             </div>
 
             {/* Title */}
-            <h2 className="text-center text-2xl font-bold underline mb-1 uppercase tracking-wider print:mb-2">Surat Rujukan</h2>
+            <h2 className="text-center text-2xl font-semibold underline mb-1 uppercase tracking-wider print:mb-2">Surat Rujukan</h2>
             
             {/* Nomor Rujukan */}
             <div className="flex justify-center items-center mb-8 gap-2">
@@ -180,7 +180,7 @@ const ReferralLetterModal = ({ isOpen, onClose, patient, userProfile }) => {
               <div className="flex">
                 <span className="w-32 font-semibold">Nama</span>
                 <span className="mr-2">:</span>
-                <span className="flex-1 font-bold">{patient?.nama_lengkap || '-'}</span>
+                <span className="flex-1 font-semibold">{patient?.nama_lengkap || '-'}</span>
               </div>
               <div className="flex">
                 <span className="w-32 font-semibold">Umur</span>
@@ -262,7 +262,7 @@ const ReferralLetterModal = ({ isOpen, onClose, patient, userProfile }) => {
                 
                 <p className="mb-20">Teman Sejawat,</p>
                 
-                <div className="border-b border-gray-400 w-full text-center pb-1 font-bold">
+                <div className="border-b border-gray-400 w-full text-center pb-1 font-semibold">
                   {formatDoctorName(userProfile) || 'Dokter Jaga'}
                 </div>
               </div>

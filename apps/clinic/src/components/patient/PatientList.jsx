@@ -7,7 +7,8 @@ import { useToast } from '../common/ToastNotification';
 import { useAuth } from '../../contexts/AuthContext';
 import { patientService } from '../../services/patientService';
 import PatientImportModal from './PatientImportModal';
-import { Users, UserPlus, Eye, Edit, Calendar, Phone, MapPin, User, Search, Filter } from 'lucide-react';
+import { Users, UserPlus, Eye, Edit, Calendar, Phone, MapPin, Search, Filter } from 'lucide-react';
+import StatCard from '../ui/StatCard';
 
 const PatientList = () => {
   const [patients, setPatients] = useState([]);
@@ -115,11 +116,8 @@ const PatientList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-accent-primary/10 flex items-center justify-center">
-            <Users size={24} className="text-accent-primary" />
-          </div>
           <div>
-            <h1 className="text-2xl font-bold text-text-primary">Daftar Pasien</h1>
+            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Daftar Pasien</h1>
             <p className="text-sm text-text-muted mt-1">
               Kelola data seluruh pasien terdaftar di klinik
             </p>
@@ -136,7 +134,7 @@ const PatientList = () => {
         )}
         <button
           onClick={() => navigate('/pasien/daftar')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 border-0 hover:opacity-90"
+          className="flex items-center gap-2 px-5 py-2.5 bg-accent-primary text-white text-sm font-semibold rounded-xl transition-all shadow-sm active:scale-95 border-0 hover:opacity-90"
         >
           <UserPlus size={18} />
           Daftar Pasien Baru
@@ -147,53 +145,13 @@ const PatientList = () => {
 
       {/* Statistics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Total Pasien</p>
-              <p className="text-2xl font-bold text-[var(--color-accent)]">{stats.total}</p>
-            </div>
-            <div className="w-12 h-12 bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Users className="text-[var(--color-accent)]" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Total Pasien" value={stats.total} />
 
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Laki-laki</p>
-              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.male}</p>
-            </div>
-            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <User className="text-emerald-500" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Laki-laki" value={stats.male} />
 
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Perempuan</p>
-              <p className="text-2xl font-bold text-rose-600 dark:text-rose-400">{stats.female}</p>
-            </div>
-            <div className="w-12 h-12 bg-rose-50 dark:bg-rose-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <User className="text-rose-500" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Perempuan" value={stats.female} />
 
-        <div className="glass-panel p-5 relative overflow-hidden group">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">Pasien Aktif</p>
-              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.active}</p>
-            </div>
-            <div className="w-12 h-12 bg-purple-50 dark:bg-purple-500/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Users className="text-purple-500" size={24} />
-            </div>
-          </div>
-        </div>
+        <StatCard label="Pasien Aktif" value={stats.active} />
       </div>
 
       {/* Filters and Table */}
@@ -224,7 +182,7 @@ const PatientList = () => {
                   onChange={(e) => { setFilterGender(e.target.value); setPage(1); }}
                   className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none"
                 >
-                  <option value="all">Semua Gender</option>
+                  <option value="all">Semua Jenis Kelamin</option>
                   <option value="Laki-laki">Laki-laki</option>
                   <option value="Perempuan">Perempuan</option>
                 </select>
@@ -278,7 +236,7 @@ const PatientList = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
+              <thead className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800">
                 <tr>
                   <th className="px-6 py-4 font-semibold">No. RM</th>
                   <th className="px-6 py-4 font-semibold">Pasien</th>
@@ -423,7 +381,7 @@ const PatientList = () => {
                       {showEllipsis && <span className="px-2 text-gray-400">...</span>}
                       <button
                         onClick={() => setPage(p)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                           page === p
                             ? 'bg-[var(--color-accent)] text-white shadow-md'
                             : 'border border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'

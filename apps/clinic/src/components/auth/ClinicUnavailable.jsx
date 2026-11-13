@@ -45,14 +45,14 @@ const ClinicUnavailable = () => {
           <div className="w-16 h-16 bg-amber-50 dark:bg-amber-500/10 rounded-2xl flex items-center justify-center mb-6">
             <Lock className="text-amber-600 dark:text-amber-400" size={30} aria-hidden="true" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{copy.title}</h1>
+          <h1 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{copy.title}</h1>
           {accountStatus?.clinic_name && (
             <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{accountStatus.clinic_name}</p>
           )}
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{copy.body}</p>
           {accountStatus?.suspended_reason && (
             <div className="w-full text-left bg-gray-50 dark:bg-gray-800/40 p-3 rounded-xl border border-gray-100 dark:border-gray-800 mb-4">
-              <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Keterangan</span>
+              <span className="block text-xs font-semibold text-gray-400 mb-1">Keterangan</span>
               <span className="text-sm text-gray-700 dark:text-gray-300">{accountStatus.suspended_reason}</span>
             </div>
           )}

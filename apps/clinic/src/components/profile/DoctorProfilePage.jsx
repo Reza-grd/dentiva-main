@@ -4,7 +4,7 @@ import { useToast } from '../common/ToastNotification';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
-import { User, Phone, Shield, Save, Camera, FileText, Briefcase, Sparkles, Loader, Calendar } from 'lucide-react';
+import { Phone, Shield, Save, Camera, FileText, Briefcase, Sparkles, Loader, Calendar } from 'lucide-react';
 import { satusehatService } from '../../services/satusehatService';
 
 const DoctorProfilePage = () => {
@@ -176,10 +176,7 @@ const DoctorProfilePage = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-          <Shield className="text-[var(--color-accent)]" size={32} />
-          Profil Dokter
-        </h1>
+        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Profil Dokter</h1>
         <p className="text-gray-600 dark:text-gray-400">Kelola kredensial medis dan biodata profesional Anda</p>
       </div>
 
@@ -197,7 +194,7 @@ const DoctorProfilePage = () => {
                   <img src={photoUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div 
-                    className="w-full h-full flex items-center justify-center text-white font-bold text-4xl"
+                    className="w-full h-full flex items-center justify-center text-white font-semibold text-4xl"
                     style={{ background: 'linear-gradient(135deg, var(--color-accent), var(--color-accent-secondary, var(--color-accent)))' }}
                   >
                     {getInitials(userProfile?.full_name)}
@@ -207,7 +204,7 @@ const DoctorProfilePage = () => {
                 {/* Upload Overlay */}
                 <label className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-full">
                   <Camera size={24} className="mb-1" />
-                  <span className="text-[10px] font-semibold">Ganti Foto</span>
+                  <span className="text-xs font-semibold">Ganti Foto</span>
                   <input type="file" onChange={handlePhotoUpload} className="hidden" accept="image/*" disabled={uploadingPhoto} />
                 </label>
               </div>
@@ -219,14 +216,14 @@ const DoctorProfilePage = () => {
               )}
             </div>
 
-            <h3 className="font-bold text-gray-900 dark:text-white text-lg">
+            <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
               {formatDoctorName(userProfile) || userProfile?.full_name || 'Dokter'}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 capitalize mb-3">
               {jenisDokter === 'spesialis' ? `Spesialis ${spesialisasi || 'Gigi'}` : 'Dokter Gigi Umum'}
             </p>
             
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-[var(--color-accent)]/10 text-[var(--color-accent)] mb-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[var(--color-accent)]/10 text-[var(--color-accent)] mb-4">
               <Shield size={12} />
               {userProfile?.role}
             </div>
@@ -236,19 +233,19 @@ const DoctorProfilePage = () => {
 
           {/* SatuSehat Integration Card */}
           <div className="glass-panel p-6 rounded-2xl space-y-4">
-            <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-gray-500">
+            <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm text-gray-500">
               <Shield size={16} className="text-blue-500" /> Integrasi SATUSEHAT
             </h4>
             <div className="p-3 bg-gray-50/50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800">
               <div className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">Status Sinkronisasi</div>
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full ${userProfile?.satusehat_practitioner_id ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                <span className="text-sm font-bold text-gray-850 dark:text-gray-200">
+                <span className="text-sm font-semibold text-gray-850 dark:text-gray-200">
                   {userProfile?.satusehat_practitioner_id ? 'Terhubung (SISDMK)' : 'Belum Terhubung'}
                 </span>
               </div>
               {userProfile?.satusehat_practitioner_id && (
-                <div className="mt-2 text-[10px] text-gray-500 font-mono select-all">
+                <div className="mt-2 text-xs text-gray-500 font-mono select-all">
                   ID: {userProfile.satusehat_practitioner_id}
                 </div>
               )}
@@ -257,7 +254,7 @@ const DoctorProfilePage = () => {
               type="button"
               onClick={handleSyncSatuSehat}
               disabled={syncing}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50"
             >
               {syncing ? <Loader className="animate-spin" size={16} /> : <Shield size={16} />}
               {syncing ? 'Menghubungkan...' : 'Sinkronkan ke SatuSehat'}
@@ -266,7 +263,7 @@ const DoctorProfilePage = () => {
 
           {/* Quick Stats / Bio View */}
           <div className="glass-panel p-6 rounded-2xl space-y-4">
-            <h4 className="font-bold text-gray-900 dark:text-white flex items-center gap-2 text-sm uppercase tracking-wider text-gray-500">
+            <h4 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2 text-sm text-gray-500">
               <Sparkles size={16} className="text-[var(--color-accent)]" />
               Biografi Singkat
             </h4>
@@ -283,10 +280,10 @@ const DoctorProfilePage = () => {
               
               {/* Kredensial Nama */}
               <div>
-                <h3 className="font-bold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm uppercase tracking-wider">Kredensial & Nama</h3>
+                <h3 className="font-semibold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm">Kredensial & Nama</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Gelar Depan</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Gelar Depan</label>
                     <input
                       type="text"
                       value={gelarDepan}
@@ -296,7 +293,7 @@ const DoctorProfilePage = () => {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Nama Lengkap <span className="text-rose-500">*</span></label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Nama Lengkap <span className="text-rose-500">*</span></label>
                     <input
                       type="text"
                       value={fullName}
@@ -309,7 +306,7 @@ const DoctorProfilePage = () => {
                 </div>
                 <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Gelar Belakang</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Gelar Belakang</label>
                     <input
                       type="text"
                       value={gelarBelakang}
@@ -319,7 +316,7 @@ const DoctorProfilePage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">NIK (No. Induk Kependudukan)</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">NIK (No. Induk Kependudukan)</label>
                     <input
                       type="text"
                       value={nik}
@@ -335,10 +332,10 @@ const DoctorProfilePage = () => {
 
               {/* Detail Spesialisasi */}
               <div>
-                <h3 className="font-bold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm uppercase tracking-wider">Keahlian & Spesialisasi</h3>
+                <h3 className="font-semibold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm">Keahlian & Spesialisasi</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Jenis Dokter</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Jenis Dokter</label>
                     <div className="flex gap-4 mt-2">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -366,7 +363,7 @@ const DoctorProfilePage = () => {
                   </div>
                   {jenisDokter === 'spesialis' && (
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Spesialisasi</label>
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Spesialisasi</label>
                       <input
                         type="text"
                         value={spesialisasi}
@@ -381,10 +378,10 @@ const DoctorProfilePage = () => {
 
               {/* Lisensi Medis */}
               <div>
-                <h3 className="font-bold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm uppercase tracking-wider">Nomor Lisensi Medis</h3>
+                <h3 className="font-semibold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm">Nomor Lisensi Medis</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide flex items-center gap-1.5">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1.5">
                       <FileText size={14} />
                       No. STR (Registrasi)
                     </label>
@@ -397,7 +394,7 @@ const DoctorProfilePage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide flex items-center gap-1.5">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1.5">
                       <Briefcase size={14} />
                       No. SIP (Izin Praktek)
                     </label>
@@ -410,7 +407,7 @@ const DoctorProfilePage = () => {
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide flex items-center gap-1.5">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1.5">
                       <Calendar size={14} />
                       STR Berlaku Hingga
                     </label>
@@ -447,10 +444,10 @@ const DoctorProfilePage = () => {
 
               {/* Kontak & Bio */}
               <div>
-                <h3 className="font-bold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm uppercase tracking-wider">Kontak & Informasi Tambahan</h3>
+                <h3 className="font-semibold text-gray-950 dark:text-white mb-4 border-b border-gray-100 dark:border-gray-800 pb-2 text-sm">Kontak & Informasi Tambahan</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide flex items-center gap-1.5">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 flex items-center gap-1.5">
                       <Phone size={14} />
                       No. Telepon / WhatsApp
                     </label>
@@ -463,7 +460,7 @@ const DoctorProfilePage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Tentang Saya / Bio</label>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Tentang Saya / Bio</label>
                     <textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
@@ -479,7 +476,7 @@ const DoctorProfilePage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-6 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
+                  className="px-6 py-2.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-semibold rounded-xl flex items-center gap-2 shadow-sm transition-all active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <>

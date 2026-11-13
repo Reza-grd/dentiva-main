@@ -6,7 +6,7 @@ import { visitService } from '../../services/visitService';
 import { treatmentService } from '../../services/treatmentService';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePermission } from '../../contexts/PermissionsContext';
-import { DollarSign, Plus, Trash2, Printer, Search, Check, AlertCircle, ChevronLeft, MessageSquare, Lock } from 'lucide-react';
+import { Plus, Trash2, Printer, Search, Check, AlertCircle, ChevronLeft, MessageSquare, Lock } from 'lucide-react';
 import { useToast } from '../common/ToastNotification';
 import { parseDateLocal } from '../../utils/dateUtils';
 import { escapeHtml as esc } from '../../utils/sanitize';
@@ -582,13 +582,13 @@ const PaymentForm = () => {
               <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
             </button>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Detail Transaksi</h1>
+              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Detail Transaksi</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Mode Baca-Saja (Admin)</p>
             </div>
           </div>
           <button 
             onClick={handlePrintInvoice} 
-            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-secondary)] rounded-xl font-semibold transition-colors shadow-lg shadow-[var(--color-accent)]/20"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-secondary)] rounded-xl font-semibold transition-colors shadow-lg"
           >
             <Printer size={18} /> Cetak Kwitansi
           </button>
@@ -600,11 +600,11 @@ const PaymentForm = () => {
           <div className="absolute top-0 inset-x-0 h-1 bg-[repeating-linear-gradient(45deg,transparent,transparent_8px,var(--color-accent)_8px,var(--color-accent)_16px)] opacity-20" />
           
           <div className="text-center pb-6 border-b border-dashed border-gray-200 dark:border-gray-800 mt-2">
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-wide">Dentiva CLINIC</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white tracking-wide">Dentiva CLINIC</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-mono">Cabang PUSAT</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">Invoice: {existingPayment?.invoice_number || 'BELUM DIBAYAR'}</p>
             <div className="mt-3 inline-block">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                 paymentData.status_pembayaran === 'paid' 
                   ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
                   : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
@@ -644,7 +644,7 @@ const PaymentForm = () => {
 
           {/* Items Section */}
           <div className="py-6 border-b border-dashed border-gray-200 dark:border-gray-800">
-            <h4 className="text-xs font-mono font-bold text-gray-400 mb-3 uppercase tracking-wider">Tindakan / Perawatan</h4>
+            <h4 className="text-xs font-mono font-semibold text-gray-400 mb-3 uppercase tracking-wider">Tindakan / Perawatan</h4>
             <div className="space-y-4">
               {selectedTreatments.map((t, idx) => (
                 <div key={idx} className="font-mono text-xs">
@@ -652,7 +652,7 @@ const PaymentForm = () => {
                     <span>{idx + 1}. {t.nama_treatment}</span>
                     <span>{formatCurrency(t.subtotal)}</span>
                   </div>
-                  <div className="text-[10px] text-gray-500 dark:text-gray-400 pl-4 mt-0.5 font-mono">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 pl-4 mt-0.5 font-mono">
                     {t.quantity} x {formatCurrency(t.harga_satuan)}
                     {t.tooth_number ? ` (Gigi: ${t.tooth_number})` : ''}
                   </div>
@@ -662,7 +662,7 @@ const PaymentForm = () => {
             
             {selectedObat.length > 0 && (
               <>
-                <h4 className="text-xs font-mono font-bold text-gray-400 mt-6 mb-3 uppercase tracking-wider">Resep Obat</h4>
+                <h4 className="text-xs font-mono font-semibold text-gray-400 mt-6 mb-3 uppercase tracking-wider">Resep Obat</h4>
                 <div className="space-y-4">
                   {selectedObat.map((o, idx) => (
                     <div key={idx} className="font-mono text-xs">
@@ -670,7 +670,7 @@ const PaymentForm = () => {
                         <span>{idx + 1}. {o.nama_obat}</span>
                         <span>{formatCurrency(o.subtotal)}</span>
                       </div>
-                      <div className="text-[10px] text-gray-500 dark:text-gray-400 pl-4 mt-0.5 font-mono">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 pl-4 mt-0.5 font-mono">
                         {o.qty} x {formatCurrency(o.harga_satuan)} ${o.dosis ? `[${o.dosis}, ${o.frekuensi}]` : ''}
                       </div>
                     </div>
@@ -708,7 +708,7 @@ const PaymentForm = () => {
               </div>
             )}
 
-            <div className="flex justify-between text-sm font-bold text-gray-900 dark:text-white pt-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex justify-between text-sm font-semibold text-gray-900 dark:text-white pt-3 border-t border-gray-100 dark:border-gray-800">
               <span>TOTAL BAYAR:</span>
               <span>{formatCurrency(totalBayar)}</span>
             </div>
@@ -718,7 +718,7 @@ const PaymentForm = () => {
               <span>{formatCurrency(jumlahBayarPrint)}</span>
             </div>
 
-            <div className="flex justify-between text-gray-900 dark:text-white font-bold">
+            <div className="flex justify-between text-gray-900 dark:text-white font-semibold">
               <span>Kembalian:</span>
               <span>{formatCurrency(kembalianPrint)}</span>
             </div>
@@ -745,11 +745,8 @@ const PaymentForm = () => {
             <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
-              <DollarSign size={24} className="text-[var(--color-accent)]" />
-            </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Form Pembayaran</h1>
+              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Form Pembayaran</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {existingPayment ? `Invoice #${existingPayment.invoice_number}` : 'Buat transaksi baru'}
               </p>
@@ -789,7 +786,7 @@ const PaymentForm = () => {
         <div className="bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-center gap-3 no-print">
           <AlertCircle className="text-amber-600 dark:text-amber-400" size={24} />
           <div>
-            <h3 className="text-amber-800 dark:text-amber-300 font-bold">Pembayaran Telah Dikunci</h3>
+            <h3 className="text-amber-800 dark:text-amber-300 font-semibold">Pembayaran Telah Dikunci</h3>
             <p className="text-amber-700 dark:text-amber-400 text-sm">Pembayaran ini sudah lunas. Form tidak dapat diubah lagi.</p>
           </div>
         </div>
@@ -889,12 +886,12 @@ const PaymentForm = () => {
             <table className="w-full text-sm">
               <thead className="bg-gray-50/80 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Perawatan</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Gigi</th>
-                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Qty</th>
-                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Harga</th>
-                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Subtotal</th>
-                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs no-print">Aksi</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 text-xs">Perawatan</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 text-xs">Gigi</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 text-xs">Qty</th>
+                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-xs">Harga</th>
+                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-xs">Subtotal</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 text-xs no-print">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
@@ -1017,13 +1014,13 @@ const PaymentForm = () => {
             <table className="w-full text-sm">
               <thead className="bg-gray-50/80 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Nama Obat</th>
-                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Qty</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Dosis</th>
-                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Frekuensi</th>
-                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Harga</th>
-                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs">Subtotal</th>
-                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 uppercase text-xs no-print">Aksi</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 text-xs">Nama Obat</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 text-xs">Qty</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 text-xs">Dosis</th>
+                  <th className="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300 text-xs">Frekuensi</th>
+                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-xs">Harga</th>
+                  <th className="px-4 py-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-xs">Subtotal</th>
+                  <th className="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 text-xs no-print">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50 dark:divide-gray-800/50">
@@ -1203,7 +1200,7 @@ const PaymentForm = () => {
                 <option value="">-- Pilih Status --</option>
                 <option value="paid">Lunas</option>
                 <option value="partial">Bayar Sebagian</option>
-                <option value="pending">Pending</option>
+                <option value="pending">Belum lunas</option>
               </select>
               <FieldError name="status_pembayaran" />
             </div>
@@ -1232,7 +1229,7 @@ const PaymentForm = () => {
                   <span className="font-semibold text-rose-600 dark:text-rose-400">-{formatCurrency(totals.diskon)}</span>
                 </div>
               )}
-              <div className={`flex justify-between text-xl font-bold pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 ${totals.totalBayar < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              <div className={`flex justify-between text-xl font-semibold pt-4 mt-2 border-t border-gray-100 dark:border-gray-800 ${totals.totalBayar < 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
                 <span>TOTAL BAYAR:</span>
                 <span>{formatCurrency(totals.totalBayar)}</span>
               </div>
@@ -1245,7 +1242,7 @@ const PaymentForm = () => {
                 <button
                   onClick={handleSavePayment}
                   disabled={saving}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-bold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center gap-2 py-3.5 px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-semibold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div> Menyimpan...</>

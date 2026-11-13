@@ -73,7 +73,7 @@ const PatientAvatar = ({
           onError={() => setImgError(true)}
         />
       ) : initials ? (
-        <span className={`font-bold ${s.text}`}>{initials}</span>
+        <span className={`font-semibold ${s.text}`}>{initials}</span>
       ) : (
         <User size={s.icon} />
       )}

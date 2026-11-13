@@ -25,13 +25,16 @@
   --shadow-xl: 0 16px 40px rgba(15, 76, 129, 0.16);
   --shadow-2xl: 0 24px 64px rgba(15, 76, 129, 0.20);
 
-  /* Border Radius */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --radius-xl: 18px;
-  --radius-2xl: 24px;
+  /* Border Radius — menurut fungsi: sm/md elemen kecil, lg input & tombol, xl/2xl kartu, 3xl jendela */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
   --radius-full: 9999px;
+
+  /* Aksen emas — dipakai hemat (penanda, bukan latar) */
+  --color-gold: #A87B2E;
 
   /* Spacing Scale */
   --space-1: 4px;
@@ -45,7 +48,8 @@
   --space-12: 48px;
 
   /* Typography */
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Onest', system-ui, sans-serif;
+  --font-display: 'Newsreader', Georgia, serif;
 
   /* Transitions */
   --transition-fast: 150ms ease;
@@ -55,6 +59,7 @@
 
 .dark {
   /* Brand Colors (Dark Mode Adjustments) - Inherited dynamically from :root */
+  --color-gold: #D9B36B;
   --color-success: #34d399;
   --color-danger: #f87171;
   --color-warning: #fbbf24;
@@ -76,6 +81,17 @@
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
     font-family: var(--font-sans);
+  }
+
+  /* Judul halaman: serif editorial, rapat */
+  h1 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  /* Angka di tabel selalu berlebar sama agar kolom rata */
+  table td, table th {
+    font-variant-numeric: tabular-nums;
   }
 
   input, textarea, select {
@@ -258,25 +274,19 @@
   }
 
   /* ---- Cards ---- */
+  /* Kartu: cukup garis tipis. Bayangan hanya untuk jendela yang melayang. */
   .card {
-    background: white;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
+    background: var(--color-card);
+    border-radius: var(--radius-2xl);
     padding: 24px;
-    border: 1px solid rgba(15, 76, 129, 0.06);
+    border: 1px solid var(--color-border);
   }
 
   .card-elevated {
-    background: white;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
+    background: var(--color-card);
+    border-radius: var(--radius-2xl);
     padding: 24px;
-    border: 1px solid rgba(15, 76, 129, 0.06);
-    transition: box-shadow var(--transition-slow), transform var(--transition-slow);
-  }
-  .card-elevated:hover {
-    box-shadow: var(--shadow-xl);
-    transform: translateY(-2px);
+    border: 1px solid var(--color-border);
   }
 
   /* ---- Badge & Chip ---- */
@@ -285,10 +295,8 @@
     align-items: center;
     padding: 2px 10px;
     border-radius: var(--radius-full);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 600;
     line-height: 1.6;
   }
 
@@ -327,12 +335,9 @@
 
   /* ---- Glass Effect ---- */
   .glass {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(16px) saturate(1.5);
-    -webkit-backdrop-filter: blur(16px) saturate(1.5);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
   }
 
   /* ---- Skeleton Loading ---- */
@@ -541,11 +546,5 @@
     to { transform: translateY(0); }
   }
 
-  .glass-panel {
-    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm;
-  }
-  
-  .dark .glass-panel {
-    @apply bg-gray-900/70 border-gray-800/60;
-  }
+  /* (glass-panel didefinisikan di theme.css sebagai kartu solid bergaris tipis) */
 }

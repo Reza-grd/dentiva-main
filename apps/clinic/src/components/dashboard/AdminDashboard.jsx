@@ -4,11 +4,7 @@ import { financialService } from '../../services/financialService';
 import { dashboardService } from '../../services/dashboardService';
 import { supabase } from '../../services/supabase';
 import { getGreeting, formatDateFull, formatRupiah } from '../../utils/dateUtils';
-import {
-  Users, Calendar, DollarSign, TrendingUp, Activity, AlertCircle,
-  BarChart2, RefreshCw, ArrowUpRight, ArrowDownRight, CheckCircle,
-  Clock, Stethoscope,
-} from 'lucide-react';
+import { Users, Calendar, DollarSign, TrendingUp, AlertCircle, BarChart2, RefreshCw, Clock, Stethoscope } from 'lucide-react';
 import {
   AreaChart, Area,
   BarChart, Bar,
@@ -20,6 +16,10 @@ import { Badge } from '@dentiva/ui';
 import { Button } from '@dentiva/ui';
 import OnboardingChecklist from './OnboardingChecklist';
 import AiBriefCard from './AiBriefCard';
+import { useAuth } from '../../contexts/AuthContext';
+import StandarStat from '../ui/StatCard';
+import EmptyState from '../ui/EmptyState';
+import { namaPanggilan } from '../../utils/stringUtils';
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, isCurrency }) => {
@@ -45,41 +45,10 @@ const CustomTooltip = ({ active, payload, label, isCurrency }) => {
 };
 
 // ─── KPI Card ────────────────────────────────────────────────────────────────
-const KpiCard = ({ label, value, icon: Icon, iconBg, iconColor, trend, trendLabel, loading }) => (
-  <Card className="group relative overflow-hidden h-full">
-    <div className="absolute -right-4 -top-4 opacity-[0.03] dark:opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-      <Icon size={100} />
-    </div>
-    <CardContent className="p-5 flex items-start justify-between relative z-10 h-full">
-      {loading ? (
-        <div className="animate-pulse space-y-3 w-full">
-          <div className="h-4 bg-gray-200 rounded w-3/4" />
-          <div className="h-8 bg-gray-200 rounded w-1/2" />
-          <div className="h-3 bg-gray-200 rounded w-1/3" />
-        </div>
-      ) : (
-        <>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-1">{label}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 leading-tight truncate">{value}</p>
-            {trend !== undefined && (
-              <div className={`flex items-center gap-1 mt-2 text-xs font-medium ${
-                trend >= 0 ? 'text-emerald-600' : 'text-red-500'
-              }`}>
-                {trend >= 0
-                  ? <ArrowUpRight size={14} />
-                  : <ArrowDownRight size={14} />}
-                <span>{Math.abs(trend)}% {trendLabel || 'dari bulan lalu'}</span>
-              </div>
-            )}
-          </div>
-          <div className={`w-12 h-12 ${iconBg} dark:bg-gray-800/50 rounded-xl flex items-center justify-center ml-4 flex-shrink-0 group-hover:scale-110 transition-transform shadow-sm`}>
-            <Icon className={iconColor} size={22} />
-          </div>
-        </>
-      )}
-    </CardContent>
-  </Card>
+// Kartu angka memakai komponen standar (tanpa lingkaran ikon / ikon samar). Warna lama → nada makna.
+const nadaDari = (c = '') => (/emerald|green/.test(c) ? 'baik' : /amber|orange|yellow/.test(c) ? 'waspada' : /red|rose/.test(c) ? 'bahaya' : 'netral');
+const KpiCard = ({ label, value, valueColor, loading, subtitle, trend, trendLabel }) => (
+  <StandarStat label={label} value={value} hint={subtitle} tone={nadaDari(valueColor)} loading={loading} trend={trend} trendLabel={trendLabel} />
 );
 
 // ─── Chart Card wrapper ──────────────────────────────────────────────────────
@@ -118,6 +87,7 @@ const StatusBadge = ({ status }) => {
 
 // ─── MAIN ────────────────────────────────────────────────────────────────────
 const AdminDashboard = () => {
+  const { userProfile } = useAuth();
   const navigate = useNavigate();
 
   // stats
@@ -207,8 +177,8 @@ const AdminDashboard = () => {
           {/* ── Hero Section ─────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                {getGreeting()}, Manajer Klinik! 👋
+              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">
+                {getGreeting()}{namaPanggilan(userProfile?.full_name) ? `, ${namaPanggilan(userProfile?.full_name)}` : ''}
               </h1>
               <p className="text-gray-500 text-sm mt-1">
                 {formatDateFull(new Date())} · Ringkasan klinik hari ini
@@ -216,10 +186,10 @@ const AdminDashboard = () => {
             </div>
             <button
               onClick={loadAll}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl glass-input text-sm hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors shadow-sm self-start sm:self-auto"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg border border-border bg-card text-sm text-text-primary hover:bg-background transition-colors self-start sm:self-auto"
             >
               <RefreshCw size={14} />
-              Refresh
+              Muat ulang
             </button>
           </div>
 
@@ -288,6 +258,9 @@ const AdminDashboard = () => {
                     subtitle="Tren kunjungan harian bulan ini"
                     loading={loadingVisits}
                   >
+                    {dailyVisits.every((d) => !Number(d.kunjungan)) ? (
+                      <EmptyState compact icon={Calendar} title="Belum ada kunjungan bulan ini" description="Grafik terisi otomatis setelah kunjungan pertama tercatat." />
+                    ) : (
                     <ResponsiveContainer width="100%" height={210}>
                       <AreaChart data={dailyVisits} margin={{ top: 4, right: 8, left: -22, bottom: 0 }}>
                         <defs>
@@ -297,8 +270,8 @@ const AdminDashboard = () => {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f8" />
-                        <XAxis dataKey="label" tick={{ fontSize: 10, fontFamily: 'Inter, sans-serif' }} interval={4} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 10, fontFamily: 'Inter, sans-serif' }} allowDecimals={false} tickLine={false} axisLine={false} />
+                        <XAxis dataKey="label" tick={{ fontSize: 10, fontFamily: 'Onest, sans-serif' }} interval={4} tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fontSize: 10, fontFamily: 'Onest, sans-serif' }} allowDecimals={false} tickLine={false} axisLine={false} />
                         <Tooltip content={<CustomTooltip />} />
                         <Area
                           type="monotone"
@@ -312,28 +285,33 @@ const AdminDashboard = () => {
                         />
                       </AreaChart>
                     </ResponsiveContainer>
+                    )}
                   </ChartCard>
 
-                  {/* Revenue vs Expenses */}
+                  {/* Pendapatan vs Pengeluaran */}
                   <ChartCard
-                    title="Revenue vs Expenses"
+                    title="Pendapatan vs Pengeluaran"
                     subtitle="Perbandingan 6 bulan terakhir"
                     loading={loadingRevenue}
                   >
+                    {monthlyRevenue.every((m) => !Number(m.revenue) && !Number(m.expense)) ? (
+                      <EmptyState compact icon={BarChart2} title="Belum ada transaksi 6 bulan terakhir" description="Pendapatan dari kasir dan pengeluaran yang dicatat akan tampil di sini." />
+                    ) : (
                     <ResponsiveContainer width="100%" height={210}>
                       <BarChart data={monthlyRevenue} margin={{ top: 4, right: 8, left: -10, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f8" vertical={false} />
-                        <XAxis dataKey="label" tick={{ fontSize: 10, fontFamily: 'Inter, sans-serif' }} tickLine={false} axisLine={false} />
-                        <YAxis tick={{ fontSize: 10, fontFamily: 'Inter, sans-serif' }} tickLine={false} axisLine={false}
+                        <XAxis dataKey="label" tick={{ fontSize: 10, fontFamily: 'Onest, sans-serif' }} tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fontSize: 10, fontFamily: 'Onest, sans-serif' }} tickLine={false} axisLine={false}
                           tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(0)}jt` : `${(v/1000).toFixed(0)}rb`}
                         />
                         <Tooltip content={<CustomTooltip isCurrency />} />
-                        <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'Inter, sans-serif', paddingTop: 8 }} />
-                        <Bar dataKey="revenue" name="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                        <Bar dataKey="expense" name="Expenses" fill="#f87171" radius={[4, 4, 0, 0]} maxBarSize={28} />
-                        <Bar dataKey="netIncome" name="Net Income" fill="#8b5cf6" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                        <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'Onest, sans-serif', paddingTop: 8 }} />
+                        <Bar dataKey="revenue" name="Pendapatan" fill="#059669" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                        <Bar dataKey="expense" name="Pengeluaran" fill="#dc2626" radius={[4, 4, 0, 0]} maxBarSize={28} />
+                        <Bar dataKey="netIncome" name="Laba Bersih" fill="var(--color-accent)" radius={[4, 4, 0, 0]} maxBarSize={28} />
                       </BarChart>
                     </ResponsiveContainer>
+                    )}
                   </ChartCard>
                 </div>
 
@@ -357,10 +335,10 @@ const AdminDashboard = () => {
                           <div key={i}>
                             <div className="flex justify-between items-center mb-1">
                               <div className="flex items-center gap-2 min-w-0">
-                                <span className="text-xs font-bold text-gray-400 w-4">{i + 1}</span>
+                                <span className="text-xs font-semibold text-gray-400 w-4">{i + 1}</span>
                                 <span className="text-sm font-medium text-gray-800 truncate">{t.nama}</span>
                               </div>
-                              <span className="text-sm font-bold text-gray-700 ml-3 flex-shrink-0">{t.jumlah}x</span>
+                              <span className="text-sm font-semibold text-gray-700 ml-3 flex-shrink-0">{t.jumlah}x</span>
                             </div>
                             <div className="w-full bg-gray-100 rounded-full h-2 ml-6">
                               <div

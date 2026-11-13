@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, RefreshCw, ArrowRight, Lightbulb, ChevronRight } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { aiService } from '../../services/aiService';
-import { getGreeting, getRelativeTime } from '../../utils/dateUtils';
+import { getRelativeTime } from '../../utils/dateUtils';
 import DentiMascot, { useDentiDirector } from '../mascot/DentiMascot';
 import { moodForBrief, POKE_REACTIONS } from '../../utils/dentiMood';
 import './ai-brief.css';
@@ -23,11 +22,6 @@ const STAFF_ROUTES = {
   pasien: { to: '/pasien', label: 'Buka data pasien' },
 };
 
-const firstName = (profile) => {
-  const n = (profile?.full_name || '').trim().split(/\s+/)[0] || '';
-  return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
-};
-
 /**
  * Kartu Asisten AI di Dashboard: sapaan + catatan singkat dari AI (disimpan server dan dipakai
  * ulang beberapa jam).
@@ -37,7 +31,6 @@ const firstName = (profile) => {
  */
 export default function AiBriefCard({ variant = 'admin' }) {
   const isStaff = variant === 'staff';
-  const { userProfile } = useAuth();
   const navigate = useNavigate();
   const [state, setState] = useState({ phase: 'loading' }); // loading | ready | inactive | error | hidden
   const [refreshing, setRefreshing] = useState(false);
@@ -90,8 +83,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
 
   if (state.phase === 'hidden') return null;
 
-  const name = firstName(userProfile);
-  const greeting = `${getGreeting()}${name ? `, ${name}` : ''}.`;
+  const judul = isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini';
 
   return (
     <section className="ai-brief relative overflow-hidden rounded-2xl border p-6 sm:p-7" aria-labelledby="ai-brief-title">
@@ -104,9 +96,9 @@ export default function AiBriefCard({ variant = 'admin' }) {
           </button>
           <div className="space-y-1.5 min-w-0">
             <p className="ai-brief__eyebrow flex items-center gap-2">
-              <Sparkles size={13} /> Eira · Asisten AI · {isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini'}
+              <Sparkles size={13} /> Eira · Asisten AI
             </p>
-            <h2 id="ai-brief-title" className="ai-brief__greeting">{greeting}</h2>
+            <h2 id="ai-brief-title" className="ai-brief__greeting">{judul}</h2>
           </div>
           </div>
           {state.phase === 'ready' && (
@@ -173,7 +165,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
                   const route = isStaff ? STAFF_ROUTES[p.aksi] : null;
                   return (
                     <li key={i} className="ai-brief__point flex flex-col">
-                      <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-60">
+                      <p className="flex items-center gap-2 text-xs font-semibold opacity-60">
                         <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} /> {tone.label}
                       </p>
                       <p className="mt-1.5 font-semibold leading-snug">{p.judul}</p>
@@ -216,7 +208,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
         )}
 
         {state.phase === 'ready' && (
-          <p className="text-[11px] tracking-wide opacity-50">
+          <p className="text-xs tracking-wide opacity-50">
             {state.stale ? 'Layanan AI sedang ramai — menampilkan catatan terakhir' : 'Disusun AI dari data klinik'}
             {' · '}diperbarui {getRelativeTime(state.generatedAt)} · otomatis pukul 00.00 & 12.00 WIB
           </p>

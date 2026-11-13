@@ -96,7 +96,7 @@ const ICD10Picker = ({ value = '', onChange, disabled = false, id }) => {
       {selectedEntry && !isOpen ? (
         <div className="flex items-center gap-2">
           <div className="flex-1 flex items-center gap-2 glass-input px-3 py-2 rounded-lg text-sm bg-[var(--color-accent)]/5 border-[var(--color-accent)]/30">
-            <span className="font-mono font-bold text-[var(--color-accent)] text-xs shrink-0">
+            <span className="font-mono font-semibold text-[var(--color-accent)] text-xs shrink-0">
               {selectedEntry.code}
             </span>
             <span className="text-gray-700 dark:text-gray-300 truncate text-xs">
@@ -173,7 +173,7 @@ const ICD10Picker = ({ value = '', onChange, disabled = false, id }) => {
                     : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-800 dark:text-gray-200'
                 }`}
               >
-                <span className={`font-mono font-bold text-xs shrink-0 mt-0.5 ${
+                <span className={`font-mono font-semibold text-xs shrink-0 mt-0.5 ${
                   idx === activeIndex ? 'text-[var(--color-accent)]' : 'text-[var(--color-accent)]/80'
                 }`}>
                   {entry.code}

@@ -484,10 +484,8 @@ export default function AiAssistantPage() {
   const header = (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Sparkles className="text-[var(--color-accent)]" /> Eira · Asisten AI
-          <Badge variant="warning" className="!text-amber-800 dark:!text-amber-300">Beta</Badge>
-        </h1>
+        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Eira · Asisten AI
+          <Badge variant="warning" className="!text-amber-800 dark:!text-amber-300">Beta</Badge></h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
       </div>
       {status?.aktif && (
@@ -600,7 +598,7 @@ export default function AiAssistantPage() {
                 <div className="space-y-4 text-left">
                   {SUGGESTION_GROUPS.map((g) => (
                     <div key={g.label}>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-2">{g.label}</p>
+                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">{g.label}</p>
                       <div className="grid sm:grid-cols-2 gap-2">
                         {g.items.map((s) => (
                           <button key={s} type="button" onClick={() => ask(s)}
@@ -626,7 +624,7 @@ export default function AiAssistantPage() {
                 </div>
                 <div className={`min-w-0 flex-1 rounded-2xl rounded-tl-md px-4 py-3 border ${m.error ? 'border-red-200 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 text-sm' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'}`}>
                   {m.revised && !m.error && (
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-accent)]">Jawaban diperbaiki</p>
+                    <p className="mb-2 text-xs font-semibold text-[var(--color-accent)]">Jawaban diperbaiki</p>
                   )}
                   {m.error ? m.content : <Answer text={m.content} fresh={m.fresh} />}
                   {!m.error && m.actions?.length > 0 && (

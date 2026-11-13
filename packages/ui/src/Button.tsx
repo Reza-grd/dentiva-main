@@ -4,22 +4,22 @@ import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "./cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-xl font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        primary: "bg-accent-primary text-white hover:opacity-90 focus-visible:ring-accent-primary shadow-sm",
-        secondary: "bg-accent-secondary text-white hover:opacity-90 focus-visible:ring-accent-secondary shadow-sm",
-        danger: "bg-[var(--color-danger)] text-white hover:opacity-90 focus-visible:ring-[var(--color-danger)] shadow-sm",
+        primary: "bg-accent-primary text-white hover:opacity-90 focus-visible:ring-accent-primary",
+        secondary: "bg-accent-secondary text-white hover:opacity-90 focus-visible:ring-accent-secondary",
+        danger: "bg-[var(--color-danger)] text-white hover:opacity-90 focus-visible:ring-[var(--color-danger)]",
         outline: "border border-border bg-transparent hover:bg-background text-text-primary focus-visible:ring-accent-primary",
         ghost: "hover:bg-background hover:text-text-primary text-text-muted focus-visible:ring-accent-primary",
         link: "text-accent-primary underline-offset-4 hover:underline focus-visible:ring-accent-primary",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-8 px-3 text-xs rounded-xl",
-        lg: "h-12 px-8 text-lg rounded-xl",
-        icon: "h-10 w-10 flex items-center justify-center rounded-xl",
+        sm: "h-8 px-3 text-xs rounded-lg",
+        lg: "h-12 px-8 text-lg rounded-lg",
+        icon: "h-10 w-10 flex items-center justify-center rounded-lg",
       },
     },
     defaultVariants: {

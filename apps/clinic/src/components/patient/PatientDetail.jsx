@@ -10,7 +10,7 @@ import { consentService } from '../../services/consentService';
 import { satusehatService } from '../../services/satusehatService';
 import { pdpService } from '../../services/pdpService';
 import { generatePDPAccessPDF } from '../../utils/pdpExportPdfGenerator';
-import { User, Edit, Save, X, Calendar, FileText, AlertCircle, ChevronLeft, Shield, Loader, Database, Download, Clock, Lock } from 'lucide-react';
+import { User, Edit, Save, X, Calendar, FileText, AlertCircle, ChevronLeft, Shield, Loader, Download, Clock, Lock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { PROVINSI, getKabupatenByProvinsi, getKecamatanByKabupaten, getDesaByKecamatan } from '../../utils/wilayahIndonesia';
@@ -323,7 +323,7 @@ const PatientDetail = () => {
     <div className="max-w-2xl mx-auto py-12">
       <div className="glass-panel text-center py-12">
         <AlertCircle className="mx-auto text-rose-500 mb-4 opacity-80" size={64} />
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Pasien Tidak Ditemukan</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Pasien Tidak Ditemukan</h2>
         <p className="text-gray-500 dark:text-gray-400 mb-6">{error}</p>
         <button onClick={() => navigate('/pasien')} className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-semibold rounded-xl transition-colors">Kembali ke Daftar Pasien</button>
       </div>
@@ -332,7 +332,7 @@ const PatientDetail = () => {
 
   const fieldView = (label, value) => (
     <div className="bg-gray-50/50 dark:bg-gray-800/30 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
-      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">{label}</label>
+      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">{label}</label>
       <p className="font-semibold text-gray-900 dark:text-white text-base">{value || '-'}</p>
     </div>
   );
@@ -349,10 +349,7 @@ const PatientDetail = () => {
             <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[var(--color-accent)]/10 flex items-center justify-center shrink-0">
-              <User size={24} className="text-[var(--color-accent)]" />
-            </div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Detail Pasien</h1>
+            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Detail Pasien</h1>
           </div>
         </div>
         {(role === 'admin' || role === 'resepsionis') && (
@@ -396,8 +393,8 @@ const PatientDetail = () => {
               onUploadSuccess={handlePhotoUploadSuccess} onDeleteSuccess={handlePhotoDeleteSuccess}
               readOnly={!editing} />
             <div className="text-center sm:text-left flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{patient?.nama_lengkap}</h2>
-              <p className="text-[var(--color-accent)] font-bold text-xl font-mono mt-1">{patient?.no_rm}</p>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">{patient?.nama_lengkap}</h2>
+              <p className="text-[var(--color-accent)] font-semibold text-xl font-mono mt-1">{patient?.no_rm}</p>
               <div className="flex gap-2 mt-3 flex-wrap justify-center sm:justify-start">
                 <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-lg">
                   {patient?.jenis_kelamin}
@@ -414,7 +411,7 @@ const PatientDetail = () => {
 
           {/* Informasi Dasar */}
           <div className="glass-panel p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3 flex items-center gap-2">
               <User size={18} className="text-[var(--color-accent)]" /> Informasi Dasar
             </h3>
             
@@ -553,7 +550,7 @@ const PatientDetail = () => {
 
           {/* Alamat */}
           <div className="glass-panel p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">Alamat Domisili</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">Alamat Domisili</h3>
             {editing ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
@@ -614,7 +611,7 @@ const PatientDetail = () => {
 
           {/* Kontak & Jaminan */}
           <div className="glass-panel p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">Kontak & Jaminan Kesehatan</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">Kontak & Jaminan Kesehatan</h3>
             {editing ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
@@ -673,7 +670,7 @@ const PatientDetail = () => {
 
           {/* Dokter Keluarga */}
           <div className="glass-panel p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">Dokter Keluarga</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6 border-b border-gray-100 dark:border-gray-800 pb-3">Dokter Keluarga</h3>
             {editing ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
@@ -697,19 +694,19 @@ const PatientDetail = () => {
         {/* Sidebar Actions */}
         <div className="space-y-6">
           <div className="glass-panel p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Aksi Cepat</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Aksi Cepat</h3>
             <div className="space-y-3">
               {role === 'dokter' && (
-                <button onClick={() => navigate(`/rekam-medis/${patientId}`)} className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-bold rounded-xl transition-all shadow-sm active:scale-95">
+                <button onClick={() => navigate(`/rekam-medis/${patientId}`)} className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white font-semibold rounded-xl transition-all shadow-sm active:scale-95">
                   <FileText size={18} /> Buka Rekam Medis
                 </button>
               )}
-              <button onClick={() => navigate(`/pasien/${patientId}/kunjungan`)} className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-bold rounded-xl transition-all shadow-sm">
+              <button onClick={() => navigate(`/pasien/${patientId}/kunjungan`)} className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-xl transition-all shadow-sm">
                 <Calendar size={18} /> Riwayat Kunjungan
               </button>
               <button 
                 onClick={() => setShowScheduleModal(true)} 
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 font-bold rounded-xl transition-all shadow-sm active:scale-95"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 font-semibold rounded-xl transition-all shadow-sm active:scale-95"
               >
                 <Calendar size={18} /> Jadwalkan Kunjungan Ulang
               </button>
@@ -718,7 +715,7 @@ const PatientDetail = () => {
 
           {/* SatuSehat Integration */}
           <div className="glass-panel p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
               <Shield size={18} className="text-blue-500" /> Integrasi SATUSEHAT
             </h3>
             
@@ -727,17 +724,17 @@ const PatientDetail = () => {
                 <div className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">Status Sinkronisasi</div>
                 <div className="flex items-center gap-2">
                   <span className={`w-2.5 h-2.5 rounded-full ${patient?.satusehat_patient_id ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                  <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                     {patient?.satusehat_patient_id ? 'Terhubung (FHIR)' : 'Belum Sinkron'}
                   </span>
                 </div>
                 {patient?.satusehat_patient_id && (
-                  <div className="mt-2 text-[10px] text-gray-500 font-mono select-all">
+                  <div className="mt-2 text-xs text-gray-500 font-mono select-all">
                     ID: {patient.satusehat_patient_id}
                   </div>
                 )}
                 {patient?.satusehat_last_synced_at && (
-                  <div className="mt-1 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                     Terakhir sinkron: {new Date(patient.satusehat_last_synced_at).toLocaleString('id-ID')}
                   </div>
                 )}
@@ -766,7 +763,7 @@ const PatientDetail = () => {
                 type="button"
                 onClick={handleSyncPatient}
                 disabled={syncingPatient || !satusehatConsent}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold rounded-xl transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 title={!satusehatConsent ? 'Persetujuan SatuSehat wajib diaktifkan terlebih dahulu' : ''}
               >
                 {syncingPatient ? <Loader className="animate-spin" size={16} /> : <Shield size={16} />}
@@ -777,11 +774,11 @@ const PatientDetail = () => {
 
           {/* Permenkes 24/2022 Retention & UU PDP Data Subject Rights Panel */}
           <div className="glass-panel p-6 space-y-4">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <Lock size={18} className="text-emerald-500" /> Kepatuhan Retensi & UU PDP
               </span>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                 retentionInfo.isExpired
                   ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400'
                   : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
@@ -809,16 +806,16 @@ const PatientDetail = () => {
 
             {/* UU PDP Data Subject Actions */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center text-xs font-bold text-gray-700 dark:text-gray-300">
+              <div className="flex justify-between items-center text-xs font-semibold text-gray-700 dark:text-gray-300">
                 <span>Hak Subjek Data (PDP)</span>
-                <span className="text-[10px] text-gray-400 font-normal">{pdpRequests.length} Permintaan</span>
+                <span className="text-xs text-gray-400 font-normal">{pdpRequests.length} Permintaan</span>
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={handleExportPDPPdf}
-                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold rounded-xl text-xs transition-all"
+                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-semibold rounded-xl text-xs transition-all"
                   title="Unduh Berkas Rekam Medis (Hak Akses UU PDP)"
                 >
                   <Download size={12} /> Export PDF PDP
@@ -826,7 +823,7 @@ const PatientDetail = () => {
                 <button
                   type="button"
                   onClick={() => setShowPdpModal(true)}
-                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-bold rounded-xl text-xs transition-all"
+                  className="flex items-center justify-center gap-1.5 py-2 px-3 bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 font-semibold rounded-xl text-xs transition-all"
                 >
                   <FileText size={12} /> Catat Permintaan
                 </button>
@@ -836,12 +833,12 @@ const PatientDetail = () => {
               {pdpRequests.length > 0 && (
                 <div className="mt-3 space-y-1.5 max-h-36 overflow-y-auto pr-1">
                   {pdpRequests.map(r => (
-                    <div key={r.id} className="p-2 bg-gray-50 dark:bg-gray-800/40 rounded-lg text-[11px] flex justify-between items-center border border-gray-100 dark:border-gray-800">
+                    <div key={r.id} className="p-2 bg-gray-50 dark:bg-gray-800/40 rounded-lg text-xs flex justify-between items-center border border-gray-100 dark:border-gray-800">
                       <div>
-                        <span className="font-bold uppercase text-gray-700 dark:text-gray-300">{r.request_type}</span>
+                        <span className="font-semibold uppercase text-gray-700 dark:text-gray-300">{r.request_type}</span>
                         {r.notes && <span className="text-gray-400 ml-1 truncate max-w-[120px] inline-block font-normal">({r.notes})</span>}
                       </div>
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                      <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
                         {r.status}
                       </span>
                     </div>
@@ -852,7 +849,7 @@ const PatientDetail = () => {
           </div>
 
           <div className="glass-panel p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center justify-between">
               Kunjungan Terakhir
               <span className="text-xs font-semibold bg-[var(--color-accent)]/10 text-[var(--color-accent)] px-2 py-0.5 rounded-full">{visits.length}</span>
             </h3>
@@ -865,10 +862,10 @@ const PatientDetail = () => {
                 {visits.slice(0, 5).map((visit) => (
                   <div key={visit.id} className="p-3 bg-gray-50/80 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-[var(--color-accent)]/30 transition-colors cursor-pointer" onClick={() => navigate(`/pasien/${patientId}/kunjungan`)}>
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-bold text-gray-900 dark:text-white font-mono">
+                      <span className="text-xs font-semibold text-gray-900 dark:text-white font-mono">
                         {new Date(visit.tanggal_kunjungan).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                       </span>
-                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${visit.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-800' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-800'}`}>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded border ${visit.status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-800' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-800'}`}>
                         {visit.status === 'completed' ? 'Selesai' : 'Ongoing'}
                       </span>
                     </div>
@@ -876,7 +873,7 @@ const PatientDetail = () => {
                   </div>
                 ))}
                 {visits.length > 5 && (
-                  <button onClick={() => navigate(`/pasien/${patientId}/kunjungan`)} className="w-full text-sm font-bold text-[var(--color-accent)] hover:text-[var(--color-accent-secondary)] py-2 mt-2 transition-colors">
+                  <button onClick={() => navigate(`/pasien/${patientId}/kunjungan`)} className="w-full text-sm font-semibold text-[var(--color-accent)] hover:text-[var(--color-accent-secondary)] py-2 mt-2 transition-colors">
                     Lihat semua kunjungan ➔
                   </button>
                 )}
@@ -891,7 +888,7 @@ const PatientDetail = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4 no-print">
           <div className="bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl animate-scale-in text-left">
             <div className="flex justify-between items-center mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Calendar className="text-[var(--color-accent)]" /> Jadwalkan Kunjungan Ulang
               </h3>
               <button 
@@ -940,7 +937,7 @@ const PatientDetail = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-900 border border-gray-150 dark:border-gray-800 rounded-2xl p-6 max-w-md w-full shadow-2xl text-left">
             <div className="flex justify-between items-center mb-4 border-b border-gray-100 dark:border-gray-800 pb-3">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Lock size={18} className="text-purple-500" /> Permintaan Subjek Data (UU PDP)
               </h3>
               <button onClick={() => setShowPdpModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">&times;</button>
@@ -956,7 +953,7 @@ const PatientDetail = () => {
                   onChange={e => setPdpForm({ ...pdpForm, requestType: e.target.value })}
                   className="glass-input w-full px-3 py-2 rounded-xl text-sm"
                 >
-                  <option value="access">Akses / Permintaan Salinan Data (Export PDF)</option>
+                  <option value="access">Akses / Permintaan Salinan Data (Ekspor PDF)</option>
                   <option value="correction">Koreksi / Perbaruan Informasi Data</option>
                   <option value="deletion">Penghapusan / Pemutusan Akses Rekam Medis</option>
                 </select>
@@ -979,14 +976,14 @@ const PatientDetail = () => {
                 <button
                   type="button"
                   onClick={() => setShowPdpModal(false)}
-                  className="flex-1 py-2 px-4 border rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300"
+                  className="flex-1 py-2 px-4 border rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submittingPdp}
-                  className="flex-1 py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs shadow-sm flex items-center justify-center gap-1 disabled:opacity-50"
+                  className="flex-1 py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-xs shadow-sm flex items-center justify-center gap-1 disabled:opacity-50"
                 >
                   {submittingPdp ? <Loader className="animate-spin" size={14} /> : 'Catat & Proses'}
                 </button>

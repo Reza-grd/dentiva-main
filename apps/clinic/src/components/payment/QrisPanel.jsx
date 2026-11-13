@@ -49,10 +49,10 @@ export default function QrisPanel({ amount }) {
 
   return (
     <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-5 text-center">
-      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 flex items-center justify-center gap-1.5">
+      <p className="text-xs font-semibold text-gray-500 flex items-center justify-center gap-1.5">
         <QrCode size={14} /> Scan QRIS untuk membayar
       </p>
-      {merchant && <p className="text-sm font-bold text-gray-900 dark:text-white mt-1">{merchant}</p>}
+      {merchant && <p className="text-sm font-semibold text-gray-900 dark:text-white mt-1">{merchant}</p>}
       <div className="my-4 flex justify-center">
         {url ? (
           <img src={url} alt="Kode QRIS klinik" className="w-56 h-56 object-contain rounded-lg bg-white p-2" />
@@ -61,8 +61,8 @@ export default function QrisPanel({ amount }) {
         )}
       </div>
       <p className="text-xs text-gray-500">Nominal yang harus dibayar</p>
-      <p className="text-2xl font-extrabold text-gray-900 dark:text-white">{formatRupiah(amount)}</p>
-      <p className="text-[11px] text-gray-500 mt-3">
+      <p className="text-2xl font-semibold text-gray-900 dark:text-white">{formatRupiah(amount)}</p>
+      <p className="text-xs text-gray-500 mt-3">
         Simpan pembayaran hanya setelah notifikasi dana masuk muncul di aplikasi bank/e-wallet klinik.
       </p>
     </div>

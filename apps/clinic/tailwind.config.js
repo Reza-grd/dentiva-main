@@ -11,6 +11,23 @@ export default {
   darkMode: 'class',
   theme: {
     extend: {
+      // Fondasi desain v3 (Nov 2026): Onest untuk teks, Newsreader untuk judul halaman.
+      fontFamily: {
+        sans: ['Onest', 'system-ui', 'sans-serif'],
+        display: ['Newsreader', 'Georgia', 'serif'],
+      },
+      // Akar dokumen 14px → text-xs bawaan hanya 10,5px. Teks terkecil kini 12px.
+      fontSize: {
+        xs: ['12px', { lineHeight: '16px' }],
+        sm: ['13px', { lineHeight: '20px' }],
+      },
+      // Sudut menurut fungsi: lg = input & tombol, 2xl = kartu, 3xl = jendela/modal
+      borderRadius: {
+        '3xl': '16px',
+      },
+      colors: {
+        gold: 'var(--color-gold)',
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%)',

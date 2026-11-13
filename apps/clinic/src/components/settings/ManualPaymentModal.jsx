@@ -44,16 +44,16 @@ export default function ManualPaymentModal({ plan, siklus, nominal, klinik, admi
           <X size={18} />
         </button>
 
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent-primary">Pembayaran langganan</p>
-        <h2 id="bayar-judul" className="mt-1 text-xl font-bold text-text-primary">Paket {plan?.name}</h2>
+        <p className="text-xs font-semibold text-accent-primary">Pembayaran langganan</p>
+        <h2 id="bayar-judul" className="mt-1 text-xl font-semibold text-text-primary">Paket {plan?.name}</h2>
         <div className="mt-3 flex items-baseline justify-between rounded-2xl bg-background px-4 py-3 border border-border">
           <span className="text-sm text-text-muted">{siklus === 'yearly' ? 'Tagihan tahunan' : 'Tagihan bulanan'}</span>
-          <span className="text-2xl font-bold tracking-tight text-text-primary">{rupiah(nominal)}</span>
+          <span className="text-2xl font-semibold tracking-tight text-text-primary">{rupiah(nominal)}</span>
         </div>
 
         <ol className="mt-5 space-y-4">
           <li className="flex gap-3">
-            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-bold text-accent-primary">1</span>
+            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-semibold text-accent-primary">1</span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-text-primary">Transfer ke rekening Dentiva</p>
               {siap ? (
@@ -75,14 +75,14 @@ export default function ManualPaymentModal({ plan, siklus, nominal, klinik, admi
             </div>
           </li>
           <li className="flex gap-3">
-            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-bold text-accent-primary">2</span>
+            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-semibold text-accent-primary">2</span>
             <div>
               <p className="text-sm font-semibold text-text-primary">Kirim konfirmasi & bukti transfer</p>
               <p className="mt-0.5 text-sm text-text-muted">Pesan berisi nama klinik, paket, dan nominal sudah kami siapkan.</p>
             </div>
           </li>
           <li className="flex gap-3">
-            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-bold text-accent-primary">3</span>
+            <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-accent-primary/10 text-sm font-semibold text-accent-primary">3</span>
             <div>
               <p className="text-sm font-semibold text-text-primary">Paket diaktifkan tim Dentiva</p>
               <p className="mt-0.5 text-sm text-text-muted">Setelah dana terverifikasi, paket aktif dan invoice resmi dikirimkan.</p>
@@ -92,7 +92,7 @@ export default function ManualPaymentModal({ plan, siklus, nominal, klinik, admi
 
         <a
           ref={tombolRef} href={konfirmasi.href} target="_blank" rel="noopener noreferrer"
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent-primary to-accent-secondary px-4 py-3 text-sm font-semibold text-white shadow-lg hover:opacity-95 transition-opacity"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-primary px-4 py-3 text-sm font-semibold text-white shadow-lg hover:opacity-95 transition-opacity"
         >
           {konfirmasi.jenis === 'wa' ? <MessageCircle size={17} /> : <Mail size={17} />}
           {konfirmasi.jenis === 'wa' ? 'Konfirmasi via WhatsApp' : 'Konfirmasi via email'}

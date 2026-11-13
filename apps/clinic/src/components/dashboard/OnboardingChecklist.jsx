@@ -57,7 +57,7 @@ const OnboardingChecklist = () => {
               <Rocket className="text-accent-primary" size={20} aria-hidden="true" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white">Siapkan klinik Anda</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Siapkan klinik Anda</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {doneAll} dari {STEPS.length} langkah selesai — lengkapi agar klinik siap menerima pasien.
               </p>
@@ -96,7 +96,7 @@ const OnboardingChecklist = () => {
                   <span className="flex-1 min-w-0">
                     <span className={`block text-sm font-semibold ${done ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
                       {s.title}
-                      {s.optional && <span className="ml-2 text-[10px] font-medium uppercase tracking-wider text-gray-400">opsional</span>}
+                      {s.optional && <span className="ml-2 text-xs font-medium text-gray-400">opsional</span>}
                     </span>
                     {!done && <span className="block text-xs text-gray-500 dark:text-gray-400">{s.desc}</span>}
                   </span>

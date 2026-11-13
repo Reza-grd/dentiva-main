@@ -48,7 +48,7 @@ const SetPasswordPage = () => {
       <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-[#0B0F17]">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Tautan tidak valid atau kedaluwarsa</h1>
+            <h1 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tautan tidak valid atau kedaluwarsa</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
               Minta admin klinik atau tim Dentiva mengirim ulang undangan, atau gunakan “Lupa password” di halaman login.
             </p>
@@ -66,7 +66,7 @@ const SetPasswordPage = () => {
           <div className="w-12 h-12 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center mb-4">
             <KeyRound className="text-[var(--color-accent)]" size={24} aria-hidden="true" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Buat password</h1>
+          <h1 className="text-xl font-medium text-gray-900 dark:text-white">Buat password</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-6">
             {user?.email ? <>Untuk akun <strong>{user.email}</strong>.</> : null} Gunakan minimal 8 karakter dengan huruf dan angka.
           </p>

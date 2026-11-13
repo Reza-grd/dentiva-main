@@ -12,6 +12,7 @@ import StockOpname from './StockOpname';
 import ProfitabilityReport from './ProfitabilityReport';
 import { inventoryService } from '../../services/inventoryService';
 import { costingService } from '../../services/costingService';
+import PageHeader from '../ui/PageHeader';
 
 /**
  * Biaya & Modal — dikelompokkan mengikuti alur kerja:
@@ -73,7 +74,7 @@ function Kpi({ icon: Icon, label, nilai, ket, nada = 'netral', onClick }) {
       <span className={`grid h-10 w-10 flex-none place-items-center rounded-xl ${warna}`}><Icon size={19} /></span>
       <span className="min-w-0">
         <span className="block text-xs font-medium text-text-muted">{label}</span>
-        <span className="mt-0.5 block truncate text-lg font-bold tracking-tight text-text-primary">{nilai}</span>
+        <span className="mt-0.5 block truncate text-lg font-semibold tracking-tight text-text-primary">{nilai}</span>
         <span className="block text-xs text-text-muted group-hover:text-accent-primary transition-colors">{ket}</span>
       </span>
     </button>
@@ -98,16 +99,16 @@ export default function CostingDashboard() {
   return (
     <div className="space-y-6">
       {/* Judul + aksi cepat */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary">Biaya & Modal</h1>
-          <p className="mt-1 text-sm text-text-muted">Kelola gudang, resep bahan per tindakan, dan biaya operasional untuk menghitung HPP serta margin.</p>
-        </div>
-        <button type="button" onClick={() => buka('gudang', 'masuk')}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-primary to-accent-secondary px-4 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-95 transition-opacity">
-          <Plus size={16} /> Catat stok masuk
-        </button>
-      </div>
+      <PageHeader
+        title="Biaya & Modal"
+        description="Kelola gudang, resep bahan per tindakan, dan biaya operasional untuk menghitung HPP serta margin."
+        actions={(
+          <button type="button" onClick={() => buka('gudang', 'masuk')}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-accent-primary px-4 py-2.5 text-sm font-semibold text-white hover:brightness-110 transition">
+            <Plus size={16} /> Catat stok masuk
+          </button>
+        )}
+      />
 
       {/* Ringkasan */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan biaya dan modal">
@@ -133,7 +134,7 @@ export default function CostingDashboard() {
               <li key={l.label}>
                 <button type="button" onClick={() => buka(...l.ke)}
                   className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-accent-primary transition-colors">
-                  <span className={`grid h-5 w-5 place-items-center rounded-full text-[11px] font-bold ${l.ok ? 'bg-emerald-500 text-white' : 'bg-accent-primary/15 text-accent-primary'}`}>
+                  <span className={`grid h-5 w-5 place-items-center rounded-full text-xs font-semibold ${l.ok ? 'bg-emerald-500 text-white' : 'bg-accent-primary/15 text-accent-primary'}`}>
                     {l.ok ? <Check size={12} /> : i + 1}
                   </span>
                   <span className={l.ok ? 'line-through' : ''}>{l.label}</span>
@@ -153,7 +154,7 @@ export default function CostingDashboard() {
           return (
             <button key={s.id} type="button" role="tab" aria-selected={aktif} onClick={() => buka(s.id)}
               className={`flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-all ${aktif
-                ? 'border-transparent bg-gradient-to-r from-accent-primary to-accent-secondary text-white shadow-md'
+                ? 'border-transparent bg-accent-primary text-white shadow-md'
                 : 'border-border bg-card text-text-primary hover:border-accent-primary/40'}`}>
               <Icon size={20} className={aktif ? 'text-white' : 'text-accent-primary'} />
               <span className="min-w-0">

@@ -6,17 +6,17 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '../common/ToastNotification';
 import { useAuth } from '../../contexts/AuthContext';
-import { LogIn, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@dentiva/ui';
 import { Input } from '@dentiva/ui';
 import { FormError } from '@dentiva/ui';
 import { Card, CardContent } from '@dentiva/ui';
 
 const FEATURES = [
-  'Rekam medis digital terintegrasi',
-  'Manajemen jadwal & kunjungan pasien',
-  'Laporan keuangan real-time',
-  'Multi-role akses (Admin, Dokter, Resepsionis)',
+  'Rekam medis, odontogram, dan resep digital',
+  'Jadwal, booking online, dan pengingat WhatsApp',
+  'Kasir, stok bahan, dan HPP per tindakan',
+  'Akses sesuai peran: manajer, dokter, resepsionis',
 ];
 
 const loginSchema = z.object({
@@ -108,49 +108,41 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex bg-background transition-colors duration-300">
-      {/* ========== LEFT PANEL (branding with active palette gradient) ========== */}
-      <div className="hidden lg:flex lg:w-[58%] bg-gradient-to-br from-accent-primary via-accent-secondary to-dark-base flex-col justify-center items-start px-16 py-12 relative overflow-hidden">
-        {/* Decorative blobs */}
-        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-white/10 blur-[60px]" />
-        <div className="absolute -bottom-15 -left-10 w-60 h-60 rounded-full bg-white/10 blur-[50px]" />
-        <div className="absolute top-[45%] right-[10%] w-40 h-40 rounded-full bg-white/5 blur-[40px]" />
+      {/* ========== PANEL KIRI (merek; navy solid, selaras iklan peluncuran) ========== */}
+      <div className="hidden lg:flex lg:w-[56%] bg-[#0E1B31] flex-col justify-center items-start px-16 py-12 relative overflow-hidden">
 
         {/* Logo */}
         <div className="flex items-center gap-3.5 mb-14 relative z-10">
-          <div className="w-14 h-14 rounded-2xl bg-white p-2 flex items-center justify-center shadow-lg border border-white/20 overflow-hidden">
+          <div className="w-12 h-12 rounded-xl bg-white p-2 flex items-center justify-center overflow-hidden">
             <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="w-full h-full object-contain" />
           </div>
           <div>
-            <div className="text-2xl font-extrabold text-white tracking-tight leading-none mb-1">
+            <div className="text-2xl font-semibold text-white tracking-tight leading-none mb-1">
               Dentiva
             </div>
-            <div className="text-[10px] text-white/60 tracking-[0.12em] font-bold">
-              KLINIK GIGI DIGITAL
+            <div className="text-xs text-white/60">
+              Klinik gigi digital
             </div>
           </div>
         </div>
 
         {/* Hero text */}
         <div className="relative max-w-lg z-10">
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-white leading-tight tracking-tight mb-5">
-            Kelola Klinik Gigi{' '}
-            <span className="bg-gradient-to-r from-white via-white/90 to-white/70 bg-clip-text text-transparent">
-              Lebih Cerdas
-            </span>
+          <h1 className="text-[44px] font-normal text-white leading-[1.1] mb-5">
+            Rekam medis gigi yang rapi, aman,{' '}
+            <em className="text-[#D9B36B]">dan siap diaudit.</em>
           </h1>
 
-          <p className="text-base text-white/80 leading-relaxed mb-10">
-            Sistem manajemen klinik gigi all-in-one. Dari rekam medis hingga laporan keuangan, semuanya terintegrasi dalam satu platform.
+          <p className="text-base text-white/70 leading-relaxed mb-10 max-w-md">
+            Satu aplikasi untuk rekam medis, jadwal, kasir, stok bahan, hingga laporan keuangan klinik gigi Anda.
           </p>
 
           {/* Feature list */}
           <div className="flex flex-col gap-3.5">
             {FEATURES.map((f, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center flex-shrink-0">
-                  <CheckCircle size={13} className="text-white" />
-                </div>
-                <span className="text-sm text-white/90 font-semibold">
+                <CheckCircle size={16} className="text-[#D9B36B] flex-shrink-0" />
+                <span className="text-sm text-white/80">
                   {f}
                 </span>
               </div>
@@ -164,26 +156,26 @@ const LoginPage = () => {
       <div className="flex-1 flex flex-col justify-center items-center px-6 sm:px-8 py-10 overflow-y-auto bg-background transition-colors duration-300">
         {/* Mobile logo */}
         <div className="lg:hidden mb-8 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-white p-2 shadow-lg flex items-center justify-center mx-auto mb-3 overflow-hidden border border-border">
+          <div className="w-12 h-12 rounded-xl bg-white p-2 flex items-center justify-center mx-auto mb-3 overflow-hidden border border-border">
             <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="w-full h-full object-contain" />
           </div>
-          <div className="text-2xl font-extrabold text-accent-primary">
+          <div className="text-2xl font-semibold text-accent-primary">
             Dentiva
           </div>
-          <div className="text-[11px] text-text-muted tracking-[0.08em] font-bold mt-0.5">
-            KLINIK GIGI DIGITAL
+          <div className="text-xs text-text-muted mt-0.5">
+            Klinik gigi digital
           </div>
         </div>
 
         {/* Form card */}
-        <Card className="w-full max-w-[400px] bg-card border-border shadow-xl">
+        <Card className="w-full max-w-[400px] bg-card border-border">
           <CardContent className="px-6 py-9 sm:px-8">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-text-primary mb-2">
-                Selamat Datang 👋
+              <h2 className="font-display text-[28px] font-medium leading-tight text-text-primary mb-1.5">
+                Masuk ke Dentiva
               </h2>
               <p className="text-sm text-text-muted">
-                Silakan login untuk mengakses Dentiva.
+                Gunakan email dan password akun klinik Anda.
               </p>
             </div>
 
@@ -201,7 +193,7 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* Email */}
               <div>
-                <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-text-muted mb-2">
                   Email
                 </label>
                 <Input
@@ -215,7 +207,7 @@ const LoginPage = () => {
 
               {/* Password */}
               <div>
-                <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-text-muted mb-2">
                   Password
                 </label>
                 <div className="relative">
@@ -260,10 +252,10 @@ const LoginPage = () => {
               <div className="pt-2">
                 <Button
                   type="submit"
-                  className="w-full h-11 text-[15px] font-semibold bg-gradient-to-r from-accent-primary to-accent-secondary hover:opacity-90 text-white shadow-lg shadow-accent-primary/20 border-0"
+                  className="w-full h-11 text-[15px] font-semibold bg-accent-primary hover:opacity-90 text-white border-0"
                   isLoading={isSubmitting}
                 >
-                  {isSubmitting ? 'Memeriksa...' : 'Masuk ke Sistem'}
+                  {isSubmitting ? 'Memeriksa…' : 'Masuk'}
                 </Button>
               </div>
             </form>
@@ -282,7 +274,7 @@ const LoginPage = () => {
 
         {/* Footer */}
         <p className="mt-8 text-xs text-text-muted text-center font-medium">
-          © 2026 Dentiva · Sistem Manajemen Klinik Gigi · All rights reserved
+          © 2026 Dentiva · Sistem manajemen klinik gigi
         </p>
       </div>
     </div>

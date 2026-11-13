@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BellRing, MessageCircle, Phone, Search, Sparkles, Save, RotateCcw, Check } from 'lucide-react';
+import { MessageCircle, Phone, Search, Sparkles, Save, RotateCcw, Check } from 'lucide-react';
 import { Card, CardContent, Button, Badge } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
@@ -105,9 +105,7 @@ export default function RecallPage() {
     <div className="space-y-5 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <BellRing className="text-[var(--color-accent)]" /> Recall Pasien
-          </h1>
+          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Recall Pasien</h1>
           <p className="text-sm text-gray-500">Pasien yang sudah lama tidak kontrol dan belum punya jadwal berikutnya.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -120,17 +118,17 @@ export default function RecallPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card><CardContent className="p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Perlu dihubungi</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-1">{stats.total}</p>
+          <p className="text-xs text-gray-500">Perlu dihubungi</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white tabular-nums mt-1">{stats.total}</p>
         </CardContent></Card>
         <Card><CardContent className="p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Bisa dihubungi via WA</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-1">{stats.wa}</p>
+          <p className="text-xs text-gray-500">Bisa dihubungi via WA</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white tabular-nums mt-1">{stats.wa}</p>
           <p className="text-xs text-gray-500">izin WA &amp; nomor valid</p>
         </CardContent></Card>
         <Card><CardContent className="p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Sudah dihubungi (30 hari)</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-1">{stats.recent}</p>
+          <p className="text-xs text-gray-500">Sudah dihubungi (30 hari)</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white tabular-nums mt-1">{stats.recent}</p>
         </CardContent></Card>
       </div>
 
@@ -189,7 +187,7 @@ export default function RecallPage() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-gray-900/40 text-gray-500 text-xs uppercase tracking-wide">
+                <thead className="bg-gray-50 dark:bg-gray-900/40 text-gray-500 text-xs">
                   <tr>
                     <th className="text-left px-4 py-3">Pasien</th>
                     <th className="text-left px-4 py-3">Kunjungan terakhir</th>

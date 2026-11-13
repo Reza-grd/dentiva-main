@@ -116,7 +116,7 @@ const MaterialPurchases = () => {
             <ShoppingCart size={24} />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Catat Stok Masuk (Pembelian)</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Catat Stok Masuk (Pembelian)</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">Pencatatan ini akan otomatis menghitung ulang harga modal rata-rata tertimbang (WAC) pada master gudang.</p>
           </div>
         </div>
@@ -223,12 +223,12 @@ const MaterialPurchases = () => {
               <div>
                 <p className="text-sm font-medium text-blue-900 dark:text-blue-200">Konversi Gudang (Otomatis):</p>
                 <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                  {formData.jumlah_beli} {selectedMaterial.satuan_beli} &times; {selectedMaterial.faktor_konversi} = <span className="font-bold">{Number(formData.jumlah_beli) * selectedMaterial.faktor_konversi} {selectedMaterial.satuan_dasar}</span> (masuk ke stok saat ini)
+                  {formData.jumlah_beli} {selectedMaterial.satuan_beli} &times; {selectedMaterial.faktor_konversi} = <span className="font-semibold">{Number(formData.jumlah_beli) * selectedMaterial.faktor_konversi} {selectedMaterial.satuan_dasar}</span> (masuk ke stok saat ini)
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-blue-700 dark:text-blue-300">Total Nilai Pembelian</p>
-                <p className="text-lg font-bold text-blue-900 dark:text-blue-200">
+                <p className="text-lg font-semibold text-blue-900 dark:text-blue-200">
                   {formatCurrency(Number(formData.jumlah_beli) * Number(formData.harga_satuan_beli || 0))}
                 </p>
               </div>

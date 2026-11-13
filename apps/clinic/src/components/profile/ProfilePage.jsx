@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import LoadingSpinner from '../common/LoadingSpinner';
-import { User, Phone, Mail, Shield, Save, Check } from 'lucide-react';
+import { User, Phone, Mail, Shield, Save } from 'lucide-react';
 
 const ProfilePage = () => {
   const { user, userProfile, updateProfile } = useAuth();
@@ -58,10 +58,7 @@ const ProfilePage = () => {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-3">
-          <User className="text-[var(--color-accent)]" size={32} />
-          Profil Saya
-        </h1>
+        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Profil Saya</h1>
         <p className="text-text-muted">Kelola informasi pribadi dan data profil Anda</p>
       </div>
 
@@ -69,14 +66,14 @@ const ProfilePage = () => {
         {/* Avatar Banner */}
         <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-border-color">
           <div 
-            className="w-24 h-24 rounded-full flex items-center justify-center text-accent-primary bg-accent-primary/10 border border-accent-primary/20 font-bold text-3xl shadow-lg"
+            className="w-24 h-24 rounded-full flex items-center justify-center text-accent-primary bg-accent-primary/10 border border-accent-primary/20 font-semibold text-3xl shadow-lg"
           >
             {getInitials(userProfile?.full_name)}
           </div>
           <div className="text-center sm:text-left space-y-1">
-            <h2 className="text-xl font-bold text-text-primary">{userProfile?.full_name || 'User'}</h2>
+            <h2 className="text-xl font-semibold text-text-primary">{userProfile?.full_name || 'User'}</h2>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-accent-primary/15 text-accent-primary border border-accent-primary/20">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-accent-primary/15 text-accent-primary border border-accent-primary/20">
                 <Shield size={12} />
                 {userProfile?.role === 'admin' ? 'Manajer Klinik' : userProfile?.role}
               </span>
@@ -141,7 +138,7 @@ const ProfilePage = () => {
                 type="text"
                 value={userProfile?.role === 'admin' ? 'Manajer Klinik' : (userProfile?.role || '')}
                 disabled
-                className="glass-input w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/40 text-gray-500 dark:text-gray-500 cursor-not-allowed border-gray-200 dark:border-gray-800 uppercase font-semibold text-xs tracking-wider"
+                className="glass-input w-full px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/40 text-gray-500 dark:text-gray-500 cursor-not-allowed border-gray-200 dark:border-gray-800 font-semibold text-xs"
               />
             </div>
           </div>
@@ -150,7 +147,7 @@ const ProfilePage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all hover:opacity-90 border-0 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
+              className="px-6 py-2.5 bg-accent-primary text-white font-semibold rounded-xl flex items-center gap-2 shadow-sm transition-all hover:opacity-90 border-0 active:scale-95 disabled:opacity-75 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>

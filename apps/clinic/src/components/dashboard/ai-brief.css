@@ -1,13 +1,8 @@
 /* Kartu Asisten AI di Dashboard — tenang, elegan, mengikuti warna aksen klinik. */
 .ai-brief {
   color: var(--color-text, #0f172a);
-  border-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
-  background:
-    linear-gradient(135deg,
-      color-mix(in srgb, var(--color-accent) 7%, var(--color-card, #ffffff)) 0%,
-      var(--color-card, #ffffff) 55%,
-      color-mix(in srgb, var(--color-accent) 4%, var(--color-card, #ffffff)) 100%);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 12px 32px -18px color-mix(in srgb, var(--color-accent) 45%, transparent);
+  border-color: var(--color-border, #e2e8f0);
+  background: var(--color-card, #ffffff);
 }
 .ai-brief__glow {
   position: absolute; right: -80px; top: -90px; width: 260px; height: 260px; border-radius: 9999px;
@@ -15,11 +10,11 @@
   pointer-events: none;
 }
 .ai-brief__eyebrow {
-  font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  font-size: 12px; font-weight: 500;
   color: var(--color-accent);
 }
 .ai-brief__greeting {
-  font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.75rem); font-weight: 600; letter-spacing: -0.015em; line-height: 1.2;
+  font-family: var(--font-display); font-size: clamp(1.35rem, 1.1rem + 0.9vw, 1.6rem); font-weight: 500; letter-spacing: -0.015em; line-height: 1.2;
 }
 .ai-brief__lead { font-size: 0.975rem; line-height: 1.7; max-width: 68ch; opacity: 0.85; }
 .ai-brief__point {
@@ -75,3 +70,6 @@
 .ai-brief__denti:hover { transform: translateY(-2px); }
 .ai-brief__denti:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
 .ai-brief__denti svg { display: block; height: auto; }
+
+/* Desain v3: tanpa cahaya dekoratif */
+.ai-brief__glow { display: none; }

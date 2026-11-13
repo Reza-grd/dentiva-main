@@ -9,18 +9,21 @@ import GlobalSearch from './GlobalSearch';
 import { mulaiTur } from '../tour/EiraTour';
 import ThemeGallery from '../common/ThemeGallery';
 
-const ROUTE_LABELS = {
-  '/admin': 'Dashboard Manajer Klinik',
-  '/dokter': 'Dashboard Dokter',
-  '/resepsionis': 'Dashboard Resepsionis',
-  '/pasien': 'Data Pasien',
-  '/pasien/daftar': 'Daftar Pasien',
-  '/admin/laporan': 'Laporan',
-  '/profil': 'Profil Saya',
-  '/dokter/profil-dokter': 'Profil Dokter',
-  '/pengaturan': 'Pengaturan',
-  '/layar-antrean': 'Layar Antrean',
-};
+// Nama halaman untuk breadcrumb: awalan alamat terpanjang yang cocok (juga halaman detail seperti /pasien/:id).
+const ROUTE_LABELS = [
+  ['/admin/jadwal-dokter', 'Jadwal Dokter'], ['/admin/pengeluaran', 'Pengeluaran'], ['/admin/laporan', 'Laporan'],
+  ['/admin/asisten-ai', 'Asisten AI'], ['/admin/treatments', 'Master Treatment'], ['/admin/costing', 'Biaya & Modal'],
+  ['/admin/pengguna', 'Kelola Pengguna'], ['/admin/audit-log', 'Audit Log'], ['/admin/pengaturan', 'Pengaturan'],
+  ['/admin', 'Dashboard'],
+  ['/dokter/jadwal', 'Jadwal Hari Ini'], ['/dokter/rekam-medis', 'Rekam Medis'], ['/dokter/kunjungan', 'Riwayat Kunjungan'],
+  ['/dokter/profil-dokter', 'Profil Dokter'], ['/dokter', 'Dashboard'],
+  ['/resepsionis/jadwal', 'Jadwal'], ['/resepsionis/recall', 'Recall Pasien'], ['/resepsionis/kunjungan', 'Riwayat Kunjungan'],
+  ['/resepsionis/pembayaran', 'Pembayaran'], ['/resepsionis', 'Dashboard'],
+  ['/pasien/daftar', 'Daftar Pasien'], ['/pasien', 'Data Pasien'], ['/rekam-medis', 'Rekam Medis'], ['/pembayaran', 'Pembayaran'],
+  ['/booking-requests', 'Booking Online'], ['/layar-antrean', 'Layar Antrean'], ['/keuangan', 'Laporan'],
+  ['/profil', 'Profil Saya'], ['/pengaturan', 'Pengaturan'], ['/pricing', 'Paket Langganan'],
+];
+const labelHalaman = (path) => (ROUTE_LABELS.find(([p]) => path === p || path.startsWith(`${p}/`)) || [null, 'Dentiva'])[1];
 
 const getInitials = (name) => {
   if (!name) return 'U';
@@ -41,7 +44,7 @@ const TopBar = ({ onMenuClick }) => {
     if (success) navigate('/login');
   };
 
-  const pageTitle = ROUTE_LABELS[location.pathname] || 'Dentiva';
+  const pageTitle = labelHalaman(location.pathname);
   const role = userProfile?.role === 'admin' ? 'Manajer Klinik' : (userProfile?.role || 'admin');
   const initials = getInitials(userProfile?.full_name);
 
@@ -52,7 +55,7 @@ const TopBar = ({ onMenuClick }) => {
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-card/70 border-b border-border/50 transition-colors duration-200">
+    <header className="sticky top-0 z-40 w-full bg-card border-b border-border transition-colors duration-200">
       <div className="flex h-16 md:h-[72px] lg:h-20 items-center justify-between px-4 sm:px-6">
         {/* Left: Mobile Menu & Breadcrumb */}
         <div className="flex items-center gap-4">
@@ -67,7 +70,7 @@ const TopBar = ({ onMenuClick }) => {
           <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-600 dark:text-gray-300">
             <span>Dentiva</span>
             <ChevronRight size={12} className="text-gray-400 dark:text-gray-500" />
-            <span className="text-text-primary text-sm font-bold">{pageTitle}</span>
+            <span className="text-text-primary text-sm font-semibold">{pageTitle}</span>
           </div>
         </div>
 
@@ -137,12 +140,12 @@ const TopBar = ({ onMenuClick }) => {
               aria-label="Menu profil pengguna"
               className="flex items-center gap-3 p-1.5 pr-4 rounded-full hover:bg-background transition-all duration-200 border border-transparent hover:border-border group"
             >
-              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-background shadow-sm border border-border relative">
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-background border border-border relative">
                 {profilePhotoUrl ? (
                   <img src={profilePhotoUrl} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
                   <div 
-                    className="w-full h-full flex items-center justify-center text-white font-bold text-xs bg-gradient-to-br from-accent-primary to-accent-secondary"
+                    className="w-full h-full flex items-center justify-center text-white font-semibold text-xs bg-accent-primary"
                   >
                     {initials}
                   </div>
@@ -152,11 +155,7 @@ const TopBar = ({ onMenuClick }) => {
                 <div className="text-sm font-semibold text-text-primary leading-tight">
                   {formatDoctorName(userProfile) || userProfile?.full_name || 'User'}
                 </div>
-                <div className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 w-fit px-1.5 py-0.5 rounded-md ${
-                  userProfile?.role === 'admin' ? 'bg-amber-500/15 text-amber-800 dark:text-amber-300' :
-                  userProfile?.role === 'resepsionis' ? 'bg-violet-500/15 text-violet-800 dark:text-violet-300' :
-                  'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
-                }`}>
+                <div className="text-xs text-text-muted mt-0.5 capitalize">
                   {role}
                 </div>
               </div>
@@ -168,7 +167,7 @@ const TopBar = ({ onMenuClick }) => {
                 <div className="fixed inset-0 z-40" onClick={() => setShowUserMenu(false)} />
                 <div className="absolute right-0 top-full mt-2 w-56 bg-card border border-border rounded-2xl shadow-xl z-50 overflow-hidden transform origin-top-right animate-in fade-in zoom-in-95 duration-200">
                   <div className="p-4 border-b border-border bg-background/50">
-                    <div className="text-sm font-bold text-text-primary">
+                    <div className="text-sm font-semibold text-text-primary">
                       {formatDoctorName(userProfile) || userProfile?.full_name || 'User'}
                     </div>
                     <div className="text-xs text-text-muted truncate">{userProfile?.email || ''}</div>

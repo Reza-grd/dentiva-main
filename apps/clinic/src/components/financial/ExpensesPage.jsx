@@ -35,7 +35,7 @@ function Modal({ title, onClose, children, wide }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm" role="dialog" aria-modal="true">
       <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full ${wide ? 'max-w-3xl' : 'max-w-md'} max-h-[92vh] overflow-hidden flex flex-col`}>
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h3>
           <button type="button" onClick={onClose} aria-label="Tutup" className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
         </div>
         <div className="overflow-y-auto">{children}</div>
@@ -212,9 +212,7 @@ export default function ExpensesPage() {
     <div className="space-y-5 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Receipt className="text-[var(--color-accent)]" /> Pengeluaran
-          </h1>
+          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Pengeluaran</h1>
           <p className="text-sm text-gray-500">Catat biaya operasional klinik. Foto nota bisa dibaca otomatis oleh Asisten AI.</p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -228,17 +226,17 @@ export default function ExpensesPage() {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardContent className="p-5">
-          <label htmlFor="exp-month" className="text-xs uppercase tracking-wide text-gray-500">Periode</label>
+          <label htmlFor="exp-month" className="text-xs text-gray-500">Periode</label>
           <input id="exp-month" type="month" value={month} max={getTodayLocal().slice(0, 7)}
             onChange={(e) => e.target.value && setMonth(e.target.value)} className={`${inputCls} mt-1`} />
         </CardContent></Card>
         <Card><CardContent className="p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Total pengeluaran</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white tabular-nums mt-1">{formatRupiah(summary.total)}</p>
+          <p className="text-xs text-gray-500">Total pengeluaran</p>
+          <p className="text-2xl font-semibold text-gray-900 dark:text-white tabular-nums mt-1">{formatRupiah(summary.total)}</p>
           <p className="text-xs text-gray-500">{summary.count} catatan</p>
         </CardContent></Card>
         <Card><CardContent className="p-5">
-          <p className="text-xs uppercase tracking-wide text-gray-500">Kategori terbesar</p>
+          <p className="text-xs text-gray-500">Kategori terbesar</p>
           <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">{summary.cats[0]?.[0] || '—'}</p>
           <p className="text-xs text-gray-500 tabular-nums">{summary.cats[0] ? formatRupiah(summary.cats[0][1]) : 'Belum ada data'}</p>
         </CardContent></Card>
@@ -271,7 +269,7 @@ export default function ExpensesPage() {
             </div>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-900/40 text-gray-500 text-xs uppercase tracking-wide">
+              <thead className="bg-gray-50 dark:bg-gray-900/40 text-gray-500 text-xs">
                 <tr>
                   <th className="text-left px-4 py-3">Tanggal</th>
                   <th className="text-left px-4 py-3">Kategori</th>

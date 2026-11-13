@@ -35,7 +35,7 @@ export const validateClinicForm = (f) => {
 
 export const Field = ({ label, error, required, children }) => (
   <div>
-    <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2">
+    <label className="block text-xs font-semibold text-text-muted mb-2">
       {label}
       {required && <span className="text-red-500"> *</span>}
     </label>
@@ -105,7 +105,7 @@ const RegisterClinicPage = () => {
           <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6">
             <MailCheck className="text-emerald-600" size={30} aria-hidden="true" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Cek email Anda</h1>
+          <h1 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Cek email Anda</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
             Kami mengirim tautan verifikasi ke <strong>{sentTo}</strong>. Buka tautan tersebut untuk menyelesaikan
             pendaftaran klinik. Email bisa tiba beberapa menit kemudian — periksa juga folder Spam.
@@ -124,7 +124,7 @@ const RegisterClinicPage = () => {
         <div className="w-12 h-12 bg-accent-primary/10 rounded-2xl flex items-center justify-center mb-4">
           <Building2 className="text-accent-primary" size={24} aria-hidden="true" />
         </div>
-        <h1 className="text-2xl font-bold text-text-primary">Daftarkan klinik Anda</h1>
+        <h1 className="text-2xl font-medium text-text-primary">Daftarkan klinik Anda</h1>
         <p className="text-sm text-text-muted mt-1">
           Setelah diverifikasi tim Dentiva (biasanya 1×24 jam kerja), klinik Anda mendapat masa uji coba gratis 14
           hari.

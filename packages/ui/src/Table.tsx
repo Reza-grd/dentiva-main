@@ -17,7 +17,7 @@ const TableContainer = forwardRef<HTMLDivElement, TableContainerProps>(
     <div
       ref={ref}
       className={cn(
-        "w-full rounded-2xl border border-border bg-card/80 backdrop-blur-md shadow-sm overflow-hidden",
+        "w-full rounded-2xl border border-border bg-card overflow-hidden",
         responsive && "overflow-x-auto",
         className
       )}
@@ -47,7 +47,7 @@ const TableHeader = forwardRef<HTMLTableSectionElement, SectionProps>(({ classNa
   <thead
     ref={ref}
     className={cn(
-      "bg-background/80 border-b border-border text-xs uppercase tracking-wider text-text-muted font-semibold",
+      "bg-background/80 border-b border-border text-xs text-text-muted font-medium",
       className
     )}
     {...props}

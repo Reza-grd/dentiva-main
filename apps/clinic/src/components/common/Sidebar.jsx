@@ -84,8 +84,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       <aside
         className={`
           flex flex-col flex-shrink-0 w-72 h-[100dvh] lg:h-screen
-          bg-card/80 backdrop-blur-xl border-r
-          border-border shadow-xl transition-transform duration-300 ease-in-out
+          bg-card border-r
+          border-border transition-transform duration-300 ease-in-out ${isDesktop ? '' : 'shadow-xl'}
           ${isDesktop ? 'translate-x-0 static' : (isOpen ? 'translate-x-0 fixed left-0 top-0 z-50' : '-translate-x-full fixed left-0 top-0 z-50')}
         `}
       >
@@ -96,8 +96,8 @@ const Sidebar = ({ isOpen, onClose }) => {
               <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="h-full w-full object-contain" />
             </span>
             <div>
-              <div className="font-bold text-2xl tracking-tighter text-text-primary leading-none mb-1">Dentiva</div>
-              <div className="text-xs text-text-muted font-medium leading-none tracking-widest uppercase">Klinik Gigi</div>
+              <div className="font-semibold text-2xl tracking-tighter text-text-primary leading-none mb-1">Dentiva</div>
+              <div className="text-xs text-text-muted font-medium leading-none">Klinik gigi</div>
             </div>
           </div>
           <button
@@ -116,9 +116,9 @@ const Sidebar = ({ isOpen, onClose }) => {
               return (
                 <div
                   key={`g-${idx}`}
-                  className={`px-3 mb-2 text-[11px] font-bold text-text-muted tracking-widest uppercase ${idx !== 0 ? 'mt-8' : ''}`}
+                  className={`px-3 mb-2 text-xs font-medium text-text-muted ${idx !== 0 ? 'mt-6' : ''}`}
                 >
-                  {item.group}
+                  {item.group.charAt(0) + item.group.slice(1).toLowerCase()}
                 </div>
               );
             }
@@ -134,14 +134,13 @@ const Sidebar = ({ isOpen, onClose }) => {
                 style={({ isActive }) => 
                   isActive 
                     ? { 
-                        background: 'linear-gradient(to right, var(--color-accent), var(--color-accent-secondary))',
-                        color: '#fff',
-                        boxShadow: 'var(--shadow-glow)'
+                        background: 'var(--color-accent)',
+                        color: '#fff'
                       } 
                     : {}
                 }
                 className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-3 mb-1.5 rounded-2xl transition-all duration-200 group relative
+                  flex items-center gap-3 px-3 py-2.5 mb-1 rounded-lg transition-colors duration-150 group relative
                   ${isActive 
                     ? 'font-semibold' 
                     : 'text-text-muted hover:bg-background hover:text-text-primary font-medium'
@@ -162,13 +161,6 @@ const Sidebar = ({ isOpen, onClose }) => {
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-border mt-auto bg-card/30">
-          <div className="bg-background/80 rounded-2xl p-4 text-xs shadow-sm border border-border/50">
-            <div className="font-semibold text-accent-primary">Dentiva AI</div>
-            <div className="text-text-muted font-medium mt-0.5">Platform © 2026</div>
-          </div>
-        </div>
       </aside>
     </>
   );

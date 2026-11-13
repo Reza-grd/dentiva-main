@@ -73,7 +73,7 @@ export default function BillingSettings() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
             <div>
               <div className="text-xs text-gray-500 dark:text-gray-400 font-medium">Paket Langganan</div>
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100 mt-0.5">
+              <div className="text-lg font-semibold text-gray-900 dark:text-gray-100 mt-0.5">
                 {plan?.name || "Starter (Default)"}
               </div>
             </div>
@@ -97,7 +97,7 @@ export default function BillingSettings() {
 
           {/* Feature highlights */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
+            <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-3">
               Fitur Termasuk Dalam Paket:
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700 dark:text-gray-300">
