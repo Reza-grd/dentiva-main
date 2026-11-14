@@ -3,7 +3,7 @@
 | Prioritas | ID | Pekerjaan | Pelaksana | Bergantung pada | Selesai bila |
 |---|---|---|---|---|---|
 | 1 | KBLI | Konfirmasi kesesuaian KBLI 47901 (*platform digital intermediasi perdagangan eceran*) dengan layanan SaaS. Siapkan perubahan ke KBLI yang tepat bila perlu (KBLI 2025 sudah berlaku di OSS; kode SaaS harus dicek di OSS/BPS) | Pemilik + konsultan perizinan / helpdesk OSS-Komdigi | — | Ada jawaban tertulis OSS/Komdigi atau KBLI baru tercatat |
-| 1 | H2 | Aktifkan email `halo@dentiva.id` (MX Hostinger) dan SMTP pengiriman aplikasi | Pemilik (akun), Claude (konfigurasi) | akun email | Email uji masuk; lupa kata sandi terkirim |
+| 1 | H2 | Aktifkan email `info@dentiva.id` (MX Hostinger) dan SMTP pengiriman aplikasi | Pemilik (akun), Claude (konfigurasi) | akun email | Email uji masuk; lupa kata sandi terkirim |
 | 1 | H1 | Jalankan `infra/vps/sql/enkripsi-data-lama.sql`: uji dulu, lalu terapkan | Pemilik (menjalankan), Claude (memeriksa) | — | Hitungan "polos sesudah" = 0 di semua tabel |
 | 1 | D1/D2 | Tayangkan perbaikan dependensi (push `main`, Vercel build ulang) | Pemilik (push) | — | `npm audit` produksi tanpa critical |
 | 1 | LOK | Konfirmasi lokasi pusat data VPS dari akun/kontrak Biznet Gio | Pemilik | — | Dokumen atau tangkapan layar lokasi |

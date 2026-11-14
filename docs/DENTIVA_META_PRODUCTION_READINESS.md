@@ -9,7 +9,7 @@
 | Aplikasi | Repo **`Reza-grd/dentiva-main`** (monorepo): klinik (React/Vite, Vercel), console, desktop (Tauri) |
 | Backend | Supabase **self-hosted** di VPS Biznet Gio (Jawa Barat). Callback `api.dentiva.id` (Caddy) → edge runtime. **Bukan** Supabase Cloud, dan tidak ada project ref `*.supabase.co` |
 | Rahasia | `/opt/dentiva/supabase/functions.env` (600), diisi pemilik lewat `isi-rahasia-functions.sh` dan `atur-whatsapp-meta.sh` |
-| Email `halo@dentiva.id` | **BLOCKED**: domain `dentiva.id` **tidak punya MX record** (dicek lewat 8.8.8.8 dan 1.1.1.1), jadi email ke alamat ini terpental |
+| Email `info@dentiva.id` | **BLOCKED**: domain `dentiva.id` **tidak punya MX record** (dicek lewat 8.8.8.8 dan 1.1.1.1), jadi email ke alamat ini terpental |
 
 ## B. Status konfigurasi Meta
 | Item | Status |
@@ -50,7 +50,7 @@ Isi halaman disusun dari audit praktik data **aktual**:
 Tidak ada klaim sertifikasi, enkripsi end-to-end, atau SLA.
 
 **REQUIRES OWNER/LEGAL REVIEW sebelum tayang:**
-1. Kontak resmi: aktifkan email `halo@dentiva.id` (MX di Hostinger) atau tentukan alamat lain.
+1. Kontak resmi: aktifkan email `info@dentiva.id` (MX di Hostinger) atau tentukan alamat lain.
 2. Peran pengendali/prosesor: klinik sebagai pengendali data pasien, Dentiva sebagai prosesor.
 3. Retensi rekam medis "paling singkat 25 tahun" (Permenkes 24/2022). Juga masa simpan data akun setelah langganan berakhir, yang ditulis "selama diperlukan untuk kewajiban hukum".
 4. Tenggat tanggapan permintaan hak subjek data, yang ditulis "dalam tenggat yang diatur UU PDP". Perlu SLA internal.
@@ -126,7 +126,7 @@ Belum diimplementasikan (NOT IMPLEMENTED):
 8. Nomor WhatsApp bisnis asli untuk situs. Formulir demo saat ini mengarah ke `6280000000000`, dan footer menampilkan `WhatsApp [nomor]`.
 
 ## J. Tindakan pemilik (berurutan)
-1. **Hostinger → Email**: aktifkan kotak surat atau penerusan untuk `halo@dentiva.id`. MX ditambahkan otomatis oleh Hostinger. Kirim email uji dari luar.
+1. **Hostinger → Email**: aktifkan kotak surat atau penerusan untuk `info@dentiva.id`. MX ditambahkan otomatis oleh Hostinger. Kirim email uji dari luar.
 2. Tinjau poin REQUIRES REVIEW di bagian C, lalu setujui. Merge `legal-pages` → `main` dan push repo `dentiva_website` (Vercel men-deploy otomatis).
 3. Pastikan ketiga URL terbuka publik (status 200, tanpa login).
 4. **Meta → App settings → Basic**:
