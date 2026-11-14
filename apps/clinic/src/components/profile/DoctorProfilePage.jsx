@@ -6,6 +6,7 @@ import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
 import { Phone, Shield, Save, Camera, FileText, Briefcase, Sparkles, Loader, Calendar } from 'lucide-react';
 import { satusehatService } from '../../services/satusehatService';
+import PengaturanAkun from './PengaturanAkun';
 
 const DoctorProfilePage = () => {
   const { user, userProfile, updateProfile } = useAuth();
@@ -497,6 +498,8 @@ const DoctorProfilePage = () => {
         </div>
 
       </div>
+
+      <PengaturanAkun />
     </div>
   );
 };

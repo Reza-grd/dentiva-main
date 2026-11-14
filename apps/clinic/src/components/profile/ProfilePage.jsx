@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { User, Phone, Mail, Shield, Save } from 'lucide-react';
+import PengaturanAkun from './PengaturanAkun';
 
 const ProfilePage = () => {
   const { user, userProfile, updateProfile } = useAuth();
@@ -164,6 +165,8 @@ const ProfilePage = () => {
           </div>
         </form>
       </div>
+
+      <PengaturanAkun />
     </div>
   );
 };

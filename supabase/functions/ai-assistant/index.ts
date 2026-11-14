@@ -45,6 +45,7 @@ import { fastAnswer } from "./fast.ts";
 import { CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
 import { ALL_TOOLS, READ_TOOLS, runTool, SYSTEM, type Tool } from "./core.ts";
 import { anthropicModels, costUsd, isCreditExhausted, supportsServerFallback } from "./pricing.ts";
+import { buatTokenPengguna, permintaanInternal } from "./waBridge.ts";
 
 const MAX_TOOL_ROUNDS = 10;
 const MAX_QUESTION = 1000;
@@ -657,7 +658,25 @@ async function agentDecision(req: Request, db: SupabaseClient, mode: string, bod
   return error ? fail(error) : json(req, 200, data);
 }
 
-async function handle(req: Request, emit?: Emit): Promise<Response> {
+// Pesan WhatsApp dari pengguna yang nomornya sudah ditautkan (lihat whatsapp-webhook & waBridge.ts).
+// deno-lint-ignore no-explicit-any
+async function waBridge(req: Request, body: any, service: SupabaseClient): Promise<Response> {
+  const p = permintaanInternal(body);
+  if (!p) return json(req, 400, { error: "Permintaan WhatsApp tidak valid" });
+  const secret = Deno.env.get("JWT_SECRET");
+  if (!secret) return json(req, 503, { error: "JWT_SECRET belum tersedia" });
+  const { data: u } = await service.from("users").select("id, email, status, clinic_id").eq("id", p.userId).maybeSingle();
+  if (!u || u.status !== "active" || !u.clinic_id) return json(req, 403, { error: "Akun tidak aktif" });
+  const token = await buatTokenPengguna({ id: u.id, email: u.email, clinic_id: u.clinic_id }, secret);
+  const inner = new Request(req.url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(p.inner),
+  });
+  return handle(inner, undefined, { id: u.id });
+}
+
+async function handle(req: Request, emit?: Emit, terpercaya?: { id: string }): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
   if (req.method !== "POST") return json(req, 405, { error: "Metode tidak didukung" });
 
@@ -675,6 +694,7 @@ async function handle(req: Request, emit?: Emit): Promise<Response> {
     // deno-lint-ignore no-explicit-any
     let cronBody: any = {};
     try { cronBody = await req.json(); } catch { /* kosong */ }
+    if (cronBody?.mode === "wa") return await waBridge(req, cronBody, createClient(url, serviceKey, { auth: { persistSession: false } }));
     if (cronBody?.mode !== "cron_briefs") return json(req, 400, { error: "Mode tidak dikenal" });
     if (!provider) return json(req, 503, { error: "Penyedia AI belum dikonfigurasi" });
     const service = createClient(url, serviceKey, { auth: { persistSession: false } });
@@ -687,7 +707,10 @@ async function handle(req: Request, emit?: Emit): Promise<Response> {
   const db = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } });
   const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 
-  const { data: userData, error: userErr } = await db.auth.getUser(authHeader.slice(7));
+  // Pemanggilan dari jembatan WhatsApp sudah memverifikasi pengguna (token dibuat server sendiri).
+  const { data: userData, error: userErr } = terpercaya
+    ? { data: { user: terpercaya }, error: null }
+    : await db.auth.getUser(authHeader.slice(7));
   if (userErr || !userData?.user) return json(req, 401, { error: "Sesi tidak valid. Silakan masuk kembali." });
 
   // deno-lint-ignore no-explicit-any
