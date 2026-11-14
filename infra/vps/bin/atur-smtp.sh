@@ -24,8 +24,7 @@ read -r -s -p "Kata sandi mailbox $USER_ (tidak tampil): " PASS_; echo
 case "$PASS_" in *"'"*|*'"'*|*' '*|*'$'*|*'`'*|*'\'*) echo "✗ kata sandi berisi ' \" spasi \$ \` atau \\ — ganti sandi mailbox di Hostinger tanpa karakter itu"; exit 1;; esac
 
 echo "• Menguji login SMTP ke $HOST:$PORT …"
-NETRC=$(mktemp); printf 'machine %s login %s password %s
-' "$HOST" "$USER_" "$PASS_" > "$NETRC"
+NETRC=$(mktemp); printf 'machine %s login %s password %s\n' "$HOST" "$USER_" "$PASS_" > "$NETRC"
 if ! curl -sS -m 25 --netrc-file "$NETRC" --url "smtps://$HOST:$PORT" -X NOOP >/dev/null 2>&1; then
   rm -f "$NETRC"; echo "✗ Login SMTP ditolak — periksa alamat & kata sandi mailbox. .env tidak diubah."; exit 1
 fi
