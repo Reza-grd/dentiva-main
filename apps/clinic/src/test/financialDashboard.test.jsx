@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import FinancialDashboard from '../components/financial/FinancialDashboard';
 
 vi.mock('../services/financialService', () => ({
   financialService: {
@@ -13,7 +14,6 @@ vi.mock('../services/paymentService', () => ({ paymentService: {} }));
 // jsdom tidak punya ResizeObserver (dipakai ResponsiveContainer Recharts)
 globalThis.ResizeObserver ??= class { observe() {} unobserve() {} disconnect() {} };
 
-const { default: FinancialDashboard } = await import('../components/financial/FinancialDashboard');
 
 describe('Laporan Keuangan', () => {
   it('menampilkan laba rugi ringkas & kategori terurut, tanpa emoji atau judul Inggris', async () => {
