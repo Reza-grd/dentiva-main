@@ -457,5 +457,32 @@ await logout();
 ok((await one(`select public.wa_cabut_persetujuan('sidik-b1') as n`)).n === 1, "BERHENTI mencabut persetujuan pasien yang dikirimi pesan");
 ok((await one(`select wa_consent from public.patients where id = '${pB1}'`)).wa_consent === false, "wa_consent pasien menjadi false");
 
+// Invoice langganan klinik (20261114120000)
+console.log("Invoice langganan klinik");
+const hargaPro = Number((await one(`select price_monthly from public.subscription_plans where id = '${plan}'`)).price_monthly);
+await loginAs(uB);
+const inv1 = (await one(`select public.billing_minta_invoice('${plan}', 'monthly') as j`)).j;
+ok(inv1.invoice.status === "open" && /^INV-\d{4}-\d{6}$/.test(inv1.invoice.number), "manajer klinik mendapat invoice terbuka bernomor resmi");
+ok(Number(inv1.invoice.total_idr) === Math.round(hargaPro), "nominal invoice diambil dari katalog paket di server");
+ok(inv1.bill_to && typeof inv1.bill_to.name === "string", "invoice menyertakan data penagihan klinik");
+const inv2 = (await one(`select public.billing_minta_invoice('${plan}', 'monthly') as j`)).j;
+ok(inv2.invoice.number === inv1.invoice.number, "permintaan ulang paket & siklus sama memakai invoice yang sama");
+const inv3 = (await one(`select public.billing_minta_invoice('${plan}', 'yearly') as j`)).j;
+ok(inv3.invoice.number !== inv1.invoice.number, "siklus berbeda membuat invoice baru");
+const daftar = (await one(`select public.billing_invoice_klinik() as j`)).j;
+ok(daftar.invoices.some((i) => i.number === inv3.invoice.number) && !daftar.invoices.some((i) => i.number === inv1.invoice.number), "daftar invoice klinik tidak memuat permintaan yang diganti");
+await expectError(`select count(*) from platform.invoices`, /permission denied|42501/, "browser tidak bisa membaca tabel invoice langsung");
+await expectError(`select public.billing_minta_invoice('${plan}', 'mingguan')`, /tidak valid/, "siklus tagihan tak dikenal ditolak");
+await logout();
+ok((await one(`select status from platform.invoices where number = '${inv1.invoice.number}'`)).status === "void", "permintaan lama yang belum dibayar dibatalkan (void)");
+ok((await one(`select clinic_id from platform.invoices where number = '${inv3.invoice.number}'`)).clinic_id === B, "invoice tercatat untuk klinik peminta");
+await loginAs(uD);
+await expectError(`select public.billing_minta_invoice('${plan}', 'monthly')`, /manajer klinik|42501/, "dokter tidak bisa membuat invoice langganan");
+await expectError(`select public.billing_invoice_klinik()`, /manajer klinik|42501/, "dokter tidak bisa melihat invoice langganan");
+await logout();
+await db.exec("set role anon");
+await expectError(`select public.billing_invoice_klinik()`, /permission denied|42501/, "pengunjung tanpa login tidak bisa memanggil");
+await db.exec("reset role");
+
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

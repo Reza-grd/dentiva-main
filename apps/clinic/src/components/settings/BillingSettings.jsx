@@ -13,10 +13,13 @@ import { Button } from "@dentiva/ui";
 import { Badge } from "@dentiva/ui";
 import { CreditCard, Calendar, Users, ShieldAlert, Sparkles, CheckCircle2 } from "lucide-react";
 import { BILLING } from "../../utils/billingConfig";
+import RiwayatInvoice from "./RiwayatInvoice";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function BillingSettings() {
   const navigate = useNavigate();
   const { plan, subscription, loadingSubscription } = usePermission();
+  const { userProfile } = useAuth();
 
   const formatDate = (isoString) => {
     if (!isoString) return "-";
@@ -142,6 +145,8 @@ export default function BillingSettings() {
           </Button>
         </CardFooter>
       </Card>
+
+      {userProfile?.role === "admin" && <RiwayatInvoice />}
     </div>
   );
 }

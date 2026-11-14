@@ -28,13 +28,25 @@ export const BILLING = {
 
 export const rekeningSiap = (b = BILLING) => Boolean(b.bank && b.rekening && b.atasNama);
 
+/**
+ * Identitas penjual pada invoice langganan. Alamat (pisahkan baris dengan "|") dan NPWP diisi
+ * pemilik di Environment Variables Vercel; baris yang kosong tidak dicetak.
+ */
+export const PENJUAL = {
+  nama: teks(env.VITE_INVOICE_NAMA) || 'PT Dentiva Teknologi Nusantara',
+  alamat: teks(env.VITE_INVOICE_ALAMAT).split('|').map((x) => x.trim()).filter(Boolean),
+  npwp: teks(env.VITE_INVOICE_NPWP),
+  email: BILLING.email,
+};
+
 const rupiah = (n) => `Rp ${Math.round(Number(n) || 0).toLocaleString('id-ID')}`;
 
 /** Pesan konfirmasi yang terisi otomatis (tanpa data pasien). */
-export function pesanKonfirmasi({ klinik, paket, siklus, nominal, admin }) {
+export function pesanKonfirmasi({ klinik, paket, siklus, nominal, admin, invoice }) {
   return [
     'Halo tim Dentiva, saya ingin mengonfirmasi pembayaran langganan.',
     '',
+    ...(invoice ? [`Invoice: ${invoice}`] : []),
     `Klinik: ${klinik || '-'}`,
     `Paket: ${paket} (${siklus === 'yearly' ? 'tahunan' : 'bulanan'})`,
     `Nominal: ${rupiah(nominal)}`,
