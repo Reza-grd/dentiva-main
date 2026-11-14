@@ -272,9 +272,10 @@ const UserManagementPage = () => {
                     className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-text-primary text-sm focus:ring-2 focus:ring-accent-primary outline-none"
                   >
                     <option value="resepsionis">Resepsionis</option>
+                    <option value="dokter">Dokter</option>
                   </select>
                   {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>}
-                  <p className="text-xs text-text-muted mt-1">Akun dokter dibuat dan diverifikasi oleh tim Dentiva — hubungi dukungan.</p>
+                  <p className="text-xs text-text-muted mt-1">Dokter dapat membuka rekam medis pasien. Pastikan STR & SIP-nya masih berlaku.</p>
                 </div>
               </div>
 

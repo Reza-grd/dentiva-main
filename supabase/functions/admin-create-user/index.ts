@@ -112,14 +112,9 @@ serve(async (req) => {
       })
     }
 
-    if (role === 'dokter') {
-      return new Response(JSON.stringify({ error: 'Akun dokter (akses rekam medis) dibuat dan diverifikasi oleh tim Dentiva — hubungi dukungan Dentiva' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    if (!['admin', 'resepsionis'].includes(role)) {
+    // Manajer klinik boleh membuat akun dokter sendiri (sejak 15 Nov 2026). Keabsahan STR/SIP
+    // menjadi tanggung jawab klinik; dokter melengkapinya di Profil Dokter.
+    if (!['admin', 'resepsionis', 'dokter'].includes(role)) {
       return new Response(JSON.stringify({ error: 'Role tidak valid' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

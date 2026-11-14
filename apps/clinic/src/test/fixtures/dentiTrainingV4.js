@@ -122,7 +122,7 @@ export const CYCLES_V4 = [
       ],
     },
     replies: [
-      ['bagaimana cara mengubah teks pesan pengingat', 'Isi Pesan Pengingat'], ['cara membuat layar antrean', 'Buat tautan'], ['cara menambah staf baru', 'tim Dentiva'],
+      ['bagaimana cara mengubah teks pesan pengingat', 'Isi Pesan Pengingat'], ['cara membuat layar antrean', 'Buat tautan'], ['cara menambah staf baru', 'Profil Dokter'], ['bagaimana cara menambah dokter baru?', 'Pilih peran **Dokter**'],
       ['cara menguji pengiriman whatsapp', 'Uji Coba Pengiriman Pesan'], ['jelaskan alur kunjungan pasien', 'invoice'], ['cara kirim ulang invoice', 'Lunas'],
       ['cara mengatur edukasi perawatan', 'Edukasi Perawatan'], ['cara ganti kata sandi', 'Keamanan'], ['cara melihat laporan keuangan', 'tanpa nama pasien'],
     ],
