@@ -87,9 +87,18 @@ const MedicalRecordList = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Rekam Medis</h1>
-        <p className="text-gray-600">Lihat dan kelola semua rekam medis pasien</p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Rekam Medis</h1>
+          <p className="text-gray-600">Lihat dan kelola semua rekam medis pasien</p>
+        </div>
+        <button
+          type="button" data-tur="rm-latihan" onClick={() => navigate('/rekam-medis/simulasi')}
+          className="px-4 py-2 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/15 text-sm font-semibold"
+          title="Buka formulir rekam medis dengan pasien anonim. Tidak ada data yang disimpan."
+        >
+          Latihan isi rekam medis
+        </button>
       </div>
 
       {/* Filters */}

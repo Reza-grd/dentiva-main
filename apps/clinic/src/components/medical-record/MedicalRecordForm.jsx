@@ -29,8 +29,16 @@ import { RichTextEditor } from '../ui/RichTextEditor';
 import { encryptionService } from '../../services/encryptionService';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
 
+/** Pasien anonim untuk latihan (tur pengenalan dokter). Tidak ada identitas & tidak ada baris di database. */
+export const ID_SIMULASI = 'simulasi';
+const PASIEN_SIMULASI = {
+  id: ID_SIMULASI, nama_lengkap: 'Pasien Simulasi', no_rm: 'SIMULASI', umur: 30,
+  jenis_kelamin: '-', no_wa: '', golongan_darah: '', foto_profile: null,
+};
+
 const MedicalRecordForm = () => {
   const { patientId } = useParams();
+  const simulasi = patientId === ID_SIMULASI;
   const { userProfile } = useAuth();
   const { settings: clinicSettings } = useClinicSettings();
   const toast = useToast();
@@ -197,6 +205,18 @@ const MedicalRecordForm = () => {
       }
     };
     fetchTemplates();
+
+    if (simulasi) {
+      setPatient(PASIEN_SIMULASI);
+      setPatientData(PASIEN_SIMULASI);
+      setToothConditions({});
+      setVisits([{ id: Date.now(), _isNew: true, tanggal_kunjungan: new Date().toISOString().split('T')[0], keluhan: '', pemeriksaan_fisik: '', diagnosa: '', terapi: '', kode_icd10: '', prescriptions: [] }]);
+      setConsents([]);
+      setIsTreatmentLocked(false);
+      setIsDraftChecked(false); // tanpa autosave draf
+      setLoading(false);
+      return;
+    }
 
     const { success, data, error } = await patientService.getPatientWithDetails(patientId);
     if (success) {
@@ -501,6 +521,11 @@ const MedicalRecordForm = () => {
       return;
     }
 
+    if (simulasi) {
+      toast.success('Simulasi berhasil — semua bidang wajib sudah terisi. Data latihan tidak disimpan.');
+      return;
+    }
+
     setSaving(true);
     try {
       const results = await Promise.all([
@@ -655,7 +680,7 @@ const MedicalRecordForm = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 glass-panel p-4 no-print">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/pasien')} className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-colors"><ArrowLeft size={20} /></button>
+          <button onClick={() => navigate(simulasi ? '/dokter/rekam-medis' : '/pasien')} aria-label="Kembali" className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-colors"><ArrowLeft size={20} /></button>
           <div>
             <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Rekam Medis Pasien</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola data medis dan odontogram</p>
@@ -665,6 +690,17 @@ const MedicalRecordForm = () => {
           <button onClick={() => setShowLegend(true)} className="px-4 py-2 bg-[var(--color-accent)]/10 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:text-[var(--color-accent)] dark:hover:bg-[var(--color-accent)]/20 rounded-xl text-sm font-semibold flex items-center gap-2 transition-colors shadow-sm"><Info size={18} /><span className="hidden sm:inline">Legenda</span></button>
         </div>
       </div>
+
+      {simulasi && (
+        <div data-tur="rm-simulasi" className="rounded-xl border border-accent-primary/25 bg-accent-primary/10 p-4 flex flex-col sm:flex-row sm:items-center gap-3 no-print">
+          <Info size={20} className="text-accent-primary flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-text-primary">Mode simulasi — latihan tanpa identitas pasien</p>
+            <p className="text-xs text-text-muted mt-0.5">Isi formulir sebebas mungkin. Tidak ada data yang dikirim atau disimpan; menekan Simpan hanya memeriksa kelengkapan isian.</p>
+          </div>
+          <button onClick={() => navigate('/dokter/rekam-medis')} className="px-3 py-1.5 rounded-lg border border-border bg-card text-text-primary hover:bg-background text-xs font-semibold">Keluar simulasi</button>
+        </div>
+      )}
 
       {/* Patient Info Card (Only Visible on Mobile screen and Printed paper) */}
       {patient && (
@@ -1281,10 +1317,19 @@ const MedicalRecordForm = () => {
               TAB 3: BERKAS & RUJUKAN (Always printed in serial print outs)
               ═════════════════════════════════════════════════════════════════ */}
             {/* PATIENT MEDIA UPLOAD SECTION */}
-            <PatientMediaUpload 
-              patientId={patientId}
-              visitId={null} /* Null because media is not strictly tied to a single visit yet during drafting */
-            />
+            {simulasi ? (
+              <div className="glass-panel overflow-hidden mb-6">
+                <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Media Pasien (Radiologi & Foto Klinik)</h3>
+                </div>
+                <p className="p-6 text-sm text-text-muted">Pada pasien sungguhan, unggah foto rontgen (periapikal, panoramik) dan foto klinis di sini. Unggahan dinonaktifkan dalam simulasi.</p>
+              </div>
+            ) : (
+              <PatientMediaUpload
+                patientId={patientId}
+                visitId={null} /* Null because media is not strictly tied to a single visit yet during drafting */
+              />
+            )}
 
             {/* Voice Input (Speech to SOAP) */}
             <div className="glass-panel overflow-hidden mb-6 break-inside-avoid">
@@ -1494,8 +1539,8 @@ const MedicalRecordForm = () => {
         </div>
       {/* Pinned action wrapper for saving / printing */}
       {/* Sticky Bottom Actions Bar */}
-      <div className="sticky bottom-6 z-10 flex flex-col md:flex-row justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] print:hidden gap-4">
-        <button onClick={() => setShowReferralModal(true)} className="w-full md:w-auto px-6 py-2.5 bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)] font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors">
+      <div data-tur="rm-aksi" className="sticky bottom-6 z-10 flex flex-col md:flex-row justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] print:hidden gap-4">
+        <button onClick={() => (simulasi ? toast.info('Surat rujukan dibuat dari rekam medis pasien sungguhan, lalu bisa dicetak.') : setShowReferralModal(true))} className="w-full md:w-auto px-6 py-2.5 bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)] font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors">
           <FileText size={18} /> Tambah Surat Rujukan
         </button>
         

@@ -175,3 +175,20 @@
   .eira-tur *, .eira-tur *::before, .eira-tur *::after, .eira-tur { animation: none !important; transition: none !important; }
 }
 @media print { .eira-tur { display: none; } }
+
+/* ---------- Tur v2: mode coba, daftar bagian ---------- */
+/* Mode coba: area yang disorot bisa langsung diisi/diklik; hanya kartu Eira yang menangkap klik. */
+.eira-tur[data-coba="true"], .eira-tur[data-coba="true"] .eira-tur__tirai { pointer-events: none; }
+.eira-tur[data-coba="true"] .eira-tur__kartu { pointer-events: auto; }
+.eira-tur__coba {
+  display: flex; align-items: center; gap: 6px; margin-top: 10px; padding: 8px 10px; border-radius: 8px;
+  font-size: 12.5px; color: var(--tur-aksen, #1d4ed8); background: color-mix(in srgb, var(--tur-aksen, #1d4ed8) 9%, transparent);
+}
+.eira-tur__bab-daftar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin: 4px 0 18px; }
+.eira-tur__bab-daftar > span { width: 100%; font-size: 12.5px; opacity: .65; margin-bottom: 2px; }
+.eira-tur__bab-daftar button {
+  font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--tur-garis, rgb(0 0 0 / .12)); background: transparent; color: inherit; transition: border-color .2s, background .2s;
+}
+.eira-tur__bab-daftar button:hover { border-color: var(--tur-aksen, #1d4ed8); background: color-mix(in srgb, var(--tur-aksen, #1d4ed8) 7%, transparent); }
+.eira-tur__lewati { display: inline-flex; align-items: center; gap: 3px; }
