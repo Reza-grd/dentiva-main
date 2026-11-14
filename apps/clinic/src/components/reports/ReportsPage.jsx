@@ -2,9 +2,11 @@ import { useToast } from '../common/ToastNotification';
 import React, { useState, useEffect } from 'react';
 import { usePermission } from '../../contexts/PermissionsContext';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Download, BarChart3, Users, DollarSign, Lock, Sparkles } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Download, BarChart3, Users, Lock, Stethoscope } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import LoadingSpinner from '../common/LoadingSpinner';
+import StatCard from '../ui/StatCard';
+import EmptyState from '../ui/EmptyState';
 import { financialService } from '../../services/financialService';
 import { treatmentService } from '../../services/treatmentService';
 import { dashboardService } from '../../services/dashboardService';
@@ -12,15 +14,12 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-const TREATMENT_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-
 const ReportsPage = () => {
   const toast = useToast();
   const navigate = useNavigate();
   const { hasFeature } = usePermission();
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const canCustomReport = hasFeature('custom_reports');
@@ -31,7 +30,7 @@ const ReportsPage = () => {
 
   useEffect(() => {
     loadReportData();
-  }, [selectedPeriod, selectedYear]);
+  }, [selectedYear]);
 
   const loadReportData = async () => {
     setLoading(true);
@@ -51,10 +50,9 @@ const ReportsPage = () => {
 
     // BUG S-01 FIX: map ke format yang dipakai chart, bukan hardcoded dummy
     setTreatmentDistribution(
-      (treatmentData.data || []).map((item, index) => ({
+      (treatmentData.data || []).map((item) => ({
         name: item.nama,
         value: item.jumlah,
-        color: TREATMENT_COLORS[index % TREATMENT_COLORS.length],
       }))
     );
 
@@ -122,7 +120,7 @@ const ReportsPage = () => {
         doc.setFont('helvetica', 'normal');
         doc.text(`Total Pendapatan: ${formatCurrency(reportData.stats?.monthRevenue)}`, 14, 52);
         doc.text(`Total Pengeluaran: ${formatCurrency(reportData.stats?.monthExpenses)}`, 14, 58);
-        doc.text(`Pendapatan Bersih: ${formatCurrency(reportData.stats?.monthNetIncome)}`, 14, 64);
+        doc.text(`Laba Bersih: ${formatCurrency(reportData.stats?.monthNetIncome)}`, 14, 64);
         doc.text(`Total Pasien: ${reportData.stats?.totalPatients || 0} (${reportData.stats?.todayVisits || 0} hari ini)`, 14, 70);
 
         // Table
@@ -130,7 +128,7 @@ const ReportsPage = () => {
         doc.setFontSize(13);
         doc.text('Rincian Kinerja Bulanan:', 14, 82);
 
-        const tableHeaders = [['Bulan', 'Pendapatan', 'Pengeluaran', 'Pendapatan Bersih', 'Kunjungan']];
+        const tableHeaders = [['Bulan', 'Pendapatan', 'Pengeluaran', 'Laba Bersih', 'Kunjungan']];
         const tableRows = (reportData.monthly || []).map((item, idx) => [
           `${item.monthName} ${selectedYear}`,
           formatCurrency(item.totalRevenue),
@@ -144,7 +142,7 @@ const ReportsPage = () => {
           head: tableHeaders,
           body: tableRows,
           theme: 'striped',
-          headStyles: { fillColor: [124, 58, 237] }, // Purple accent
+          headStyles: { fillColor: [30, 41, 59] }, // slate gelap, netral
           styles: { fontSize: 9 }
         });
 
@@ -212,301 +210,201 @@ const ReportsPage = () => {
   // BUG K-02 FIX: pakai reportData.monthly dari getMonthlyReport(), bukan dummy hardcoded
   const monthlyRevenue = reportData?.monthly || [];
 
+  // Angka ringkas untuk sumbu grafik: 1,2 jt · 850 rb
+  const ringkas = (v) => (v >= 1e6 ? `${(v / 1e6).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt` : v >= 1e3 ? `${Math.round(v / 1e3)} rb` : `${v}`);
+  const tooltipGaya = { backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', color: 'var(--color-text)', borderRadius: '8px', fontSize: '13px' };
+  const tahunPilihan = Array.from({ length: 4 }, (_, i) => new Date().getFullYear() - i);
+  const total = monthlyRevenue.reduce((t, m, i) => ({
+    pendapatan: t.pendapatan + (Number(m.totalRevenue) || 0),
+    pengeluaran: t.pengeluaran + (Number(m.totalExpenses) || 0),
+    kunjungan: t.kunjungan + (Number(patientGrowth[i]?.patients) || 0),
+  }), { pendapatan: 0, pengeluaran: 0, kunjungan: 0 });
+  const adaKeuangan = monthlyRevenue.some((m) => (Number(m.totalRevenue) || 0) + (Number(m.totalExpenses) || 0) > 0);
+  const adaKunjungan = patientGrowth.some((m) => (Number(m.patients) || 0) > 0);
+  const totalTindakan = treatmentDistribution.reduce((n, t) => n + (Number(t.value) || 0), 0);
+  const ekspor = (format) => {
+    if (!canCustomReport) {
+      toast.showToast(`Ekspor ${format === 'pdf' ? 'PDF' : 'Excel'} tersedia di paket Pro dan Enterprise.`, 'warning');
+      return;
+    }
+    handleExport(format);
+  };
+  const tombolEkspor = `flex items-center gap-2 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${canCustomReport
+    ? 'border-border bg-card text-text-primary hover:bg-background'
+    : 'border-border bg-card text-text-muted'}`;
+
   if (loading) {
     return <LoadingSpinner fullScreen />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Laporan & Analisis</h1>
-        <p className="text-text-muted">Dashboard analisis bisnis klinik</p>
+    <div className="space-y-6">
+      {/* Judul & alat */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Laporan Tahunan & Kunjungan</h1>
+          <p className="text-text-muted">Kinerja bulanan klinik sepanjang tahun {selectedYear}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="sr-only" htmlFor="laporan-tahun">Tahun</label>
+          <select
+            id="laporan-tahun" value={selectedYear} onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+            className="px-3 py-2 rounded-lg border border-border bg-card text-sm text-text-primary"
+          >
+            {tahunPilihan.map((y) => <option key={y} value={y}>Tahun {y}</option>)}
+          </select>
+          <button type="button" onClick={() => ekspor('pdf')} className={tombolEkspor} title={canCustomReport ? 'Unduh PDF' : 'Tersedia di paket Pro'}>
+            {canCustomReport ? <Download size={15} /> : <Lock size={14} />} PDF
+          </button>
+          <button type="button" onClick={() => ekspor('excel')} className={tombolEkspor} title={canCustomReport ? 'Unduh Excel' : 'Tersedia di paket Pro'}>
+            {canCustomReport ? <Download size={15} /> : <Lock size={14} />} Excel
+          </button>
+        </div>
       </div>
 
-      {/* Upgrade Banner for Starter Plan */}
+      {/* Info paket (tenang, tanpa ajakan mencolok) */}
       {!canCustomReport && (
-        <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400">
-              <Lock size={20} />
-            </div>
-            <div>
-              <h3 className="font-semibold text-sm text-text-primary flex items-center gap-1.5">
-                Fitur Laporan Kustom & Ekspor Terkunci
-              </h3>
-              <p className="text-xs text-text-muted">
-                Ekspor berkas PDF/Excel & analisis mendalam memerlukan paket langganan Pro atau Enterprise.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate('/pricing')}
-            className="px-4 py-2 bg-accent-primary text-white text-xs font-semibold rounded-xl shadow-md hover:opacity-90 transition-all whitespace-nowrap flex items-center gap-1.5 border-0"
-          >
-            <Sparkles size={14} /> Upgrade Sekarang
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-border bg-card px-4 py-3">
+          <p className="text-sm text-text-muted">
+            <Lock size={14} className="inline -mt-0.5 mr-1.5 text-text-muted" />
+            Ekspor PDF/Excel tersedia di paket Pro dan Enterprise.
+          </p>
+          <button type="button" onClick={() => navigate('/pricing')} className="text-sm font-medium text-accent-primary hover:underline whitespace-nowrap">
+            Lihat paket
           </button>
         </div>
       )}
 
-      {/* Controls */}
-      <div className="glass-panel mb-6 p-4 sm:p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Periode
-              </label>
-              <select
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="glass-input px-4 py-2 rounded-lg text-sm"
-              >
-                <option value="week">Minggu Ini</option>
-                <option value="month">Bulan Ini</option>
-                <option value="quarter">Kuartal Ini</option>
-                <option value="year">Tahun Ini</option>
-              </select>
-            </div>
+      {/* Bulan ini */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Pendapatan bulan ini" value={formatCurrency(reportData?.stats?.monthRevenue)} hint={trenPendapatan.teks} />
+        <StatCard label="Pengeluaran bulan ini" value={formatCurrency(reportData?.stats?.monthExpenses)} hint={trenPengeluaran.teks} />
+        <StatCard label="Laba bersih bulan ini" value={formatCurrency(reportData?.stats?.monthNetIncome)} hint={trenLaba.teks} tone={(reportData?.stats?.monthNetIncome || 0) < 0 ? 'bahaya' : 'netral'} />
+        <StatCard label="Total pasien" value={(reportData?.stats?.totalPatients || 0).toLocaleString('id-ID')} hint={`${reportData?.stats?.todayVisits || 0} kunjungan hari ini`} />
+      </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Tahun
-              </label>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="glass-input px-4 py-2 rounded-lg text-sm"
-              >
-                {[2024, 2025, 2026].map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Pendapatan vs pengeluaran per bulan */}
+        <section className="lg:col-span-3 rounded-xl border border-border bg-card p-5 md:p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
+            <h2 className="text-base font-semibold text-text-primary">Pendapatan & pengeluaran per bulan</h2>
+            <div className="flex items-center gap-4 text-xs text-text-muted">
+              <span className="flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-sm bg-accent-primary" /> Pendapatan</span>
+              <span className="flex items-center gap-1.5"><i className="w-2.5 h-2.5 rounded-sm bg-text-muted/40" /> Pengeluaran</span>
             </div>
           </div>
+          {adaKeuangan ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={monthlyRevenue} barGap={2} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="var(--color-border)" />
+                <XAxis dataKey="monthName" tick={{ fontSize: 12 }} stroke="var(--color-muted)" tickLine={false} axisLine={false} tickFormatter={(m) => String(m || '').slice(0, 3)} />
+                <YAxis tick={{ fontSize: 12 }} stroke="var(--color-muted)" tickLine={false} axisLine={false} tickFormatter={ringkas} width={52} />
+                <Tooltip formatter={(v, n) => [formatCurrency(v), n]} contentStyle={tooltipGaya} cursor={{ fill: 'var(--color-bg)' }} />
+                <Bar dataKey="totalRevenue" name="Pendapatan" fill="var(--color-accent)" radius={[3, 3, 0, 0]} maxBarSize={18} />
+                <Bar dataKey="totalExpenses" name="Pengeluaran" fill="var(--color-muted)" fillOpacity={0.4} radius={[3, 3, 0, 0]} maxBarSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyState compact icon={BarChart3} title={`Belum ada transaksi di tahun ${selectedYear}`} description="Grafik terisi otomatis dari pembayaran dan pengeluaran yang tercatat." />
+          )}
+        </section>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                if (!canCustomReport) {
-                  toast.showToast('Ekspor PDF memerlukan Paket Pro/Enterprise. Silakan upgrade paket langganan Anda.', 'warning');
-                  return;
-                }
-                handleExport('pdf');
-              }}
-              className={`flex items-center gap-2 px-4 py-2 border rounded-lg text-sm transition-colors ${
-                canCustomReport
-                  ? 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
-                  : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-900 cursor-pointer'
-              }`}
-            >
-              {!canCustomReport && <Lock size={14} className="text-amber-500" />}
-              <Download size={16} />
-              Export PDF
-            </button>
-            <button
-              onClick={() => {
-                if (!canCustomReport) {
-                  toast.showToast('Ekspor Excel memerlukan Paket Pro/Enterprise. Silakan upgrade paket langganan Anda.', 'warning');
-                  return;
-                }
-                handleExport('excel');
-              }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors shadow-lg ${
-                canCustomReport
-                  ? 'bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-secondary)]'
-                  : 'bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-500 shadow-none cursor-pointer'
-              }`}
-            >
-              {!canCustomReport && <Lock size={14} className="text-amber-500" />}
-              <Download size={16} />
-              Export Excel
-            </button>
-          </div>
-        </div>
+        {/* Tindakan terpopuler */}
+        <section className="lg:col-span-2 rounded-xl border border-border bg-card p-5 md:p-6">
+          <h2 className="text-base font-semibold text-text-primary mb-4">Tindakan terpopuler</h2>
+          {treatmentDistribution.length === 0 ? (
+            <EmptyState compact icon={Stethoscope} title="Belum ada tindakan tercatat" description="Daftar ini terisi dari tindakan yang dipilih dokter di rekam medis." />
+          ) : (
+            <ol className="space-y-3.5">
+              {treatmentDistribution.map((t, i) => {
+                const porsi = totalTindakan > 0 ? ((Number(t.value) || 0) / totalTindakan) * 100 : 0;
+                return (
+                  <li key={t.name || i}>
+                    <div className="flex items-baseline justify-between gap-3 text-sm">
+                      <span className="text-text-primary truncate"><span className="text-text-muted tabular-nums mr-2">{i + 1}.</span>{t.name}</span>
+                      <span className="tabular-nums text-text-primary whitespace-nowrap">{(Number(t.value) || 0).toLocaleString('id-ID')}<span className="text-xs text-text-muted ml-1">kali</span></span>
+                    </div>
+                    <div className="mt-1.5 h-1 rounded-full bg-border overflow-hidden" aria-hidden="true">
+                      <div className="h-full rounded-full bg-accent-primary/70" style={{ width: `${porsi}%` }} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </section>
       </div>
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="glass-panel p-5 rounded-2xl">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pendapatan</p>
-            <DollarSign className="text-green-500" size={20} />
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {formatCurrency(reportData?.stats?.monthRevenue || 0)}
-          </p>
-          <p className={`text-xs mt-1 ${trenPendapatan.kelas}`}>{trenPendapatan.teks}</p>
+      {/* Kunjungan per bulan */}
+      <section className="rounded-xl border border-border bg-card p-5 md:p-6">
+        <div className="flex items-baseline justify-between gap-4 mb-4">
+          <h2 className="text-base font-semibold text-text-primary">Kunjungan per bulan</h2>
+          <span className="text-xs text-text-muted tabular-nums">{total.kunjungan.toLocaleString('id-ID')} kunjungan di {selectedYear}</span>
         </div>
-
-        <div className="glass-panel p-5 rounded-2xl">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pengeluaran</p>
-            <DollarSign className="text-red-500" size={20} />
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {formatCurrency(reportData?.stats?.monthExpenses || 0)}
-          </p>
-          <p className={`text-xs mt-1 ${trenPengeluaran.kelas}`}>{trenPengeluaran.teks}</p>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Laba Bersih</p>
-            <TrendingUp className="text-[var(--color-accent)]" size={20} />
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {formatCurrency(reportData?.stats?.monthNetIncome || 0)}
-          </p>
-          <p className={`text-xs mt-1 ${trenLaba.kelas}`}>{trenLaba.teks}</p>
-        </div>
-
-        <div className="glass-panel p-5 rounded-2xl">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Pasien</p>
-            <Users className="text-purple-500" size={20} />
-          </div>
-          <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-            {reportData?.stats?.totalPatients || 0}
-          </p>
-          <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">+{reportData?.stats?.todayVisits || 0} hari ini</p>
-        </div>
-      </div>
-
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Revenue vs Expenses — BUG K-02 + K-01 FIX: pakai monthlyRevenue dari state, field totalRevenue/totalExpenses */}
-        <div className="glass-panel p-5 sm:p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <BarChart3 size={20} className="text-[var(--color-accent)]" />
-            Pendapatan vs Pengeluaran
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlyRevenue}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(156, 163, 175, 0.2)" />
-              {/* BUG K-01 FIX: dataKey pakai monthName (bukan month) */}
-              <XAxis dataKey="monthName" axisLine={false} tickLine={false} tick={{fill: 'currentColor', fontSize: 12}} className="text-gray-500 dark:text-gray-400"/>
-              <YAxis axisLine={false} tickLine={false} tick={{fill: 'currentColor', fontSize: 12}} className="text-gray-500 dark:text-gray-400"/>
-              <Tooltip
-                formatter={(value) => formatCurrency(value)}
-                contentStyle={{ backgroundColor: 'var(--color-tooltip-bg, #fff)', color: 'var(--color-tooltip-text, #374151)', border: '1px solid var(--color-tooltip-border, #e5e7eb)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              />
-              <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              {/* BUG K-01 FIX: dataKey pakai totalRevenue & totalExpenses */}
-              <Bar dataKey="totalRevenue" name="Pendapatan" fill="#059669" radius={[4,4,0,0]} />
-              <Bar dataKey="totalExpenses" name="Pengeluaran" fill="#dc2626" radius={[4,4,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Treatment Distribution — BUG S-01 FIX: pakai state treatmentDistribution */}
-        <div className="glass-panel p-5 sm:p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <BarChart3 size={20} className="text-[var(--color-accent)]" />
-            Distribusi Treatment
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={treatmentDistribution}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                stroke="var(--color-background, #fff)"
-                strokeWidth={2}
-              >
-                {treatmentDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ backgroundColor: 'var(--color-tooltip-bg, #fff)', color: 'var(--color-tooltip-text, #374151)', border: '1px solid var(--color-tooltip-border, #e5e7eb)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 gap-6 mb-6">
-        {/* Patient Growth — BUG S-01 FIX: pakai state patientGrowth */}
-        <div className="glass-panel p-5 sm:p-6 rounded-2xl">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <Users size={20} className="text-[var(--color-accent)]" />
-            Pertumbuhan Pasien
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={patientGrowth}>
+        {adaKunjungan ? (
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={patientGrowth} margin={{ top: 6, right: 6, left: 0, bottom: 0 }}>
               <defs>
-                <linearGradient id="colorPatients" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0}/>
+                <linearGradient id="isiKunjungan" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.14} />
+                  <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(156, 163, 175, 0.2)" />
-              <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: 'currentColor', fontSize: 12}} className="text-gray-500 dark:text-gray-400" />
-              <YAxis axisLine={false} tickLine={false} tick={{fill: 'currentColor', fontSize: 12}} className="text-gray-500 dark:text-gray-400" />
-              <Tooltip
-                contentStyle={{ backgroundColor: 'var(--color-tooltip-bg, #fff)', color: 'var(--color-tooltip-text, #374151)', border: '1px solid var(--color-tooltip-border, #e5e7eb)', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-              />
-              <Legend wrapperStyle={{ paddingTop: '20px' }} />
-              <Line
-                type="monotone"
-                dataKey="patients"
-                name="Pasien Baru"
-                stroke="var(--color-accent)"
-                strokeWidth={3}
-                dot={{ fill: 'var(--color-accent)', r: 4, strokeWidth: 2, stroke: 'var(--color-background, #fff)' }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
+              <CartesianGrid vertical={false} stroke="var(--color-border)" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="var(--color-muted)" tickLine={false} axisLine={false} />
+              <YAxis tick={{ fontSize: 12 }} stroke="var(--color-muted)" tickLine={false} axisLine={false} allowDecimals={false} width={36} />
+              <Tooltip formatter={(v) => [`${v} kunjungan`, 'Kunjungan']} contentStyle={tooltipGaya} />
+              <Area type="monotone" dataKey="patients" stroke="var(--color-accent)" strokeWidth={2} fill="url(#isiKunjungan)" dot={false} activeDot={{ r: 4 }} />
+            </AreaChart>
           </ResponsiveContainer>
-        </div>
-      </div>
+        ) : (
+          <EmptyState compact icon={Users} title={`Belum ada kunjungan di tahun ${selectedYear}`} description="Grafik terisi otomatis dari jadwal kunjungan yang tercatat." />
+        )}
+      </section>
 
-      {/* Summary Table */}
-      <div className="glass-panel overflow-hidden rounded-2xl">
-        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Ringkasan Bulanan</h3>
+      {/* Ringkasan bulanan */}
+      <section className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="px-5 md:px-6 py-4 border-b border-border">
+          <h2 className="text-base font-semibold text-text-primary">Ringkasan bulanan {selectedYear}</h2>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50/80 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Bulan</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Pendapatan</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Pengeluaran</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Laba Bersih</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400">Pasien</th>
+          <table className="w-full text-sm tabular-nums">
+            <thead>
+              <tr className="border-b border-border text-xs text-text-muted">
+                <th scope="col" className="px-5 md:px-6 py-3 text-left font-medium">Bulan</th>
+                <th scope="col" className="px-4 py-3 text-right font-medium">Pendapatan</th>
+                <th scope="col" className="px-4 py-3 text-right font-medium">Pengeluaran</th>
+                <th scope="col" className="px-4 py-3 text-right font-medium">Laba bersih</th>
+                <th scope="col" className="px-5 md:px-6 py-3 text-right font-medium">Kunjungan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800 bg-transparent">
-              {monthlyRevenue.map((item, index) => (
-                <tr key={index} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
-                  {/* BUG K-01 FIX: item.monthName (bukan item.month) */}
-                  <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{item.monthName} {selectedYear}</td>
-                  {/* BUG K-01 FIX: item.totalRevenue (bukan item.revenue) */}
-                  <td className="px-6 py-4 text-sm text-green-600 dark:text-green-400 font-semibold">
-                    {formatCurrency(item.totalRevenue)}
-                  </td>
-                  {/* BUG K-01 FIX: item.totalExpenses (bukan item.expenses) */}
-                  <td className="px-6 py-4 text-sm text-red-600 dark:text-red-400 font-semibold">
-                    {formatCurrency(item.totalExpenses)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-[var(--color-accent)] font-semibold bg-[var(--color-accent)]/5 dark:bg-[var(--color-accent)]/10">
-                    {formatCurrency(item.totalRevenue - item.totalExpenses)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    {patientGrowth[index]?.patients || 0} <span className="text-gray-400 text-xs font-normal">kunjungan</span>
-                  </td>
-                </tr>
-              ))}
+            <tbody className="divide-y divide-border">
+              {monthlyRevenue.map((item, index) => {
+                const labaBulan = (Number(item.totalRevenue) || 0) - (Number(item.totalExpenses) || 0);
+                const kosong = !item.totalRevenue && !item.totalExpenses && !patientGrowth[index]?.patients;
+                return (
+                  <tr key={item.monthName || index} className={kosong ? 'text-text-muted' : 'text-text-primary'}>
+                    <td className="px-5 md:px-6 py-2.5">{item.monthName}</td>
+                    <td className="px-4 py-2.5 text-right">{formatCurrency(item.totalRevenue)}</td>
+                    <td className="px-4 py-2.5 text-right">{formatCurrency(item.totalExpenses)}</td>
+                    <td className={`px-4 py-2.5 text-right ${labaBulan < 0 ? 'text-red-700 dark:text-red-400' : ''}`}>{formatCurrency(labaBulan)}</td>
+                    <td className="px-5 md:px-6 py-2.5 text-right">{(Number(patientGrowth[index]?.patients) || 0).toLocaleString('id-ID')}</td>
+                  </tr>
+                );
+              })}
             </tbody>
+            <tfoot>
+              <tr className="border-t border-text-primary/60 font-semibold text-text-primary">
+                <td className="px-5 md:px-6 py-3">Total {selectedYear}</td>
+                <td className="px-4 py-3 text-right">{formatCurrency(total.pendapatan)}</td>
+                <td className="px-4 py-3 text-right">{formatCurrency(total.pengeluaran)}</td>
+                <td className={`px-4 py-3 text-right ${total.pendapatan - total.pengeluaran < 0 ? 'text-red-700 dark:text-red-400' : ''}`}>{formatCurrency(total.pendapatan - total.pengeluaran)}</td>
+                <td className="px-5 md:px-6 py-3 text-right">{total.kunjungan.toLocaleString('id-ID')}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
