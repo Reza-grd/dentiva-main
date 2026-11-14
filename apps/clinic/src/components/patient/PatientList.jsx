@@ -117,7 +117,7 @@ const PatientList = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Daftar Pasien</h1>
+            <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Daftar Pasien</h1>
             <p className="text-sm text-text-muted mt-1">
               Kelola data seluruh pasien terdaftar di klinik
             </p>

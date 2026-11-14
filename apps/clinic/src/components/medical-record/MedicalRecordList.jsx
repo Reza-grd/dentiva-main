@@ -89,7 +89,7 @@ const MedicalRecordList = () => {
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Rekam Medis</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Rekam Medis</h1>
           <p className="text-gray-600">Lihat dan kelola semua rekam medis pasien</p>
         </div>
         <button

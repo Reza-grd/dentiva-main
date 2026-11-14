@@ -349,7 +349,7 @@ const PatientDetail = () => {
             <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
           <div className="flex items-center gap-3">
-            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Detail Pasien</h1>
+            <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Detail Pasien</h1>
           </div>
         </div>
         {(role === 'admin' || role === 'resepsionis') && (

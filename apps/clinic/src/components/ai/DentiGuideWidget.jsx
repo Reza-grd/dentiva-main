@@ -277,7 +277,7 @@ export default function DentiGuideWidget() {
       )}
 
       <button type="button" className="denti-widget__launch" onClick={toggle} aria-label={open ? 'Tutup Eira' : 'Buka Eira, pemandu Dentiva'} aria-expanded={open}>
-        <DentiMascot state={open ? 'happy' : 'idle'} size={58} title="Eira" />
+        <DentiMascot state={open ? 'happy' : 'idle'} size={50} title="Eira" />
       </button>
     </div>
   );

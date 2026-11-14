@@ -212,7 +212,7 @@ export default function ExpensesPage() {
     <div className="space-y-5 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Pengeluaran</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Pengeluaran</h1>
           <p className="text-sm text-gray-500">Catat biaya operasional klinik. Foto nota bisa dibaca otomatis oleh Asisten AI.</p>
         </div>
         <div className="flex gap-2 flex-wrap">

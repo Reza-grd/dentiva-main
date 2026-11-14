@@ -58,7 +58,7 @@ const ProfilePage = () => {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Profil Saya</h1>
+        <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Profil Saya</h1>
         <p className="text-text-muted">Kelola informasi pribadi dan data profil Anda</p>
       </div>
 

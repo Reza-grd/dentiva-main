@@ -56,7 +56,7 @@ const TopBar = ({ onMenuClick }) => {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-card border-b border-border transition-colors duration-200">
-      <div className="flex h-16 md:h-[72px] lg:h-20 items-center justify-between px-4 sm:px-6">
+      <div className="flex h-14 lg:h-[56px] items-center justify-between px-4 sm:px-6">
         {/* Left: Mobile Menu & Breadcrumb */}
         <div className="flex items-center gap-4">
           <button

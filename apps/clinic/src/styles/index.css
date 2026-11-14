@@ -548,3 +548,11 @@
 
   /* (glass-panel didefinisikan di theme.css sebagai kartu solid bergaris tipis) */
 }
+
+/* Laptop dengan tinggi layar pendek (mis. 1920×1080 + skala Windows 150% → ±1280×600 CSS px):
+   rapatkan jarak vertikal agar isi halaman langsung terlihat tanpa mengecilkan teks. */
+@media (min-width: 1024px) and (max-height: 760px) {
+  main.app-isi { padding-top: 16px; }
+  .denti-widget { bottom: 1rem; right: 1rem; }
+  .denti-widget__launch svg { width: 44px !important; }
+}

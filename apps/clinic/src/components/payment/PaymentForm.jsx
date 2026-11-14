@@ -582,7 +582,7 @@ const PaymentForm = () => {
               <ChevronLeft className="w-5 h-5 text-gray-700 dark:text-gray-300" />
             </button>
             <div>
-              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Detail Transaksi</h1>
+              <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Detail Transaksi</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Mode Baca-Saja (Admin)</p>
             </div>
           </div>
@@ -746,7 +746,7 @@ const PaymentForm = () => {
           </button>
           <div className="flex items-center gap-3">
             <div>
-              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Form Pembayaran</h1>
+              <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Form Pembayaran</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {existingPayment ? `Invoice #${existingPayment.invoice_number}` : 'Buat transaksi baru'}
               </p>

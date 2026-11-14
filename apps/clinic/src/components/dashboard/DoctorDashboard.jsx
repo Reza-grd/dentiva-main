@@ -97,7 +97,7 @@ const DoctorDashboard = () => {
           {/* ── Header ───────────────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">
+              <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">
                 {getGreeting()}, {formatDoctorName(userProfile) || 'Dokter'}
               </h1>
               <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">

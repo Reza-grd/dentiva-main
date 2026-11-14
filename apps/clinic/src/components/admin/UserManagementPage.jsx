@@ -99,7 +99,7 @@ const UserManagementPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 glass-panel p-6">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Manajemen Pengguna</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Manajemen Pengguna</h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola staf klinik, peran, dan akses sistem
           </p>

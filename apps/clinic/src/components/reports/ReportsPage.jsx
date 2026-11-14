@@ -220,7 +220,7 @@ const ReportsPage = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Laporan & Analisis</h1>
+        <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Laporan & Analisis</h1>
         <p className="text-text-muted">Dashboard analisis bisnis klinik</p>
       </div>
 

@@ -484,7 +484,7 @@ export default function AiAssistantPage() {
   const header = (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Eira · Asisten AI
+        <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Eira · Asisten AI
           <Badge variant="warning" className="!text-amber-800 dark:!text-amber-300">Beta</Badge></h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
       </div>

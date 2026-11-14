@@ -393,7 +393,7 @@ const SettingsPage = () => {
       {/* Header */}
       <div className="flex items-center gap-3 glass-panel p-6">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Pengaturan Sistem</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Pengaturan Sistem</h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola profil klinik, preferensi tampilan, dan integrasi SATUSEHAT
           </p>

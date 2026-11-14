@@ -112,7 +112,7 @@ const LoginPage = () => {
       <div className="hidden lg:flex lg:w-[56%] bg-[#0E1B31] flex-col justify-center items-start px-16 py-12 relative overflow-hidden">
 
         {/* Logo */}
-        <div className="flex items-center gap-3.5 mb-14 relative z-10">
+        <div className="flex items-center gap-3.5 mb-12 [@media(max-height:760px)]:mb-8 relative z-10">
           <div className="w-12 h-12 rounded-xl bg-white p-2 flex items-center justify-center overflow-hidden">
             <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="w-full h-full object-contain" />
           </div>
@@ -127,13 +127,13 @@ const LoginPage = () => {
         </div>
 
         {/* Hero text */}
-        <div className="relative max-w-lg z-10">
-          <h1 className="text-[44px] font-normal text-white leading-[1.1] mb-5">
+        <div className="relative max-w-[560px] z-10">
+          <h1 className="text-[42px] [@media(max-height:760px)]:text-[34px] font-normal text-white leading-[1.12] mb-5">
             Dental Klinik yang tertata,{' '}
             <em className="text-[#D9B36B]">dari pasien datang hingga laporan bulanan.</em>
           </h1>
 
-          <p className="text-base text-white/70 leading-relaxed mb-10 max-w-md">
+          <p className="text-base text-white/70 leading-relaxed mb-10 [@media(max-height:760px)]:mb-7 max-w-md">
             Satu aplikasi untuk rekam medis, jadwal, kasir, stok bahan, hingga laporan keuangan klinik gigi Anda.
           </p>
 

@@ -90,7 +90,7 @@ const AuditLogPage = () => {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Audit Log</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Audit Log</h1>
           <p className="text-sm text-text-muted mt-1">
             Riwayat seluruh aksi yang tercatat di sistem — {totalCount.toLocaleString('id-ID')} entri total
           </p>

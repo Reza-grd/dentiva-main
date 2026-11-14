@@ -229,7 +229,7 @@ const DoctorSchedulePage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Jadwal Praktek Dokter</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Jadwal Praktek Dokter</h1>
           <p className="text-sm text-gray-500 mt-1">Kelola hari & jam praktek setiap dokter</p>
         </div>
         <div className="flex gap-2">

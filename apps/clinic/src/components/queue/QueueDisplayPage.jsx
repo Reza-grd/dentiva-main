@@ -8,7 +8,7 @@ export default function QueueDisplayPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Layar Antrean</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Layar Antrean</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Tampilkan antrean di TV ruang tunggu. Buka tautan di TV atau komputer layar tersebut — tanpa login.
           </p>

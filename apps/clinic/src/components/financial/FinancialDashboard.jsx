@@ -84,7 +84,7 @@ const FinancialDashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Dashboard Keuangan</h1>
+            <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Dashboard Keuangan</h1>
             <p className="text-text-muted">Laporan dan analisa keuangan klinik</p>
           </div>
         </div>

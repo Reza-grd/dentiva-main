@@ -309,7 +309,7 @@ const SchedulePage = () => {
       {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Jadwal Kunjungan</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Jadwal Kunjungan</h1>
           <p className="text-sm text-gray-500 mt-1">
             {getHariLabel(dayOfWeek(selectedDate))},{' '}
             {new Date(selectedDate + 'T00:00:00').toLocaleDateString('id-ID', {

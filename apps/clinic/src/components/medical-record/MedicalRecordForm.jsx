@@ -682,7 +682,7 @@ const MedicalRecordForm = () => {
         <div className="flex items-center gap-4">
           <button onClick={() => navigate(simulasi ? '/dokter/rekam-medis' : '/pasien')} aria-label="Kembali" className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl transition-colors"><ArrowLeft size={20} /></button>
           <div>
-            <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Rekam Medis Pasien</h1>
+            <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Rekam Medis Pasien</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola data medis dan odontogram</p>
           </div>
         </div>
@@ -1539,7 +1539,7 @@ const MedicalRecordForm = () => {
         </div>
       {/* Pinned action wrapper for saving / printing */}
       {/* Sticky Bottom Actions Bar */}
-      <div data-tur="rm-aksi" className="sticky bottom-6 z-10 flex flex-col md:flex-row justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] print:hidden gap-4">
+      <div data-tur="rm-aksi" className="sticky bottom-6 [@media(max-height:760px)]:bottom-3 z-10 md:mr-16 flex flex-col md:flex-row justify-between items-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl p-4 [@media(max-height:760px)]:p-2.5 rounded-2xl border border-gray-200/50 dark:border-gray-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] print:hidden gap-4">
         <button onClick={() => (simulasi ? toast.info('Surat rujukan dibuat dari rekam medis pasien sungguhan, lalu bisa dicetak.') : setShowReferralModal(true))} className="w-full md:w-auto px-6 py-2.5 bg-[var(--color-accent)]/10 hover:bg-[var(--color-accent)]/20 dark:bg-[var(--color-accent)]/10 dark:hover:bg-[var(--color-accent)]/20 text-[var(--color-accent)] font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors">
           <FileText size={18} /> Tambah Surat Rujukan
         </button>

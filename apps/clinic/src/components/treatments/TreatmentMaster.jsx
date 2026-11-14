@@ -143,7 +143,7 @@ const TreatmentMaster = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Master Treatment</h1>
+        <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Master Treatment</h1>
         <p className="text-gray-600">Kelola daftar perawatan dan harga</p>
       </div>
 

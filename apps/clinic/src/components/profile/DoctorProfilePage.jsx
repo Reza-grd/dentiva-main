@@ -176,7 +176,7 @@ const DoctorProfilePage = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-[26px] md:text-[30px] font-medium leading-tight text-text-primary">Profil Dokter</h1>
+        <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Profil Dokter</h1>
         <p className="text-gray-600 dark:text-gray-400">Kelola kredensial medis dan biodata profesional Anda</p>
       </div>
 
