@@ -66,6 +66,19 @@ if (isProd && dsn) {
 import { PermissionsProvider } from './contexts/PermissionsContext';
 import { installDesktopLinkHandler } from './utils/platform';
 
+// Setelah deploy baru, tab lama bisa meminta berkas halaman (chunk) yang sudah tidak ada → layar kosong.
+// Muat ulang sekali agar memakai versi terbaru; dijaga agar tidak berulang tanpa henti.
+window.addEventListener("vite:preloadError", (e) => {
+  const kunci = "dentiva-muat-ulang-chunk";
+  try {
+    const terakhir = Number(sessionStorage.getItem(kunci) || 0);
+    if (Date.now() - terakhir < 30_000) return;
+    sessionStorage.setItem(kunci, String(Date.now()));
+  } catch { /* penyimpanan dimatikan */ }
+  e.preventDefault();
+  window.location.reload();
+});
+
 installDesktopLinkHandler();
 
 ReactDOM.createRoot(document.getElementById('root')).render(

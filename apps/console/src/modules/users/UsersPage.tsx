@@ -17,6 +17,7 @@ import { DataTable, type Column } from "@/components/DataTable";
 import { FilterSelect, SearchInput, Toolbar } from "@/components/misc";
 import { PageHeader } from "@/components/PageHeader";
 import { ReasonDialog } from "@/components/ReasonDialog";
+import { TautanAksesDialog, type TautanAkses } from "@/components/TautanAksesDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuth } from "@/lib/auth";
 import { useUrlState } from "@/lib/hooks";
@@ -51,14 +52,22 @@ export function UsersPage() {
     successMessage: (u) => `${u.full_name}: status menjadi ${USER_STATUS_LABELS[u.status]}`,
     onSuccess: close,
   });
+  const [tautan, setTautan] = useState<TautanAkses | null>(null);
   const reset = useConsoleMutation("users.sendPasswordReset", {
     invalidate: ["audit."],
-    successMessage: "Email reset password dikirim",
-    onSuccess: close,
+    successMessage: (r) => (r.sent ? "Email reset password dikirim" : "Email gagal — salin tautan reset"),
+    onSuccess: (r) => {
+      if (!r.sent && r.link && pending?.kind === "reset") setTautan({ email: pending.user.email, link: r.link, jenis: "reset" });
+      close();
+    },
   });
+  const [diundang, setDiundang] = useState<string>("");
   const resend = useConsoleMutation("users.resendInvite", {
     invalidate: ["audit."],
-    successMessage: "Undangan dikirim ulang",
+    successMessage: (r) => (r.sent ? "Undangan dikirim ulang" : "Email gagal — salin tautan undangan"),
+    onSuccess: (r) => {
+      if (!r.sent && r.link) setTautan({ email: diundang, link: r.link, jenis: "undangan" });
+    },
   });
 
   const columns: Column<ClinicUser>[] = [
@@ -96,7 +105,7 @@ export function UsersPage() {
       key: "actions",
       header: <span className="sr-only">Aksi</span>,
       align: "right",
-      cell: (u) => <UserActions user={u} onPick={setPending} onResend={() => resend.mutate({ userId: u.id })} can={can} />,
+      cell: (u) => <UserActions user={u} onPick={setPending} onResend={() => { setDiundang(u.email); resend.mutate({ userId: u.id }); }} can={can} />,
     },
   ];
 
@@ -179,6 +188,7 @@ export function UsersPage() {
           if (pending?.kind === "reset") reset.mutate({ userId: pending.user.id, reason });
         }}
       />
+      <TautanAksesDialog data={tautan} onClose={() => setTautan(null)} />
     </>
   );
 }

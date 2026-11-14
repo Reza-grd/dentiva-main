@@ -78,8 +78,9 @@ export type ActionResults = {
   "clinics.notes.add": ClinicNote;
   "users.list": Paginated<ClinicUser>;
   "users.setStatus": ClinicUser;
-  "users.resendInvite": { sent: true };
-  "users.sendPasswordReset": { sent: true };
+  /** sent=false: email gagal; `link` sekali pakai untuk dibagikan operator secara manual. */
+  "users.resendInvite": { sent: boolean; link?: string };
+  "users.sendPasswordReset": { sent: boolean; link?: string };
   "billing.plans.list": Plan[];
   "billing.plans.update": Plan;
   "billing.subscriptions.list": Paginated<SubscriptionListItem>;
