@@ -4,9 +4,10 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { financialService } from '../../services/financialService';
 import { paymentService } from '../../services/paymentService';
 import { parseDateLocal } from '../../utils/dateUtils';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Download, RefreshCw } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart3, Download, RefreshCw, Receipt } from 'lucide-react';
 import StatCard from '../ui/StatCard';
+import EmptyState from '../ui/EmptyState';
 
 const FinancialDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -76,7 +77,32 @@ const FinancialDashboard = () => {
     }).format(amount || 0);
   };
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+  // Angka ringkas untuk sumbu grafik: 1,2 jt · 850 rb
+  const ringkas = (v) => (v >= 1e6 ? `${(v / 1e6).toLocaleString('id-ID', { maximumFractionDigits: 1 })} jt` : v >= 1e3 ? `${Math.round(v / 1e3)} rb` : `${v}`);
+  const persen = (v) => `${(Number.isFinite(v) ? v : 0).toLocaleString('id-ID', { maximumFractionDigits: 1 })}%`;
+
+  const pendapatan = stats?.totalRevenue || 0;
+  const pengeluaran = stats?.totalExpenses || 0;
+  const laba = stats?.netIncome ?? pendapatan - pengeluaran;
+  const margin = stats?.profitMargin ?? (pendapatan > 0 ? (laba / pendapatan) * 100 : 0);
+  const rasioOperasional = pendapatan > 0 ? (pengeluaran / pendapatan) * 100 : 0;
+  const adaGrafik = revenueData.some((d) => d.revenue > 0);
+  const totalKategori = expensesByCategory.reduce((n, e) => n + (Number(e.total) || 0), 0);
+  const labelPeriode = dateRange === 'week' ? '7 hari terakhir' : dateRange === 'year' ? 'tahun ini' : 'bulan ini';
+
+  // Catatan singkat yang jujur terhadap data, tanpa pujian berlebihan.
+  const catatan = pendapatan === 0 && pengeluaran === 0
+    ? 'Belum ada transaksi pada periode ini.'
+    : pendapatan === 0
+      ? 'Ada pengeluaran, tetapi belum ada pendapatan tercatat pada periode ini.'
+      : margin >= 30
+        ? 'Margin laba sehat: lebih dari 30% pendapatan menjadi laba.'
+        : margin >= 15
+          ? 'Margin laba wajar. Tinjau pengeluaran terbesar untuk menaikkannya.'
+          : margin >= 0
+            ? 'Margin laba tipis. Pengeluaran menyerap sebagian besar pendapatan.'
+            : 'Pengeluaran melebihi pendapatan pada periode ini.';
+  const tooltipGaya = { backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', color: 'var(--color-text)', borderRadius: '8px', fontSize: '13px' };
 
   return (
     <div className="space-y-6">
@@ -84,8 +110,8 @@ const FinancialDashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center gap-3">
           <div>
-            <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Dashboard Keuangan</h1>
-            <p className="text-text-muted">Laporan dan analisa keuangan klinik</p>
+            <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Laporan Keuangan</h1>
+            <p className="text-text-muted">Pendapatan, pengeluaran, dan laba klinik, {labelPeriode}</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
@@ -144,180 +170,111 @@ const FinancialDashboard = () => {
         <LoadingSpinner />
       ) : (
         <>
-          {/* Financial Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <StatCard label="Total Pendapatan" value={formatCurrency(stats?.totalRevenue)} tone="baik" />
-
-            <StatCard label="Total Pengeluaran" value={formatCurrency(stats?.totalExpenses)} />
-
-            <StatCard label="Laba Bersih" value={formatCurrency(stats?.netIncome)} />
-
-            <StatCard label="Margin Laba" value={`${(stats?.profitMargin ?? 0).toFixed(1)}%`} />
+          {/* Ringkasan angka */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard label="Pendapatan" value={formatCurrency(pendapatan)} />
+            <StatCard label="Pengeluaran" value={formatCurrency(pengeluaran)} />
+            <StatCard label="Laba bersih" value={formatCurrency(laba)} tone={laba < 0 ? 'bahaya' : 'netral'} />
+            <StatCard label="Margin laba" value={persen(margin)} hint={pendapatan > 0 ? `Rasio operasional ${persen(rasioOperasional)}` : undefined} />
           </div>
 
-          {/* Revenue Chart */}
-          <div className="glass-panel p-6 mb-6">
-            <h3 className="text-lg font-semibold text-text-primary mb-6">
-              Grafik Pendapatan ({dateRange === 'week' ? '7 Hari Terakhir' : dateRange === 'year' ? '1 Tahun Terakhir' : '30 Hari Terakhir'})
-            </h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" opacity={0.5} />
-                <XAxis dataKey="date" style={{ fontSize: '12px' }} stroke="var(--color-muted)" tickLine={false} axisLine={false} />
-                <YAxis style={{ fontSize: '12px' }} stroke="var(--color-muted)" tickLine={false} axisLine={false} />
-                <Tooltip
-                  formatter={(value) => formatCurrency(value)}
-                  contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', color: 'var(--color-text)', borderRadius: '12px' }}
-                />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="var(--color-accent)"
-                  strokeWidth={3}
-                  name="Pendapatan"
-                  dot={{ fill: 'var(--color-accent)' }}
-                  activeDot={{ r: 8 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Grafik pendapatan vs pengeluaran & pengeluaran per kategori */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Bar Chart */}
-            <div className="glass-panel p-6">
-              <h3 className="text-lg font-semibold text-text-primary mb-6">Pendapatan vs Pengeluaran</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={[
-                  {
-                    name: 'Periode ini',
-                    Pendapatan: stats?.totalRevenue || 0,
-                    Pengeluaran: stats?.totalExpenses || 0,
-                    'Laba Bersih': stats?.netIncome || 0
-                  }
-                ]}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" opacity={0.5} />
-                  <XAxis dataKey="name" style={{ fontSize: '12px' }} stroke="var(--color-muted)" tickLine={false} axisLine={false} />
-                  <YAxis style={{ fontSize: '12px' }} stroke="var(--color-muted)" tickLine={false} axisLine={false} />
-                  <Tooltip
-                    formatter={(value) => formatCurrency(value)}
-                    contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', color: 'var(--color-text)', borderRadius: '12px' }}
-                    cursor={{fill: 'var(--color-bg)'}}
-                  />
-                  <Legend />
-                  <Bar dataKey="Pendapatan" fill="#059669" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Pengeluaran" fill="#dc2626" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="Laba Bersih" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
-                </BarChart>
+          {/* Tren pendapatan */}
+          <section className="rounded-xl border border-border bg-card p-5 md:p-6">
+            <div className="flex items-baseline justify-between gap-4 mb-4">
+              <h2 className="text-base font-semibold text-text-primary">Tren pendapatan</h2>
+              <span className="text-xs text-text-muted">{dateRange === 'week' ? '7 hari terakhir' : dateRange === 'year' ? '1 tahun terakhir' : '30 hari terakhir'} · harian</span>
+            </div>
+            {adaGrafik ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={revenueData} margin={{ top: 6, right: 6, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="isiPendapatan" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.14} />
+                      <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} stroke="var(--color-border)" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="var(--color-muted)" tickLine={false} axisLine={false} minTickGap={24} />
+                  <YAxis tick={{ fontSize: 12 }} stroke="var(--color-muted)" tickLine={false} axisLine={false} tickFormatter={ringkas} width={52} />
+                  <Tooltip formatter={(v) => [formatCurrency(v), 'Pendapatan']} contentStyle={tooltipGaya} />
+                  <Area type="monotone" dataKey="revenue" stroke="var(--color-accent)" strokeWidth={2} fill="url(#isiPendapatan)" dot={false} activeDot={{ r: 4 }} />
+                </AreaChart>
               </ResponsiveContainer>
-            </div>
+            ) : (
+              <EmptyState compact icon={BarChart3} title="Belum ada pendapatan pada periode ini" description="Grafik terisi otomatis setelah pembayaran pertama tercatat di kasir." />
+            )}
+          </section>
 
-            {/* Pie Chart - Expenses by Category */}
-            <div className="glass-panel p-6">
-              <h3 className="text-lg font-semibold text-text-primary mb-6">Pengeluaran per Kategori</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Laba rugi ringkas */}
+            <section className="lg:col-span-3 rounded-xl border border-border bg-card p-5 md:p-6">
+              <div className="flex items-baseline justify-between gap-4 mb-3">
+                <h2 className="text-base font-semibold text-text-primary">Laba rugi ringkas</h2>
+                <span className="text-xs text-text-muted">{labelPeriode}</span>
+              </div>
+              <dl className="text-sm tabular-nums">
+                <div className="flex items-center justify-between py-2.5">
+                  <dt className="text-text-muted">Pendapatan</dt>
+                  <dd className="text-text-primary">{formatCurrency(pendapatan)}</dd>
+                </div>
+                <div className="flex items-center justify-between py-2.5 border-t border-border">
+                  <dt className="text-text-muted">Pengeluaran</dt>
+                  <dd className="text-text-primary">({formatCurrency(pengeluaran)})</dd>
+                </div>
+                <div className="flex items-center justify-between py-3 border-t border-text-primary/60">
+                  <dt className="font-semibold text-text-primary">Laba bersih</dt>
+                  <dd className={`text-base font-semibold ${laba < 0 ? 'text-red-700 dark:text-red-400' : 'text-text-primary'}`}>{formatCurrency(laba)}</dd>
+                </div>
+              </dl>
+
+              {/* Porsi pengeluaran terhadap pendapatan */}
+              <div className="mt-3">
+                <div className="flex justify-between text-xs text-text-muted mb-1.5">
+                  <span>Pengeluaran terhadap pendapatan</span>
+                  <span className="tabular-nums">{pendapatan > 0 ? persen(rasioOperasional) : '–'}</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-border overflow-hidden" aria-hidden="true">
+                  <div className={`h-full rounded-full ${rasioOperasional > 100 ? 'bg-red-600' : 'bg-accent-primary'}`} style={{ width: `${Math.min(100, rasioOperasional)}%` }} />
+                </div>
+              </div>
+              <p className="mt-4 pt-4 border-t border-border text-sm text-text-muted">{catatan}</p>
+            </section>
+
+            {/* Pengeluaran per kategori */}
+            <section className="lg:col-span-2 rounded-xl border border-border bg-card p-5 md:p-6">
+              <div className="flex items-baseline justify-between gap-4 mb-4">
+                <h2 className="text-base font-semibold text-text-primary">Pengeluaran per kategori</h2>
+                {totalKategori > 0 && (
+                  <button type="button" onClick={() => navigate('/admin/pengeluaran')} className="text-xs font-medium text-accent-primary hover:underline">Lihat rincian</button>
+                )}
+              </div>
               {expensesByCategory.length === 0 ? (
-                <p className="text-center text-text-muted py-12">Tidak ada data pengeluaran</p>
+                <EmptyState
+                  compact icon={Receipt} title="Belum ada pengeluaran"
+                  description="Catat pengeluaran klinik agar rinciannya tampil di sini."
+                  action={<button type="button" onClick={() => navigate('/admin/pengeluaran')} className="text-sm font-medium text-accent-primary hover:underline">Catat pengeluaran</button>}
+                />
               ) : (
-                <>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
-                      <Pie
-                        data={expensesByCategory}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ kategori, percent }) => `${kategori} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={80}
-                        innerRadius={60}
-                        paddingAngle={5}
-                        fill="#8884d8"
-                        dataKey="total"
-                      >
-                        {expensesByCategory.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => formatCurrency(value)} contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', color: 'var(--color-text)', borderRadius: '12px' }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="mt-4 space-y-2">
-                    {expensesByCategory.map((expense, index) => (
-                      <div key={index} className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                          ></div>
-                          <span className="text-text-primary">{expense.kategori}</span>
+                <ul className="space-y-3.5">
+                  {[...expensesByCategory].sort((a, b) => (Number(b.total) || 0) - (Number(a.total) || 0)).map((e) => {
+                    const porsi = totalKategori > 0 ? ((Number(e.total) || 0) / totalKategori) * 100 : 0;
+                    return (
+                      <li key={e.kategori || 'lainnya'}>
+                        <div className="flex items-baseline justify-between gap-3 text-sm">
+                          <span className="text-text-primary truncate">{e.kategori || 'Lainnya'}</span>
+                          <span className="tabular-nums text-text-primary whitespace-nowrap">
+                            {formatCurrency(e.total)} <span className="text-xs text-text-muted ml-1">{persen(porsi)}</span>
+                          </span>
                         </div>
-                        <span className="font-semibold text-text-primary">{formatCurrency(expense.total)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
+                        <div className="mt-1.5 h-1 rounded-full bg-border overflow-hidden" aria-hidden="true">
+                          <div className="h-full rounded-full bg-accent-primary/70" style={{ width: `${porsi}%` }} />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               )}
-            </div>
-          </div>
-
-          {/* Financial Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-panel p-6 bg-emerald-500/5 border border-emerald-500/20">
-              <h3 className="font-semibold text-lg mb-4 text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
-                💰 Financial Health
-              </h3>
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Rasio Operasional:</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    {stats?.totalRevenue > 0
-                      ? ((stats?.totalExpenses / stats?.totalRevenue) * 100).toFixed(1)
-                      : 0}%
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Margin Laba:</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    {stats?.profitMargin?.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="pt-4 border-t border-emerald-500/20">
-                  <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                    {stats?.profitMargin > 30
-                      ? '✅ Performa keuangan sangat baik!'
-                      : stats?.profitMargin > 15
-                      ? '👍 Performa keuangan baik'
-                      : '⚠️ Perlu optimasi pengeluaran'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-panel p-6 bg-accent-primary/5 border border-accent-primary/20">
-              <h3 className="font-semibold text-lg mb-4 text-accent-primary flex items-center gap-2">
-                📊 Quick Stats
-              </h3>
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Total Pendapatan:</span>
-                  <span className="font-semibold text-accent-primary">
-                    {formatCurrency(stats?.totalRevenue)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-muted">Total Pengeluaran:</span>
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
-                    {formatCurrency(stats?.totalExpenses)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pt-4 border-t border-accent-primary/20">
-                  <span className="text-text-primary font-semibold">Laba Bersih:</span>
-                  <span className="font-semibold text-lg text-accent-primary">
-                    {formatCurrency(stats?.netIncome)}
-                  </span>
-                </div>
-              </div>
-            </div>
+            </section>
           </div>
         </>
       )}
