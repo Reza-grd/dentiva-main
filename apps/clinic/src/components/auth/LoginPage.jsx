@@ -129,8 +129,8 @@ const LoginPage = () => {
         {/* Hero text */}
         <div className="relative max-w-lg z-10">
           <h1 className="text-[44px] font-normal text-white leading-[1.1] mb-5">
-            Rekam medis gigi yang rapi, aman,{' '}
-            <em className="text-[#D9B36B]">dan siap diaudit.</em>
+            Dental Klinik yang tertata,{' '}
+            <em className="text-[#D9B36B]">dari pasien datang hingga laporan bulanan.</em>
           </h1>
 
           <p className="text-base text-white/70 leading-relaxed mb-10 max-w-md">
