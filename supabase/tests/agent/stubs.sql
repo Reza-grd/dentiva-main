@@ -18,6 +18,8 @@ create table auth.users (
   email_confirmed_at timestamptz, last_sign_in_at timestamptz, encrypted_password text
 );
 create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid);
+-- Faktor MFA (dibaca public.mfa_terpenuhi sejak migration 20261115170000)
+create table auth.mfa_factors (id uuid primary key default gen_random_uuid(), user_id uuid, factor_type text default 'totp', status text);
 create function auth.uid() returns uuid language sql stable as
 $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 create function auth.jwt() returns jsonb language sql stable as
