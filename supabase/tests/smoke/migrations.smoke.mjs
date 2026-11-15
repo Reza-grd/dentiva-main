@@ -528,5 +528,13 @@ await expectError(`select public.staf_cabut_sesi('${uD}')`, /permission denied|4
 await logout();
 ok(Number((await one(`select public.staf_cabut_sesi('${uD}') as n`)).n) >= 0, "server (service role) bisa mencabut sesi staf");
 
+// Email profil disamakan dengan email Auth saat login (20261115150000)
+await db.exec(`update auth.users set email = 'b-baru@x.test' where id = '${uB}'`);
+await loginAs(uB);
+await one(`select public.record_login() as r`);
+ok((await one(`select email from public.users where id = '${uB}'`)).email === "b-baru@x.test", "record_login menyamakan email profil dengan email Auth yang sudah dikonfirmasi");
+await logout();
+await db.exec(`update auth.users set email = 'b@x.test' where id = '${uB}'; update public.users set email = 'b@x.test' where id = '${uB}'`);
+
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

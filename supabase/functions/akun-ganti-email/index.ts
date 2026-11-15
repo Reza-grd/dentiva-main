@@ -6,8 +6,9 @@
  *   2. Password SAAT INI diverifikasi ke Auth (grant_type=password); sesi tambahan yang
  *      tercipta langsung ditutup (scope=local) agar tidak menumpuk.
  *   3. Email baru harus valid, berbeda, dan belum dipakai akun lain.
- *   4. Email Auth diganti (langsung terkonfirmasi — server belum punya SMTP untuk tautan konfirmasi)
- *      dan public.users.email disamakan; perubahan tercatat oleh trigger audit tabel users.
+ *   4. Permintaan ganti email diteruskan ke Auth ATAS NAMA PENGGUNA (PUT /auth/v1/user). Auth mengirim
+ *      tautan konfirmasi ke email LAMA dan email BARU (secure email change); email baru berlaku setelah
+ *      kedua tautan diklik. public.users.email disamakan saat login berikutnya (record_login).
  * Password tidak pernah dicatat. Batas percobaan password mengikuti pembatas Auth (rate limit token).
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
@@ -82,16 +83,21 @@ Deno.serve(async (req) => {
   if (cekErr) return json(req, 500, { error: "Email baru belum bisa diperiksa. Coba lagi." })
   if (terpakai === true) return json(req, 409, { error: "Email baru sudah dipakai akun lain." })
 
-  const { error: updErr } = await admin.auth.admin.updateUserById(user.id, { email: emailBaru, email_confirm: true })
-  if (updErr) {
-    console.error("[akun-ganti-email] auth:", updErr.message)
-    return json(req, 500, { error: "Email gagal diganti. Coba lagi." })
-  }
-  const { error: profilErr } = await admin.from("users").update({ email: emailBaru }).eq("id", user.id)
-  if (profilErr) {
-    // Email masuk (Auth) sudah berganti; hanya tampilan profil yang tertinggal — dicatat untuk ditindaklanjuti.
-    console.error("[akun-ganti-email] profil gagal disamakan:", profilErr.message)
+  // Minta Auth mengirim tautan konfirmasi (ke email lama & baru) memakai token pengguna sendiri.
+  const asal = req.headers.get("Origin") ?? ""
+  // Hanya alamat web yang terdaftar di daftar redirect Auth; aplikasi desktop memakai alamat web.
+  const appUrl = ["https://dentiva-main.vercel.app", "https://app.dentiva.id", "https://dentiva.id"].includes(asal) ? asal : "https://dentiva-main.vercel.app"
+  const minta = await fetch(`${url}/auth/v1/user?redirect_to=${encodeURIComponent(`${appUrl}/profil?email=dikonfirmasi`)}`, {
+    method: "PUT",
+    headers: { apikey: anonKey, Authorization: authHeader, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: emailBaru }),
+  })
+  if (!minta.ok) {
+    const isi = await minta.json().catch(() => ({}))
+    console.error("[akun-ganti-email] auth:", minta.status, isi?.error_code ?? isi?.msg ?? "")
+    if (minta.status === 429) return json(req, 429, { error: "Terlalu banyak permintaan email. Coba lagi beberapa menit lagi." })
+    return json(req, 502, { error: "Email konfirmasi gagal dikirim. Coba lagi sebentar lagi." })
   }
 
-  return json(req, 200, { ok: true, email: emailBaru })
+  return json(req, 200, { ok: true, menunggu_konfirmasi: true, email: emailBaru })
 })

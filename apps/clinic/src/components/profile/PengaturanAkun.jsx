@@ -23,6 +23,17 @@ function GantiEmail() {
   const [lihat, setLihat] = useState(false);
   const [proses, setProses] = useState(false);
   const [galat, setGalat] = useState('');
+  const [menunggu, setMenunggu] = useState(user?.new_email || '');
+  // Kembali dari tautan konfirmasi email (?email=dikonfirmasi): Auth menaruh pesan di hash URL.
+  const [kembali] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    const q = new URLSearchParams(window.location.search);
+    if (q.get('email') !== 'dikonfirmasi') return '';
+    const h = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    if (h.get('error_description')) return `galat:${h.get('error_description')}`;
+    return h.get('message') ? 'satu' : 'selesai';
+  });
+  useEffect(() => { setMenunggu(user?.new_email || ''); }, [user?.new_email]);
 
   const kirim = async (e) => {
     e.preventDefault();
@@ -36,7 +47,8 @@ function GantiEmail() {
     setProses(false);
     if (!r.ok) { setGalat(r.error); return; }
     setPassword(''); setEmail(''); setBuka(false);
-    toast.success(`Email diganti menjadi ${r.email}. Gunakan email ini saat masuk berikutnya.`);
+    setMenunggu(r.email);
+    toast.success('Tautan konfirmasi dikirim ke email lama dan email baru.');
   };
 
   return (
@@ -55,6 +67,18 @@ function GantiEmail() {
           </button>
         )}
       </div>
+      {kembali && (
+        <p role="status" className={`mx-5 mb-4 rounded-lg px-3 py-2 text-sm ${kembali.startsWith('galat:') ? 'bg-red-500/10 text-red-700 dark:text-red-400' : 'bg-accent-primary/10 text-text-primary'}`}>
+          {kembali === 'satu' && 'Satu tautan sudah dikonfirmasi. Klik juga tautan di email yang satunya untuk menyelesaikan pergantian.'}
+          {kembali === 'selesai' && 'Konfirmasi diterima. Gunakan email baru saat masuk berikutnya.'}
+          {kembali.startsWith('galat:') && `Tautan tidak berlaku: ${kembali.slice(6)}. Ulangi ganti email bila perlu.`}
+        </p>
+      )}
+      {menunggu && !buka && (
+        <p className="mx-5 mb-4 rounded-lg bg-accent-primary/10 px-3 py-2 text-sm text-text-primary">
+          Menunggu konfirmasi ke <span className="font-semibold">{menunggu}</span>. Klik tautan yang kami kirim ke email lama <b>dan</b> email baru; email baru berlaku setelah keduanya dikonfirmasi.
+        </p>
+      )}
       {buka && (
         <form onSubmit={kirim} className="space-y-4 border-t border-border p-5" noValidate>
           <div>
@@ -71,7 +95,7 @@ function GantiEmail() {
             </div>
           </div>
           {galat && <p role="alert" className="text-sm text-red-700 dark:text-red-400">{galat}</p>}
-          <p className="text-xs text-text-muted">Setelah diganti, gunakan email baru untuk masuk. Password tidak berubah.</p>
+          <p className="text-xs text-text-muted">Kami mengirim tautan konfirmasi ke email lama dan email baru. Email baru berlaku setelah keduanya diklik. Password tidak berubah.</p>
           <div className="flex justify-end gap-2">
             <button type="button" onClick={() => { setBuka(false); setGalat(''); setPassword(''); }} className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-primary hover:bg-background">Batal</button>
             <button type="submit" disabled={proses} className="inline-flex items-center gap-2 rounded-lg bg-accent-primary px-4 py-2 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60">

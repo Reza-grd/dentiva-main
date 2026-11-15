@@ -17,7 +17,7 @@ export const akunService = {
       const body = await res.json().catch(() => ({}));
       if (!res.ok) return { ok: false, error: body.error || 'Email gagal diganti.' };
       await supabase.auth.refreshSession().catch(() => {});
-      return { ok: true, email: body.email };
+      return { ok: true, email: body.email, menungguKonfirmasi: body.menunggu_konfirmasi === true };
     } catch {
       return { ok: false, error: 'Tidak dapat terhubung ke server. Periksa koneksi Anda.' };
     }
