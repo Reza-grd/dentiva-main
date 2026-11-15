@@ -23,9 +23,13 @@ describe('Pembayaran langganan manual', () => {
     expect(wa.jenis).toBe('wa');
     expect(wa.href.startsWith('https://wa.me/6281234567890?text=')).toBe(true);
     expect(decodeURIComponent(wa.href.split('text=')[1])).toContain('Paket: Starter (bulanan)');
-    const mail = tautanKonfirmasi(data, { wa: '', email: 'support@dentiva.co.id' });
+    const mail = tautanKonfirmasi(data, { wa: '', email: 'info@dentiva.id' });
     expect(mail.jenis).toBe('email');
-    expect(mail.href.startsWith('mailto:support@dentiva.co.id?')).toBe(true);
+    // Tombol utama: Gmail web (mailto: sering membuka halaman kosong tanpa aplikasi email bawaan)
+    expect(mail.href.startsWith('https://mail.google.com/mail/?view=cm')).toBe(true);
+    expect(decodeURIComponent(mail.href)).toContain('to=info@dentiva.id');
+    expect(mail.mailto.startsWith('mailto:info@dentiva.id?')).toBe(true);
+    expect(mail.isi).toContain('Paket: Starter (bulanan)');
   });
 
   it('rekening dianggap siap hanya bila bank, nomor, dan atas nama terisi', () => {

@@ -20,6 +20,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import StandarStat from '../ui/StatCard';
 import EmptyState from '../ui/EmptyState';
 import { namaPanggilan } from '../../utils/stringUtils';
+import PengingatLangganan from '../billing/PengingatLangganan';
 
 // ─── Custom Tooltip ──────────────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label, isCurrency }) => {
@@ -192,6 +193,9 @@ const AdminDashboard = () => {
               Muat ulang
             </button>
           </div>
+
+          {/* ── Pengingat langganan (uji coba / tunggakan) ───────── */}
+          <PengingatLangganan />
 
           {/* ── Catatan Asisten AI (sapaan + laporan singkat) ─────── */}
           <AiBriefCard variant="admin" />

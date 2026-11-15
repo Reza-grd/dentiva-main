@@ -23,7 +23,7 @@ export const BILLING = {
   rekening: teks(env.VITE_BILLING_REKENING),
   atasNama: teks(env.VITE_BILLING_ATAS_NAMA),
   wa: nomorWa(env.VITE_BILLING_WA),
-  email: teks(env.VITE_BILLING_EMAIL) || 'support@dentiva.co.id',
+  email: teks(env.VITE_BILLING_EMAIL) || 'info@dentiva.id',
 };
 
 export const rekeningSiap = (b = BILLING) => Boolean(b.bank && b.rekening && b.atasNama);
@@ -60,5 +60,14 @@ export function pesanKonfirmasi({ klinik, paket, siklus, nominal, admin, invoice
 export function tautanKonfirmasi(data, b = BILLING) {
   const isi = pesanKonfirmasi(data);
   if (b.wa) return { jenis: 'wa', href: `https://wa.me/${b.wa}?text=${encodeURIComponent(isi)}` };
-  return { jenis: 'email', href: `mailto:${b.email}?subject=${encodeURIComponent(`Konfirmasi langganan Dentiva — ${data.klinik || 'klinik'}`)}&body=${encodeURIComponent(isi)}` };
+  const subjek = `Konfirmasi langganan Dentiva — ${data.klinik || 'klinik'}`;
+  // Tautan mailto: sering membuka halaman kosong bila komputer tidak punya aplikasi email bawaan,
+  // jadi tombol utama memakai Gmail versi web; mailto tetap tersedia sebagai pilihan lain.
+  return {
+    jenis: 'email',
+    href: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(b.email)}&su=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isi)}`,
+    mailto: `mailto:${b.email}?subject=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isi)}`,
+    alamat: b.email,
+    isi,
+  };
 }

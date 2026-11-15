@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import PengingatLangganan from '../billing/PengingatLangganan';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { userProfile } = useAuth();
@@ -161,6 +162,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           })}
         </nav>
 
+        {/* Sisa uji coba / tunggakan — hanya manajer klinik */}
+        <PengingatLangganan varian="kartu" />
       </aside>
     </>
   );

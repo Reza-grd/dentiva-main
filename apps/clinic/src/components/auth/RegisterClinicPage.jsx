@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { simpanNiatBeli } from '../../utils/midtransSnap';
-import { Building2, MailCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { Building2, MailCheck, AlertCircle, Eye, EyeOff, Check } from 'lucide-react';
 import { Button, Card, CardContent, Input } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -53,6 +53,9 @@ const RegisterClinicPage = () => {
   // Datang dari tombol "Pilih paket" di dentiva.id (?paket=pro&siklus=yearly): ingat untuk checkout.
   const [searchParams] = useSearchParams();
   useEffect(() => { simpanNiatBeli(searchParams); }, [searchParams]);
+  const paketDipilih = (searchParams.get('paket') || '').trim().toLowerCase();
+  const namaPaket = { starter: 'Starter', pro: 'Pro', enterprise: 'Enterprise' }[paketDipilih] || '';
+  const siklusDipilih = searchParams.get('siklus') === 'yearly' ? 'Tahunan' : 'Bulanan';
   const { signUpClinic } = useAuth();
   const [form, setForm] = useState({
     clinicName: '', clinicPhone: '', city: '', province: '', ownerName: '', ownerPhone: '',
@@ -130,9 +133,21 @@ const RegisterClinicPage = () => {
         </div>
         <h1 className="text-2xl font-medium text-text-primary">Daftarkan klinik Anda</h1>
         <p className="text-sm text-text-muted mt-1">
-          Setelah diverifikasi tim Dentiva (biasanya 1×24 jam kerja), klinik Anda mendapat masa uji coba gratis 14
-          hari.
+          {namaPaket
+            ? 'Isi data klinik dan akun pemilik. Setelah email terverifikasi, Anda langsung menyelesaikan pembayaran paket dan klinik siap dipakai.'
+            : 'Setelah diverifikasi tim Dentiva (biasanya 1×24 jam kerja), klinik Anda mendapat masa uji coba gratis 14 hari.'}
         </p>
+        {namaPaket && (
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-accent-primary/25 bg-accent-primary/5 px-4 py-3">
+            <div className="flex items-center gap-2.5">
+              <Check size={16} className="text-accent-primary" aria-hidden="true" />
+              <p className="text-sm text-text-primary">
+                Paket dipilih: <span className="font-semibold">{namaPaket}</span> <span className="text-text-muted">· {siklusDipilih}</span>
+              </p>
+            </div>
+            <a href="https://dentiva.id/#paket" className="text-xs font-medium text-accent-primary hover:underline">Ganti paket</a>
+          </div>
+        )}
       </div>
 
       {serverError && (

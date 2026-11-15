@@ -14,7 +14,7 @@ const PENJUAL = {
   nama: teks(env.VITE_INVOICE_NAMA) || "PT Dentiva Teknologi Nusantara",
   alamat: teks(env.VITE_INVOICE_ALAMAT).split("|").map((x) => x.trim()).filter(Boolean),
   npwp: teks(env.VITE_INVOICE_NPWP),
-  email: teks(env.VITE_BILLING_EMAIL) || "support@dentiva.co.id",
+  email: teks(env.VITE_BILLING_EMAIL) || "info@dentiva.id",
 };
 const PEMBAYARAN = {
   bank: teks(env.VITE_BILLING_BANK),

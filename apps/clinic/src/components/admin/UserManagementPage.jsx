@@ -201,7 +201,7 @@ const UserManagementPage = () => {
                           }`}
                           title={
                             u.status === 'suspended'
-                              ? 'Ditangguhkan oleh tim Dentiva — hubungi support@dentiva.co.id'
+                              ? 'Ditangguhkan oleh tim Dentiva — hubungi info@dentiva.id'
                               : isActive ? "Nonaktifkan Akses" : "Aktifkan Akses"
                           }
                           aria-label={

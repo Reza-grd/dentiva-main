@@ -147,8 +147,22 @@ export default function ManualPaymentModal({ plan, siklus, nominal, klinik, admi
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-primary px-4 py-3 text-sm font-semibold text-white shadow-lg hover:opacity-95 transition-opacity"
         >
           {konfirmasi.jenis === 'wa' ? <MessageCircle size={17} /> : <Mail size={17} />}
-          {konfirmasi.jenis === 'wa' ? 'Konfirmasi via WhatsApp' : 'Konfirmasi via email'}
+          {konfirmasi.jenis === 'wa' ? 'Konfirmasi via WhatsApp' : 'Kirim konfirmasi via Gmail'}
         </a>
+        {konfirmasi.jenis === 'email' && (
+          <div className="mt-3 rounded-2xl border border-border px-4 py-3 text-sm">
+            <p className="text-text-muted">
+              Atau kirim email ke <span className="font-medium text-text-primary">{konfirmasi.alamat}</span> dari aplikasi email Anda:
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Salin nilai={konfirmasi.alamat} label="alamat email" />
+              <Salin nilai={konfirmasi.isi} label="isi pesan" />
+              <a href={konfirmasi.mailto} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-accent-primary hover:bg-accent-primary/10">
+                <Mail size={13} /> Aplikasi email lain
+              </a>
+            </div>
+          </div>
+        )}
         <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-text-muted">
           <ShieldCheck size={13} /> Pastikan nama penerima sesuai sebelum mentransfer.
         </p>
