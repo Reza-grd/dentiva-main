@@ -91,7 +91,8 @@ biasa SATUSEHAT_ENVIRONMENT "sandbox atau production" "sandbox"
 
 printf '\n\033[1;36m— Rahasia (tidak tampil saat diketik) —\033[0m\n'
 rahasia GEMINI_API_KEY "Google AI Studio → API keys (untuk asisten Denti)"
-rahasia MIDTRANS_SERVER_KEY "Midtrans Dashboard → Settings → Access Keys → Server Key"
+rahasia MIDTRANS_SERVER_KEY "Midtrans Dashboard → Settings → Access Keys → General Credentials → Server Key (izin Snap Checkout: Write, Core API: Read)"
+rahasia MIDTRANS_SIGNATURE_KEY "Midtrans Dashboard → Settings → Access Keys → General Credentials → Signature Secret Key (untuk memeriksa notifikasi)"
 rahasia WHAPI_TOKEN "Whapi.cloud → Channel → Token"
 rahasia WHATSAPP_VERIFY_TOKEN "token verifikasi webhook WhatsApp (sama dengan yang diisi di pengaturan webhook)"
 rahasia WHATSAPP_APP_SECRET "App Secret Meta (jika dipakai; Enter untuk lewati)"
