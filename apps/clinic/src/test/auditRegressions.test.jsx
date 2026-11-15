@@ -45,12 +45,12 @@ beforeEach(() => rpc.mockReset());
 
 describe('Halaman Pricing (#2 crash useToast @dentiva/ui)', () => {
   it('tampil di dalam ToastProvider aplikasi tanpa error', async () => {
-    render(<ToastProvider><PricingPage /></ToastProvider>);
+    render(<MemoryRouter><ToastProvider><PricingPage /></ToastProvider></MemoryRouter>);
     expect(await screen.findByText('Starter')).toBeInTheDocument();
   });
 
   it('Enterprise ditampilkan "tanpa batas", bukan angka 9999, dan tanpa klaim jaringan klinik', async () => {
-    render(<ToastProvider><PricingPage /></ToastProvider>);
+    render(<MemoryRouter><ToastProvider><PricingPage /></ToastProvider></MemoryRouter>);
     expect(await screen.findByText('Pengguna tanpa batas')).toBeInTheDocument();
     expect(screen.queryByText(/jaringan klinik/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/9999/)).not.toBeInTheDocument();

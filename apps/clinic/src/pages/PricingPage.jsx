@@ -20,12 +20,15 @@ import { Check, ShieldCheck, Zap, Sparkles, HelpCircle } from "lucide-react";
 import { useClinicSettingsOptional } from "../contexts/ClinicSettingsContext";
 import ManualPaymentModal from "../components/settings/ManualPaymentModal";
 import { BILLING } from "../utils/billingConfig";
+import { mulaiCheckout } from "../services/checkoutService";
+import { useNavigate } from "react-router-dom";
 
 // Batas ≥ 9999 di subscription_plans berarti "tanpa batas".
 const isUnlimited = (n) => Number(n) >= 9999;
 
 export default function PricingPage() {
   const { userProfile } = useAuth();
+  const navigate = useNavigate();
   const { plan: currentPlan, subscription } = usePermission();
   const { addToast } = useToast();
   const toast = ({ title, description, variant = "info" }) =>
@@ -84,36 +87,15 @@ export default function PricingPage() {
 
     try {
       setProcessingPlanId(planId);
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-
-      const { data, error } = await supabase.functions.invoke(
-        "midtrans-create-transaction",
-        {
-          body: { plan_id: planId, billing_cycle: billingCycle },
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || "Gagal membuat transaksi");
+      const { orderId, hasil } = await mulaiCheckout(planId, billingCycle);
+      if (hasil === "close") {
+        toast({ title: "Pembayaran belum selesai", description: "Jendela pembayaran ditutup.", variant: "info" });
+        return;
       }
-
-      if (data.redirect_url) {
-        toast({
-          title: "Mengarahkan ke Pembayaran...",
-          description: "Membuka gerbang pembayaran Midtrans Snap.",
-          variant: "info",
-        });
-        window.location.href = data.redirect_url;
-      }
+      navigate(`/langganan/status?order_id=${encodeURIComponent(orderId)}`);
     } catch (err) {
       console.error("Payment initiation error:", err);
-      toast({
-        title: "Gagal Memulai Pembayaran",
-        description: err.message,
-        variant: "error",
-      });
+      toast({ title: "Gagal Memulai Pembayaran", description: err.message, variant: "error" });
     } finally {
       setProcessingPlanId(null);
     }

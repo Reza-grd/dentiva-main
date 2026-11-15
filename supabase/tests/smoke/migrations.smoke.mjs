@@ -391,6 +391,23 @@ ok(rc.slug === "klinik-senyum-ceria" && rc.role === "admin", "slug dibuat dari n
 await loginAs(uR);
 ok((await one("select public.get_user_clinic_id() as c")).c === null, "klinik pending belum punya akses data (RLS)");
 ok((await one("select has_access from public.get_my_account_status()")).has_access === false, "status akun: menunggu (has_access=false)");
+const cPlans = await q("select * from public.get_checkout_plans()");
+ok(cPlans.length >= 1, "klinik pending bisa melihat paket untuk checkout", cPlans.length);
+await logout();
+// Checkout: bayar = klinik pending langsung aktif
+const cPlan = cPlans[0];
+await one(`select * from public.billing_register_midtrans_order('ORD-CK', '${regId}', '${cPlan.id}', 'monthly')`);
+await loginAs(uR);
+ok((await one("select status from public.get_checkout_status('ORD-CK')")).status === "pending", "pemilik melihat status order miliknya");
+await logout();
+await loginAs(uA);
+ok((await q("select * from public.get_checkout_status('ORD-CK')")).length === 0, "klinik lain tidak melihat order ini");
+await logout();
+ok((await one(`select public.billing_settle_midtrans_order('ORD-CK', 'success', ${Math.round(Number(cPlan.price_monthly))}, '{}') as r`)).r === "confirmed", "checkout klinik pending terkonfirmasi");
+const ck = await one(`select status, activated_at from public.clinics where id = '${regId}'`);
+ok(ck.status === "active" && ck.activated_at !== null, "pembayaran mengaktifkan klinik pending", ck);
+await loginAs(uR);
+ok((await one("select has_access from public.get_my_account_status()")).has_access === true, "setelah bayar pemilik langsung punya akses");
 await logout();
 await db.exec(`update auth.users set email_confirmed_at = now() where id = '${uB}'`);
 await loginAs(uB);

@@ -37,6 +37,7 @@ const CostingDashboard = lazy(() => import('./components/costing/CostingDashboar
 const TreatmentMaster = lazy(() => import('./components/treatments/TreatmentMaster'));
 const LaporanPage = lazy(() => import('./components/reports/LaporanPage'));
 const SettingsPage = lazy(() => import('./components/settings/SettingsPage'));
+const CheckoutStatusPage = lazy(() => import('./pages/CheckoutStatusPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ProfilePage = lazy(() => import('./components/profile/ProfilePage'));
 const DoctorProfilePage = lazy(() => import('./components/profile/DoctorProfilePage'));
@@ -71,6 +72,11 @@ function App() {
   }
 
   // Pendaftar mandiri yang sudah verifikasi email tapi belum mengirim data klinik.
+  // Status pembayaran langganan: harus bisa dibuka klinik yang masih menunggu aktivasi.
+  if (user && location.pathname === '/langganan/status') {
+    return <Suspense fallback={<LoadingSpinner fullScreen />}><CheckoutStatusPage /></Suspense>;
+  }
+
   if (user && !userProfile && !accountStatus && isPendingSignup(user)) {
     return <CompleteRegistration />;
   }

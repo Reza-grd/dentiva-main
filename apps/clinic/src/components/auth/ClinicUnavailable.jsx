@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Lock, RefreshCw, LogOut } from 'lucide-react';
 import { Button, Card, CardContent } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
+import CheckoutPanel from '../billing/CheckoutPanel';
+import { BILLING } from '../../utils/billingConfig';
 
 const COPY = {
   suspended: {
@@ -38,6 +40,24 @@ const ClinicUnavailable = () => {
     }
   };
 
+  // Pendaftar baru (klinik 'pending'): bisa langsung bayar agar aktif tanpa menunggu verifikasi.
+  if (accountStatus?.clinic_status === 'pending' && accountStatus?.role === 'admin' && BILLING.mode === 'midtrans') {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F17] px-4 py-8 flex flex-col items-center">
+        <CheckoutPanel
+          subjudul={`${accountStatus.clinic_name ? accountStatus.clinic_name + ' sudah terdaftar. ' : ''}Bayar langganan sekarang dan klinik langsung aktif — tanpa menunggu verifikasi.`}
+        />
+        <div className="mt-8 text-center text-xs text-gray-500 dark:text-gray-400 space-y-2 max-w-md">
+          <p>Belum ingin membayar? Pendaftaran Anda tetap kami verifikasi (1×24 jam kerja) untuk masa uji coba.</p>
+          <div className="flex justify-center gap-4">
+            <button type="button" onClick={recheck} className="underline">{checking ? 'Memeriksa…' : 'Periksa status'}</button>
+            <button type="button" onClick={signOut} className="underline">Keluar</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B0F17] p-4">
       <Card className="w-full max-w-md">
@@ -58,7 +78,7 @@ const ClinicUnavailable = () => {
           )}
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
             Hubungi tim Dentiva untuk bantuan:{' '}
-            <a href="mailto:support@dentiva.co.id" className="underline">support@dentiva.co.id</a>
+            <a href="mailto:info@dentiva.id" className="underline">info@dentiva.id</a>
           </p>
           <div className="flex gap-3 w-full">
             <Button onClick={recheck} variant="outline" className="flex-1 gap-2" isLoading={checking}>

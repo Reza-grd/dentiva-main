@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { simpanNiatBeli } from '../../utils/midtransSnap';
 import { Building2, MailCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Button, Card, CardContent, Input } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
@@ -49,6 +50,9 @@ export const Field = ({ label, error, required, children }) => (
  * email terverifikasi dan menunggu persetujuan tim Dentiva (status 'pending').
  */
 const RegisterClinicPage = () => {
+  // Datang dari tombol "Pilih paket" di dentiva.id (?paket=pro&siklus=yearly): ingat untuk checkout.
+  const [searchParams] = useSearchParams();
+  useEffect(() => { simpanNiatBeli(searchParams); }, [searchParams]);
   const { signUpClinic } = useAuth();
   const [form, setForm] = useState({
     clinicName: '', clinicPhone: '', city: '', province: '', ownerName: '', ownerPhone: '',
