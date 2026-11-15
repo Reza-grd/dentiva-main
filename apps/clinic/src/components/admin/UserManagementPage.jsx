@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { userManagementService } from '../../services/userManagementService';
 import { useToast } from '../common/ToastNotification';
 import ConfirmDialog from '../common/ConfirmDialog';
-import { UserPlus, UserX, UserCheck, RefreshCw } from 'lucide-react';
+import { UserPlus, UserX, UserCheck, RefreshCw, KeyRound } from 'lucide-react';
+import AturPasswordStafModal from './AturPasswordStafModal';
+import { useAuth } from '../../contexts/AuthContext';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userManagementSchema } from '../../utils/validationSchemas';
@@ -15,6 +17,8 @@ const UserManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const toast = useToast();
+  const { userProfile } = useAuth();
+  const [aturPw, setAturPw] = useState(null); // staf yang passwordnya diatur ulang
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting: formSubmitting } } = useForm({
     resolver: zodResolver(userManagementSchema),
@@ -161,7 +165,7 @@ const UserManagementPage = () => {
                           disabled={!isActive}
                         >
                           <option value="admin">Admin</option>
-                          {/* Peran dokter hanya diberikan tim Dentiva (verifikasi) — tampil hanya bila sudah dokter */}
+                          {/* Peran dokter diberikan saat membuat akun baru; mengubah akun lama menjadi dokter ditolak server */}
                           {u.role === 'dokter' && <option value="dokter">Dokter</option>}
                           <option value="resepsionis">Resepsionis</option>
                         </select>
@@ -175,7 +179,17 @@ const UserManagementPage = () => {
                           {statusLabel}
                         </span>
                       </td>
-                      <td className="p-4 text-right">
+                      <td className="p-4 text-right whitespace-nowrap">
+                        {u.id !== userProfile?.id && u.status !== 'suspended' && (
+                          <button
+                            onClick={() => setAturPw(u)}
+                            className="mr-2 p-2 rounded-xl border border-border text-text-muted hover:text-text-primary hover:bg-background transition-colors"
+                            title="Atur ulang password"
+                            aria-label={`Atur ulang password ${u.full_name}`}
+                          >
+                            <KeyRound size={18} />
+                          </button>
+                        )}
                         <button
                           onClick={() => toggleStatus(u)}
                           // Status 'suspended' dipasang tim Dentiva; hanya bisa dilepas dari Dentiva Console.
@@ -317,6 +331,21 @@ const UserManagementPage = () => {
         onClose={() => setConfirmDialog({ isOpen: false, user: null, action: null })}
         onConfirm={executeToggleStatus}
       />
+
+      {aturPw && (
+        <AturPasswordStafModal
+          staf={aturPw}
+          onClose={() => setAturPw(null)}
+          onSubmit={async (password) => {
+            const r = await userManagementService.setStaffPassword(aturPw.id, password);
+            if (r.success) {
+              toast.success(`Password ${aturPw.full_name} sudah diatur. Sampaikan password baru secara langsung.`);
+              setAturPw(null);
+            }
+            return r;
+          }}
+        />
+      )}
     </div>
   );
 };

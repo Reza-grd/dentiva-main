@@ -522,5 +522,11 @@ await loginAs(uB);
 await expectError(`select public.akun_email_terpakai('b@x.test')`, /permission denied|42501/, "browser tidak bisa mengecek email terpakai");
 await logout();
 
+// Cabut sesi staf setelah password diatur ulang (20261115120000)
+await loginAs(uB);
+await expectError(`select public.staf_cabut_sesi('${uD}')`, /permission denied|42501/, "browser tidak bisa mencabut sesi staf langsung");
+await logout();
+ok(Number((await one(`select public.staf_cabut_sesi('${uD}') as n`)).n) >= 0, "server (service role) bisa mencabut sesi staf");
+
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);
