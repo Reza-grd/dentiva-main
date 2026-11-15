@@ -30,7 +30,8 @@ export async function buatTokenPengguna(u: PenggunaWa, secret: string, detik = 3
     email: u.email ?? undefined,
     app_metadata: { clinic_id: u.clinic_id, provider: "whatsapp" },
     user_metadata: {},
-    aal: "aal1",
+    // Nomor ditautkan dari sesi yang sudah memenuhi MFA (wa_buat_kode_tautan menolak sesi aal1 bila MFA aktif).
+    aal: "aal2",
     amr: [{ method: "whatsapp", timestamp: sekarang }],
     is_anonymous: false,
     iat: sekarang,

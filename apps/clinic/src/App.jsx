@@ -50,20 +50,31 @@ const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
 const BookingRequests = lazy(() => import('./components/schedule/BookingRequests'));
+const VerifikasiMfaPage = lazy(() => import('./components/auth/VerifikasiMfaPage'));
 // Pembaruan otomatis hanya untuk aplikasi desktop (Tauri)
 const DesktopUpdater = isDesktop ? lazy(() => import('./components/common/DesktopUpdater')) : null;
 
 function App() {
-  const { loading, user, userProfile, accountStatus, signOut } = useAuth();
+  const { loading, user, userProfile, accountStatus, signOut, mfaDiperlukan } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
   }
 
+  // Sudah lolos password, menunggu kode verifikasi dua langkah.
+  if (user && mfaDiperlukan && location.pathname !== '/atur-password') {
+    return <Suspense fallback={<LoadingSpinner fullScreen />}><VerifikasiMfaPage /></Suspense>;
+  }
+
   // Tautan undangan / reset password: boleh dibuka sebelum profil termuat.
   if (location.pathname === '/atur-password') {
     return <SetPasswordPage />;
+  }
+
+  // Status pembayaran langganan: harus bisa dibuka klinik yang masih menunggu aktivasi.
+  if (user && location.pathname === '/langganan/status') {
+    return <Suspense fallback={<LoadingSpinner fullScreen />}><CheckoutStatusPage /></Suspense>;
   }
 
   // Klinik ditangguhkan / ditutup / belum aktif (dikelola dari Dentiva Console).
@@ -72,11 +83,6 @@ function App() {
   }
 
   // Pendaftar mandiri yang sudah verifikasi email tapi belum mengirim data klinik.
-  // Status pembayaran langganan: harus bisa dibuka klinik yang masih menunggu aktivasi.
-  if (user && location.pathname === '/langganan/status') {
-    return <Suspense fallback={<LoadingSpinner fullScreen />}><CheckoutStatusPage /></Suspense>;
-  }
-
   if (user && !userProfile && !accountStatus && isPendingSignup(user)) {
     return <CompleteRegistration />;
   }

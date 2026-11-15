@@ -30,6 +30,13 @@ const cors = (req: Request) => {
 const json = (req: Request, status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors(req), "Content-Type": "application/json" } })
 
+/** Sesi pemanggil memenuhi MFA? (database: mfa_terpenuhi — aal2 bila pengguna memasang MFA) */
+async function mfaTerpenuhi(url: string, anonKey: string, authHeader: string): Promise<boolean> {
+  const c = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } })
+  const { data, error } = await c.rpc("mfa_terpenuhi")
+  return !error && data === true
+}
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 Deno.serve(async (req) => {
@@ -55,6 +62,10 @@ Deno.serve(async (req) => {
   if (!EMAIL_RE.test(emailBaru) || emailBaru.length > 254) return json(req, 400, { error: "Format email baru tidak valid." })
   if (!password) return json(req, 400, { error: "Masukkan password Anda saat ini." })
   if (emailBaru === user.email.toLowerCase()) return json(req, 400, { error: "Email baru sama dengan email saat ini." })
+
+  if (!(await mfaTerpenuhi(url, anonKey, authHeader))) {
+    return json(req, 403, { error: "Masuk ulang dengan verifikasi dua langkah untuk mengganti email." })
+  }
 
   const { data: operator } = await admin.rpc("akun_adalah_operator", { p_user: user.id })
   if (operator === true) return json(req, 403, { error: "Email akun operator Dentiva diubah dari Console." })

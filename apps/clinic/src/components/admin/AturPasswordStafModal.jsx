@@ -19,6 +19,7 @@ export default function AturPasswordStafModal({ staf, onSubmit, onClose }) {
   const [lihat, setLihat] = useState(false);
   const [proses, setProses] = useState(false);
   const [galat, setGalat] = useState('');
+  const [resetMfa, setResetMfa] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && !proses && onClose();
@@ -32,7 +33,7 @@ export default function AturPasswordStafModal({ staf, onSubmit, onClose }) {
     if (salah) { setGalat(salah); return; }
     setGalat('');
     setProses(true);
-    const r = await onSubmit(pw);
+    const r = await onSubmit(pw, { resetMfa });
     setProses(false);
     if (!r?.success) setGalat(r?.error || 'Password gagal diatur.');
   };
@@ -66,6 +67,10 @@ export default function AturPasswordStafModal({ staf, onSubmit, onClose }) {
             <label htmlFor="pw-ulang-staf" className="mb-1.5 block text-xs font-medium text-text-muted">Ulangi password baru</label>
             <input id="pw-ulang-staf" type={lihat ? 'text' : 'password'} autoComplete="new-password" value={ulang} onChange={(e) => setUlang(e.target.value)} className={masukan} />
           </div>
+          <label className="flex items-start gap-2 text-sm text-text-primary">
+            <input type="checkbox" checked={resetMfa} onChange={(e) => setResetMfa(e.target.checked)} className="mt-0.5" />
+            <span>Matikan juga verifikasi dua langkah <span className="text-text-muted">(bila HP staf hilang atau ganti HP)</span></span>
+          </label>
           {galat && <p role="alert" className="text-sm text-red-700 dark:text-red-400">{galat}</p>}
           <p className="text-xs text-text-muted">Minimal 8 karakter, berisi huruf dan angka. Staf akan keluar dari semua perangkat dan masuk lagi dengan password ini. Sampaikan password secara langsung, lalu sarankan staf menggantinya.</p>
           <div className="flex justify-end gap-2">

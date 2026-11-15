@@ -9,6 +9,8 @@
  *   - Password minimal 8 karakter, memuat huruf dan angka.
  *   - Semua sesi aktif staf dicabut, sehingga staf wajib masuk ulang dengan password baru.
  *   - Tercatat di audit_logs (tanpa password).
+ *   - reset_mfa = true: verifikasi dua langkah staf ikut dimatikan (HP staf hilang/ganti).
+ *   - Manajer yang memasang MFA wajib memakai sesi terverifikasi dua langkah.
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 
@@ -28,6 +30,13 @@ const cors = (req: Request) => {
 }
 const json = (req: Request, status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors(req), "Content-Type": "application/json" } })
+/** Sesi pemanggil memenuhi MFA? (database: mfa_terpenuhi — aal2 bila pengguna memasang MFA) */
+async function mfaTerpenuhi(url: string, anonKey: string, authHeader: string): Promise<boolean> {
+  const c = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } })
+  const { data, error } = await c.rpc("mfa_terpenuhi")
+  return !error && data === true
+}
+
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /** Aturan password: ≥ 8 karakter, ada huruf & angka, ≤ 72 (batas bcrypt). */
@@ -56,10 +65,14 @@ Deno.serve(async (req) => {
   try { body = await req.json() } catch { return json(req, 400, { error: "Permintaan tidak valid" }) }
   const targetId = String(body?.user_id ?? "")
   const password = String(body?.password ?? "")
+  const resetMfa = body?.reset_mfa === true
   if (!UUID.test(targetId)) return json(req, 400, { error: "Staf tidak valid." })
   const salahPw = cekPassword(password)
   if (salahPw) return json(req, 400, { error: salahPw })
   if (targetId === me.user.id) return json(req, 400, { error: "Ganti password Anda sendiri lewat halaman Profil." })
+  if (!(await mfaTerpenuhi(url, Deno.env.get("SUPABASE_ANON_KEY")!, authHeader))) {
+    return json(req, 403, { error: "Masuk ulang dengan verifikasi dua langkah untuk mengatur password staf." })
+  }
 
   const { data: pemanggil } = await admin.from("users").select("id, role, status, clinic_id").eq("id", me.user.id).maybeSingle()
   if (!pemanggil || pemanggil.role !== "admin" || !["active", "invited"].includes(pemanggil.status) || !pemanggil.clinic_id) {
@@ -76,13 +89,21 @@ Deno.serve(async (req) => {
     console.error("[admin-atur-password-staf] auth:", updErr.message)
     return json(req, 500, { error: "Password gagal diatur. Coba lagi." })
   }
+  if (resetMfa) {
+    const { data: faktor } = await admin.auth.admin.mfa.listFactors({ userId: targetId })
+    for (const f of faktor?.factors ?? []) {
+      const { error } = await admin.auth.admin.mfa.deleteFactor({ userId: targetId, id: f.id })
+      if (error) console.error("[admin-atur-password-staf] hapus faktor:", error.message)
+    }
+  }
+
   // Keluarkan staf dari semua perangkat agar password lama tidak bisa dipakai lagi.
   const { error: sesiErr } = await admin.rpc("staf_cabut_sesi", { p_user: targetId })
   if (sesiErr) console.error("[admin-atur-password-staf] cabut sesi:", sesiErr.message)
 
   const { error: auditErr } = await admin.from("audit_logs").insert([{
     user_id: me.user.id, user_role: "admin", clinic_id: pemanggil.clinic_id, module: "USER_MANAGEMENT", action: "RESET_PASSWORD",
-    previous_value: null, new_value: { staf_id: targetId, staf: target.full_name, role: target.role }, risk_level: "HIGH",
+    previous_value: null, new_value: { staf_id: targetId, staf: target.full_name, role: target.role, reset_mfa: resetMfa }, risk_level: "HIGH",
   }])
   if (auditErr) console.error("[admin-atur-password-staf] audit:", auditErr.message)
 

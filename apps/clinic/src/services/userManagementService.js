@@ -70,14 +70,14 @@ export const userManagementService = {
    * Manajer klinik menetapkan password baru untuk staf (fungsi admin-atur-password-staf).
    * Server memeriksa hak akses & klinik, mencabut semua sesi staf, dan mencatat audit.
    */
-  async setStaffPassword(userId, password) {
+  async setStaffPassword(userId, password, { resetMfa = false } = {}) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Sesi berakhir. Silakan masuk kembali.');
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-atur-password-staf`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ user_id: userId, password }),
+        body: JSON.stringify({ user_id: userId, password, reset_mfa: resetMfa }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Password gagal diatur');

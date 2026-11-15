@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { akunService } from '../../services/akunService';
 import { nomorWa } from '../../utils/billingConfig';
+import KeamananAkun from './KeamananAkun';
 
 const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
 /** Nomor WhatsApp resmi Eira (diisi pemilik di Vercel: VITE_EIRA_WA). */
@@ -212,8 +213,9 @@ function WhatsAppEira() {
 export default function PengaturanAkun() {
   return (
     <div className="space-y-4">
-      <h2 className="text-base font-semibold text-text-primary">Akun & WhatsApp</h2>
+      <h2 className="text-base font-semibold text-text-primary">Akun & keamanan</h2>
       <GantiEmail />
+      <KeamananAkun />
       <WhatsAppEira />
     </div>
   );

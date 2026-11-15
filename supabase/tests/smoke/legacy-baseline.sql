@@ -16,7 +16,10 @@ create table auth.users (
   raw_app_meta_data jsonb default '{}', created_at timestamptz, updated_at timestamptz,
   email_confirmed_at timestamptz
 );
-create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid);
+create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid,
+  created_at timestamptz default now(), updated_at timestamptz default now(), refreshed_at timestamp,
+  user_agent text, ip inet, aal text default 'aal1');
+create table auth.mfa_factors (id uuid primary key default gen_random_uuid(), user_id uuid, factor_type text default 'totp', status text);
 create function auth.uid() returns uuid language sql stable as
 $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 create function auth.jwt() returns jsonb language sql stable as
@@ -231,7 +234,8 @@ create policy "Authenticated can view users" on public.users for select using (t
 create table public.patient_visits (id uuid primary key default gen_random_uuid(), patient_id uuid references public.patients(id), visit_date date, chief_complaint text);
 
 -- bucket produksi: semuanya publik
-create table storage.buckets (id text primary key, name text, public boolean default false);
+create table storage.buckets (id text primary key, name text, public boolean default false,
+  file_size_limit bigint, allowed_mime_types text[]);
 insert into storage.buckets (id, name, public) values
   ('patient-photos', 'patient-photos', true), ('radiologi', 'radiologi', true),
   ('klinik', 'klinik', true), ('avatars', 'avatars', true);

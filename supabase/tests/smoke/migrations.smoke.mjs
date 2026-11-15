@@ -553,5 +553,41 @@ ok((await one(`select email from public.users where id = '${uB}'`)).email === "b
 await logout();
 await db.exec(`update auth.users set email = 'b@x.test' where id = '${uB}'; update public.users set email = 'b@x.test' where id = '${uB}'`);
 
+// Keamanan: MFA ditegakkan di database, sesi milik sendiri (20261115170000)
+console.log("Keamanan: MFA & sesi");
+const klaimB = async (aal, sesi) => {
+  await db.exec("reset role");
+  const u = await one("select raw_app_meta_data from auth.users where id = $1", [uB]);
+  await q("select set_config('request.jwt.claims', $1, false), set_config('request.jwt.claim.sub', $2, false)",
+    [JSON.stringify({ sub: uB, role: "authenticated", aal, session_id: sesi, app_metadata: u?.raw_app_meta_data ?? {} }), uB]);
+  await db.exec("set role authenticated");
+};
+await klaimB("aal1", null);
+ok((await one(`select public.get_user_clinic_id() as c`)).c === B, "tanpa MFA terpasang: sesi aal1 tetap dikenali (perilaku lama)");
+await logout();
+await db.exec(`insert into auth.mfa_factors (user_id, status) values ('${uB}', 'verified')`);
+await klaimB("aal1", null);
+ok((await one(`select public.get_user_clinic_id() as c`)).c === null, "MFA terpasang + sesi aal1 (hanya password): tidak dikenali sebagai anggota klinik");
+ok((await q(`select id from public.patients`)).length === 0, "MFA terpasang + sesi aal1: data pasien tidak terbaca");
+await expectError(`select public.wa_buat_kode_tautan()`, /tidak aktif|42501/, "MFA terpasang + sesi aal1: tidak bisa membuat kode tautan WA");
+await expectError(`select * from public.sesi_saya()`, /Tidak diizinkan|42501/, "MFA terpasang + sesi aal1: daftar perangkat ditolak");
+await klaimB("aal2", null);
+ok((await one(`select public.get_user_clinic_id() as c`)).c === B, "MFA terpasang + sesi aal2: dikenali kembali");
+await logout();
+await db.exec(`delete from auth.mfa_factors where user_id = '${uB}'`);
+const [s1, s2] = ["5e550001-0000-4000-8000-000000000001", "5e550001-0000-4000-8000-000000000002"];
+await db.exec(`insert into auth.sessions (id, user_id, user_agent, ip) values ('${s1}', '${uB}', 'Chrome', '182.10.225.246'), ('${s2}', '${uB}', 'Safari', '10.1.2.3'), (gen_random_uuid(), '${uD}', 'Lain', '1.2.3.4')`);
+await klaimB("aal1", s1);
+const sesi = await q(`select * from public.sesi_saya()`);
+ok(sesi.length === 2 && sesi.some((x) => x.sesi_ini) && sesi.every((x) => !x.ip_tersamar || x.ip_tersamar.endsWith(".x.x")), "daftar perangkat: hanya milik sendiri, IP disamarkan, sesi ini ditandai");
+ok(Number((await one(`select public.keluar_perangkat_lain() as n`)).n) === 1, "keluar dari perangkat lain menghapus sesi lain saja");
+await logout();
+ok((await one(`select count(*)::int as n from auth.sessions where user_id = '${uD}'`)).n === 1, "sesi pengguna lain tidak tersentuh");
+await loginAs(uB);
+ok((await q(`select clinic_id from public.users`)).every((r) => r.clinic_id === B), "daftar pengguna hanya dari klinik sendiri");
+await logout();
+const av = await one(`select file_size_limit, allowed_mime_types from storage.buckets where id = 'avatars'`).catch(() => null);
+ok(!av || (Number(av.file_size_limit) === 2097152 && av.allowed_mime_types.includes("image/png")), "bucket avatars dibatasi gambar 2 MB");
+
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

@@ -336,8 +336,8 @@ const UserManagementPage = () => {
         <AturPasswordStafModal
           staf={aturPw}
           onClose={() => setAturPw(null)}
-          onSubmit={async (password) => {
-            const r = await userManagementService.setStaffPassword(aturPw.id, password);
+          onSubmit={async (password, opsi) => {
+            const r = await userManagementService.setStaffPassword(aturPw.id, password, opsi);
             if (r.success) {
               toast.success(`Password ${aturPw.full_name} sudah diatur. Sampaikan password baru secara langsung.`);
               setAturPw(null);

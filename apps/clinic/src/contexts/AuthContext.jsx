@@ -10,6 +10,19 @@ const AuthContext = createContext({});
 /** Akun hasil pendaftaran mandiri yang belum menyelesaikan pendaftaran klinik. */
 export const isPendingSignup = (user) => Boolean(user?.user_metadata?.signup_clinic);
 
+/** Level jaminan sesi (aal1 = password saja, aal2 = + verifikasi dua langkah) dari token akses. */
+export function aalSesi(session) {
+  try {
+    const b64 = (session?.access_token || '').split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(b64)).aal || 'aal1';
+  } catch {
+    return 'aal1';
+  }
+}
+/** Sesi butuh kode MFA: pengguna punya faktor TOTP terverifikasi tetapi sesi masih aal1. */
+export const sesiPerluMfa = (session) =>
+  Boolean(session?.user?.factors?.some((f) => f.status === 'verified')) && aalSesi(session) !== 'aal2';
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -26,6 +39,8 @@ export const AuthProvider = ({ children }) => {
   const [accountStatus, setAccountStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // true = sudah lolos password, menunggu kode verifikasi dua langkah (database menolak data sebelum ini).
+  const [mfaDiperlukan, setMfaDiperlukan] = useState(false);
   const toast = useToast();
 
   useEffect(() => {
@@ -49,7 +64,8 @@ export const AuthProvider = ({ children }) => {
           logger.debug('✅ User found');
           setUser(session.user);
           state.currentUserId = session.user.id;
-          await fetchUserProfile(session.user.id);
+          if (sesiPerluMfa(session)) setMfaDiperlukan(true);
+          else await fetchUserProfile(session.user.id);
         } else {
           logger.debug('ℹ️ No active session');
         }
@@ -103,13 +119,15 @@ export const AuthProvider = ({ children }) => {
             if (mounted) {
               setUser(session.user);
               state.currentUserId = session.user.id;
-              await fetchUserProfile(session.user.id);
+              if (sesiPerluMfa(session)) setMfaDiperlukan(true);
+              else await fetchUserProfile(session.user.id);
             }
           } else {
             if (mounted) {
               setUser(null);
               setUserProfile(null);
               setAccountStatus(null);
+              setMfaDiperlukan(false);
               state.currentUserId = null;
             }
           }
@@ -261,6 +279,13 @@ export const AuthProvider = ({ children }) => {
 
       if (error) throw error;
 
+      // Akun dengan verifikasi dua langkah: profil baru dimuat setelah kode benar (verifikasiMfa).
+      if (sesiPerluMfa(data.session)) {
+        setUser(data.user);
+        setMfaDiperlukan(true);
+        return { success: true, mfa: true, data };
+      }
+
       // BUG FIX: fetchUserProfile bisa throw jika profil belum ada di tabel users.
       // Tangkap error agar loading tidak stuck di true, dan kembalikan error ke caller.
       try {
@@ -400,6 +425,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /** Langkah kedua login: kode 6 digit dari aplikasi authenticator. */
+  const verifikasiMfa = async (kode) => {
+    const { data: faktor, error: fErr } = await supabase.auth.mfa.listFactors();
+    const totp = faktor?.totp?.find((f) => f.status === 'verified');
+    if (fErr || !totp) return { success: false, error: 'Faktor verifikasi tidak ditemukan. Masuk ulang.' };
+    const { error: vErr } = await supabase.auth.mfa.challengeAndVerify({ factorId: totp.id, code: String(kode).trim() });
+    if (vErr) return { success: false, error: 'Kode salah atau sudah kedaluwarsa. Coba kode terbaru.' };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) setUser(session.user);
+      await fetchUserProfile(session.user.id);
+      setMfaDiperlukan(false);
+      supabase.rpc('record_login').then(() => {});
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e?.message || 'Profil gagal dimuat.' };
+    }
+  };
+
   const refreshAccountStatus = async () => {
     if (!user) return null;
     return fetchUserProfile(user.id);
@@ -418,6 +462,8 @@ export const AuthProvider = ({ children }) => {
     requestPasswordReset,
     signOut,
     updateProfile,
+    mfaDiperlukan,
+    verifikasiMfa,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

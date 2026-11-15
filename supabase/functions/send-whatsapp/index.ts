@@ -4,11 +4,21 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
 import { configProblem, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000", "http://localhost:3001", "http://localhost:5173",
+  "https://dentiva-main.vercel.app", "https://dentiva.id", "https://app.dentiva.id",
+  "http://tauri.localhost", "https://tauri.localhost", "tauri://localhost",
+]
+const asalDiizinkan = (req: Request) => {
+  const o = req.headers.get("Origin") ?? ""
+  return ALLOWED_ORIGINS.includes(o) ? o : ALLOWED_ORIGINS[3]
+}
+const corsHeaders = (req: Request) => ({
+  'Access-Control-Allow-Origin': asalDiizinkan(req),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
+  'Vary': 'Origin',
+})
 
 // Pembatas sederhana (per worker): per IP dan per klinik untuk pesan uji.
 const rateLimitMap = new Map<string, number[]>()
@@ -29,7 +39,7 @@ function isRateLimited(ip: string, limit = 100, windowMs = 15 * 60 * 1000): bool
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders(req) })
   }
 
   // Rate Limiting Check
@@ -37,7 +47,7 @@ serve(async (req) => {
   if (isRateLimited(clientIp)) {
     return new Response(JSON.stringify({ error: 'Too Many Requests: Rate limit exceeded' }), {
       status: 429,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
   }
 
@@ -46,7 +56,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -57,7 +67,7 @@ serve(async (req) => {
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({ error: 'Supabase environment variables not configured in Edge Function' }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -72,7 +82,7 @@ serve(async (req) => {
       const { data: { user }, error: authError } = await userClient.auth.getUser()
       if (!authError && user) {
         try { await requireActiveAccount(userClient, ['admin','dokter','resepsionis']); }
-        catch { return new Response(JSON.stringify({error:'Forbidden: akun atau klinik tidak aktif'}), {status:403,headers:{...corsHeaders,'Content-Type':'application/json'}}); }
+        catch { return new Response(JSON.stringify({error:'Forbidden: akun atau klinik tidak aktif'}), {status:403,headers:{...corsHeaders(req),'Content-Type':'application/json'}}); }
         isAuthorized = true
       }
     }
@@ -80,7 +90,7 @@ serve(async (req) => {
     if (!isAuthorized) {
       return new Response(JSON.stringify({ error: 'Unauthorized: Invalid credentials' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -122,7 +132,7 @@ serve(async (req) => {
           }),
           {
             status: 403,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
           }
         )
       }
@@ -134,7 +144,7 @@ serve(async (req) => {
     } catch (e) {
       return new Response(JSON.stringify({ error: 'Invalid JSON request body' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -147,12 +157,12 @@ serve(async (req) => {
     if (authHeader !== `Bearer ${supabaseServiceKey}`) {
       if (!isTest || visitId || patientId) {
         return new Response(JSON.stringify({ error: 'Pesan pasien dikirim otomatis oleh server (invoice/edukasi). Fungsi ini hanya untuk pesan uji.' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
         })
       }
       if (isRateLimited(`uji:${callingClinicId}`, 5, 10 * 60 * 1000)) {
         return new Response(JSON.stringify({ error: 'Terlalu banyak pesan uji — coba lagi 10 menit lagi' }), {
-          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
         })
       }
       const { data: nameRow } = await supabase.from('clinic_settings').select('value')
@@ -167,7 +177,7 @@ Pesan ini dikirim dari menu Pengaturan.`
     if (authHeader !== `Bearer ${supabaseServiceKey}`) {
       const forbidden = () => new Response(JSON.stringify({ error: 'Forbidden: data bukan milik klinik Anda' }), {
         status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
       if (!callingClinicId) return forbidden()
       if (visitId) {
@@ -184,7 +194,7 @@ Pesan ini dikirim dari menu Pengaturan.`
     if (waProblem) {
       return new Response(JSON.stringify({ error: waProblem }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -220,7 +230,7 @@ Pesan ini dikirim dari menu Pengaturan.`
             }
             return new Response(JSON.stringify({ success: false, reason: 'skipped_no_consent' }), {
                 status: 200,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
             });
         }
       }
@@ -246,7 +256,7 @@ Pesan ini dikirim dari menu Pengaturan.`
             });
             return new Response(JSON.stringify({ success: false, reason: 'skipped_no_consent' }), {
                 status: 200,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
             });
         }
       }
@@ -260,14 +270,14 @@ Pesan ini dikirim dari menu Pengaturan.`
     if (!finalPhone) {
       return new Response(JSON.stringify({ error: 'Recipient phone number is missing' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
     if (!message) {
       return new Response(JSON.stringify({ error: 'Message content is required' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -293,20 +303,20 @@ Pesan ini dikirim dari menu Pengaturan.`
     if (!result.ok) {
       return new Response(JSON.stringify({ error: result.error || 'Pengiriman WhatsApp gagal', detail: result.detail ?? null }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
     return new Response(JSON.stringify({ success: true, detail: { provider: result.provider, id: result.id } }), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
 
   } catch (error: any) {
     console.error('Fatal Edge Function Error:', error)
     return new Response(JSON.stringify({ error: error.message || 'Unknown internal error' }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
   }
 })

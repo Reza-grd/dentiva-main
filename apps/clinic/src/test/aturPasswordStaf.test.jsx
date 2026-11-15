@@ -20,6 +20,6 @@ describe('Atur ulang password staf', () => {
     expect(onSubmit).not.toHaveBeenCalled();
     fireEvent.change(screen.getByLabelText('Ulangi password baru'), { target: { value: 'klinik2026' } });
     fireEvent.click(screen.getByRole('button', { name: /Simpan password/ }));
-    await vi.waitFor(() => expect(onSubmit).toHaveBeenCalledWith('klinik2026'));
+    await vi.waitFor(() => expect(onSubmit).toHaveBeenCalledWith('klinik2026', { resetMfa: false }));
   });
 });
