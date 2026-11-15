@@ -1,5 +1,16 @@
 import dentivaPreset from '@dentiva/ui/tailwind-preset';
 
+/** Skala warna dari --color-accent: <500 dicampur putih, 500–600 = aksen, >600 dicampur hitam. */
+function primer() {
+  const campur = (lawan, persen) =>
+    `color-mix(in srgb, color-mix(in srgb, var(--color-accent) ${persen}%, ${lawan}) calc(<alpha-value> * 100%), transparent)`;
+  return {
+    50: campur('white', 7), 100: campur('white', 14), 200: campur('white', 28), 300: campur('white', 45),
+    400: campur('white', 70), 500: campur('white', 100), 600: campur('white', 100),
+    700: campur('black', 85), 800: campur('black', 70), 900: campur('black', 55),
+  };
+}
+
 /** @type {import('tailwindcss').Config} */
 export default {
   presets: [dentivaPreset],
@@ -27,6 +38,9 @@ export default {
       },
       colors: {
         gold: 'color-mix(in srgb, var(--color-gold) calc(<alpha-value> * 100%), transparent)',
+        // Skala "primary-50…900" dipakai halaman lama (Jadwal Dokter, Biaya & Modal, dll.) tetapi dulu
+        // tidak pernah didefinisikan → tombol putih di atas putih. Kini diturunkan dari warna aksen klinik.
+        primary: primer(),
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
