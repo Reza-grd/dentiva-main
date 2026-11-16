@@ -22,13 +22,13 @@
 .denti .d-fin-l   { transform-origin: 64px 128px; }
 .denti .d-fin-r   { transform-origin: 336px 128px; }
 .denti .d-shadow  { transform-origin: 200px 464px; }
-.denti .d-chest   { transform-origin: 200px 336px; }
+.denti .d-chest   { transform-origin: 200px 358px; }
 .denti .d-eyes    { transform-origin: 200px 160px; }
 .denti .d-eye, .denti .d-mouth-talk, .denti .d-star, .denti .d-heart, .denti .d-spark, .denti .d-bdot, .denti .d-z, .denti .d-wave,
 .denti .d-eyeheart, .denti .d-bub, .denti .d-note, .denti .d-ha, .denti .d-exclaim, .denti .d-tooth-star, .denti .d-arrow
   { transform-box: fill-box; transform-origin: center; }
 .denti .d-tooth       { transform-origin: 200px 6px; }
-.denti .d-chest-heart { transform-origin: 200px 334px; }
+.denti .d-chest-heart { transform-origin: 200px 356px; }
 
 /* Tampilan bawaan: mata bulat + senyum */
 .denti .d-eye-happy, .denti .d-eye-sleep, .denti .d-eye-wow,
@@ -1210,3 +1210,19 @@
   .denti, .denti * { animation: none !important; transition: none !important; }
 }
 
+
+/* ═════ EIRA KLASIK A (Nov 2026): mata lengkung tersenyum saat diam & ekspresi positif ═════
+   Mata dasar (.d-eye-open) kini oval netral agar cocok untuk emosi sedih/marah/bingung;
+   state di bawah ini menampilkan lengkung khas model Klasik + kedip. */
+.denti[data-state="idle"] .d-eye-open, .denti[data-state="talk"] .d-eye-open, .denti[data-state="point"] .d-eye-open,
+.denti[data-state="listen"] .d-eye-open, .denti[data-state="slowclap"] .d-eye-open, .denti[data-state="whisper"] .d-eye-open,
+.denti[data-state="shush"] .d-eye-open, .denti[data-state="loading"] .d-eye-open, .denti[data-state="lock"] .d-eye-open,
+.denti[data-state="shield"] .d-eye-open, .denti[data-state="hourglass"] .d-eye-open, .denti[data-state="chart"] .d-eye-open { opacity: 0; }
+.denti[data-state="idle"] .d-eye-happy, .denti[data-state="talk"] .d-eye-happy, .denti[data-state="point"] .d-eye-happy,
+.denti[data-state="listen"] .d-eye-happy, .denti[data-state="slowclap"] .d-eye-happy, .denti[data-state="whisper"] .d-eye-happy,
+.denti[data-state="shush"] .d-eye-happy, .denti[data-state="loading"] .d-eye-happy, .denti[data-state="lock"] .d-eye-happy,
+.denti[data-state="shield"] .d-eye-happy, .denti[data-state="hourglass"] .d-eye-happy, .denti[data-state="chart"] .d-eye-happy { opacity: 1; }
+.denti .d-eye-happy path { transform-box: fill-box; transform-origin: center; }
+.denti[data-state="idle"] .d-eye-happy path, .denti[data-state="talk"] .d-eye-happy path, .denti[data-state="listen"] .d-eye-happy path
+  { animation: d-blink var(--blink, 5.4s) ease-in-out var(--blink-delay, 0s) infinite; }
+.denti[data-blink="2"][data-state="idle"] .d-eye-happy path { animation-name: d-blink2; }

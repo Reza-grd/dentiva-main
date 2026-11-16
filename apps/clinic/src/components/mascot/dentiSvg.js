@@ -1,10 +1,10 @@
 /**
- * EIRA — maskot AI Dentiva (konsep visual v3 · HD Multi-LOD).
+ * EIRA — maskot AI Dentiva (model "Klasik A", Nov 2026 · HD Multi-LOD).
  *
- * Bentuk: kepala lebar membulat dengan visor hitam besar + aksen sudut biru, headphone di kedua
- * sisi (muka biru, cincin emas) dengan "antena sisi" berupa sirip cahaya, tubuh telur porselen
- * dengan panel biru bawah dan lampu dada bercincin emas, lengan terpisah berbentuk kapsul membulat (ujung biru,
- * gelang emas), cincin orbit berpartikel, dan cincin cahaya tempat melayang. Tanpa antena atas.
+ * Bentuk: kepala helm lebar — tutup/visor navy berkilau dengan lis emas di atas dagu putih mutiara,
+ * mata lengkung tersenyum yang menyala; leher navy; badan perisai navy berkerah emas dengan medali
+ * logo Dentiva (gigi emas + sirkuit); lengan bercangkang mutiara dengan tangan navy bergelang emas.
+ * Grup telinga/sirip/bracket tetap ada (kosong) agar seluruh rig animasi & 93 state tetap berlaku.
  *
  * Sistem Level of Detail (LOD):
  *   - `mini`    (≤ 72 px)  : Tanpa <filter>, kontras tepi diperkuat, garis (stroke) dipertebal agar ≥ 1–1,5 px fisik.
@@ -44,11 +44,11 @@ export const DENTI_STATES = [
   'chart', 'money',
 ];
 
-const ARM = 'M-27 0 A27 27 0 0 1 27 0 C27 32 25 62 23 82 C21 106 -21 106 -23 82 C-25 62 -27 32 -27 0 Z';
-const ARM_CAP = 'M-27 0 A27 27 0 0 1 27 0 L27 10 C16 17 -16 17 -27 10 Z';
-const BODY = 'M200 270 C258 270 290 306 290 354 C290 410 252 444 200 444 C148 444 110 410 110 354 C110 306 142 270 200 270 Z';
-const HEAD = 'M200 56 C282 56 330 84 330 152 L330 176 C330 236 290 262 200 262 C110 262 70 236 70 176 L70 152 C70 84 118 56 200 56 Z';
-const VISOR = 'M200 88 C270 88 304 106 304 160 L304 176 C304 222 274 240 200 240 C126 240 96 222 96 176 L96 160 C96 106 130 88 200 88 Z';
+const ARM = 'M-35 -4 A35 30 0 0 1 35 -4 C37 30 34 58 29 76 C23 88 -23 88 -29 76 C-34 58 -37 30 -35 -4 Z';
+const HAND = 'M-27 70 C-27 56 -15 50 0 50 C15 50 27 56 27 72 L27 102 C27 115 14 121 0 121 C-14 121 -27 115 -27 102 Z';
+const BODY = 'M110 284 C128 273 272 273 290 284 C303 294 301 342 293 382 C281 428 246 448 200 448 C154 448 119 428 107 382 C99 342 97 294 110 284 Z';
+const HEAD = 'M200 54 C286 54 334 82 334 150 L334 168 C334 228 296 252 200 252 C104 252 66 228 66 168 L66 150 C66 82 114 54 200 54 Z';
+const VISOR = 'M200 54 C286 54 334 80 334 148 C334 196 318 220 278 226 C242 231 158 231 122 226 C82 220 66 196 66 148 C66 80 114 54 200 54 Z';
 const HEART = 'M0 4 C-6 -3 -14 0 -13 7 C-12 13 -4 17 0 21 C4 17 12 13 13 7 C14 0 6 -3 0 4 Z';
 const STAR = 'M0 -14 C2 -3 3 -2 14 0 C3 2 2 3 0 14 C-2 3 -3 2 -14 0 C-3 -2 -2 -3 0 -14Z';
 const TOOTH = 'M-24 -26 C-32 -18 -32 0 -26 12 C-22 22 -20 34 -14 34 C-8 34 -6 18 0 18 C6 18 8 34 14 34 C20 34 22 22 26 12 C32 0 32 -18 24 -26 C16 -33 8 -30 0 -26 C-8 -30 -16 -33 -24 -26 Z';
@@ -72,9 +72,9 @@ const LOD_SPEC = {
     earGoldStroke: 5.5,
     armBandStroke: 6,
     // #567bb0 vs #ffffff = 4.30:1; #2e5288 vs #ffffff = 7.72:1 (jauh di atas syarat >= 3:1)
-    edgeTopColor: '#567bb0',
+    edgeTopColor: '#5f6f88',
     edgeTopOpacity: '1',
-    edgeBottomColor: '#2e5288',
+    edgeBottomColor: '#3e4d66',
     edgeBottomOpacity: '1',
   },
   standar: {
@@ -92,9 +92,9 @@ const LOD_SPEC = {
     earGoldStroke: 4.6,
     armBandStroke: 5,
     // #6488bc vs #ffffff = 3.57:1; #3b629b vs #ffffff = 6.03:1
-    edgeTopColor: '#6488bc',
+    edgeTopColor: '#a3b0c3',
     edgeTopOpacity: '1',
-    edgeBottomColor: '#3b629b',
+    edgeBottomColor: '#7f8ea6',
     edgeBottomOpacity: '1',
   },
   hero: {
@@ -112,9 +112,9 @@ const LOD_SPEC = {
     earGoldStroke: 4.2,
     armBandStroke: 4.6,
     // #6b8fc2 vs #ffffff = 3.30:1; #436aa3 vs #ffffff = 5.33:1
-    edgeTopColor: '#6b8fc2',
+    edgeTopColor: '#c3ccd9',
     edgeTopOpacity: '1',
-    edgeBottomColor: '#436aa3',
+    edgeBottomColor: '#97a4b8',
     edgeBottomOpacity: '1',
   },
 };
@@ -167,22 +167,15 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
         <ellipse cx="0" cy="136" rx="14" ry="3.2" fill="#8a5a34"/>
       </g>${armPropsR2}` : '');
   const arm = (side, x) => `
-    <g class="d-arm-${side}"><g transform="translate(${x} 322) rotate(${side === 'l' ? 22 : -22})">
+    <g class="d-arm-${side}"><g transform="translate(${x} 322) rotate(${side === 'l' ? 12 : -12})">
       <path d="${ARM}" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="${cfg.partStroke}"/>
-      <path d="${ARM_CAP}" fill="${url('blue')}"/>
-      <path d="M-26 20 C-12 28 12 28 26 20" stroke="${url('gold')}" stroke-width="${cfg.armBandStroke}" fill="none" stroke-linecap="round"/>
-      <path d="M-15 32 C-15 52 -14 70 -12 82" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>${armProps(side)}
+      <path d="M-17 4 C-19 26 -18 48 -14 64" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".85"/>
+      <path d="${HAND}" fill="${url('navy')}" stroke="${url('navyEdge')}" stroke-width="${cfg.partStroke * 0.6}"/>
+      <path d="M-26 66 C-11 57 11 57 26 66" stroke="${url('gold')}" stroke-width="${Math.max(2.2, cfg.armBandStroke * 0.55)}" fill="none" stroke-linecap="round"/>
+      <path d="M-14 80 C-14 72 -9 66 -2 65" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".22"/>${armProps(side)}
     </g></g>`;
-  const ear = (side, cx, face) => `
-    <g class="d-ear-${side}">
-      <rect x="${cx - 20}" y="122" width="40" height="88" rx="20" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="${cfg.partStroke}"/>
-      <ellipse cx="${face}" cy="166" rx="18" ry="36" fill="none" stroke="${url('gold')}" stroke-width="${cfg.earGoldStroke}"/>
-      <ellipse class="d-ear-face" cx="${face}" cy="166" rx="13" ry="29" fill="${url('blue')}"/>
-      <ellipse cx="${face - (side === 'l' ? 3 : -3)}" cy="152" rx="4" ry="9" fill="#fff" opacity=".75"/>
-    </g>`;
-  const fin = (side) => side === 'l'
-    ? `<g class="d-fin-l"><path d="M60 128 C42 108 40 78 52 56 C66 72 72 102 68 128 Z" fill="${url('fin')}" stroke="${url('edge')}" stroke-width="${cfg.finStroke}"/></g>`
-    : `<g class="d-fin-r"><path d="M340 128 C358 108 360 78 348 56 C334 72 328 102 332 128 Z" fill="${url('fin')}" stroke="${url('edge')}" stroke-width="${cfg.finStroke}"/></g>`;
+  const ear = (side) => `<g class="d-ear-${side}"></g>`;
+  const fin = (side) => `<g class="d-fin-${side}"></g>`;
 
   return `
 <defs>
@@ -196,8 +189,23 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
     <stop offset="0" stop-color="#162138"/><stop offset=".55" stop-color="#070c18"/><stop offset="1" stop-color="#03050b"/>
   </linearGradient>
   <linearGradient id="${g('eye')}" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#f2fdff"/><stop offset="1" stop-color="#56c8ff"/>
+    <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#cfeeff"/>
   </linearGradient>
+  <linearGradient id="${g('navy')}" x1="0" y1="0" x2=".35" y2="1">
+    <stop offset="0" stop-color="#2d568e"/><stop offset=".55" stop-color="#183858"/><stop offset="1" stop-color="#0b1a31"/>
+  </linearGradient>
+  <linearGradient id="${g('cap')}" x1="66" y1="54" x2="146" y2="231" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#2d568e"/><stop offset=".5" stop-color="#183858"/><stop offset="1" stop-color="#0b1a31"/>
+  </linearGradient>
+  <linearGradient id="${g('navyEdge')}" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#3a6299"/><stop offset="1" stop-color="#08142a"/>
+  </linearGradient>
+  <linearGradient id="${g('logoGold')}" x1="560" y1="270" x2="870" y2="740" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#f3e2b3"/><stop offset=".45" stop-color="#d3a95a"/><stop offset="1" stop-color="#b08135"/>
+  </linearGradient>
+  <radialGradient id="${g('ground')}">
+    <stop offset="0" stop-color="#0f2240" stop-opacity=".3"/><stop offset="1" stop-color="#0f2240" stop-opacity="0"/>
+  </radialGradient>
   <linearGradient id="${g('blue')}" x1="0" y1="0" x2=".4" y2="1">
     <stop offset="0" stop-color="#d6f0ff"/><stop offset=".5" stop-color="#76c2ff"/><stop offset="1" stop-color="#2979e6"/>
   </linearGradient>
@@ -228,63 +236,55 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
 
 <!-- cincin orbit (di belakang badan — gerak mengitari via CSS offset-path, tanpa SMIL) -->
 <g class="d-orbit" transform="rotate(-14 200 252)">
-  <path id="${g('orbit')}" d="M22 252 a178 64 0 1 0 356 0 a178 64 0 1 0 -356 0" fill="none" stroke="#e6c698" stroke-width="1.8" opacity=".4"/>
+  <path id="${g('orbit')}" d="M22 252 a178 64 0 1 0 356 0 a178 64 0 1 0 -356 0" fill="none" stroke="#e6c698" stroke-width="1.6" opacity=".22"/>
   <circle class="d-orbit-dot d-orbit-dot-1" cx="0" cy="0" r="4.5" fill="#fff1d6"/>
   <circle class="d-orbit-dot d-orbit-dot-2" cx="0" cy="0" r="3.5" fill="#a9e4ff"/>
 </g>
 
 <g class="d-shadow">
-  <ellipse cx="200" cy="466" rx="140" ry="22" fill="${url('halo')}"/>
-  <ellipse class="d-ring-1" cx="200" cy="464" rx="122" ry="16" fill="none" stroke="#6cc4ff" stroke-width="${lod === 'mini' ? 4 : 2.8}" opacity=".82"/>
-  <ellipse class="d-ring-2" cx="200" cy="464" rx="88" ry="11" fill="none" stroke="#ecca97" stroke-width="${lod === 'mini' ? 3.5 : 2.4}" opacity=".88"/>
-  <ellipse class="d-ring-3" cx="200" cy="464" rx="54" ry="7" fill="none" stroke="#a9e4ff" stroke-width="${lod === 'mini' ? 2.5 : 1.8}" opacity=".65"/>
+  <ellipse cx="200" cy="466" rx="130" ry="18" fill="${url('ground')}"/>
+  <ellipse class="d-ring-1" cx="200" cy="464" rx="122" ry="16" fill="none" stroke="#9fb4d4" stroke-width="${lod === 'mini' ? 3 : 1.6}" opacity=".35"/>
+  <ellipse class="d-ring-2" cx="200" cy="464" rx="88" ry="11" fill="none" stroke="#d9b672" stroke-width="${lod === 'mini' ? 3 : 1.8}" opacity=".6"/>
+  <ellipse class="d-ring-3" cx="200" cy="464" rx="54" ry="7" fill="none" stroke="#c9d6ea" stroke-width="${lod === 'mini' ? 2 : 1.2}" opacity=".3"/>
 </g>
 
 <g class="d-lean"><g class="d-root">
   <g class="d-figure">
     <!-- tubuh -->
     <g class="d-body">
-      <path d="${BODY}" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="${cfg.shellStroke}"/>
-      <g clip-path="url(#${g('bodyClip')})">
-        <ellipse cx="112" cy="420" rx="46" ry="62" fill="${url('blue')}" opacity=".88"/>
-        <ellipse cx="288" cy="420" rx="46" ry="62" fill="${url('blue')}" opacity=".88"/>
-        <path d="M150 300 C162 288 178 282 196 281" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".95"/>
-      </g>
-      <path d="M152 404 C174 424 226 424 248 404" stroke="#8faad4" stroke-width="${lod === 'mini' ? 3 : 2}" fill="none" opacity=".6"/>
+      <path d="${BODY}" fill="${url('navy')}" stroke="${url('navyEdge')}" stroke-width="${cfg.shellStroke}"/>
+      <path d="M118 298 C150 288 250 288 282 298" stroke="${url('gold')}" stroke-width="${lod === 'mini' ? 4 : 2.6}" fill="none" stroke-linecap="round"/>
+      <path d="M128 310 C120 342 124 386 146 420 C134 384 134 344 140 312 Z" fill="#fff" opacity=".14"/>
       <g class="d-chest">
-        ${hasGlow ? `<circle class="d-chest-glow" cx="200" cy="336" r="44" fill="${url('coreGlow')}"/>` : `<circle cx="200" cy="336" r="35" fill="${url('halo')}"/>`}
-        <circle cx="200" cy="336" r="29" fill="#0b1324"/>
-        <circle cx="200" cy="336" r="29" fill="none" stroke="${url('gold')}" stroke-width="${cfg.chestGoldStroke}"/>
-        ${hasGlow ? `<circle cx="200" cy="336" r="25" fill="${url('coreGlow')}"/>` : ''}
-        <circle class="d-chest-core" cx="200" cy="336" r="20" fill="${url('core')}"/>
-        <ellipse cx="193" cy="328" rx="6" ry="4" fill="#fff" opacity=".9"/>
-        <g class="d-chest-heart">${at(200, 323, 1.15, `<path d="${HEART}" fill="#ff8fb8"/>`)}</g>
+        ${hasGlow ? `<circle class="d-chest-glow" cx="200" cy="358" r="50" fill="${url('coreGlow')}" opacity=".06"/>` : ''}
+        <!-- logo Dentiva timbul, senada badan: bayangan gelap di bawah + garis sedikit lebih terang -->
+        <g transform="translate(200 360) scale(.13) translate(-640 -507)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="${lod === 'mini' ? 30 : 18}">
+          <g transform="translate(0 12)" opacity=".85"><g stroke="#081429"><path d="M436 362 V452 L494 500 V608 L541 660 V718"/><path d="M534 452 V582 L606 514"/><path d="M426 578 C426 640 446 682 486 710"/><path d="M541 660 L630 578 H696 Q713 578 713 595"/><path d="M713 595 C714 625 718 648 724 668 C734 708 748 726 770 722 C796 717 808 660 826 590 C846 512 872 420 866 352 C860 290 818 270 778 282 C756 289 742 300 722 296 C694 290 668 268 620 270 C578 272 548 300 546 338 C544 378 578 398 620 400 L666 400" stroke-width="${lod === 'mini' ? 30 : 18}"/></g></g>
+          <g stroke="#2f5a92"><path d="M436 362 V452 L494 500 V608 L541 660 V718"/><path d="M534 452 V582 L606 514"/><path d="M426 578 C426 640 446 682 486 710"/><path d="M541 660 L630 578 H696 Q713 578 713 595"/><path d="M713 595 C714 625 718 648 724 668 C734 708 748 726 770 722 C796 717 808 660 826 590 C846 512 872 420 866 352 C860 290 818 270 778 282 C756 289 742 300 722 296 C694 290 668 268 620 270 C578 272 548 300 546 338 C544 378 578 398 620 400 L666 400" stroke-width="${lod === 'mini' ? 30 : 18}"/></g>
+          ${lod === 'mini' ? '' : '<g stroke="#2f5a92" stroke-width="12" fill="#183858"><circle cx="436" cy="340" r="18"/><circle cx="534" cy="430" r="18"/><circle cx="624" cy="496" r="18"/><circle cx="426" cy="556" r="18"/><circle cx="541" cy="740" r="18"/></g>'}
+        </g>
+        <g class="d-chest-heart">${at(200, 345, 1.15, `<path d="${HEART}" fill="#ff8fb8"/>`)}</g>
       </g>
     </g>
 
     <!-- leher -->
-    <ellipse cx="200" cy="266" rx="54" ry="12" fill="#0d1628"/>
-    <ellipse cx="200" cy="264" rx="44" ry="6" fill="none" stroke="#6cc4ff" stroke-width="${lod === 'mini' ? 3.5 : 2.2}" opacity=".8"/>
+    <rect x="164" y="238" width="72" height="40" rx="11" fill="#0b1a31"/>
 
     <!-- kepala -->
     <g class="d-head">
       ${fin('l')}
       ${fin('r')}
-      ${ear('l', 66, 58)}
-      ${ear('r', 334, 342)}
+      ${ear('l')}
+      ${ear('r')}
       <path d="${HEAD}" fill="${url('shell')}" stroke="${url('edge')}" stroke-width="${cfg.shellStroke}"/>
-      <path d="M104 98 C124 76 152 66 186 64" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" opacity=".95"/>
 
       <g class="d-visor">
-        <path d="${VISOR}" fill="${url('visor')}"/>
-        ${hasGlow ? `<ellipse class="d-visor-glow" cx="200" cy="166" rx="98" ry="64" fill="${url('eyeGlow')}" opacity=".58"/>` : ''}
-        <path class="d-visor-rim" d="${VISOR}" fill="none" stroke="#5fbaff" stroke-width="${cfg.visorRimStroke}" opacity=".75"/>
-        <path d="M128 112 C156 100 196 98 236 102" stroke="#fff" stroke-opacity=".22" stroke-width="8" fill="none" stroke-linecap="round"/>
-        <g class="d-brackets" fill="none" stroke="#6fdcff" stroke-width="${cfg.bracketStroke}" stroke-linecap="round">
-          ${hasGlow ? `<g stroke="#38bdf8" stroke-opacity=".28" stroke-width="${cfg.bracketStroke + 6}"><path d="M120 134 v-10 q0 -8 8 -8 h10"/><path d="M280 134 v-10 q0 -8 -8 -8 h-10"/><path d="M120 194 v10 q0 8 8 8 h10"/><path d="M280 194 v10 q0 8 -8 8 h-10"/></g>` : ''}
-          <path d="M120 134 v-10 q0 -8 8 -8 h10"/><path d="M280 134 v-10 q0 -8 -8 -8 h-10"/>
-          <path d="M120 194 v10 q0 8 8 8 h10"/><path d="M280 194 v10 q0 8 -8 8 h-10"/>
-        </g>
+        <path d="${VISOR}" fill="${url('cap')}" stroke="${url('navyEdge')}" stroke-width="${cfg.partStroke * 0.6}"/>
+        ${hasGlow ? `<ellipse class="d-visor-glow" cx="200" cy="160" rx="110" ry="58" fill="${url('eyeGlow')}" opacity=".3"/>` : ''}
+        <path class="d-visor-rim" d="M76 202 C96 222 140 230 200 230 C260 230 304 222 324 202" fill="none" stroke="${url('gold')}" stroke-width="${Math.max(2, cfg.visorRimStroke * 0.85)}" stroke-linecap="round"/>
+        <path d="M104 94 C130 70 178 62 218 64 C174 70 136 84 114 106 Z" fill="#fff" opacity=".2"/>
+        <ellipse cx="282" cy="82" rx="16" ry="6" transform="rotate(14 282 82)" fill="#fff" opacity=".14"/>
+        <g class="d-brackets"></g>
         <g clip-path="url(#${g('visorClip')})"><g class="d-scan">
           <rect x="96" y="66" width="208" height="28" fill="${url('scan')}"/>
           <rect x="96" y="93" width="208" height="3" fill="#8fe8ff"/>
@@ -294,13 +294,13 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
       <g class="d-gaze">
       <g class="d-eyes">
         <g class="d-eye-open">
-          ${hasGlow ? `<ellipse class="d-eye-glow" cx="162" cy="160" rx="34" ry="40" fill="${url('eyeGlow')}"/><ellipse class="d-eye-glow" cx="238" cy="160" rx="34" ry="40" fill="${url('eyeGlow')}"/>` : ''}
-          <ellipse class="d-eye d-eye-l" cx="162" cy="160" rx="17" ry="21" fill="${url('eye')}"/>
-          <ellipse class="d-eye d-eye-r" cx="238" cy="160" rx="17" ry="21" fill="${url('eye')}"/>
+          ${hasGlow ? `<ellipse class="d-eye-glow" cx="162" cy="158" rx="32" ry="36" fill="${url('eyeGlow')}"/><ellipse class="d-eye-glow" cx="238" cy="158" rx="32" ry="36" fill="${url('eyeGlow')}"/>` : ''}
+          <ellipse class="d-eye d-eye-l" cx="162" cy="158" rx="15" ry="19" fill="${url('eye')}"/>
+          <ellipse class="d-eye d-eye-r" cx="238" cy="158" rx="15" ry="19" fill="${url('eye')}"/>
         </g>
         <g class="d-eye-happy" fill="none" stroke="${url('eye')}" stroke-width="${cfg.eyeHappyStroke}" stroke-linecap="round">
           ${hasGlow ? `<ellipse cx="162" cy="158" rx="34" ry="26" fill="${url('eyeGlow')}" stroke="none"/><ellipse cx="238" cy="158" rx="34" ry="26" fill="${url('eyeGlow')}" stroke="none"/>` : ''}
-          <path d="M140 170 Q162 140 184 170"/><path d="M216 170 Q238 140 260 170"/>
+          <path d="M136 174 Q162 132 188 174"/><path d="M212 174 Q238 132 264 174"/>
         </g>
         <g class="d-eye-sleep" fill="none" stroke="${url('eye')}" stroke-width="${cfg.eyeSleepStroke}" stroke-linecap="round">
           <path d="M142 164 Q162 176 182 164"/><path d="M218 164 Q238 176 258 164"/>
@@ -313,7 +313,7 @@ export function dentiSvg(uid = 'd', lod = 'hero') {
           ${at(238, 143, 1.75, `<path class="d-eyeheart" d="${HEART}"/>`)}
         </g>
       </g>
-      <g class="d-lids" fill="#070b16">
+      <g class="d-lids" fill="${url('cap')}">
         <path d="M136 128 L190 128 L190 146 L136 166 Z"/><path d="M264 128 L210 128 L210 146 L264 166 Z"/>
       </g>
       <g class="d-shades">
