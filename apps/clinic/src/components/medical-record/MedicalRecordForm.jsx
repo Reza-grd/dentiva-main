@@ -546,6 +546,10 @@ const MedicalRecordForm = () => {
       }
 
       let latestVisitId = null;
+      // Kunjungan baru ditandai selesai PALING AKHIR (setelah resep & tindakan
+      // tersimpan): status completed memicu kirim ke SATUSEHAT dan mengunci
+      // tindakan, jadi semua data harus sudah lengkap sebelumnya.
+      const visitIdsToComplete = [];
       for (const v of visits.filter(v => v._isNew)) {
         const res = await visitService.createVisit({ 
           patient_id: patientId, 
@@ -554,8 +558,7 @@ const MedicalRecordForm = () => {
           pemeriksaan_fisik: v.pemeriksaan_fisik || '', 
           diagnosa: v.diagnosa || '', 
           terapi: v.terapi || '', 
-          kode_icd10: v.kode_icd10 || '',
-          status: 'completed' 
+          kode_icd10: v.kode_icd10 || ''
         });
         if (!res.success) {
           toast.error('Gagal membuat kunjungan baru: ' + res.error);
@@ -564,8 +567,14 @@ const MedicalRecordForm = () => {
         }
         if (res.data) {
           latestVisitId = res.data.id;
+          visitIdsToComplete.push(res.data.id);
           if (v.prescriptions && v.prescriptions.length > 0) {
-            await prescriptionService.replaceVisitObat(latestVisitId, v.prescriptions);
+            const obatRes = await prescriptionService.replaceVisitObat(latestVisitId, v.prescriptions);
+            if (!obatRes.success) {
+              toast.error('Gagal menyimpan resep: ' + obatRes.error);
+              setSaving(false);
+              return;
+            }
           }
         }
       }
@@ -575,8 +584,7 @@ const MedicalRecordForm = () => {
           diagnosa: v.diagnosa || '', 
           terapi: v.terapi || '', 
           pemeriksaan_fisik: v.pemeriksaan_fisik || '',
-          kode_icd10: v.kode_icd10 || '',
-          status: 'completed'
+          kode_icd10: v.kode_icd10 || ''
         });
         if (!res.success) {
           toast.error('Gagal memperbarui kunjungan: ' + res.error);
@@ -584,8 +592,14 @@ const MedicalRecordForm = () => {
           return;
         }
         if (!latestVisitId) latestVisitId = v.id;
+        visitIdsToComplete.push(v.id);
         if (v.prescriptions) {
-          await prescriptionService.replaceVisitObat(v.id, v.prescriptions);
+          const obatRes = await prescriptionService.replaceVisitObat(v.id, v.prescriptions);
+          if (!obatRes.success) {
+            toast.error('Gagal menyimpan resep: ' + obatRes.error);
+            setSaving(false);
+            return;
+          }
         }
       }
 
@@ -637,12 +651,36 @@ const MedicalRecordForm = () => {
             }));
 
           const merged = [...receptionistEntries, ...mappedVisitTreatments];
-          const replaceRes = await visitService.replaceVisitTreatments(latestVisitId, merged);
-          if (!replaceRes.success) {
-            toast.error('Gagal mensinkronisasikan tindakan ke kunjungan: ' + replaceRes.error);
-            setSaving(false);
-            return;
+          const sig = (rows) => rows
+            .map(r => `${r.treatment_id}|${r.quantity || 1}|${Number(r.harga_satuan) || 0}`)
+            .sort()
+            .join(',');
+          const latestVisit = visits.find(v => v.id === latestVisitId);
+          const unchanged = sig(existingVT || []) === sig(merged);
+
+          if (unchanged) {
+            // Tindakan sama dengan yang tersimpan — tidak perlu ditulis ulang.
+          } else if (latestVisit && !latestVisit._isNew && latestVisit.status === 'completed') {
+            // Tindakan kunjungan yang sudah selesai dikunci database (snapshot biaya).
+            toast.warning('Tindakan tidak diubah karena kunjungan sudah selesai. Data lain tetap tersimpan.');
+          } else {
+            const replaceRes = await visitService.replaceVisitTreatments(latestVisitId, merged);
+            if (!replaceRes.success) {
+              toast.error('Gagal mensinkronisasikan tindakan ke kunjungan: ' + replaceRes.error);
+              setSaving(false);
+              return;
+            }
           }
+        }
+      }
+
+      // Tandai selesai terakhir — memicu sinkronisasi SATUSEHAT dengan resep & tindakan lengkap.
+      for (const id of visitIdsToComplete) {
+        const res = await visitService.updateVisit(id, { status: 'completed' });
+        if (!res.success) {
+          toast.error('Data tersimpan, tetapi kunjungan gagal ditandai selesai: ' + res.error);
+          setSaving(false);
+          return;
         }
       }
 
