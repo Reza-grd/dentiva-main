@@ -41,6 +41,8 @@ const SettingsPage = () => {
   const [syncingSS, setSyncingSS] = useState({});
   const [processingOutbox, setProcessingOutbox] = useState(false);
   const [retryingOutboxId, setRetryingOutboxId] = useState(null);
+  const [ssOrgIdInput, setSsOrgIdInput] = useState('');
+  const [savingSSOrgId, setSavingSSOrgId] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'audit-logs') {
@@ -62,6 +64,7 @@ const SettingsPage = () => {
 
       if (orgErr) throw orgErr;
       setSsOrg(orgData);
+      setSsOrgIdInput(orgData?.satusehat_organization_id || '');
 
       const { data: locData, error: locErr } = await supabase
         .from('satusehat_locations')
@@ -114,6 +117,43 @@ const SettingsPage = () => {
       toast.error('Error: ' + e.message);
     } finally {
       setProcessingOutbox(false);
+    }
+  };
+
+  // Organization ID dari SATUSEHAT Platform → Kode Akses API (format UUID). Disimpan lalu langsung
+  // diverifikasi ke SATUSEHAT lewat sinkronisasi organisasi.
+  const handleSaveSSOrgId = async () => {
+    const orgId = ssOrgIdInput.trim().toLowerCase();
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(orgId)) {
+      toast.error('Format Organization ID tidak valid. Salin dari SATUSEHAT Platform → Kode Akses API (contoh: 1a2b3c4d-…-…-…-…).');
+      return;
+    }
+    setSavingSSOrgId(true);
+    try {
+      const { error } = await supabase
+        .from('satusehat_organizations')
+        .upsert(
+          { clinic_id: userProfile.clinic_id, satusehat_organization_id: orgId, updated_at: new Date().toISOString() },
+          { onConflict: 'clinic_id' }
+        );
+      if (error) {
+        toast.error(error.code === '23505'
+          ? 'Organization ID ini sudah dipakai klinik lain di Dentiva.'
+          : 'Gagal menyimpan Organization ID: ' + error.message);
+        return;
+      }
+      await loadSatuSehatData();
+      const res = await satusehatService.syncOrganization(userProfile.clinic_id);
+      if (res.success) {
+        toast.success('Organization ID tersimpan dan terverifikasi di SATUSEHAT.');
+        await loadSatuSehatData();
+      } else {
+        toast.error('Organization ID tersimpan, tetapi verifikasi ke SATUSEHAT gagal: ' + res.error);
+      }
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setSavingSSOrgId(false);
     }
   };
 
@@ -970,8 +1010,36 @@ const SettingsPage = () => {
                         Master Organisasi (DFO)
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
-                        Data Organisasi Klinik terpetakan 1-to-1 dengan registrasi DFO (Direktorat Fasilitas Pelayanan Kesehatan) Kementerian Kesehatan. Masukkan ID Organisasi Anda di database atau profil sebelum menekan tombol sinkronisasi.
+                        Data Organisasi Klinik terpetakan 1-to-1 dengan registrasi DFO (Direktorat Fasilitas Pelayanan Kesehatan) Kementerian Kesehatan. Salin Organization ID dari SATUSEHAT Platform → Kode Akses API, tempel di bawah, lalu simpan — ID langsung diverifikasi ke SATUSEHAT.
                       </p>
+
+                      <div className="mb-4">
+                        <label htmlFor="ss-org-id" className="block text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">
+                          Organization ID SATUSEHAT
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            id="ss-org-id"
+                            type="text"
+                            value={ssOrgIdInput}
+                            onChange={(e) => setSsOrgIdInput(e.target.value)}
+                            disabled={!isAdmin || savingSSOrgId}
+                            placeholder="contoh: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                            spellCheck={false}
+                            autoComplete="off"
+                            className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-mono text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSaveSSOrgId}
+                            disabled={!isAdmin || savingSSOrgId || !ssOrgIdInput.trim() || ssOrgIdInput.trim().toLowerCase() === ssOrg?.satusehat_organization_id}
+                            className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                          >
+                            {savingSSOrgId ? <Loader className="animate-spin" size={16} /> : <Save size={16} />}
+                            {savingSSOrgId ? 'Menyimpan...' : 'Simpan & Verifikasi'}
+                          </button>
+                        </div>
+                      </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-gray-50 dark:bg-gray-800/20 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
                         <div>
@@ -979,17 +1047,14 @@ const SettingsPage = () => {
                           <div className="flex items-center gap-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${ssOrg?.satusehat_organization_id ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
                             <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
-                              {ssOrg?.satusehat_organization_id ? 'Terhubung ke Sandbox' : 'Belum Terhubung / ID Kosong'}
+                              {ssOrg?.satusehat_organization_id
+                                ? `ID tersimpan (${ssOrg.environment === 'production' ? 'Production' : 'Sandbox'})`
+                                : 'Belum Terhubung / ID Kosong'}
                             </span>
                           </div>
-                          {ssOrg?.satusehat_organization_id && (
-                            <div className="mt-1 text-xs text-gray-500 font-mono select-all">
-                              ID: {ssOrg.satusehat_organization_id}
-                            </div>
-                          )}
-                          {ssOrg?.last_synced_at && (
+                          {ssOrg?.updated_at && (
                             <div className="mt-1 text-xs text-gray-400">
-                              Terakhir Sinkron: {new Date(ssOrg.last_synced_at).toLocaleString('id-ID')}
+                              Terakhir diperbarui: {new Date(ssOrg.updated_at).toLocaleString('id-ID')}
                             </div>
                           )}
                         </div>
@@ -997,7 +1062,7 @@ const SettingsPage = () => {
                           <button
                             type="button"
                             onClick={handleSyncSSOrg}
-                            disabled={syncingSS.org}
+                            disabled={syncingSS.org || !ssOrg?.satusehat_organization_id}
                             className="flex items-center gap-2 py-2 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
                           >
                             {syncingSS.org ? <Loader className="animate-spin" size={16} /> : <Shield size={16} />}
