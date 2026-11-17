@@ -43,6 +43,8 @@ const SettingsPage = () => {
   const [retryingOutboxId, setRetryingOutboxId] = useState(null);
   const [ssOrgIdInput, setSsOrgIdInput] = useState('');
   const [savingSSOrgId, setSavingSSOrgId] = useState(false);
+  const [newLocName, setNewLocName] = useState('');
+  const [addingLoc, setAddingLoc] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'audit-logs') {
@@ -188,6 +190,38 @@ const SettingsPage = () => {
       toast.error('Error: ' + e.message);
     } finally {
       setSyncingSS(prev => ({ ...prev, [locId]: false }));
+    }
+  };
+
+  // Lokasi pertama otomatis menjadi default (dipakai Encounter.location), lalu langsung dibuat di SATUSEHAT.
+  const handleAddSSLoc = async () => {
+    const nama = newLocName.trim().replace(/\s+/g, ' ');
+    if (nama.length < 3) {
+      toast.error('Nama ruangan minimal 3 karakter, misalnya "Poli Gigi 1".');
+      return;
+    }
+    if (ssLocations.some(l => l.nama_unit.toLowerCase() === nama.toLowerCase())) {
+      toast.error('Ruangan dengan nama ini sudah ada.');
+      return;
+    }
+    setAddingLoc(true);
+    try {
+      const { data, error } = await supabase
+        .from('satusehat_locations')
+        .insert({ clinic_id: userProfile.clinic_id, nama_unit: nama, is_default: ssLocations.length === 0 })
+        .select('id')
+        .single();
+      if (error) {
+        toast.error('Gagal menambah ruangan: ' + error.message);
+        return;
+      }
+      setNewLocName('');
+      await loadSatuSehatData();
+      await handleSyncSSLoc(data.id);
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setAddingLoc(false);
     }
   };
 
@@ -1079,8 +1113,34 @@ const SettingsPage = () => {
                         Master Lokasi (Ruangan & Unit Pelayanan)
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
-                        Data ruangan, poli gusi, poli bedah mulut, dan unit pelayanan fisik di dalam klinik yang wajib dipetakan ke FHIR Location SatuSehat.
+                        Data ruangan, poli gusi, poli bedah mulut, dan unit pelayanan fisik di dalam klinik yang wajib dipetakan ke FHIR Location SatuSehat. Ruangan pertama menjadi lokasi default kunjungan.
                       </p>
+
+                      {isAdmin && (
+                        <div className="mb-4 flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            value={newLocName}
+                            onChange={(e) => setNewLocName(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleAddSSLoc(); }}
+                            disabled={addingLoc}
+                            maxLength={100}
+                            placeholder="Nama ruangan, mis. Poli Gigi 1"
+                            aria-label="Nama ruangan baru"
+                            className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddSSLoc}
+                            disabled={addingLoc || !newLocName.trim() || !ssOrg?.satusehat_organization_id}
+                            title={!ssOrg?.satusehat_organization_id ? 'Isi Organization ID terlebih dahulu' : ''}
+                            className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                          >
+                            {addingLoc ? <Loader className="animate-spin" size={16} /> : <MapPin size={16} />}
+                            {addingLoc ? 'Menambahkan...' : 'Tambah & Sinkronkan'}
+                          </button>
+                        </div>
+                      )}
 
                       {ssLocations.length === 0 ? (
                         <div className="text-center py-8 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
