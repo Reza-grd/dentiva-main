@@ -655,12 +655,17 @@ const MedicalRecordForm = () => {
             .map(r => `${r.treatment_id}|${r.quantity || 1}|${Number(r.harga_satuan) || 0}`)
             .sort()
             .join(',');
-          const latestVisit = visits.find(v => v.id === latestVisitId);
+          // Status dibaca dari database, bukan dari state/draf yang bisa basi.
+          const { data: latestVisitRow } = await supabase
+            .from('visits')
+            .select('status')
+            .eq('id', latestVisitId)
+            .maybeSingle();
           const unchanged = sig(existingVT || []) === sig(merged);
 
           if (unchanged) {
             // Tindakan sama dengan yang tersimpan — tidak perlu ditulis ulang.
-          } else if (latestVisit && !latestVisit._isNew && latestVisit.status === 'completed') {
+          } else if (latestVisitRow?.status === 'completed') {
             // Tindakan kunjungan yang sudah selesai dikunci database (snapshot biaya).
             toast.warning('Tindakan tidak diubah karena kunjungan sudah selesai. Data lain tetap tersimpan.');
           } else {
