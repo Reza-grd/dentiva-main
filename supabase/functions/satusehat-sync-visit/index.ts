@@ -153,11 +153,6 @@ serve(async (req) => {
       callingUserId
     );
 
-    // FIX D: Update Encounter resource on SATUSEHAT to attach Condition diagnosis references
-    if (conditionIds.length > 0) {
-      await updateEncounterDiagnoses(supabaseAdmin, encounterId, conditionIds);
-    }
-
     // 4. Sync Procedures (Step 3)
     const procedureIds = await buildAndSyncProcedures(
       supabaseAdmin,
@@ -189,6 +184,21 @@ serve(async (req) => {
       );
     } catch (e: any) {
       console.error('Dental Observation sync failed:', e?.message);
+    }
+
+    // FIX D: Tutup Encounter (arrived → finished) beserta diagnosis setelah semua
+    // resource kunjungan terkirim. Gagal di sini tidak membatalkan resume medis.
+    let encounterFinishError: string | null = null;
+    if (conditionIds.length > 0) {
+      try {
+        await updateEncounterDiagnoses(supabaseAdmin, encounterId, conditionIds);
+      } catch (e: any) {
+        encounterFinishError = e?.message || String(e);
+        console.error('Encounter finish failed:', encounterFinishError);
+      }
+    } else {
+      encounterFinishError = 'Encounter belum bisa ditutup (finished): tidak ada diagnosis ICD-10 yang terkirim.';
+      console.warn(encounterFinishError);
     }
 
     // Save mapping list of successfully synced resources
@@ -233,7 +243,8 @@ serve(async (req) => {
           procedureIds,
           medicationRequestIds,
           observationIds,
-          compositionId
+          compositionId,
+          encounterFinishError
         }
       }),
       {

@@ -7,7 +7,7 @@ import { syncOrganization } from "../_shared/resources/organization.ts";
 import { syncLocation } from "../_shared/resources/location.ts";
 import { syncPractitioner } from "../_shared/resources/practitioner.ts";
 import { syncPatient } from "../_shared/resources/patient.ts";
-import { buildAndSyncEncounter } from "../_shared/resources/encounter.ts";
+import { buildAndSyncEncounter, updateEncounterDiagnoses } from "../_shared/resources/encounter.ts";
 import { buildAndSyncConditions } from "../_shared/resources/condition.ts";
 import { buildAndSyncProcedures } from "../_shared/resources/procedure.ts";
 import { buildAndSyncDentalObservations } from "../_shared/resources/dentalObservation.ts";
@@ -145,7 +145,15 @@ serve(async (req) => {
             if (item.resource_type === 'Condition') {
               const code = item.payload?.code?.coding?.[0]?.code;
               const existingOutboxIds = code ? { [code]: item.id } : undefined;
-              await buildAndSyncConditions(supabaseAdmin, visit.id, patientSId, encounterId, isoTimestamp, existingOutboxIds, callingUserId);
+              const conditionIds = await buildAndSyncConditions(supabaseAdmin, visit.id, patientSId, encounterId, isoTimestamp, existingOutboxIds, callingUserId);
+              // Encounter dibuat berstatus `arrived`; tutup (finished + diagnosis) setelah Condition tersedia.
+              if (conditionIds.length > 0) {
+                try {
+                  await updateEncounterDiagnoses(supabaseAdmin, encounterId, conditionIds);
+                } catch (e: any) {
+                  console.error(`Outbox item ${item.id}: Encounter finish failed:`, e?.message);
+                }
+              }
             } else if (item.resource_type === 'Procedure') {
               const code = item.payload?.code?.coding?.[0]?.code;
               const existingOutboxIds = code ? { [code]: item.id } : undefined;
