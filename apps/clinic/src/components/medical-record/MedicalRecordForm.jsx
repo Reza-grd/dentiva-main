@@ -1349,8 +1349,8 @@ const MedicalRecordForm = () => {
             </div>
 
             {/* SOAP Histori Kunjungan */}
-            <div className="glass-panel overflow-hidden mb-8 break-inside-avoid print:break-before-page">
-              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex justify-between items-center">
+            <div className="glass-panel mb-8 break-inside-avoid print:break-before-page">
+              <div className="px-6 py-4 rounded-t-[inherit] border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 flex justify-between items-center">
                 <h3 className="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2"><Calendar className="text-[var(--color-accent)]"/> Histori Kunjungan & SOAP</h3>
                 <button onClick={addVisit} className="px-4 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-secondary)] text-white text-sm font-semibold rounded-xl flex items-center gap-1.5 transition-colors no-print"><Plus size={16}/> Tambah Kunjungan</button>
               </div>
