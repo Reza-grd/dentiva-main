@@ -13,6 +13,7 @@ import { prescriptionService } from '../../services/prescriptionService';
  */
 const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = '', disabled = false }) => {
   const [masterObat, setMasterObat] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +35,9 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
       const res = await prescriptionService.getActiveObat();
       if (res.success && res.data) {
         setMasterObat(res.data);
+        setLoadError(null);
+      } else {
+        setLoadError(res.error || 'Daftar obat gagal dimuat');
       }
     };
     fetchMasterObat();
@@ -179,6 +183,14 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
                       </li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {isOpen && results.length === 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl px-3 py-2.5 text-xs text-gray-600 dark:text-gray-300">
+                  {loadError
+                    ? `Daftar obat gagal dimuat: ${loadError}. Muat ulang halaman.`
+                    : `Obat "${query.trim()}" tidak ditemukan. Hanya bahan berkategori "Obat" dan berstatus aktif di Inventori → Master Bahan yang muncul di sini (${masterObat.length} obat tersedia).`}
                 </div>
               )}
             </div>
