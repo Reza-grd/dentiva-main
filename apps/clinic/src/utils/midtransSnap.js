@@ -2,6 +2,7 @@
  * Popup pembayaran Midtrans Snap (https://docs.midtrans.com/docs/snap-snap-integration-guide).
  *   VITE_MIDTRANS_CLIENT_KEY  — Client Key (publik) dari Dashboard Midtrans → Settings → Access Keys
  *   VITE_MIDTRANS_ENV         — 'sandbox' (bawaan) | 'production'
+ *   Uji sandbox: ketiga variabel di atas diisi hanya untuk lingkungan Preview Vercel.
  * Server Key TIDAK pernah ada di aplikasi; transaksi dibuat fungsi midtrans-create-transaction.
  * Hasil popup hanya petunjuk tampilan — status resmi datang dari webhook (lihat get_checkout_status).
  */
