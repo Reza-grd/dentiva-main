@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import PhotoUpload from '../common/PhotoUpload';
 import { useToast } from '../common/ToastNotification';
@@ -1161,7 +1162,8 @@ const PatientRegistration = () => {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Modals — lewat portal agar latar gelap menutup seluruh layar (induk halaman memakai animasi transform) */}
+      {createPortal(<>
       {successModalData && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-scale-in">
@@ -1254,6 +1256,7 @@ const PatientRegistration = () => {
           </div>
         </div>
       )}
+      </>, document.body)}
     </div>
   );
 };

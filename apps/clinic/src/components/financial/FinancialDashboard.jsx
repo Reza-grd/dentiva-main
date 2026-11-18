@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { financialService } from '../../services/financialService';
 import { paymentService } from '../../services/paymentService';
-import { parseDateLocal } from '../../utils/dateUtils';
+import { parseDateLocal, formatLocalISO, getTodayLocal } from '../../utils/dateUtils';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BarChart3, Download, RefreshCw, Receipt } from 'lucide-react';
 import StatCard from '../ui/StatCard';
@@ -24,21 +24,23 @@ const FinancialDashboard = () => {
   const loadFinancialData = async () => {
     setLoading(true);
 
-    // Get date range
-    const endDate = new Date().toISOString().split('T')[0];
+    // Get date range — pakai tanggal lokal (WIB), bukan toISOString() (UTC) yang
+    // menggeser awal bulan/tahun mundur sehari sehingga "Bulan ini" ikut menghitung tanggal terakhir bulan lalu.
+    const now = new Date();
+    const endDate = getTodayLocal();
     let startDate;
     switch (dateRange) {
       case 'week':
-        startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        startDate = formatLocalISO(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7));
         break;
       case 'month':
-        startDate = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+        startDate = formatLocalISO(new Date(now.getFullYear(), now.getMonth(), 1));
         break;
       case 'year':
-        startDate = new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0];
+        startDate = formatLocalISO(new Date(now.getFullYear(), 0, 1));
         break;
       default:
-        startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        startDate = formatLocalISO(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30));
     }
 
     // Load financial summary

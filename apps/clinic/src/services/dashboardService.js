@@ -94,7 +94,9 @@ export const dashboardService = {
         if (monthMap[key]) monthMap[key].kunjungan += Number(v.jumlah) || 0;
       });
 
-      const result = Object.entries(monthMap).map(([, val]) => val);
+      // Bulan yang belum terjadi → null agar garis grafik berhenti, bukan jatuh ke 0.
+      const bulanIni = getTodayLocal().substring(0, 7);
+      const result = Object.entries(monthMap).map(([key, val]) => (yearMode && key > bulanIni ? { ...val, kunjungan: null } : val));
       return { success: true, data: result };
     } catch (error) {
       console.error('getMonthlyVisits error:', error);

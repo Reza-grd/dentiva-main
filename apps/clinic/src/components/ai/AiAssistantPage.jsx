@@ -139,8 +139,10 @@ function Answer({ text, fresh = false }) {
   return <div ref={ref} className={`ai-md ${fresh ? 'ai-md--stream' : ''}`} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+/** Gelar di depan nama (drg., dr., Prof., H., …) dilewati agar sapaan memakai nama asli. */
+const GELAR = /^(drg|dr|prof|h|hj|ir|ns|apt|sp|mr|mrs|ms)\.?,?$/i;
 const firstName = (profile) => {
-  const n = (profile?.full_name || '').trim().split(/\s+/)[0] || '';
+  const n = (profile?.full_name || '').trim().split(/\s+/).find((w) => !GELAR.test(w)) || '';
   return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
 };
 
