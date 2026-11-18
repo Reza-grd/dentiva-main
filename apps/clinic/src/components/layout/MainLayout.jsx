@@ -5,6 +5,7 @@ import BottomNav from '../common/BottomNav';
 import AnnouncementBanner from './AnnouncementBanner';
 import DentiGuideWidget from '../ai/DentiGuideWidget';
 import EiraTour from '../tour/EiraTour';
+import PilihPaketModal from '../billing/PilihPaketModal';
 
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -44,6 +45,9 @@ const MainLayout = ({ children }) => {
 
       {/* Tur pengenalan bersama Eira untuk pengguna baru (bisa diulang dari menu profil) */}
       <EiraTour />
+
+      {/* Popup pilihan paket untuk Manajer Klinik yang masih uji coba / menunggak (sekali per login) */}
+      <PilihPaketModal />
     </div>
   );
 };

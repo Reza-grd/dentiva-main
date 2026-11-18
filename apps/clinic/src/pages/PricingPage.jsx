@@ -21,7 +21,7 @@ import { useClinicSettingsOptional } from "../contexts/ClinicSettingsContext";
 import ManualPaymentModal from "../components/settings/ManualPaymentModal";
 import { BILLING } from "../utils/billingConfig";
 import { mulaiCheckout } from "../services/checkoutService";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Batas ≥ 9999 di subscription_plans berarti "tanpa batas".
 const isUnlimited = (n) => Number(n) >= 9999;
@@ -44,6 +44,18 @@ export default function PricingPage() {
   useEffect(() => {
     fetchPlans();
   }, []);
+
+  // Datang dari popup pilihan paket: /pricing?paket=<id>&siklus=monthly|yearly → langsung ke pembayaran.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const paket = searchParams.get("paket");
+    if (!paket || loading || !plans.some((p) => p.id === paket)) return;
+    const siklus = searchParams.get("siklus") === "yearly" ? "yearly" : "monthly";
+    setBillingCycle(siklus);
+    setSearchParams({}, { replace: true });
+    handleSubscribe(paket, siklus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, plans, searchParams]);
 
   const fetchPlans = async () => {
     try {
@@ -68,7 +80,7 @@ export default function PricingPage() {
     }
   };
 
-  const handleSubscribe = async (planId) => {
+  const handleSubscribe = async (planId, siklus = billingCycle) => {
     if (userProfile?.role !== "admin") {
       toast({
         title: "Akses Dibatasi",
@@ -87,7 +99,7 @@ export default function PricingPage() {
 
     try {
       setProcessingPlanId(planId);
-      const { orderId, hasil } = await mulaiCheckout(planId, billingCycle);
+      const { orderId, hasil } = await mulaiCheckout(planId, siklus);
       if (hasil === "close") {
         toast({ title: "Pembayaran belum selesai", description: "Jendela pembayaran ditutup.", variant: "info" });
         return;
@@ -239,11 +251,14 @@ export default function PricingPage() {
                   <Button
                     variant={isPopular ? "primary" : "outline"}
                     className="w-full"
-                    disabled={isCurrent || processingPlanId === p.id}
+                    disabled={Boolean(processingPlanId)}
                     isLoading={processingPlanId === p.id}
                     onClick={() => handleSubscribe(p.id)}
                   >
-                    {isCurrent ? "Paket Saat Ini" : `Pilih Paket ${p.name}`}
+                    {/* Paket yang sedang dipakai tetap bisa dibayar: aktifkan dari uji coba / perpanjang. */}
+                    {!isCurrent ? `Pilih Paket ${p.name}`
+                      : subscription?.status === "trialing" ? `Aktifkan Paket ${p.name}`
+                      : "Perpanjang Paket Ini"}
                   </Button>
                 </CardFooter>
               </Card>

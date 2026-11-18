@@ -33,12 +33,12 @@ const bacaJalan = (uid) => {
   } catch { return null; }
 };
 const kunciLokal = (id) => `dentiva-tur-v${TUR_VERSI}:${id}`;
-const sudahTur = (user) => {
+export const sudahTur = (user) => {
   if (!user) return true;
   if ((user.user_metadata?.tur_dentiva?.v || 0) >= TUR_VERSI) return true;
   try { return Boolean(localStorage.getItem(kunciLokal(user.id))); } catch { return false; }
 };
-const akunBaru = (user) => {
+export const akunBaru = (user) => {
   const dibuat = Date.parse(user?.created_at || '');
   return Number.isFinite(dibuat) && Date.now() - dibuat < HARI_BARU * 864e5;
 };

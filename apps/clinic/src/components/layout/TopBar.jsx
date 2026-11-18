@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette, Bell, ChevronDown, Compass } from 'lucide-react';
+import { LogOut, User, Settings, Menu, ChevronRight, Sun, Moon, Palette, ChevronDown, Compass } from 'lucide-react';
+import NotifikasiLonceng from './NotifikasiLonceng';
 import { supabase } from '../../services/supabase';
 import { formatDoctorName } from '../../utils/dateUtils';
 import GlobalSearch from './GlobalSearch';
@@ -122,16 +123,8 @@ const TopBar = ({ onMenuClick }) => {
 
           <div className="h-6 w-px bg-border hidden sm:block"></div>
 
-          {/* Notifications Placeholder */}
-          <div className="relative">
-            <button
-              aria-label="Pemberitahuan / Notifikasi"
-              className="p-2 rounded-full text-text-muted hover:bg-background transition-colors"
-            >
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-card"></span>
-            </button>
-          </div>
+          {/* Notifikasi: pesan antar-staf, langganan, sistem */}
+          <NotifikasiLonceng />
 
           {/* User Menu */}
           <div className="relative flex items-center">
