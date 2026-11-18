@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { writeFileSync } from 'node:fs';
 import { buatInvoiceLangganan } from '../utils/invoiceLanggananPdf';
-import { pesanKonfirmasi, PENJUAL } from '../utils/billingConfig';
+import { PENJUAL } from '../utils/billingConfig';
 
 const invoice = {
   number: 'INV-2026-000042', status: 'open', issued_at: '2026-11-14T03:00:00Z', due_date: '2026-11-17',
@@ -33,8 +33,4 @@ describe('Invoice langganan (PDF)', () => {
     expect(t).toContain('Rp 0');
   });
 
-  it('pesan konfirmasi WhatsApp menyertakan nomor invoice', () => {
-    expect(pesanKonfirmasi({ klinik: 'K', paket: 'Pro', siklus: 'monthly', nominal: 299000, admin: 'A', invoice: 'INV-2026-000042' }))
-      .toContain('Invoice: INV-2026-000042');
-  });
 });

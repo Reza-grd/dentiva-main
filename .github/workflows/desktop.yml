@@ -12,7 +12,7 @@ name: Dentiva Desktop (Windows & macOS)
 #
 # Variabel repository (Settings → Secrets and variables → Actions → Variables):
 #   VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY (publishable key), VITE_PUBLIC_APP_URL,
-#   VITE_SENTRY_DSN (opsional).
+#   VITE_SENTRY_DSN (opsional), VITE_MIDTRANS_CLIENT_KEY + VITE_MIDTRANS_ENV (pembayaran langganan).
 # Secrets untuk rilis (Settings → Secrets and variables → Actions → Secrets):
 #   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD — kunci penanda tangan pembaruan
 #   RELEASES_TOKEN — fine-grained token, akses Contents: Read & write HANYA ke repo dentiva-desktop-releases
@@ -106,6 +106,8 @@ jobs:
       VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
       VITE_PUBLIC_APP_URL: ${{ vars.VITE_PUBLIC_APP_URL }}
       VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+      VITE_MIDTRANS_CLIENT_KEY: ${{ vars.VITE_MIDTRANS_CLIENT_KEY }}
+      VITE_MIDTRANS_ENV: ${{ vars.VITE_MIDTRANS_ENV }}
     steps:
       - uses: actions/checkout@v4
 

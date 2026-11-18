@@ -1,10 +1,8 @@
 /**
- * Cara klinik membayar langganan Dentiva.
- *   - 'manual'   (bawaan): transfer ke rekening Dentiva lalu konfirmasi via WhatsApp; tim Dentiva memverifikasi dan
- *                 mencatat di Console (Billing → Invoice → "Konfirmasi transfer").
- *   - 'midtrans' : gerbang Midtrans Snap (fungsi midtrans-create-transaction), aktifkan dengan VITE_BILLING_MODE=midtrans
- *                 setelah akun Midtrans & MIDTRANS_SERVER_KEY di VPS siap.
- * Data rekening & nomor WhatsApp diisi pemilik di Environment Variables Vercel — tidak ditulis di kode.
+ * Pembayaran langganan Dentiva memakai Midtrans Snap (fungsi midtrans-create-transaction).
+ * Lingkungan Snap (sandbox/production) diatur VITE_MIDTRANS_ENV + VITE_MIDTRANS_CLIENT_KEY.
+ * Data rekening & nomor WhatsApp di bawah hanya untuk identitas pada invoice PDF, diisi pemilik di
+ * Environment Variables — tidak ditulis di kode.
  */
 const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
 const teks = (v) => String(v ?? '').trim();
@@ -18,15 +16,12 @@ export function nomorWa(raw) {
 }
 
 export const BILLING = {
-  mode: teks(env.VITE_BILLING_MODE).toLowerCase() === 'midtrans' ? 'midtrans' : 'manual',
   bank: teks(env.VITE_BILLING_BANK),
   rekening: teks(env.VITE_BILLING_REKENING),
   atasNama: teks(env.VITE_BILLING_ATAS_NAMA),
   wa: nomorWa(env.VITE_BILLING_WA),
   email: teks(env.VITE_BILLING_EMAIL) || 'info@dentiva.id',
 };
-
-export const rekeningSiap = (b = BILLING) => Boolean(b.bank && b.rekening && b.atasNama);
 
 /**
  * Identitas penjual pada invoice langganan. Alamat (pisahkan baris dengan "|") dan NPWP diisi
@@ -38,36 +33,3 @@ export const PENJUAL = {
   npwp: teks(env.VITE_INVOICE_NPWP),
   email: BILLING.email,
 };
-
-const rupiah = (n) => `Rp ${Math.round(Number(n) || 0).toLocaleString('id-ID')}`;
-
-/** Pesan konfirmasi yang terisi otomatis (tanpa data pasien). */
-export function pesanKonfirmasi({ klinik, paket, siklus, nominal, admin, invoice }) {
-  return [
-    'Halo tim Dentiva, saya ingin mengonfirmasi pembayaran langganan.',
-    '',
-    ...(invoice ? [`Invoice: ${invoice}`] : []),
-    `Klinik: ${klinik || '-'}`,
-    `Paket: ${paket} (${siklus === 'yearly' ? 'tahunan' : 'bulanan'})`,
-    `Nominal: ${rupiah(nominal)}`,
-    `Admin: ${admin || '-'}`,
-    '',
-    'Bukti transfer saya lampirkan di pesan berikutnya. Terima kasih.',
-  ].join('\n');
-}
-
-/** Tautan konfirmasi: WhatsApp bila nomor tersedia, selain itu email. */
-export function tautanKonfirmasi(data, b = BILLING) {
-  const isi = pesanKonfirmasi(data);
-  if (b.wa) return { jenis: 'wa', href: `https://wa.me/${b.wa}?text=${encodeURIComponent(isi)}` };
-  const subjek = `Konfirmasi langganan Dentiva — ${data.klinik || 'klinik'}`;
-  // Tautan mailto: sering membuka halaman kosong bila komputer tidak punya aplikasi email bawaan,
-  // jadi tombol utama memakai Gmail versi web; mailto tetap tersedia sebagai pilihan lain.
-  return {
-    jenis: 'email',
-    href: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(b.email)}&su=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isi)}`,
-    mailto: `mailto:${b.email}?subject=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isi)}`,
-    alamat: b.email,
-    isi,
-  };
-}

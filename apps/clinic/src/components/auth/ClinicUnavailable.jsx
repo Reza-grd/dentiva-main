@@ -3,7 +3,6 @@ import { Lock, RefreshCw, LogOut } from 'lucide-react';
 import { Button, Card, CardContent } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
 import CheckoutPanel from '../billing/CheckoutPanel';
-import { BILLING } from '../../utils/billingConfig';
 
 const COPY = {
   suspended: {
@@ -41,7 +40,7 @@ const ClinicUnavailable = () => {
   };
 
   // Pendaftar baru (klinik 'pending'): bisa langsung bayar agar aktif tanpa menunggu verifikasi.
-  if (accountStatus?.clinic_status === 'pending' && accountStatus?.role === 'admin' && BILLING.mode === 'midtrans') {
+  if (accountStatus?.clinic_status === 'pending' && accountStatus?.role === 'admin') {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F17] px-4 py-8 flex flex-col items-center">
         <CheckoutPanel

@@ -18,8 +18,6 @@ import { Tabs, TabsList, TabsTrigger } from "@dentiva/ui";
 import { SkeletonCard } from "@dentiva/ui";
 import { Check, ShieldCheck, Zap, Sparkles, HelpCircle } from "lucide-react";
 import { useClinicSettingsOptional } from "../contexts/ClinicSettingsContext";
-import ManualPaymentModal from "../components/settings/ManualPaymentModal";
-import { BILLING } from "../utils/billingConfig";
 import { mulaiCheckout } from "../services/checkoutService";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
@@ -38,7 +36,6 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(true);
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [processingPlanId, setProcessingPlanId] = useState(null);
-  const [bayarManual, setBayarManual] = useState(null); // paket yang sedang dibayar via transfer manual
   const clinicSettings = useClinicSettingsOptional()?.settings;
 
   useEffect(() => {
@@ -87,13 +84,6 @@ export default function PricingPage() {
         description: "Hanya Manajer Klinik (Admin) yang dapat mengubah paket langganan.",
         variant: "warning",
       });
-      return;
-    }
-
-    // Belum memakai payment gateway: tampilkan langkah transfer manual + konfirmasi WhatsApp.
-    if (BILLING.mode === "manual") {
-      const p = plans.find((x) => x.id === planId);
-      if (p) setBayarManual(p);
       return;
     }
 
@@ -277,17 +267,8 @@ export default function PricingPage() {
         <div className="flex items-center gap-3">
           <ShieldCheck className="w-8 h-8 text-[var(--color-accent)] flex-shrink-0" />
           <div>
-            {BILLING.mode === "midtrans" ? (
-              <>
-                <div className="font-semibold text-gray-900 dark:text-gray-200">Pembayaran Aman via Midtrans Snap</div>
-                <div>Mendukung QRIS, Transfer Bank BCA/Mandiri/BRI, E-Wallet, & Kartu Kredit.</div>
-              </>
-            ) : (
-              <>
-                <div className="font-semibold text-gray-900 dark:text-gray-200">Pembayaran via transfer bank</div>
-                <div>Paket aktif setelah transfer Anda diverifikasi tim Dentiva.</div>
-              </>
-            )}
+            <div className="font-semibold text-gray-900 dark:text-gray-200">Pembayaran Aman via Midtrans Snap</div>
+            <div>Mendukung QRIS, Transfer Bank BCA/Mandiri/BRI, E-Wallet, & Kartu Kredit.</div>
           </div>
         </div>
         <div className="flex items-center gap-2 font-medium">
@@ -295,16 +276,6 @@ export default function PricingPage() {
           <span>Butuh bantuan? Hubungi Support Dentiva</span>
         </div>
       </div>
-      {bayarManual && (
-        <ManualPaymentModal
-          plan={bayarManual}
-          siklus={billingCycle}
-          nominal={billingCycle === "yearly" ? bayarManual.price_yearly : bayarManual.price_monthly}
-          klinik={clinicSettings?.clinic_name}
-          admin={userProfile?.full_name}
-          onClose={() => setBayarManual(null)}
-        />
-      )}
     </div>
   );
 }
