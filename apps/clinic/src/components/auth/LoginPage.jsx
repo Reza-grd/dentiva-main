@@ -28,6 +28,7 @@ const loginSchema = z.object({
 const GENERIC_LOGIN_ERROR = 'Email atau password salah.';
 const NETWORK_LOGIN_ERROR = 'Tidak dapat terhubung ke server. Periksa koneksi Anda.';
 const RATE_LIMIT_LOGIN_ERROR = 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.';
+export const CAPTCHA_ERROR = 'Verifikasi keamanan gagal. Muat ulang halaman lalu coba lagi.';
 
 export const normalizeLoginError = (msg) => {
   if (!msg) return '';
@@ -36,6 +37,11 @@ export const normalizeLoginError = (msg) => {
   // 1. Batas laju (HTTP 429 / over_request_rate_limit)
   if (/429|rate[_\s-]?limit|too many requests|terlalu banyak percobaan/i.test(text)) {
     return RATE_LIMIT_LOGIN_ERROR;
+  }
+
+  // 1b. CAPTCHA Turnstile ditolak server (token kosong/kedaluwarsa/tidak sah)
+  if (/captcha/i.test(text)) {
+    return CAPTCHA_ERROR;
   }
 
   // 2. Galat jaringan (fetch gagal / koneksi terputus / server tidak terjangkau)

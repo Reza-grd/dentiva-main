@@ -278,7 +278,7 @@ const SettingsPage = () => {
       captchaPw.current?.reset();
 
       if (authError) {
-        toast.error('Password saat ini salah');
+        toast.error(/captcha/i.test(authError.message || '') ? 'Verifikasi keamanan gagal. Muat ulang halaman lalu coba lagi.' : 'Password saat ini salah');
         setUpdatingPassword(false);
         return;
       }

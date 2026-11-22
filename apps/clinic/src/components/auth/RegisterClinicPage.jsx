@@ -110,7 +110,7 @@ const RegisterClinicPage = () => {
     setSubmitting(false);
     captcha.current?.reset();
     if (!res.success) {
-      setServerError(res.error);
+      setServerError(/captcha/i.test(res.error || '') ? 'Verifikasi keamanan gagal. Muat ulang halaman lalu coba lagi.' : res.error);
       return;
     }
     // Tanpa konfirmasi email, sesi langsung aktif dan App menampilkan langkah berikutnya.

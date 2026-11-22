@@ -38,7 +38,11 @@ export function LoginPage() {
     setPending(false);
     if (err) {
       // Pesan generik: jangan bocorkan apakah email terdaftar.
-      setError("Email atau password salah.");
+      setError(
+        /captcha/i.test(err.message)
+          ? "Verifikasi keamanan gagal. Muat ulang halaman lalu coba lagi."
+          : "Email atau password salah.",
+      );
     }
   }
 
