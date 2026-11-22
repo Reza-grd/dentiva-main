@@ -41,7 +41,9 @@ export function LoginPage() {
       setError(
         /captcha/i.test(err.message)
           ? "Verifikasi keamanan gagal. Muat ulang halaman lalu coba lagi."
-          : "Email atau password salah.",
+          : /coba lagi dalam \d+ (menit|jam)/i.test(err.message)
+            ? err.message
+            : "Email atau password salah.",
       );
     }
   }

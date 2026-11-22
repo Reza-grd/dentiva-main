@@ -5,6 +5,7 @@ import { LoadingBlock } from "@/components/States";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { AuthLayout, FormAlert } from "./AuthLayout";
+import { pesanKunci } from "./pesanKunci";
 
 const FRIENDLY_NAME = "Dentiva Console";
 
@@ -68,7 +69,7 @@ function Enroll() {
     const { error: err } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code });
     setPending(false);
     if (err) {
-      setError("Kode tidak cocok. Pastikan jam di ponsel Anda akurat lalu coba lagi.");
+      setError(pesanKunci(err) ?? "Kode tidak cocok. Pastikan jam di ponsel Anda akurat lalu coba lagi.");
       setCode("");
       return;
     }
@@ -127,7 +128,7 @@ function Verify() {
     const { error: err } = await supabase.auth.mfa.challengeAndVerify({ factorId: totp.id, code });
     setPending(false);
     if (err) {
-      setError("Kode tidak cocok atau sudah kedaluwarsa.");
+      setError(pesanKunci(err) ?? "Kode tidak cocok atau sudah kedaluwarsa.");
       setCode("");
       return;
     }

@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { passwordProblems } from "@/lib/password";
 import { supabase } from "@/lib/supabase";
 import { AuthLayout, FormAlert } from "./AuthLayout";
+import { pesanKunci } from "./pesanKunci";
 
 /**
  * Buat / atur ulang password dari tautan undangan atau "Lupa password".
@@ -37,7 +38,7 @@ export function SetPasswordPage() {
     }
     const { error: vErr } = await supabase.auth.mfa.challengeAndVerify({ factorId: totp.id, code: kode.trim() });
     if (vErr) {
-      setError("Kode verifikasi salah atau kedaluwarsa. Masukkan kode terbaru dari aplikasi authenticator.");
+      setError(pesanKunci(vErr) ?? "Kode verifikasi salah atau kedaluwarsa. Masukkan kode terbaru dari aplikasi authenticator.");
       return false;
     }
     setPerluKode(false);

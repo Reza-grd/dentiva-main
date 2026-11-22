@@ -13,14 +13,18 @@ Status: `[ ]` belum · `[~]` sedang dikerjakan · `[x]` selesai · **P1** = dike
 Temuan 22 Nov: GoTrue (auth) tidak diberi tahu IP asli pengunjung (`GOTRUE_RATE_LIMIT_HEADER` kosong), jadi semua
 pengunjung kemungkinan dihitung sebagai satu IP (proxy). Belum ada penguncian per akun.
 
-- [ ] Server login membaca IP asli (`X-Forwarded-For` dari Caddy → Envoy → GoTrue); uji bahwa batas bawaan berlaku per IP.
-- [ ] **Per akun** lewat hook GoTrue *password verification attempt* (fungsi Postgres): 5 salah → kunci 1 menit,
-      10 → 5 menit, 15 → 30 menit, 20 → 24 jam + email peringatan ke pemilik akun. Hitungan direset setelah login berhasil.
-- [ ] **Kode MFA** lewat hook *MFA verification attempt*: 5 salah → jeda bertingkat yang sama.
-- [ ] **Per IP** (longgar, karena satu klinik = satu IP untuk banyak staf): fail2ban membaca log Caddy, blokir IP yang
-      terus gagal dengan durasi berlipat (`bantime.increment`), maks. 1 minggu.
-- [ ] Layar login menampilkan pesan jelas: "Terlalu banyak percobaan, coba lagi dalam N menit".
-- [ ] Uji: unit test fungsi hook di PGlite + uji manual di lingkungan uji.
+- [x] 22 Nov: `GOTRUE_RATE_LIMIT_HEADER=X-Forwarded-For` (sebelumnya kosong = batas per IP bawaan GoTrue MATI). Diuji: header
+      palsu dari klien diganti Caddy, GoTrue mencatat IP asli.
+- [x] 22 Nov: **per akun** lewat hook *password verification attempt* (`20261122130000_kunci_login_bertingkat.sql`):
+      5 salah → 1 menit, 10 → 5 menit, 15 → 30 menit, 20 → 24 jam; selama terkunci password benar pun ditolak (pesan sama);
+      reset saat login berhasil / 24 jam tanpa gagal / ganti password.
+- [ ] Email peringatan ke pemilik akun saat terkunci 24 jam (sementara: peringatan WA ke pemilik Dentiva lewat pantau.sh).
+- [x] 22 Nov: **kode MFA** lewat hook *MFA verification attempt*, jeda sama (server sekaligus mengakhiri sesi saat terkunci).
+- [x] **Per IP**: batas bawaan GoTrue (login/refresh 150 per 5 menit, verifikasi 30 per 5 menit per IP) + CAPTCHA.
+- [ ] (Opsional, ditunda) fail2ban dengan durasi berlipat — butuh log akses Caddy + aturan DOCKER-USER; nilai tambahnya
+      kecil setelah CAPTCHA aktif.
+- [x] Layar login & kode MFA (klinik + console) menampilkan "Terlalu banyak percobaan masuk. Coba lagi dalam N menit/jam."
+- [x] Uji PGlite `npm run db:kunci-login` (9 uji, ikut CI). [ ] Uji manual oleh pemilik (5× salah password).
 
 ### A2. CAPTCHA — Cloudflare Turnstile · OWASP A07 / A06
 - [x] Pemilik membuat widget Turnstile (22 Nov; mode Managed; hostname dentiva.id, app., console., localhost).
@@ -95,9 +99,12 @@ Ringkasan kondisi saat ini per kategori, lalu yang belum.
 - [ ] Script pihak ketiga (Midtrans Snap) hanya dari domain resmi — sudah dibatasi CSP; pertahankan.
 
 ### B8. Log & peringatan keamanan (A09) — P1 bersama A1
-- [ ] Catat kejadian keamanan: login gagal, akun terkunci, MFA gagal/dimatikan, ganti email/password, peran staf berubah.
-- [ ] Peringatan WA ke pemilik (memakai `pantau.sh`) bila: lonjakan login gagal, akun admin terkunci, IP diblokir massal, aksi operator console sensitif.
-- [ ] Simpan log auth/akses minimal 90 hari dan ikut backup offsite.
+- [x] 22 Nov: tabel `keamanan.kejadian` (login gagal + IP, akun terkunci, ditolak saat terkunci, MFA gagal/terkunci,
+      kunci dibuka). MFA dimatikan & ganti password tercatat di `auth.audit_log_entries` bawaan GoTrue.
+- [ ] Peran staf berubah / aksi operator console sensitif → peringatan.
+- [x] 22 Nov: `pantau.sh` (tiap 5 menit) memperingatkan lewat WA bila: ≥30 login gagal/10 menit, akun terkunci ≥30 menit,
+      MFA dimatikan/dihapus, ≥20 permintaan kena batas per IP/10 menit (dedup 6 jam per jenis).
+- [x] `keamanan.kejadian` disimpan 90 hari (pg_cron harian) dan ikut backup database. [ ] Backup offsite (B4).
 
 ### B9. Penanganan galat (A10)
 - [ ] Fungsi edge jangan mengirim pesan galat mentah ke pengguna (ditemukan ±4 tempat `error.message` di respons); kirim pesan umum + kode, detail hanya di log.

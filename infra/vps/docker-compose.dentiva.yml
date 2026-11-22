@@ -33,6 +33,15 @@ services:
       GOTRUE_SECURITY_CAPTCHA_PROVIDER: turnstile
       GOTRUE_SECURITY_CAPTCHA_SECRET: ${CAPTCHA_SECRET:-}
       GOTRUE_SECURITY_CAPTCHA_TIMEOUT: 10s
+      # Batas per IP bawaan GoTrue (login/refresh 150 per 5 menit, verifikasi 30 per 5 menit) memakai IP asli pengunjung.
+      # Caddy mengganti X-Forwarded-For kiriman klien (tidak bisa dipalsukan, diuji 22 Nov 2026); nilai pertama = IP klien.
+      GOTRUE_RATE_LIMIT_HEADER: X-Forwarded-For
+      # Kunci akun bertingkat (5→1 mnt, 10→5 mnt, 15→30 mnt, 20→24 jam) untuk password & kode MFA —
+      # migrasi 20261122130000_kunci_login_bertingkat.sql; catatan di keamanan.kejadian.
+      GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_ENABLED: "true"
+      GOTRUE_HOOK_PASSWORD_VERIFICATION_ATTEMPT_URI: pg-functions://postgres/public/hook_password_verification_attempt
+      GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_ENABLED: "true"
+      GOTRUE_HOOK_MFA_VERIFICATION_ATTEMPT_URI: pg-functions://postgres/public/hook_mfa_verification_attempt
 
   # Edge function: rahasia & konfigurasi Dentiva di functions.env (izin 600, diisi lewat
   # /opt/dentiva/bin/isi-rahasia-functions.sh). Router (volumes/functions/main) memeriksa JWT

@@ -434,7 +434,18 @@ export const AuthProvider = ({ children }) => {
     const totp = faktor?.totp?.find((f) => f.status === 'verified');
     if (fErr || !totp) return { success: false, error: 'Faktor verifikasi tidak ditemukan. Masuk ulang.' };
     const { error: vErr } = await supabase.auth.mfa.challengeAndVerify({ factorId: totp.id, code: String(kode).trim() });
-    if (vErr) return { success: false, error: 'Kode salah atau sudah kedaluwarsa. Coba kode terbaru.' };
+    if (vErr) {
+      // Terlalu banyak kode salah → server mengunci & mengakhiri sesi; kembali ke layar login dengan pesannya.
+      if (/coba lagi dalam \d+ (menit|jam)/i.test(vErr.message || '')) {
+        await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+        setUser(null);
+        setUserProfile(null);
+        setMfaDiperlukan(false);
+        setError(vErr.message);
+        return { success: false, error: vErr.message, terkunci: true };
+      }
+      return { success: false, error: 'Kode salah atau sudah kedaluwarsa. Coba kode terbaru.' };
+    }
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) setUser(session.user);

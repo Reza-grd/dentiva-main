@@ -46,6 +46,8 @@ jobs:
 
       - name: Audit log tambah-saja & berantai hash — uji pada skema produksi (PGlite)
         run: npm run db:audit
+      - name: Uji kunci login bertingkat (PGlite)
+        run: npm run db:kunci-login
 
       - name: Denti Agen — evaluasi percakapan (skrip, tanpa jaringan) + uji penilai
         run: |

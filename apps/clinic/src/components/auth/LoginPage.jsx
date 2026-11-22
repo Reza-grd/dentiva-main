@@ -34,6 +34,11 @@ export const normalizeLoginError = (msg) => {
   if (!msg) return '';
   const text = String(msg);
 
+  // 0. Akun dikunci sementara (hook kunci login bertingkat) — tampilkan apa adanya agar sisa waktunya terlihat.
+  if (/coba lagi dalam \d+ (menit|jam)/i.test(text)) {
+    return text;
+  }
+
   // 1. Batas laju (HTTP 429 / over_request_rate_limit)
   if (/429|rate[_\s-]?limit|too many requests|terlalu banyak percobaan/i.test(text)) {
     return RATE_LIMIT_LOGIN_ERROR;
