@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { isDesktop, DOWNLOAD_URL } from '../../utils/platform';
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,7 @@ import { Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@dentiva/ui';
 import { Input } from '@dentiva/ui';
 import { FormError } from '@dentiva/ui';
+import Turnstile from './Turnstile';
 import { Card, CardContent } from '@dentiva/ui';
 
 const FEATURES = [
@@ -66,6 +67,7 @@ const LoginPage = () => {
   const { signIn, requestPasswordReset, user, userProfile, error: authError } = useAuth();
   const displayError = normalizeLoginError(serverError || authError);
   const [resetState, setResetState] = useState(null); // null | 'sending' | 'sent'
+  const captcha = useRef(null);
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -81,11 +83,14 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     setServerError('');
     try {
-      const { success, error: signInError } = await signIn(data.email, data.password);
+      const captchaToken = await captcha.current?.ambilToken();
+      const { success, error: signInError } = await signIn(data.email, data.password, captchaToken);
       if (!success) setServerError(normalizeLoginError(signInError || GENERIC_LOGIN_ERROR));
     } catch (err) {
       setServerError(normalizeLoginError(err?.message || 'Terjadi kesalahan. Silakan coba lagi.'));
       toast.error(err.message || 'Terjadi kesalahan saat login');
+    } finally {
+      captcha.current?.reset();
     }
   };
 
@@ -97,7 +102,14 @@ const LoginPage = () => {
     }
     setServerError('');
     setResetState('sending');
-    const res = await requestPasswordReset(email);
+    let res;
+    try {
+      res = await requestPasswordReset(email, await captcha.current?.ambilToken());
+    } catch (err) {
+      res = { success: false, error: err.message };
+    } finally {
+      captcha.current?.reset();
+    }
     if (!res.success) {
       setResetState(null);
       setServerError(res.error);
@@ -247,6 +259,8 @@ const LoginPage = () => {
                   Jika email terdaftar, tautan untuk membuat password baru sudah dikirim. Periksa juga folder Spam.
                 </p>
               )}
+
+              <Turnstile ref={captcha} />
 
               {/* Submit Button */}
               <div className="pt-2">

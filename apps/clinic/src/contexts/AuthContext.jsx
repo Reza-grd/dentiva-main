@@ -267,7 +267,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signIn = async (email, password) => {
+  const signIn = async (email, password, captchaToken) => {
     try {
       setLoading(true);
       setError(null);
@@ -275,6 +275,7 @@ export const AuthProvider = ({ children }) => {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
       });
 
       if (error) throw error;
@@ -333,12 +334,13 @@ export const AuthProvider = ({ children }) => {
    * sampai disetujui tim Dentiva). Staf klinik tidak mendaftar di sini —
    * mereka diundang admin klinik.
    */
-  const signUpClinic = async ({ email, password, ownerName, ownerPhone, clinicName, clinicPhone, city, province }) => {
+  const signUpClinic = async ({ email, password, ownerName, ownerPhone, clinicName, clinicPhone, city, province, captchaToken }) => {
     const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${PUBLIC_APP_URL}/daftar/lanjut`,
+        ...(captchaToken ? { captchaToken } : {}),
         data: {
           full_name: ownerName,
           signup_clinic: { clinic_name: clinicName, clinic_phone: clinicPhone, city, province, owner_phone: ownerPhone },
@@ -366,9 +368,10 @@ export const AuthProvider = ({ children }) => {
     return { success: true };
   };
 
-  const requestPasswordReset = async (email) => {
+  const requestPasswordReset = async (email, captchaToken) => {
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${PUBLIC_APP_URL}/atur-password`,
+      ...(captchaToken ? { captchaToken } : {}),
     });
     return resetError ? { success: false, error: resetError.message } : { success: true };
   };

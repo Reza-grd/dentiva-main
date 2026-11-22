@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button, Input } from "@dentiva/ui";
 import { Field } from "@/components/Field";
 import { supabase } from "@/lib/supabase";
 import { AuthLayout, FormAlert } from "./AuthLayout";
+import { Turnstile, type TurnstileHandle } from "./Turnstile";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -11,12 +12,29 @@ export function LoginPage() {
   const [info, setInfo] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [mode, setMode] = useState<"login" | "forgot">("login");
+  const captcha = useRef<TurnstileHandle>(null);
+
+  async function ambilCaptcha(): Promise<string | undefined | null> {
+    try {
+      return await captcha.current?.ambilToken();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Verifikasi keamanan gagal.");
+      return null;
+    }
+  }
 
   async function onLogin(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setPending(true);
-    const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    const captchaToken = await ambilCaptcha();
+    if (captchaToken === null) return setPending(false);
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+      ...(captchaToken ? { options: { captchaToken } } : {}),
+    });
+    captcha.current?.reset();
     setPending(false);
     if (err) {
       // Pesan generik: jangan bocorkan apakah email terdaftar.
@@ -28,9 +46,13 @@ export function LoginPage() {
     e.preventDefault();
     setError(null);
     setPending(true);
+    const captchaToken = await ambilCaptcha();
+    if (captchaToken === null) return setPending(false);
     await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/set-password`,
+      ...(captchaToken ? { captchaToken } : {}),
     });
+    captcha.current?.reset();
     setPending(false);
     setInfo("Jika email terdaftar sebagai operator, tautan reset password sudah dikirim.");
   }
@@ -40,9 +62,11 @@ export function LoginPage() {
       <AuthLayout title="Reset password" subtitle="Kami akan mengirim tautan untuk membuat password baru.">
         <form onSubmit={onForgot} className="space-y-4">
           {info && <FormAlert tone="info">{info}</FormAlert>}
+          {error && <FormAlert>{error}</FormAlert>}
           <Field label="Email" htmlFor="forgot-email" required>
             <Input id="forgot-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
+          <Turnstile ref={captcha} />
           <Button type="submit" className="w-full" isLoading={pending}>
             Kirim tautan reset
           </Button>
@@ -71,6 +95,7 @@ export function LoginPage() {
             required
           />
         </Field>
+        <Turnstile ref={captcha} />
         <Button type="submit" className="w-full" isLoading={pending}>
           Masuk
         </Button>

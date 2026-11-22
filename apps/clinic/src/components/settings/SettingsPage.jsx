@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CreditCard, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Shield, Loader, MapPin, Building, Activity, Palette } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
@@ -12,6 +12,7 @@ import ThemeGallery from '../common/ThemeGallery';
 import { TEMPLATE_VARS, DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, MAX_TEMPLATE_LENGTH, renderPreview, unknownPlaceholders } from '../../utils/waTemplates';
 import PaymentSettings from './PaymentSettings';
 import BookingSettings from './BookingSettings';
+import Turnstile from '../auth/Turnstile';
 
 const SettingsPage = () => {
   const { user, userProfile } = useAuth();
@@ -249,6 +250,7 @@ const SettingsPage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
+  const captchaPw = useRef(null);
 
   const handleUpdatePassword = async () => {
     if (!currentPassword) {
@@ -267,10 +269,13 @@ const SettingsPage = () => {
     setUpdatingPassword(true);
     try {
       // Re-authenticate user to confirm current password
+      const captchaToken = await captchaPw.current?.ambilToken();
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
       });
+      captchaPw.current?.reset();
 
       if (authError) {
         toast.error('Password saat ini salah');
@@ -911,6 +916,7 @@ const SettingsPage = () => {
                         className="glass-input w-full px-4 py-2.5 rounded-xl"
                         disabled={updatingPassword}
                       />
+                      <Turnstile ref={captchaPw} className="justify-start" />
                       <button
                         onClick={handleUpdatePassword}
                         disabled={updatingPassword}

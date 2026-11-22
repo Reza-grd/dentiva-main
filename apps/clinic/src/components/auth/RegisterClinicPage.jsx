@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { simpanNiatBeli } from '../../utils/midtransSnap';
 import { Building2, MailCheck, AlertCircle, Eye, EyeOff, Check } from 'lucide-react';
 import { Button, Card, CardContent, Input } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
+import Turnstile from './Turnstile';
 
 // Sama dengan kebijakan password Supabase Auth proyek ini (min. 8, huruf + angka).
 const passwordProblems = (pw) => {
@@ -66,6 +67,7 @@ const RegisterClinicPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [sentTo, setSentTo] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const captcha = useRef(null);
 
   const set = (name) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -86,7 +88,16 @@ const RegisterClinicPage = () => {
 
     setSubmitting(true);
     setServerError('');
+    let captchaToken;
+    try {
+      captchaToken = await captcha.current?.ambilToken();
+    } catch (err) {
+      setSubmitting(false);
+      setServerError(err.message);
+      return;
+    }
     const res = await signUpClinic({
+      captchaToken,
       email: form.email.trim().toLowerCase(),
       password: form.password,
       ownerName: form.ownerName.trim(),
@@ -97,6 +108,7 @@ const RegisterClinicPage = () => {
       province: form.province.trim(),
     });
     setSubmitting(false);
+    captcha.current?.reset();
     if (!res.success) {
       setServerError(res.error);
       return;
@@ -193,6 +205,8 @@ const RegisterClinicPage = () => {
             {errors.agree && <span className="block text-xs text-red-500">{errors.agree}</span>}
           </span>
         </label>
+
+        <Turnstile ref={captcha} />
 
         <Button type="submit" className="w-full h-11" isLoading={submitting}>
           Daftarkan klinik

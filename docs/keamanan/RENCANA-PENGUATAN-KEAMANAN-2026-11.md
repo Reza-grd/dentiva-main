@@ -23,10 +23,14 @@ pengunjung kemungkinan dihitung sebagai satu IP (proxy). Belum ada penguncian pe
 - [ ] Uji: unit test fungsi hook di PGlite + uji manual di lingkungan uji.
 
 ### A2. CAPTCHA — Cloudflare Turnstile · OWASP A07 / A06
-- [ ] Pemilik membuat akun Cloudflare + widget Turnstile; kunci rahasia diisi pemilik ke server.
-- [ ] Aktifkan CAPTCHA bawaan GoTrue (`GOTRUE_SECURITY_CAPTCHA_*`, provider turnstile).
-- [ ] Pasang di: login (klinik & console), daftar klinik, lupa password, form booking online pasien.
-- [ ] Uji aplikasi desktop (Tauri). Bila Turnstile bermasalah di desktop, desktop cukup dilindungi A1.
+- [x] Pemilik membuat widget Turnstile (22 Nov; mode Managed; hostname dentiva.id, app., console., localhost).
+- [~] Widget terpasang di login klinik & console, daftar klinik, lupa password, ganti password (Pengaturan → Keamanan).
+      CSP web klinik, console, dan desktop mengizinkan `https://challenges.cloudflare.com`.
+- [ ] Rilis desktop baru berisi widget; uji di `tauri.localhost` (tercakup hostname `localhost`).
+- [ ] **Baru setelah web & desktop baru terpasang di pengguna**: pemilik mengisi Secret Key, lalu aktifkan CAPTCHA
+      GoTrue (`GOTRUE_SECURITY_CAPTCHA_ENABLED/PROVIDER=turnstile/SECRET`). CAPTCHA GoTrue berlaku untuk SEMUA login,
+      jadi desktop versi lama tanpa widget tidak bisa login lagi setelah diaktifkan.
+- [ ] Form booking online pasien (fungsi edge `online-booking`, verifikasi token sendiri lewat siteverify).
 
 ### A3. Verifikasi dua langkah (MFA) yang tidak melelahkan — OWASP A07 · *menunggu keputusan pemilik*
 Usulan (belum diputuskan):
