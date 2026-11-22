@@ -13,6 +13,8 @@ import { dashboardService } from '../../services/dashboardService';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import EksporLengkapModal from './EksporLengkapModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ReportsPage = () => {
   const toast = useToast();
@@ -21,6 +23,9 @@ const ReportsPage = () => {
   const [loading, setLoading] = useState(true);
   const [reportData, setReportData] = useState(null);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [bukaEksporLengkap, setBukaEksporLengkap] = useState(false);
+  const { userProfile } = useAuth();
+  const bolehEksporLengkap = userProfile?.role === 'admin';
 
   const canCustomReport = hasFeature('custom_reports');
 
@@ -239,6 +244,7 @@ const ReportsPage = () => {
 
   return (
     <div className="space-y-6">
+      {bukaEksporLengkap && <EksporLengkapModal onClose={() => setBukaEksporLengkap(false)} />}
       {/* Judul & alat */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
@@ -259,6 +265,16 @@ const ReportsPage = () => {
           <button type="button" onClick={() => ekspor('excel')} className={tombolEkspor} title={canCustomReport ? 'Unduh Excel' : 'Tersedia di paket Pro'}>
             {canCustomReport ? <Download size={15} /> : <Lock size={14} />} Excel
           </button>
+          {bolehEksporLengkap && (
+            <button
+              type="button"
+              onClick={() => (canCustomReport ? setBukaEksporLengkap(true) : ekspor('excel'))}
+              className={`${tombolEkspor} ${canCustomReport ? '!border-accent-primary !text-accent-primary' : ''}`}
+              title={canCustomReport ? 'Keuangan, bahan, dan laporan dalam satu Excel — pilih periode' : 'Tersedia di paket Pro'}
+            >
+              {canCustomReport ? <Download size={15} /> : <Lock size={14} />} Ekspor Lengkap
+            </button>
+          )}
         </div>
       </div>
 
