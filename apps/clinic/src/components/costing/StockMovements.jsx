@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { List, Search, Filter } from 'lucide-react';
+
 import LoadingSpinner from '../common/LoadingSpinner';
 import { inventoryService } from '../../services/inventoryService';
 
@@ -46,11 +46,11 @@ const StockMovements = () => {
 
   const getTipeBadge = (tipe) => {
     switch(tipe) {
-      case 'masuk': return <span className="inline-flex px-2 py-1 text-[10px] font-medium rounded-full bg-green-100 text-green-700">Masuk</span>;
-      case 'keluar': return <span className="inline-flex px-2 py-1 text-[10px] font-medium rounded-full bg-red-100 text-red-700">Keluar</span>;
-      case 'opname': return <span className="inline-flex px-2 py-1 text-[10px] font-medium rounded-full bg-orange-100 text-orange-700">Opname</span>;
-      case 'penyesuaian': return <span className="inline-flex px-2 py-1 text-[10px] font-medium rounded-full bg-blue-100 text-blue-700">Penyesuaian</span>;
-      default: return <span className="inline-flex px-2 py-1 text-[10px] font-medium rounded-full bg-gray-100 text-gray-700">{tipe}</span>;
+      case 'masuk': return <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">Masuk</span>;
+      case 'keluar': return <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">Keluar</span>;
+      case 'opname': return <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-700">Opname</span>;
+      case 'penyesuaian': return <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">Penyesuaian</span>;
+      default: return <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">{tipe}</span>;
     }
   };
 
@@ -111,13 +111,13 @@ const StockMovements = () => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waktu</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bahan</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipe</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Perubahan</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Saldo Stok</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Harga @</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catatan / Ref</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Waktu</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Bahan</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Tipe</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Perubahan</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Saldo Stok</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Harga @</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Catatan / Ref</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -135,7 +135,7 @@ const StockMovements = () => {
                       <td className="px-6 py-4">
                         {getTipeBadge(m.tipe)}
                       </td>
-                      <td className={`px-6 py-4 text-sm text-right font-bold ${m.jumlah > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <td className={`px-6 py-4 text-sm text-right font-semibold ${m.jumlah > 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {m.jumlah > 0 ? '+' : ''}{m.jumlah} {m.master_bahan?.satuan_dasar}
                       </td>
                       <td className="px-6 py-4 text-sm text-right text-gray-900 dark:text-gray-200 font-medium">

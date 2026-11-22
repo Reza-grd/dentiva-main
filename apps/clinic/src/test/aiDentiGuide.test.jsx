@@ -141,11 +141,17 @@ describe('Konsistensi pemandu dengan aplikasi', () => {
   // `to` bisa berupa teks atau peta per peran
   const targets = () => PAGES.flatMap((p) => (typeof p.to === 'string' ? [p.to] : Object.values(p.to || {})));
 
-  it('setiap tautan ?tab= milik Eira ada di Pengaturan', () => {
-    const settings = src('../components/settings/SettingsPage.jsx');
-    const tabs = [...new Set(targets().map((to) => /[?&]tab=([\w-]+)/.exec(to)?.[1]).filter(Boolean))];
-    expect(tabs.length).toBeGreaterThan(5);
-    for (const t of tabs) expect(settings).toContain(`id: '${t}'`);
+  it('setiap tautan ?tab= milik Eira ada di halaman tujuannya', () => {
+    // Tab Pengaturan ada di SettingsPage; tab Laporan (Keuangan / Tahunan) ada di LaporanPage.
+    const halaman = { '/admin/pengaturan': src('../components/settings/SettingsPage.jsx'), '/admin/laporan': src('../components/reports/LaporanPage.jsx') };
+    const tautan = [...new Set(targets().filter((to) => /[?&]tab=/.test(to)))];
+    expect(tautan.length).toBeGreaterThan(5);
+    for (const to of tautan) {
+      const [jalur] = to.split('?'), t = /[?&]tab=([\w-]+)/.exec(to)[1];
+      const isi = halaman[jalur] ?? (jalur.endsWith('/pengaturan') ? halaman['/admin/pengaturan'] : undefined);
+      expect(isi, `halaman untuk ${to}`).toBeDefined();
+      expect(isi).toContain(`id: '${t}'`);
+    }
   });
 
   it('setiap rute tujuan Eira terdaftar di App.jsx', () => {

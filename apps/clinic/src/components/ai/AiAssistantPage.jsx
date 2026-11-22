@@ -139,8 +139,10 @@ function Answer({ text, fresh = false }) {
   return <div ref={ref} className={`ai-md ${fresh ? 'ai-md--stream' : ''}`} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+/** Gelar di depan nama (drg., dr., Prof., H., …) dilewati agar sapaan memakai nama asli. */
+const GELAR = /^(drg|dr|prof|h|hj|ir|ns|apt|sp|mr|mrs|ms)\.?,?$/i;
 const firstName = (profile) => {
-  const n = (profile?.full_name || '').trim().split(/\s+/)[0] || '';
+  const n = (profile?.full_name || '').trim().split(/\s+/).find((w) => !GELAR.test(w)) || '';
   return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
 };
 
@@ -154,6 +156,7 @@ export default function AiAssistantPage() {
   const [messages, setMessages] = useState(loadChat);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
+  const [draft, setDraft] = useState('');
   const [agree, setAgree] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [provider, setProvider] = useState(null);
@@ -287,6 +290,7 @@ export default function AiAssistantPage() {
   }, [status?.aktif, name, react]);
   useEffect(() => { aiService.getProvider().then((r) => r.success && setProvider(r.data)); }, []);
   useEffect(() => { saveChat(messages); endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, [messages, busy, typing]);
+  useEffect(() => { if (draft) endRef.current?.scrollIntoView({ block: 'end' }); }, [draft]);
 
   const typeahead = React.useMemo(() => {
     const q = input.toLowerCase().trim();
@@ -300,6 +304,18 @@ export default function AiAssistantPage() {
     usageId: data.usage_id || null, cached: Boolean(data.cached), fast: Boolean(data.fast), references: data.references || 0,
     actions: (data.actions || []).map((a) => ({ ...a, state: 'pending', at: Date.now(), error: '' })), ...extra,
   });
+
+  // Jawaban tampil bertahap di draft; animasi masuk dilewati bila teksnya sudah terlihat.
+  const askStreaming = async (question, history, opts) => {
+    let streamed = false;
+    const res = await aiService.ask(question, history, {
+      ...opts,
+      onDelta: (text) => { streamed = true; setDraft((d) => d + text); },
+      onReset: () => { streamed = false; setDraft(''); },
+    });
+    setDraft('');
+    return { res, fresh: !streamed };
+  };
 
   // Pindai nota → Eira memeriksa duplikat lalu menyiapkan usulan pengeluaran + stok masuk
   const notaRef = useRef(null);
@@ -389,10 +405,10 @@ export default function AiAssistantPage() {
     setDentiLine(lineForQuestion(question));
     settle();
     setBusy(true);
-    const res = await aiService.ask(question, history);
+    const { res, fresh } = await askStreaming(question, history);
     setBusy(false);
     if (res.success) {
-      setMessages((m) => [...m, toAssistant(res.data, question)]);
+      setMessages((m) => [...m, toAssistant(res.data, question, { fresh })]);
       if (res.data.status) setStatus(res.data.status);
       const mood = moodForAnswer(res.data.answer);
       const blocks = (String(res.data.answer).match(/\n\s*\n|\n\s*[-*\d|]/g) || []).length + 1;
@@ -433,10 +449,10 @@ export default function AiAssistantPage() {
     const qIdx = messages.slice(0, idx).map((m) => m.role).lastIndexOf('user');
     const history = messages.slice(0, Math.max(qIdx, 0)).filter((m) => !m.error && !m.local).map(({ role, content }) => ({ role, content }));
     setBusy(true);
-    const res = await aiService.ask(msg.question, history, { retry: true, note });
+    const { res, fresh } = await askStreaming(msg.question, history, { retry: true, note });
     setBusy(false);
     if (res.success) {
-      setMessages((m) => [...m, toAssistant(res.data, msg.question, { revised: true })]);
+      setMessages((m) => [...m, toAssistant(res.data, msg.question, { revised: true, fresh })]);
       if (res.data.status) setStatus(res.data.status);
       react('happy', 'Sudah saya perbaiki. Semoga kali ini tepat!', 3000);
     } else {
@@ -470,10 +486,8 @@ export default function AiAssistantPage() {
   const header = (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <Sparkles className="text-[var(--color-accent)]" /> Eira · Asisten AI
-          <Badge variant="warning" className="!text-amber-800 dark:!text-amber-300">Beta</Badge>
-        </h1>
+        <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Eira · Asisten AI
+          <Badge variant="warning" className="!text-amber-800 dark:!text-amber-300">Beta</Badge></h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">Tanyakan keuangan, perencanaan, dan operasional klinik dalam bahasa sehari-hari.</p>
       </div>
       {status?.aktif && (
@@ -586,7 +600,7 @@ export default function AiAssistantPage() {
                 <div className="space-y-4 text-left">
                   {SUGGESTION_GROUPS.map((g) => (
                     <div key={g.label}>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-2">{g.label}</p>
+                      <p className="text-xs font-semibold text-gray-600 dark:text-gray-300 mb-2">{g.label}</p>
                       <div className="grid sm:grid-cols-2 gap-2">
                         {g.items.map((s) => (
                           <button key={s} type="button" onClick={() => ask(s)}
@@ -612,7 +626,7 @@ export default function AiAssistantPage() {
                 </div>
                 <div className={`min-w-0 flex-1 rounded-2xl rounded-tl-md px-4 py-3 border ${m.error ? 'border-red-200 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 text-sm' : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'}`}>
                   {m.revised && !m.error && (
-                    <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-accent)]">Jawaban diperbaiki</p>
+                    <p className="mb-2 text-xs font-semibold text-[var(--color-accent)]">Jawaban diperbaiki</p>
                   )}
                   {m.error ? m.content : <Answer text={m.content} fresh={m.fresh} />}
                   {!m.error && m.actions?.length > 0 && (
@@ -679,7 +693,17 @@ export default function AiAssistantPage() {
               </div>
             )}
 
-            {busy && (
+            {busy && draft && (
+              <div className="flex gap-3">
+                <div className="w-8 h-8 shrink-0 rounded-xl grid place-items-center bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)]">
+                  <Sparkles size={16} className="text-[var(--color-accent)]" />
+                </div>
+                <div className="min-w-0 flex-1 rounded-2xl rounded-tl-md px-4 py-3 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm">
+                  <Answer text={draft} />
+                </div>
+              </div>
+            )}
+            {busy && !draft && (
               <div className="flex gap-3 items-center text-sm text-gray-500">
                 <div className="w-8 h-8 rounded-xl grid place-items-center bg-[color-mix(in_srgb,var(--color-accent)_12%,transparent)]">
                   <Sparkles size={16} className="text-[var(--color-accent)]" />

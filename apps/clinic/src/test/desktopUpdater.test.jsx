@@ -6,7 +6,7 @@ const check = vi.fn();
 const relaunch = vi.fn();
 vi.mock('@tauri-apps/plugin-updater', () => ({ check: (...a) => check(...a) }));
 vi.mock('@tauri-apps/plugin-process', () => ({ relaunch: (...a) => relaunch(...a) }));
-// eslint-disable-next-line import/first
+// Impor sengaja ditaruh setelah vi.mock di atas.
 import DesktopUpdater from '../components/common/DesktopUpdater';
 
 const flush = async () => { for (let i = 0; i < 5; i += 1) await Promise.resolve(); };

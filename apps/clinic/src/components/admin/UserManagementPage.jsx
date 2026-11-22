@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { userManagementService } from '../../services/userManagementService';
 import { useToast } from '../common/ToastNotification';
 import ConfirmDialog from '../common/ConfirmDialog';
-import { UserPlus, Shield, UserX, UserCheck, RefreshCw, Edit2, ShieldAlert } from 'lucide-react';
+import { UserPlus, UserX, UserCheck, RefreshCw, KeyRound } from 'lucide-react';
+import AturPasswordStafModal from './AturPasswordStafModal';
+import { useAuth } from '../../contexts/AuthContext';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { userManagementSchema } from '../../utils/validationSchemas';
@@ -15,6 +17,8 @@ const UserManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const toast = useToast();
+  const { userProfile } = useAuth();
+  const [aturPw, setAturPw] = useState(null); // staf yang passwordnya diatur ulang
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting: formSubmitting } } = useForm({
     resolver: zodResolver(userManagementSchema),
@@ -99,9 +103,7 @@ const UserManagementPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 glass-panel p-6">
         <div>
-          <h1 className="text-2xl font-bold text-text-primary flex items-center gap-2">
-            <Shield className="text-accent-primary" /> Manajemen Pengguna
-          </h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Manajemen Pengguna</h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola staf klinik, peran, dan akses sistem
           </p>
@@ -116,7 +118,7 @@ const UserManagementPage = () => {
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-accent-primary to-accent-secondary text-white font-semibold rounded-xl transition-all shadow-md shadow-accent-primary/20 hover:opacity-90 border-0"
+            className="flex items-center gap-2 px-4 py-2 bg-accent-primary text-white font-semibold rounded-xl transition-all shadow-md hover:opacity-90 border-0"
           >
             <UserPlus size={18} /> Tambah Staf
           </button>
@@ -129,10 +131,10 @@ const UserManagementPage = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-background/50 border-b border-border">
-                <th className="p-4 text-xs font-bold text-text-muted uppercase tracking-wider">Staf</th>
-                <th className="p-4 text-xs font-bold text-text-muted uppercase tracking-wider">Role</th>
-                <th className="p-4 text-xs font-bold text-text-muted uppercase tracking-wider">Status</th>
-                <th className="p-4 text-xs font-bold text-text-muted uppercase tracking-wider text-right">Aksi</th>
+                <th className="p-4 text-xs font-semibold text-text-muted">Staf</th>
+                <th className="p-4 text-xs font-semibold text-text-muted">Role</th>
+                <th className="p-4 text-xs font-semibold text-text-muted">Status</th>
+                <th className="p-4 text-xs font-semibold text-text-muted text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -163,13 +165,13 @@ const UserManagementPage = () => {
                           disabled={!isActive}
                         >
                           <option value="admin">Admin</option>
-                          {/* Peran dokter hanya diberikan tim Dentiva (verifikasi) — tampil hanya bila sudah dokter */}
+                          {/* Peran dokter diberikan saat membuat akun baru; mengubah akun lama menjadi dokter ditolak server */}
                           {u.role === 'dokter' && <option value="dokter">Dokter</option>}
                           <option value="resepsionis">Resepsionis</option>
                         </select>
                       </td>
                       <td className="p-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
                           isActive 
                             ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' 
                             : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
@@ -177,7 +179,17 @@ const UserManagementPage = () => {
                           {statusLabel}
                         </span>
                       </td>
-                      <td className="p-4 text-right">
+                      <td className="p-4 text-right whitespace-nowrap">
+                        {u.id !== userProfile?.id && u.status !== 'suspended' && (
+                          <button
+                            onClick={() => setAturPw(u)}
+                            className="mr-2 p-2 rounded-xl border border-border text-text-muted hover:text-text-primary hover:bg-background transition-colors"
+                            title="Atur ulang password"
+                            aria-label={`Atur ulang password ${u.full_name}`}
+                          >
+                            <KeyRound size={18} />
+                          </button>
+                        )}
                         <button
                           onClick={() => toggleStatus(u)}
                           // Status 'suspended' dipasang tim Dentiva; hanya bisa dilepas dari Dentiva Console.
@@ -189,7 +201,7 @@ const UserManagementPage = () => {
                           }`}
                           title={
                             u.status === 'suspended'
-                              ? 'Ditangguhkan oleh tim Dentiva — hubungi support@dentiva.co.id'
+                              ? 'Ditangguhkan oleh tim Dentiva — hubungi info@dentiva.id'
                               : isActive ? "Nonaktifkan Akses" : "Aktifkan Akses"
                           }
                           aria-label={
@@ -215,7 +227,7 @@ const UserManagementPage = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
           <div className="bg-card text-text-primary rounded-2xl w-full max-w-md shadow-2xl border border-border animate-scale-in overflow-hidden">
             <div className="px-6 py-4 border-b border-border flex justify-between items-center bg-background/50">
-              <h2 className="text-lg font-bold text-text-primary flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-text-primary flex items-center gap-2">
                 <UserPlus className="text-accent-primary" size={20} />
                 Tambah Staf Baru
               </h2>
@@ -223,7 +235,7 @@ const UserManagementPage = () => {
             
             <form onSubmit={handleSubmit(handleAddSubmit)} className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5 uppercase tracking-wide">Nama Lengkap</label>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Nama Lengkap</label>
                 <input
                   type="text"
                   {...register('full_name')}
@@ -234,7 +246,7 @@ const UserManagementPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5 uppercase tracking-wide">Email</label>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Email</label>
                 <input
                   type="email"
                   {...register('email')}
@@ -245,7 +257,7 @@ const UserManagementPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5 uppercase tracking-wide">Nomor Telepon/WA</label>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Nomor Telepon/WA</label>
                 <input
                   type="text"
                   {...register('phone')}
@@ -256,7 +268,7 @@ const UserManagementPage = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-text-muted mb-1.5 uppercase tracking-wide">Password Sementara</label>
+                <label className="block text-xs font-semibold text-text-muted mb-1.5">Password Sementara</label>
                 <input
                   type="text"
                   {...register('password')}
@@ -268,15 +280,16 @@ const UserManagementPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-text-muted mb-1.5 uppercase tracking-wide">Peran (Role)</label>
+                  <label className="block text-xs font-semibold text-text-muted mb-1.5">Peran (Role)</label>
                   <select
                     {...register('role')}
                     className="w-full px-4 py-2.5 rounded-xl border border-border bg-background text-text-primary text-sm focus:ring-2 focus:ring-accent-primary outline-none"
                   >
                     <option value="resepsionis">Resepsionis</option>
+                    <option value="dokter">Dokter</option>
                   </select>
                   {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role.message}</p>}
-                  <p className="text-xs text-text-muted mt-1">Akun dokter dibuat dan diverifikasi oleh tim Dentiva — hubungi dukungan.</p>
+                  <p className="text-xs text-text-muted mt-1">Dokter dapat membuka rekam medis pasien. Pastikan STR & SIP-nya masih berlaku.</p>
                 </div>
               </div>
 
@@ -294,7 +307,7 @@ const UserManagementPage = () => {
                 <button
                   type="submit"
                   disabled={formSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-accent-primary to-accent-secondary text-white rounded-xl hover:opacity-90 transition-all font-medium text-sm disabled:opacity-70 flex items-center justify-center gap-2 border-0"
+                  className="flex-1 px-4 py-2.5 bg-accent-primary text-white rounded-xl hover:opacity-90 transition-all font-medium text-sm disabled:opacity-70 flex items-center justify-center gap-2 border-0"
                 >
                   {formSubmitting ? (
                     <><RefreshCw size={18} className="animate-spin" /> Menyimpan...</>
@@ -318,6 +331,21 @@ const UserManagementPage = () => {
         onClose={() => setConfirmDialog({ isOpen: false, user: null, action: null })}
         onConfirm={executeToggleStatus}
       />
+
+      {aturPw && (
+        <AturPasswordStafModal
+          staf={aturPw}
+          onClose={() => setAturPw(null)}
+          onSubmit={async (password, opsi) => {
+            const r = await userManagementService.setStaffPassword(aturPw.id, password, opsi);
+            if (r.success) {
+              toast.success(`Password ${aturPw.full_name} sudah diatur. Sampaikan password baru secara langsung.`);
+              setAturPw(null);
+            }
+            return r;
+          }}
+        />
+      )}
     </div>
   );
 };

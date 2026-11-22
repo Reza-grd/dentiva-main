@@ -22,7 +22,21 @@ export default defineConfig(({ mode }) => ({
     mode !== 'desktop' && VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Halaman (HTML) TIDAK di-precache: setiap kunjungan mengambil versi terbaru dari server dulu
+        // (NetworkFirst), sehingga deploy baru langsung tampil tanpa harus memuat ulang dua kali.
+        // Bila offline, halaman terakhir dari cache tetap dipakai. Aset ber-hash tetap di-precache.
+        globPatterns: ['**/*.{js,css,ico,png,svg}'],
+        navigateFallback: null,
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: { cacheName: 'dentiva-halaman', networkTimeoutSeconds: 5, expiration: { maxEntries: 20 } },
+          },
+        ],
       },
       manifest: {
         name: 'Dentiva Enterprise',

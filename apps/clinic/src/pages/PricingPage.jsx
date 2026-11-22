@@ -17,12 +17,16 @@ import { Badge } from "@dentiva/ui";
 import { Tabs, TabsList, TabsTrigger } from "@dentiva/ui";
 import { SkeletonCard } from "@dentiva/ui";
 import { Check, ShieldCheck, Zap, Sparkles, HelpCircle } from "lucide-react";
+import { useClinicSettingsOptional } from "../contexts/ClinicSettingsContext";
+import { mulaiCheckout } from "../services/checkoutService";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 // Batas ≥ 9999 di subscription_plans berarti "tanpa batas".
 const isUnlimited = (n) => Number(n) >= 9999;
 
 export default function PricingPage() {
   const { userProfile } = useAuth();
+  const navigate = useNavigate();
   const { plan: currentPlan, subscription } = usePermission();
   const { addToast } = useToast();
   const toast = ({ title, description, variant = "info" }) =>
@@ -32,10 +36,23 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(true);
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [processingPlanId, setProcessingPlanId] = useState(null);
+  const clinicSettings = useClinicSettingsOptional()?.settings;
 
   useEffect(() => {
     fetchPlans();
   }, []);
+
+  // Datang dari popup pilihan paket: /pricing?paket=<id>&siklus=monthly|yearly → langsung ke pembayaran.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const paket = searchParams.get("paket");
+    if (!paket || loading || !plans.some((p) => p.id === paket)) return;
+    const siklus = searchParams.get("siklus") === "yearly" ? "yearly" : "monthly";
+    setBillingCycle(siklus);
+    setSearchParams({}, { replace: true });
+    handleSubscribe(paket, siklus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, plans, searchParams]);
 
   const fetchPlans = async () => {
     try {
@@ -60,7 +77,7 @@ export default function PricingPage() {
     }
   };
 
-  const handleSubscribe = async (planId) => {
+  const handleSubscribe = async (planId, siklus = billingCycle) => {
     if (userProfile?.role !== "admin") {
       toast({
         title: "Akses Dibatasi",
@@ -72,36 +89,15 @@ export default function PricingPage() {
 
     try {
       setProcessingPlanId(planId);
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-
-      const { data, error } = await supabase.functions.invoke(
-        "midtrans-create-transaction",
-        {
-          body: { plan_id: planId, billing_cycle: billingCycle },
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || "Gagal membuat transaksi");
+      const { orderId, hasil } = await mulaiCheckout(planId, siklus);
+      if (hasil === "close") {
+        toast({ title: "Pembayaran belum selesai", description: "Jendela pembayaran ditutup.", variant: "info" });
+        return;
       }
-
-      if (data.redirect_url) {
-        toast({
-          title: "Mengarahkan ke Pembayaran...",
-          description: "Membuka gerbang pembayaran Midtrans Snap.",
-          variant: "info",
-        });
-        window.location.href = data.redirect_url;
-      }
+      navigate(`/langganan/status?order_id=${encodeURIComponent(orderId)}`);
     } catch (err) {
       console.error("Payment initiation error:", err);
-      toast({
-        title: "Gagal Memulai Pembayaran",
-        description: err.message,
-        variant: "error",
-      });
+      toast({ title: "Gagal Memulai Pembayaran", description: err.message, variant: "error" });
     } finally {
       setProcessingPlanId(null);
     }
@@ -122,7 +118,7 @@ export default function PricingPage() {
         <Badge variant="accent" className="px-3 py-1">
           <Sparkles className="w-3.5 h-3.5 mr-1 inline" /> Dentiva SaaS Subscription
         </Badge>
-        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+        <h1 className="text-3xl md:text-4xl font-medium tracking-tight text-gray-900 dark:text-gray-100">
           Pilih Paket Terbaik untuk Klinik Anda
         </h1>
         <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -137,7 +133,7 @@ export default function PricingPage() {
                 Bulanan
               </TabsTrigger>
               <TabsTrigger value="yearly" className="px-6">
-                Tahunan <span className="ml-1 text-[10px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">Hemat 16%</span>
+                Tahunan <span className="ml-1 text-xs bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-semibold">Hemat 16%</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -168,7 +164,7 @@ export default function PricingPage() {
                 }`}
               >
                 {isPopular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[var(--color-accent)] to-[var(--color-accent-secondary)] text-white text-[11px] font-bold px-3 py-0.5 rounded-full shadow-md uppercase tracking-wider">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--color-accent)] text-white text-xs font-semibold px-3 py-0.5 rounded-full shadow-md uppercase tracking-wider">
                     Paling Populer
                   </div>
                 )}
@@ -176,7 +172,7 @@ export default function PricingPage() {
                 <div>
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                      <CardTitle className="text-xl font-bold">{p.name}</CardTitle>
+                      <CardTitle className="text-xl font-semibold">{p.name}</CardTitle>
                       {isCurrent && <Badge variant="success">Paket Aktif</Badge>}
                     </div>
                     <CardDescription className="mt-2">
@@ -189,7 +185,7 @@ export default function PricingPage() {
                   <CardContent className="space-y-6">
                     {/* Price */}
                     <div>
-                      <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+                      <div className="text-3xl font-semibold text-gray-900 dark:text-gray-100">
                         {formatIDR(price)}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -205,7 +201,7 @@ export default function PricingPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-                        <span>{isUnlimited(p.max_patients) ? <strong>Pasien tanpa batas</strong> : <>Hingga <strong>{p.max_patients.toLocaleString("id-ID")} Pasien</strong></>}</span>
+                        <span>{isUnlimited(p.max_patients) ? <strong>Pasien tanpa batas</strong> : <>Hingga <strong>{Number(p.max_patients ?? 1000).toLocaleString("id-ID")} Pasien</strong></>}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-emerald-500 flex-shrink-0" />
@@ -245,11 +241,14 @@ export default function PricingPage() {
                   <Button
                     variant={isPopular ? "primary" : "outline"}
                     className="w-full"
-                    disabled={isCurrent || processingPlanId === p.id}
+                    disabled={Boolean(processingPlanId)}
                     isLoading={processingPlanId === p.id}
                     onClick={() => handleSubscribe(p.id)}
                   >
-                    {isCurrent ? "Paket Saat Ini" : `Pilih Paket ${p.name}`}
+                    {/* Paket yang sedang dipakai tetap bisa dibayar: aktifkan dari uji coba / perpanjang. */}
+                    {!isCurrent ? `Pilih Paket ${p.name}`
+                      : subscription?.status === "trialing" ? `Aktifkan Paket ${p.name}`
+                      : "Perpanjang Paket Ini"}
                   </Button>
                 </CardFooter>
               </Card>

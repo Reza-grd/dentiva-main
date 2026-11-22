@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { X, Check, PenTool, Trash2, Printer, Save } from 'lucide-react';
+import { X, PenTool, Trash2, Save } from 'lucide-react';
 import { consentService } from '../../services/consentService';
 import { useToast } from '../common/ToastNotification';
 import { format } from 'date-fns';
@@ -118,7 +118,7 @@ const ConsentFormModal = ({ patient, visit, userProfile, onClose, onSaveSuccess 
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-full flex flex-col my-8">
         
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <PenTool className="text-blue-500" /> Form Informed Consent
           </h2>
           <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
@@ -208,7 +208,7 @@ const ConsentFormModal = ({ patient, visit, userProfile, onClose, onSaveSuccess 
           <button 
             onClick={handleSave} 
             disabled={saving}
-            className="px-6 py-2.5 font-bold text-white bg-[var(--color-accent)] hover:opacity-90 rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors disabled:opacity-50"
+            className="px-6 py-2.5 font-semibold text-white bg-[var(--color-accent)] hover:opacity-90 rounded-xl flex items-center justify-center gap-2 shadow-md transition-colors disabled:opacity-50"
           >
             {saving ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
             Simpan Persetujuan

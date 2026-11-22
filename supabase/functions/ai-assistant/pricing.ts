@@ -11,7 +11,7 @@ export const DEFAULT_LIGHT_MODEL = "claude-haiku-5-5";
 
 export const PRICES: Record<string, Price> = {
   "claude-sonnet-5-5": { input: 2, output: 10, cacheRead: 0.2, cacheWrite: 2.5 },
-  // Haiku 5.5: harga untuk prompt ≤ 100K token (di atas itu lebih mahal; catatan dashboard jauh di bawah batas ini). Cache: baca 10%, tulis 1,25×.
+  // Haiku 5.5: harga untuk prompt ≤ 100K token (di atas itu lebih mahal; obrolan & catatan dashboard jauh di bawah batas ini). Cache: baca 10%, tulis 1,25×.
   "claude-haiku-5-5": { input: 0.1, output: 0.5, cacheRead: 0.01, cacheWrite: 0.125 },
   "claude-opus-5-5": { input: 4, output: 20, cacheRead: 0.2, cacheWrite: 5 },
 };
@@ -26,6 +26,10 @@ export function costUsd(model: string, u: { input: number; output: number; cache
 
 /** Haiku 5.5 tidak punya fallback refusal sisi-server: parameter `fallbacks`/beta tidak boleh dikirim. */
 export const supportsServerFallback = (model: string): boolean => !/haiku/i.test(model);
+
+/** Kredit habis datang sebagai 402 billing_error atau 400 "credit balance is too low"; keduanya tidak bisa dicoba ulang. */
+export const isCreditExhausted = (status: number | undefined, message: string): boolean =>
+  status === 402 || (status === 400 && /credit balance/i.test(message));
 
 /** Model untuk percakapan dan untuk tugas ringan, dari nilai secret (kosong = bawaan). */
 export function anthropicModels(chatEnv?: string, lightEnv?: string): { chat: string; light: string } {

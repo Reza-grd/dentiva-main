@@ -82,12 +82,17 @@ serve(async (req) => {
       );
     }
 
-    // Verify Signature: SHA512(order_id + status_code + gross_amount + ServerKey)
-    const expectedSignature = await sha512Hex(
-      `${order_id}${status_code}${gross_amount}${serverKey}`
-    );
+    // Verify Signature: SHA512(order_id + status_code + gross_amount + kunci tanda tangan).
+    // Akun Midtrans sejak 28 Okt 2026 memakai "Signature Secret Key" terpisah dari Server Key
+    // (docs.midtrans.com/docs/access-keys); akun lama memakai Server Key — keduanya diterima.
+    const signatureKey = Deno.env.get("MIDTRANS_SIGNATURE_KEY");
+    const candidates = [signatureKey, serverKey].filter((k): k is string => !!k);
+    let signatureValid = false;
+    for (const k of candidates) {
+      if (signature_key === await sha512Hex(`${order_id}${status_code}${gross_amount}${k}`)) { signatureValid = true; break; }
+    }
 
-    if (signature_key !== expectedSignature) {
+    if (!signatureValid) {
       console.error(`Invalid Midtrans Webhook signature for order ${order_id}`);
       return new Response(
         JSON.stringify({ error: "Invalid signature verification key" }),

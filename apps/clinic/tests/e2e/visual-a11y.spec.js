@@ -17,7 +17,7 @@ const TARGET_PAGES = [
     slug: 'login',
     url: '/login',
     role: null,
-    readyText: /Selamat Datang/i,
+    readyText: /Masuk ke Dentiva/i,
   },
   {
     slug: 'dashboard-admin',

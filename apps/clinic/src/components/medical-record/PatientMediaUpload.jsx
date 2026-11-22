@@ -244,7 +244,7 @@ const PatientMediaUpload = ({ patientId, visitId }) => {
                         className="w-full text-xs p-1.5 border border-gray-200 rounded focus:border-blue-400 focus:ring-1 focus:ring-blue-400 outline-none"
                       />
                     ) : (
-                      <p className="text-[10px] text-gray-500 truncate" title={item.filename}>{item.filename}</p>
+                      <p className="text-xs text-gray-500 truncate" title={item.filename}>{item.filename}</p>
                     )}
                   </div>
                 </div>
@@ -259,7 +259,7 @@ const PatientMediaUpload = ({ patientId, visitId }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-        <h3 className="font-bold text-lg text-gray-900">Media Pasien (Radiologi & Foto Klinik)</h3>
+        <h3 className="font-semibold text-lg text-gray-900">Media Pasien (Radiologi & Foto Klinik)</h3>
         <span className="print:hidden text-xs font-medium text-gray-500 bg-gray-200 px-2.5 py-1 rounded-md flex items-center gap-1">
           <Info size={14} /> Tersimpan Otomatis
         </span>
@@ -275,7 +275,7 @@ const PatientMediaUpload = ({ patientId, visitId }) => {
             
             {/* Radiology Section */}
             <div>
-              <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b pb-2">A. Radiologi</h4>
+              <h4 className="text-sm font-semibold text-gray-400 mb-4 border-b pb-2">A. Radiologi</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {CATEGORIES.radiologi.map(renderUploadZone)}
               </div>
@@ -283,7 +283,7 @@ const PatientMediaUpload = ({ patientId, visitId }) => {
 
             {/* Clinical Photos Section */}
             <div>
-              <h4 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 border-b pb-2">B. Foto Klinik</h4>
+              <h4 className="text-sm font-semibold text-gray-400 mb-4 border-b pb-2">B. Foto Klinik</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {CATEGORIES.klinik.map(renderUploadZone)}
               </div>

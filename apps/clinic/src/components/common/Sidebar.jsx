@@ -3,10 +3,11 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, FileText, DollarSign,
   BarChart3, Calendar, Settings, UserPlus, X,
-  ClipboardList, TrendingUp, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles, Receipt, BellRing, Monitor,
+  ClipboardList, Package, CalendarClock, User, Shield, CalendarCheck, Sparkles, Receipt, BellRing, Monitor,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import PengingatLangganan from '../billing/PengingatLangganan';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { userProfile } = useAuth();
@@ -30,12 +31,11 @@ const Sidebar = ({ isOpen, onClose }) => {
         { icon: Monitor,         label: 'Layar Antrean',    path: '/layar-antrean' },
         { group: 'KEUANGAN' },
         { icon: Receipt,         label: 'Pengeluaran',      path: `${baseUrl}/pengeluaran` },
-        { icon: BarChart3,       label: 'Lap. Keuangan',    path: '/keuangan' },
+        { icon: BarChart3,       label: 'Laporan',          path: `${baseUrl}/laporan` },
         { icon: Sparkles,        label: 'Asisten AI',       path: `${baseUrl}/asisten-ai` },
         { group: 'LAINNYA' },
         { icon: Package,         label: 'Master Treatment', path: `${baseUrl}/treatments` },
         { icon: DollarSign,      label: 'Biaya & Modal',    path: `${baseUrl}/costing` },
-        { icon: TrendingUp,      label: 'Laporan',          path: `${baseUrl}/laporan` },
         { icon: Users,           label: 'Kelola Pengguna',  path: `${baseUrl}/pengguna` },
         { icon: Shield,          label: 'Audit Log',        path: `${baseUrl}/audit-log` },
         { icon: Settings,        label: 'Pengaturan',       path: `${baseUrl}/pengaturan` },
@@ -84,21 +84,21 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`
-          flex flex-col flex-shrink-0 w-72 h-[100dvh] lg:h-screen
-          bg-card/80 backdrop-blur-xl border-r
-          border-border shadow-xl transition-transform duration-300 ease-in-out
+          flex flex-col flex-shrink-0 w-[232px] h-[100dvh] lg:h-screen
+          bg-card border-r
+          border-border transition-transform duration-300 ease-in-out ${isDesktop ? '' : 'shadow-xl'}
           ${isDesktop ? 'translate-x-0 static' : (isOpen ? 'translate-x-0 fixed left-0 top-0 z-50' : '-translate-x-full fixed left-0 top-0 z-50')}
         `}
       >
         {/* Logo */}
-        <div className="p-6 flex items-center justify-between border-b border-border">
+        <div className="h-14 lg:h-[56px] px-5 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-3">
-            <span className="h-10 w-10 shrink-0 rounded-xl bg-white p-1.5 shadow-sm ring-1 ring-black/5 flex items-center justify-center">
+            <span className="h-8 w-8 shrink-0 rounded-lg bg-white p-1 ring-1 ring-black/5 flex items-center justify-center">
               <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="h-full w-full object-contain" />
             </span>
             <div>
-              <div className="font-bold text-2xl tracking-tighter text-text-primary leading-none mb-1">Dentiva</div>
-              <div className="text-xs text-text-muted font-medium leading-none tracking-widest uppercase">Klinik Gigi</div>
+              <div className="font-semibold text-lg tracking-tight text-text-primary leading-none mb-0.5">Dentiva</div>
+              <div className="text-xs text-text-muted font-medium leading-none">Klinik gigi</div>
             </div>
           </div>
           <button
@@ -111,15 +111,15 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-6 overflow-y-auto overflow-x-hidden scrollbar-hide">
+        <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto overflow-x-hidden scrollbar-hide">
           {items.map((item, idx) => {
             if (item.group) {
               return (
                 <div
                   key={`g-${idx}`}
-                  className={`px-3 mb-2 text-[11px] font-bold text-text-muted tracking-widest uppercase ${idx !== 0 ? 'mt-8' : ''}`}
+                  className={`px-3 mb-1.5 text-xs font-medium text-text-muted ${idx !== 0 ? 'mt-4' : ''}`}
                 >
-                  {item.group}
+                  {item.group.charAt(0) + item.group.slice(1).toLowerCase()}
                 </div>
               );
             }
@@ -129,19 +129,19 @@ const Sidebar = ({ isOpen, onClose }) => {
               <NavLink
                 key={item.path}
                 to={item.path}
+                data-tur={item.path}
                 end={item.path === `/${role}`}
                 onClick={() => !isDesktop && onClose()}
                 style={({ isActive }) => 
                   isActive 
                     ? { 
-                        background: 'linear-gradient(to right, var(--color-accent), var(--color-accent-secondary))',
-                        color: '#fff',
-                        boxShadow: 'var(--shadow-glow)'
+                        background: 'var(--color-accent)',
+                        color: '#fff'
                       } 
                     : {}
                 }
                 className={({ isActive }) => `
-                  flex items-center gap-3 px-4 py-3 mb-1.5 rounded-2xl transition-all duration-200 group relative
+                  flex items-center gap-3 px-3 py-2 mb-0.5 rounded-lg transition-colors duration-150 group relative
                   ${isActive 
                     ? 'font-semibold' 
                     : 'text-text-muted hover:bg-background hover:text-text-primary font-medium'
@@ -162,13 +162,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-border mt-auto bg-card/30">
-          <div className="bg-background/80 rounded-2xl p-4 text-xs shadow-sm border border-border/50">
-            <div className="font-semibold text-accent-primary">Dentiva AI</div>
-            <div className="text-text-muted font-medium mt-0.5">Platform © 2026</div>
-          </div>
-        </div>
+        {/* Sisa uji coba / tunggakan — hanya manajer klinik */}
+        <PengingatLangganan varian="kartu" />
       </aside>
     </>
   );

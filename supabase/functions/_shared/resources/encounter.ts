@@ -1,7 +1,7 @@
 import { fhirRequest } from '../fhirClient.ts';
 import { recordOutboxStart, recordOutboxSuccess, recordOutboxFailure } from '../outboxHelper.ts';
 import { decryptBatch } from '../decryptionHelper.ts';
-import { getDiagnosisUseCoding } from '../satusehatConfig.ts';
+import { getDiagnosisUseCoding, diagnosisUseCodingFor } from '../satusehatConfig.ts';
 
 export async function buildAndSyncEncounter(
   supabaseAdmin: any, 
@@ -76,9 +76,13 @@ export async function buildAndSyncEncounter(
   // FIX B: Use clinic's actual SATUSEHAT Organization IHS number in sys-ids.kemkes.go.id, NEVER local UUID
   const encounterIdentifierSystem = `http://sys-ids.kemkes.go.id/encounter/${org.satusehat_organization_id}`;
 
+  // SATUSEHAT: Encounter dibuat berstatus `arrived` (belum boleh `finished`
+  // karena `finished` wajib punya diagnosis, sedangkan Condition butuh
+  // Encounter lebih dulu). Setelah Condition terbentuk, updateEncounterDiagnoses
+  // mengubahnya menjadi `finished` beserta diagnosis & statusHistory lengkap.
   const fhirPayload = {
     resourceType: 'Encounter',
-    status: 'finished',
+    status: 'arrived',
     identifier: [
       {
         system: encounterIdentifierSystem,
@@ -123,8 +127,7 @@ export async function buildAndSyncEncounter(
       }
     ],
     period: {
-      start: isoTimestamp,
-      end: isoTimestamp
+      start: isoTimestamp
     },
     location: [
       {
@@ -136,13 +139,16 @@ export async function buildAndSyncEncounter(
     ],
     statusHistory: [
       {
-        status: 'finished',
+        status: 'arrived',
         period: {
-          start: isoTimestamp,
-          end: isoTimestamp
+          start: isoTimestamp
         }
       }
-    ]
+    ],
+    // Wajib di SATUSEHAT (RuleNumber 10124): fasyankes penyelenggara kunjungan.
+    serviceProvider: {
+      reference: `Organization/${org.satusehat_organization_id}`
+    }
   };
 
   // Record Outbox Start with audit logging
@@ -241,10 +247,9 @@ export async function updateEncounterDiagnoses(
 
   const encounterPayload = getRes.data;
 
-  // FIX F: `use` hanya dikirim bila kodenya sudah dikonfirmasi lewat uji sandbox
-  // (secret SATUSEHAT_DIAGNOSIS_USE = DD | CC | AD; lihat satusehat-sandbox-verify).
-  // Tanpa konfirmasi, `use` dihilangkan — lebih aman daripada kode yang salah.
-  const useCoding = getDiagnosisUseCoding();
+  // `use` wajib di SATUSEHAT. Default DD (Discharge diagnosis) seperti contoh
+  // Postman SATUSEHAT rawat jalan; bisa diganti lewat secret SATUSEHAT_DIAGNOSIS_USE.
+  const useCoding = getDiagnosisUseCoding() ?? diagnosisUseCodingFor('DD');
   encounterPayload.diagnosis = conditionIds.map((condId, index) => ({
     condition: {
       reference: `Condition/${condId}`,
@@ -254,11 +259,29 @@ export async function updateEncounterDiagnoses(
     rank: index + 1
   }));
 
+  // Tutup kunjungan: arrived → in-progress → finished dengan waktu berurutan.
+  // Waktu tidak boleh di masa depan, jadi dibatasi ke "sekarang".
+  const startMs = Date.parse(encounterPayload.period?.start || '') || Date.now();
+  const nowMs = Date.now();
+  const at = (offsetMin: number) => new Date(Math.min(startMs + offsetMin * 60_000, nowMs)).toISOString();
+  const tArrived = new Date(Math.min(startMs, nowMs)).toISOString();
+  const tInProgress = at(5);
+  const tFinished = at(30);
+  encounterPayload.status = 'finished';
+  encounterPayload.period = { start: tArrived, end: tFinished };
+  encounterPayload.statusHistory = [
+    { status: 'arrived', period: { start: tArrived, end: tInProgress } },
+    { status: 'in-progress', period: { start: tInProgress, end: tFinished } },
+    { status: 'finished', period: { start: tFinished, end: tFinished } }
+  ];
+
   console.log(`Updating Encounter ${encounterId} on SATUSEHAT with ${conditionIds.length} linked Condition diagnoses...`);
   const putRes = await fhirRequest(supabaseAdmin, 'PUT', `Encounter/${encounterId}`, encounterPayload);
 
   if (!putRes.ok) {
-    console.error(`Failed to update Encounter ${encounterId} diagnoses: HTTP ${putRes.status} - ${JSON.stringify(putRes.data)}`);
+    const errText = `HTTP ${putRes.status} - ${JSON.stringify(putRes.data)}`;
+    console.error(`Failed to update Encounter ${encounterId} diagnoses: ${errText}`);
+    throw new Error(`Gagal menyelesaikan Encounter (diagnosis/status finished): ${errText}`);
   } else {
     console.log(`Encounter ${encounterId} diagnoses updated successfully on SATUSEHAT.`);
   }

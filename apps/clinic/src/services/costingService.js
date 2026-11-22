@@ -13,7 +13,7 @@ export const costingService = {
         .order('kategori', { ascending: true })
         .order('nama_biaya', { ascending: true });
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data ?? [] };
     } catch (error) {
       logger.error('Error fetching overhead costs:', error);
       return { success: false, error: error.message };
@@ -235,7 +235,7 @@ export const costingService = {
       if (error) throw error;
       
       // Filter out invalid joins (if any)
-      const validData = data.filter(d => d.visit_treatment && d.visit_treatment.visit);
+      const validData = (data ?? []).filter(d => d.visit_treatment && d.visit_treatment.visit);
       return { success: true, data: validData };
     } catch (error) {
       logger.error('Error fetching profitability report:', error);

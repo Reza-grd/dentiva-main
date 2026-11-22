@@ -6,11 +6,11 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await setupSyntheticClinic(page);
 
     await page.goto('/login');
-    await expect(page.getByRole('heading', { name: /Selamat Datang/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Masuk ke Dentiva/i })).toBeVisible();
 
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
     await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/admin$/);
     await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();
@@ -22,7 +22,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.goto('/login');
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.dokter.email);
     await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.dokter.password);
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/dokter$/);
     await expect(page.getByText(/drg\. Sinta Maharani/i).first()).toBeVisible();
@@ -34,7 +34,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.goto('/login');
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.resepsionis.email);
     await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.resepsionis.password);
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/resepsionis$/);
     await expect(page.getByRole('heading', { name: /Rina Puspita/i })).toBeVisible();
@@ -47,7 +47,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     // Kasus 1: Email tidak terdaftar di sistem
     await page.getByPlaceholder('nama@email.com').fill('tidak-terdaftar@klinik-sintetis.test');
     await page.getByPlaceholder('••••••••').fill('PasswordApaSaja123!');
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/login$/);
     const alertBox = page.getByRole('alert');
@@ -57,7 +57,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     // Kasus 2: Email terdaftar tetapi password salah -> pesan harus identik (tidak membedakan)
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
     await page.getByPlaceholder('••••••••').fill('PasswordSalah999!');
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/login$/);
     await expect(page.getByRole('alert')).toContainText('Email atau password salah.');
@@ -71,7 +71,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.goto('/login');
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
     await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/login$/);
     const alertBox = page.getByRole('alert');
@@ -87,7 +87,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.goto('/login');
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
     await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/login$/);
     const alertBox = page.getByRole('alert');
@@ -103,7 +103,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.goto('/login');
     await page.getByPlaceholder('nama@email.com').fill(SYNTHETIC_USERS.admin.email);
     await page.getByPlaceholder('••••••••').fill(SYNTHETIC_USERS.admin.password);
-    await page.getByRole('button', { name: /Masuk ke Sistem/i }).click();
+    await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/admin$/);
     await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();

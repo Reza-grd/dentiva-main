@@ -13,7 +13,7 @@
  */
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
-import { configProblem, reminderTemplate, sendWhatsApp } from "../_shared/whatsapp.ts"
+import { configProblem, reminderTemplate, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 import { DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, renderTemplate } from "../_shared/visitMessages.ts"
 
 const json = (status: number, body: unknown) =>
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     return json(401, { error: 'Unauthorized: Service role key required' })
   }
 
-  const waProblem = configProblem()
+  const waProblem = configProblem(Deno.env, 'reminder')
   if (waProblem) return json(500, { error: waProblem })
 
   const supabase = createClient(Deno.env.get('SUPABASE_URL')!, serviceKey)
@@ -93,9 +93,9 @@ Deno.serve(async (req) => {
 
     // Teks untuk sidecar/Whapi; penyedia Meta memakai template resmi bila dikonfigurasi.
     const sendReminder = async (phone: string, text: string, params: string[], key: string) => {
-      const r = await sendWhatsApp({ to: phone, text, template: reminderTemplate(params), idempotencyKey: key })
+      const r = await sendWhatsApp({ to: phone, text, template: reminderTemplate(params), idempotencyKey: key, kind: 'reminder' })
       if (!r.ok) throw Object.assign(new Error(r.error || 'Pengiriman WhatsApp gagal'), { retryable: r.retryable === true })
-      return { provider: r.provider, id: r.id }
+      return { resp: { provider: r.provider, id: r.id }, fields: await sentLogFields(r, phone) }
     }
 
     const fetchVisits = async (date: string) => {
@@ -157,17 +157,17 @@ Deno.serve(async (req) => {
         results.push({ visitId: visit.id, type, status: claimErr.code === '23505' ? 'already_in_progress' : 'error' })
         return
       }
-      const setStatus = async (status: string, why: string) => {
-        const { error } = await supabase.from('notification_logs').update({ status, gateway_response: why.slice(0, 500) }).eq('id', claim.id)
+      const setStatus = async (status: string, why: string, extra: Record<string, unknown> = {}) => {
+        const { error } = await supabase.from('notification_logs').update({ status, gateway_response: why.slice(0, 500), ...extra }).eq('id', claim.id)
         if (error) console.error('send-appointment-reminders: status log gagal diperbarui:', status, error.message)
         return !error
       }
 
       try {
         const { text, params } = build({ ...visit.patient, nama_lengkap: nama }, cfg(visit.clinic_id))
-        const resp = await sendReminder(wa, text, params, `${type}:${visit.id}`)
+        const { resp, fields } = await sendReminder(wa, text, params, `${type}:${visit.id}`)
         // Pesan sudah terkirim; bila log gagal diperbarui, klaim tetap 'sending' (tidak dikirim ulang; sweep menandai 'uncertain').
-        const ok = await setStatus('sent', JSON.stringify(resp))
+        const ok = await setStatus('sent', JSON.stringify(resp), fields)
         results.push({ visitId: visit.id, type, status: ok ? 'sent' : 'sent_log_failed' })
       } catch (err: any) {
         // Gangguan sementara (WA belum tersambung, batas kirim, jaringan): klaim dilepas agar dicoba lagi di putaran

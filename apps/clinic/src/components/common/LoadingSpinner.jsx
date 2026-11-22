@@ -37,7 +37,7 @@ const LoadingSpinner = ({
       >
         {/* Logo */}
         <div
-          className="w-[72px] h-[72px] rounded-full flex items-center justify-center mb-5 overflow-hidden bg-white shadow-xl shadow-[var(--color-accent)]/20 animate-bounce-in"
+          className="w-[72px] h-[72px] rounded-full flex items-center justify-center mb-5 overflow-hidden bg-white shadow-xl animate-bounce-in"
         >
           <img src="/dentiva-logo.svg" alt="Dentiva Logo" className="w-full h-full object-contain p-3.5" />
         </div>

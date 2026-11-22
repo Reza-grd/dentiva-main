@@ -24,8 +24,8 @@
  * Penyedia AI dipilih lewat Supabase secrets (tanpa ubah kode):
  *   AI_PROVIDER        "anthropic" | "gemini" | "groq" (opsional; bila kosong: Anthropic, lalu Groq, lalu Gemini)
  *   ANTHROPIC_API_KEY  kunci Claude
- *   ANTHROPIC_MODEL    opsional, bawaan "claude-sonnet-5-5" (chat/agen & pindai nota)
- *   ANTHROPIC_BRIEF_MODEL opsional, bawaan "claude-haiku-5-5" (catatan dashboard & template recall)
+ *   ANTHROPIC_MODEL    opsional, bawaan "claude-sonnet-5-5" (permintaan tindakan agen & pindai nota)
+ *   ANTHROPIC_BRIEF_MODEL opsional, bawaan "claude-haiku-5-5" (obrolan biasa, catatan dashboard & template recall)
  *   GEMINI_API_KEY     kunci Google AI Studio
  *   GEMINI_MODEL       opsional, bawaan "gemini-flash-latest"
  *   GEMINI_PAID        "true" bila proyek Google sudah berbayar (data tidak dipakai Google untuk pelatihan)
@@ -44,7 +44,8 @@ import { dataFingerprint, normalizeQuestion, referenceText } from "./knowledge.t
 import { fastAnswer } from "./fast.ts";
 import { CLAIM_PREPARED, guardAgentAnswer, isAgentIntent, isBriefingRequest, needsWriteTools, pendingText, type AgentCtx } from "./agent.ts";
 import { ALL_TOOLS, READ_TOOLS, runTool, SYSTEM, type Tool } from "./core.ts";
-import { anthropicModels, costUsd, supportsServerFallback } from "./pricing.ts";
+import { anthropicModels, costUsd, isCreditExhausted, supportsServerFallback } from "./pricing.ts";
+import { buatTokenPengguna, permintaanInternal } from "./waBridge.ts";
 
 const MAX_TOOL_ROUNDS = 10;
 const MAX_QUESTION = 1000;
@@ -235,6 +236,9 @@ const textOf = (response: any): string =>
 function apiErrorMessage(err: unknown): string {
   const isApi = err instanceof Anthropic.APIError || err instanceof GeminiError || err instanceof GroqError;
   console.error("ai-assistant error:", isApi ? `${(err as { status?: number }).status} ${(err as Error).message}` : err);
+  if (err instanceof Anthropic.APIError && isCreditExhausted(err.status, err.message)) {
+    return "Kredit AI Dentiva habis. Pengelola Dentiva perlu mengisi ulang kredit penyedia AI.";
+  }
   const busy = err instanceof Anthropic.RateLimitError ||
     ((err instanceof GeminiError || err instanceof GroqError) && err.status === 429);
   const keyRejected = err instanceof Anthropic.AuthenticationError || err instanceof Anthropic.PermissionDeniedError ||
@@ -337,23 +341,35 @@ const anthropicCommon = (model: string) => ({
   ...(supportsServerFallback(model) ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
 });
 
+// Batas 90 detik per panggilan: bawaan SDK 10 menit membuat permintaan yang macet menggantung di halaman admin.
+const anthropicClient = (p: Provider) => new Anthropic({ apiKey: p.key, timeout: 90_000, maxRetries: 1 });
+
 /** Model yang dipakai untuk satu tugas: tugas ringan (catatan dashboard, template) memakai model murah bila tersedia. */
 const lightOf = (p: Provider) => p.lightModel ?? p.model;
 
-async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx, effort: "medium" | "high" = "medium"): Promise<ChatResult> {
-  const client = new Anthropic({ apiKey: p.key });
+/** Aliran jawaban ke aplikasi. "reset" membuang teks yang sudah tampil saat model lanjut memanggil alat atau mengulang jawaban. */
+type StreamEvent = { type: "delta"; text: string } | { type: "reset" } | { type: "done"; status: number; data: unknown };
+type Emit = (event: StreamEvent) => void;
+
+async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[], usage: Usage, toolsUsed: Set<string>, ctx: AgentCtx, opts: { model: string; effort: "low" | "high"; emit?: Emit }): Promise<ChatResult> {
+  const client = anthropicClient(p);
   const messages: Anthropic.Beta.BetaMessageParam[] = turns.map((t) => ({ role: t.role, content: t.content }));
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
-    // deno-lint-ignore no-explicit-any
-    const response: any = await client.beta.messages.create({
-      ...anthropicCommon(p.model),
+    const stream = client.beta.messages.stream({
+      ...anthropicCommon(opts.model),
       max_tokens: 16000,
-      output_config: { effort },
+      output_config: { effort: opts.effort },
+      // Titik cache otomatis mengikuti ekor percakapan, jadi data & hasil alat tidak dibayar penuh di setiap putaran alat.
+      cache_control: { type: "ephemeral" },
       system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }],
       tools: ctx.writeTools === false ? READ_TOOLS : ALL_TOOLS,
       messages,
     // deno-lint-ignore no-explicit-any
     } as any);
+    let streamed = false;
+    if (opts.emit) stream.on("text", (text: string) => { streamed = true; opts.emit!({ type: "delta", text }); });
+    // deno-lint-ignore no-explicit-any
+    const response: any = await stream.finalMessage();
     addUsage(usage, response);
     if (response.stop_reason === "refusal") return { answer: REFUSED_CHAT, refused: true };
     if (response.stop_reason === "pause_turn") {
@@ -365,6 +381,7 @@ async function chatAnthropic(p: Provider, db: SupabaseClient, turns: ChatTurn[],
     if (response.stop_reason !== "tool_use" || toolUses.length === 0) {
       return { answer: textOf(response) + (response.stop_reason === "max_tokens" ? TRUNCATED : ""), refused: false };
     }
+    if (streamed) opts.emit?.({ type: "reset" });
     if (round === MAX_TOOL_ROUNDS) break;
     messages.push({ role: "assistant", content: response.content });
     const results = await Promise.all(toolUses.map(async (t: { id: string; name: string; input: unknown }) => {
@@ -530,7 +547,7 @@ async function structured(p: Provider, input: StructuredInput, usage: Usage): Pr
     if (r.failed) throw new GeminiError(502, `interaction ${r.status}`);
     return { text: r.text, refused: false };
   }
-  const client = new Anthropic({ apiKey: p.key });
+  const client = anthropicClient(p);
   // deno-lint-ignore no-explicit-any
   const response: any = await client.beta.messages.create({
     ...anthropicCommon(input.light ? lightOf(p) : p.model),
@@ -641,7 +658,25 @@ async function agentDecision(req: Request, db: SupabaseClient, mode: string, bod
   return error ? fail(error) : json(req, 200, data);
 }
 
-Deno.serve(async (req) => {
+// Pesan WhatsApp dari pengguna yang nomornya sudah ditautkan (lihat whatsapp-webhook & waBridge.ts).
+// deno-lint-ignore no-explicit-any
+async function waBridge(req: Request, body: any, service: SupabaseClient): Promise<Response> {
+  const p = permintaanInternal(body);
+  if (!p) return json(req, 400, { error: "Permintaan WhatsApp tidak valid" });
+  const secret = Deno.env.get("JWT_SECRET");
+  if (!secret) return json(req, 503, { error: "JWT_SECRET belum tersedia" });
+  const { data: u } = await service.from("users").select("id, email, status, clinic_id").eq("id", p.userId).maybeSingle();
+  if (!u || u.status !== "active" || !u.clinic_id) return json(req, 403, { error: "Akun tidak aktif" });
+  const token = await buatTokenPengguna({ id: u.id, email: u.email, clinic_id: u.clinic_id }, secret);
+  const inner = new Request(req.url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify(p.inner),
+  });
+  return handle(inner, undefined, { id: u.id });
+}
+
+async function handle(req: Request, emit?: Emit, terpercaya?: { id: string }): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
   if (req.method !== "POST") return json(req, 405, { error: "Metode tidak didukung" });
 
@@ -659,6 +694,7 @@ Deno.serve(async (req) => {
     // deno-lint-ignore no-explicit-any
     let cronBody: any = {};
     try { cronBody = await req.json(); } catch { /* kosong */ }
+    if (cronBody?.mode === "wa") return await waBridge(req, cronBody, createClient(url, serviceKey, { auth: { persistSession: false } }));
     if (cronBody?.mode !== "cron_briefs") return json(req, 400, { error: "Mode tidak dikenal" });
     if (!provider) return json(req, 503, { error: "Penyedia AI belum dikonfigurasi" });
     const service = createClient(url, serviceKey, { auth: { persistSession: false } });
@@ -671,7 +707,10 @@ Deno.serve(async (req) => {
   const db = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } });
   const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 
-  const { data: userData, error: userErr } = await db.auth.getUser(authHeader.slice(7));
+  // Pemanggilan dari jembatan WhatsApp sudah memverifikasi pengguna (token dibuat server sendiri).
+  const { data: userData, error: userErr } = terpercaya
+    ? { data: { user: terpercaya }, error: null }
+    : await db.auth.getUser(authHeader.slice(7));
   if (userErr || !userData?.user) return json(req, 401, { error: "Sesi tidak valid. Silakan masuk kembali." });
 
   // deno-lint-ignore no-explicit-any
@@ -763,6 +802,7 @@ Deno.serve(async (req) => {
   let questionNorm: string | null = null;
   let fingerprint: string | null = null;
   let fast: ReturnType<typeof fastAnswer> = null;
+  let lightChat = false;
 
   try {
     if (mode === "chat") {
@@ -832,13 +872,16 @@ Deno.serve(async (req) => {
           ...clean,
           { role: "user", content: `Tanggal hari ini: ${today} (Asia/Jakarta).${snapText}${referenceText(refs)}${retryNote}\n\nPertanyaan: ${question}` },
         ];
+        // Obrolan biasa memakai model ringan agar cepat dan murah; permintaan tindakan tetap memakai model utama.
+        lightChat = !agentIntent;
         const runChat = () => provider.name === "gemini" ? chatGemini(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "medium" : undefined)
           : provider.name === "groq" ? chatGroq(provider, db, turns, usage, toolsUsed, agentCtx)
-          : chatAnthropic(provider, db, turns, usage, toolsUsed, agentCtx, agentIntent ? "high" : "medium");
+          : chatAnthropic(provider, db, turns, usage, toolsUsed, agentCtx, { model: agentIntent ? provider.model : lightOf(provider), effort: agentIntent ? "high" : "low", emit });
         let r = await runChat();
         // Model mengaku sudah menyiapkan kartu padahal tidak punya/tidak memakai alat usulan → ulangi sekali dengan alat usulan tersedia.
         if (agentCtx.actions.length === 0 && agentCtx.writeTools === false && CLAIM_PREPARED.test(r.answer)) {
           agentCtx.writeTools = true;
+          emit?.({ type: "reset" });
           r = await runChat();
         }
         if (r.refused) outcome = "refused";
@@ -893,8 +936,8 @@ Deno.serve(async (req) => {
   }
 
   // Biaya dihitung untuk Claude; Gemini dicatat 0 (gratis; versi berbayar dipantau di Google AI Studio).
-  // Catatan dashboard & template recall memakai model ringan; chat/agen & pindai nota memakai model utama.
-  const usedModel = (isBrief || mode === "recall_template") ? lightOf(provider) : provider.model;
+  // Obrolan biasa, catatan dashboard & template recall memakai model ringan; tindakan agen & pindai nota memakai model utama.
+  const usedModel = (isBrief || mode === "recall_template" || lightChat) ? lightOf(provider) : provider.model;
   const cost = provider.name !== "anthropic" ? 0 : costUsd(usedModel, usage);
   if (clinicId) {
     const { data: logRow, error: logErr } = await admin.from("ai_usage").update({
@@ -919,4 +962,32 @@ Deno.serve(async (req) => {
   if (outcome === "error") return json(req, 502, { error: errorMsg, status: newStatus });
   if (mode !== "chat" && outcome === "refused") return json(req, 422, { error: errorMsg, status: newStatus });
   return json(req, 200, { ...payload, status: newStatus });
+}
+
+/** Respons biasa dibungkus jadi peristiwa "done", sehingga semua pemeriksaan & galat di handle() tetap satu jalur. */
+function streamed(req: Request): Response {
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      // Tab yang ditutup tidak boleh menggagalkan pencatatan pemakaian di handle().
+      const send: Emit = (event) => {
+        try { controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`)); } catch { /* klien sudah pergi */ }
+      };
+      try {
+        const res = await handle(req, send);
+        send({ type: "done", status: res.status, data: await res.json() });
+      } catch (err) {
+        console.error("ai-assistant stream:", err);
+        send({ type: "done", status: 500, data: { error: "Asisten AI sedang tidak dapat dihubungi. Coba lagi nanti." } });
+      }
+      try { controller.close(); } catch { /* klien sudah pergi */ }
+    },
+  });
+  // no-transform mematikan gzip otomatis Deno, yang menahan teks jawaban sampai aliran selesai.
+  return new Response(body, { headers: { ...cors(req), "Content-Type": "text/event-stream", "Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no" } });
+}
+
+Deno.serve((req) => {
+  const wantsStream = req.method === "POST" && (req.headers.get("Accept") ?? "").includes("text/event-stream");
+  return wantsStream ? streamed(req) : handle(req);
 });

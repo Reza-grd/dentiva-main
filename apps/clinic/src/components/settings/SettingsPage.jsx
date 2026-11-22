@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { CreditCard, Settings as SettingsIcon, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Eye, EyeOff, Shield, Loader, MapPin, Building, BookOpen, FileText, Activity, Palette } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { CreditCard, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Shield, Loader, MapPin, Building, Activity, Palette } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
@@ -12,6 +12,7 @@ import ThemeGallery from '../common/ThemeGallery';
 import { TEMPLATE_VARS, DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, MAX_TEMPLATE_LENGTH, renderPreview, unknownPlaceholders } from '../../utils/waTemplates';
 import PaymentSettings from './PaymentSettings';
 import BookingSettings from './BookingSettings';
+import Turnstile from '../auth/Turnstile';
 
 const SettingsPage = () => {
   const { user, userProfile } = useAuth();
@@ -41,6 +42,10 @@ const SettingsPage = () => {
   const [syncingSS, setSyncingSS] = useState({});
   const [processingOutbox, setProcessingOutbox] = useState(false);
   const [retryingOutboxId, setRetryingOutboxId] = useState(null);
+  const [ssOrgIdInput, setSsOrgIdInput] = useState('');
+  const [savingSSOrgId, setSavingSSOrgId] = useState(false);
+  const [newLocName, setNewLocName] = useState('');
+  const [addingLoc, setAddingLoc] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'audit-logs') {
@@ -62,6 +67,7 @@ const SettingsPage = () => {
 
       if (orgErr) throw orgErr;
       setSsOrg(orgData);
+      setSsOrgIdInput(orgData?.satusehat_organization_id || '');
 
       const { data: locData, error: locErr } = await supabase
         .from('satusehat_locations')
@@ -117,6 +123,43 @@ const SettingsPage = () => {
     }
   };
 
+  // Organization ID dari SATUSEHAT Platform → Kode Akses API (format UUID). Disimpan lalu langsung
+  // diverifikasi ke SATUSEHAT lewat sinkronisasi organisasi.
+  const handleSaveSSOrgId = async () => {
+    const orgId = ssOrgIdInput.trim().toLowerCase();
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(orgId)) {
+      toast.error('Format Organization ID tidak valid. Salin dari SATUSEHAT Platform → Kode Akses API (contoh: 1a2b3c4d-…-…-…-…).');
+      return;
+    }
+    setSavingSSOrgId(true);
+    try {
+      const { error } = await supabase
+        .from('satusehat_organizations')
+        .upsert(
+          { clinic_id: userProfile.clinic_id, satusehat_organization_id: orgId, updated_at: new Date().toISOString() },
+          { onConflict: 'clinic_id' }
+        );
+      if (error) {
+        toast.error(error.code === '23505'
+          ? 'Organization ID ini sudah dipakai klinik lain di Dentiva.'
+          : 'Gagal menyimpan Organization ID: ' + error.message);
+        return;
+      }
+      await loadSatuSehatData();
+      const res = await satusehatService.syncOrganization(userProfile.clinic_id);
+      if (res.success) {
+        toast.success('Organization ID tersimpan dan terverifikasi di SATUSEHAT.');
+        await loadSatuSehatData();
+      } else {
+        toast.error('Organization ID tersimpan, tetapi verifikasi ke SATUSEHAT gagal: ' + res.error);
+      }
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setSavingSSOrgId(false);
+    }
+  };
+
   const handleSyncSSOrg = async () => {
     setSyncingSS(prev => ({ ...prev, org: true }));
     try {
@@ -151,6 +194,38 @@ const SettingsPage = () => {
     }
   };
 
+  // Lokasi pertama otomatis menjadi default (dipakai Encounter.location), lalu langsung dibuat di SATUSEHAT.
+  const handleAddSSLoc = async () => {
+    const nama = newLocName.trim().replace(/\s+/g, ' ');
+    if (nama.length < 3) {
+      toast.error('Nama ruangan minimal 3 karakter, misalnya "Poli Gigi 1".');
+      return;
+    }
+    if (ssLocations.some(l => l.nama_unit.toLowerCase() === nama.toLowerCase())) {
+      toast.error('Ruangan dengan nama ini sudah ada.');
+      return;
+    }
+    setAddingLoc(true);
+    try {
+      const { data, error } = await supabase
+        .from('satusehat_locations')
+        .insert({ clinic_id: userProfile.clinic_id, nama_unit: nama, is_default: ssLocations.length === 0 })
+        .select('id')
+        .single();
+      if (error) {
+        toast.error('Gagal menambah ruangan: ' + error.message);
+        return;
+      }
+      setNewLocName('');
+      await loadSatuSehatData();
+      await handleSyncSSLoc(data.id);
+    } catch (e) {
+      toast.error('Error: ' + e.message);
+    } finally {
+      setAddingLoc(false);
+    }
+  };
+
   const fetchAuditLogs = async () => {
     setLoadingAudit(true);
     try {
@@ -175,6 +250,7 @@ const SettingsPage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
+  const captchaPw = useRef(null);
 
   const handleUpdatePassword = async () => {
     if (!currentPassword) {
@@ -193,10 +269,13 @@ const SettingsPage = () => {
     setUpdatingPassword(true);
     try {
       // Re-authenticate user to confirm current password
+      const captchaToken = await captchaPw.current?.ambilToken();
       const { error: authError } = await supabase.auth.signInWithPassword({
         email: user.email,
         password: currentPassword,
+        ...(captchaToken ? { options: { captchaToken } } : {}),
       });
+      captchaPw.current?.reset();
 
       if (authError) {
         toast.error('Password saat ini salah');
@@ -383,8 +462,8 @@ const SettingsPage = () => {
     { id: 'security', label: 'Keamanan', icon: Lock },
     { id: 'audit-logs', label: 'Log Audit', icon: Shield },
     ...(isAdmin ? [
-      { id: 'billing', label: 'Langganan SaaS', icon: CreditCard },
-      { id: 'database', label: 'Database', icon: Database },
+      { id: 'billing', label: 'Langganan', icon: CreditCard },
+      { id: 'database', label: 'Data & Cadangan', icon: Database },
     ] : []),
   ];
 
@@ -392,9 +471,8 @@ const SettingsPage = () => {
     <div className="max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 glass-panel p-6">
-        <SettingsIcon className="text-accent-primary" size={32} />
         <div>
-          <h1 className="text-2xl font-bold text-text-primary">Pengaturan Sistem</h1>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Pengaturan Sistem</h1>
           <p className="text-sm text-text-muted mt-1">
             Kelola profil klinik, preferensi tampilan, dan integrasi SATUSEHAT
           </p>
@@ -437,7 +515,7 @@ const SettingsPage = () => {
             {/* Profile Tab */}
             {activeTab === 'profile' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Profil Klinik</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Profil Klinik</h2>
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -541,7 +619,7 @@ const SettingsPage = () => {
             {/* Notifications Tab */}
             {activeTab === 'notifications' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pengaturan Notifikasi</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Pengaturan Notifikasi</h2>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-5 bg-gray-50/50 dark:bg-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800">
                     <div>
@@ -613,12 +691,12 @@ const SettingsPage = () => {
             {/* WhatsApp Tab */}
             {activeTab === 'whatsapp' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pengaturan WhatsApp</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Pengaturan WhatsApp</h2>
                 
                 <div className="space-y-6">
                   {/* WhatsApp Notification Toggles */}
                   <div className="space-y-4">
-                    <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Toggles Notifikasi Otomatis</h3>
+                    <h3 className="text-sm font-semibold text-gray-400 dark:text-gray-500">Toggles Notifikasi Otomatis</h3>
                     
                     <div className="flex items-center justify-between p-5 bg-gray-50/50 dark:bg-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800">
                       <div>
@@ -688,14 +766,14 @@ const SettingsPage = () => {
                   {/* Template pesan pengingat */}
                   <div className="p-5 border border-gray-100 dark:border-gray-800 rounded-2xl space-y-5">
                     <div>
-                      <h3 className="font-bold text-gray-900 dark:text-white text-sm">Isi Pesan Pengingat</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Isi Pesan Pengingat</h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Ubah teks yang dikirim ke pasien. Data otomatis disisipkan dengan kode berikut:
                       </p>
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {TEMPLATE_VARS.map((v) => (
                           <span key={v.key} title={`${v.label}, contoh: ${v.contoh}`}
-                            className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                            className="text-xs font-mono px-2 py-0.5 rounded-md bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
                             {`{${v.key}}`} <span className="font-sans text-gray-400">= {v.label}</span>
                           </span>
                         ))}
@@ -727,7 +805,7 @@ const SettingsPage = () => {
                             onChange={(e) => setFormData({ ...formData, [key]: e.target.value })}
                             className="glass-input w-full px-4 py-2.5 rounded-xl text-sm font-mono leading-relaxed disabled:opacity-60"
                           />
-                          <div className="flex justify-between text-[11px] text-gray-400 mt-1">
+                          <div className="flex justify-between text-xs text-gray-400 mt-1">
                             <span>{nilai.trim() ? 'Memakai teks buatan Anda' : 'Memakai teks bawaan (kolom kosong)'}</span>
                             <span>{nilai.length}/{MAX_TEMPLATE_LENGTH}</span>
                           </div>
@@ -736,18 +814,18 @@ const SettingsPage = () => {
                             <p className="text-amber-600 text-xs mt-1">Kode tidak dikenal (tampil apa adanya): {salah.map((k) => `{${k}}`).join(', ')}</p>
                           )}
                           <div className="mt-2 p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-900/30">
-                            <p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Pratinjau (data contoh)</p>
+                            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">Pratinjau (data contoh)</p>
                             <pre className="whitespace-pre-wrap text-xs text-gray-700 dark:text-gray-300 font-sans">{renderPreview(aktif, { klinik: formData.clinicName || undefined, telepon: formData.clinicPhone || undefined })}</pre>
                           </div>
                         </div>
                       );
                     })}
-                    <p className="text-[11px] text-gray-400">Klik <b>Simpan</b> di bagian bawah halaman untuk menerapkan. Jika klinik memakai WhatsApp resmi (Meta), pengingat memakai template yang disetujui Meta, bukan teks ini.</p>
+                    <p className="text-xs text-gray-400">Klik <b>Simpan</b> di bagian bawah halaman untuk menerapkan. Jika klinik memakai WhatsApp resmi (Meta), pengingat memakai template yang disetujui Meta, bukan teks ini.</p>
                   </div>
 
                   {/* Test Send Section */}
                   <div className="p-5 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl bg-gray-50/20">
-                    <h3 className="font-bold text-gray-900 dark:text-white mb-2 text-sm">Uji Coba Pengiriman Pesan</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 text-sm">Uji Coba Pengiriman Pesan</h3>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">Gunakan fitur ini untuk mengetes koneksi gateway Whapi.cloud dengan mengirimkan pesan uji coba ke nomor Anda.</p>
                     <div className="flex flex-col sm:flex-row gap-3">
                       <input
@@ -798,10 +876,10 @@ const SettingsPage = () => {
             {/* Security Tab */}
             {activeTab === 'security' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Keamanan</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Keamanan</h2>
                 <div className="space-y-6">
                   <div className="p-5 bg-blue-50/50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl relative">
-                    <span className="absolute top-4 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">Segera Hadir</span>
+                    <span className="absolute top-4 right-4 px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">Segera Hadir</span>
                     <h3 className="font-semibold text-blue-900 dark:text-blue-400 mb-2">Two-Factor Authentication</h3>
                     <p className="text-sm text-blue-700 dark:text-blue-300 mb-4 opacity-70">
                       Tingkatkan keamanan akun dengan autentikasi dua faktor
@@ -838,6 +916,7 @@ const SettingsPage = () => {
                         className="glass-input w-full px-4 py-2.5 rounded-xl"
                         disabled={updatingPassword}
                       />
+                      <Turnstile ref={captchaPw} className="justify-start" />
                       <button
                         onClick={handleUpdatePassword}
                         disabled={updatingPassword}
@@ -856,7 +935,7 @@ const SettingsPage = () => {
                   </div>
 
                   <div className="relative">
-                    <span className="absolute top-0 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">Segera Hadir</span>
+                    <span className="absolute top-0 right-4 px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded">Segera Hadir</span>
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Session Management</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 opacity-70">
                       Kelola sesi login aktif Anda
@@ -874,7 +953,7 @@ const SettingsPage = () => {
               <div className="glass-panel p-6">
                 <div className="flex justify-between items-center mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
                       <Shield className="text-amber-500" size={24} />
                       Log Audit Keamanan
                     </h2>
@@ -901,7 +980,7 @@ const SettingsPage = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-gray-100 dark:border-gray-800 text-xs font-bold text-gray-400 uppercase">
+                        <tr className="border-b border-gray-100 dark:border-gray-800 text-xs font-semibold text-gray-400">
                           <th className="py-3 px-4">Waktu</th>
                           <th className="py-3 px-4">Modul</th>
                           <th className="py-3 px-4">Aktivitas</th>
@@ -919,7 +998,7 @@ const SettingsPage = () => {
                               {log.module}
                             </td>
                             <td className="py-3 px-4 text-gray-800 dark:text-gray-200">
-                              <span className="font-bold text-xs uppercase bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400 mr-2">
+                              <span className="font-semibold text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-gray-600 dark:text-gray-400 mr-2">
                                 {log.action}
                               </span>
                               {log.visit_id ? 'Detail rekam medis diakses' : log.patient_id ? 'Profil pasien diakses' : 'Aktivitas sistem'}
@@ -928,7 +1007,7 @@ const SettingsPage = () => {
                               {log.user_role}
                             </td>
                             <td className="py-3 px-4">
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
+                              <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
                                 log.risk_level === 'CRITICAL' || log.risk_level === 'HIGH'
                                   ? 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'
                                   : log.risk_level === 'MEDIUM'
@@ -950,9 +1029,9 @@ const SettingsPage = () => {
             {/* SatuSehat Tab */}
             {activeTab === 'satusehat' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex justify-between items-center">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 flex justify-between items-center">
                   <span>Integrasi SATUSEHAT Kemenkes RI</span>
-                  <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-blue-500/10 text-blue-500 rounded-xl border border-blue-500/20">
+                  <span className="px-3 py-1 text-xs font-semibold bg-blue-500/10 text-blue-500 rounded-xl border border-blue-500/20">
                     SatuSehat Portal
                   </span>
                 </h2>
@@ -966,31 +1045,56 @@ const SettingsPage = () => {
                   <div className="space-y-6">
                     {/* Organization Section */}
                     <div className="glass-panel p-6 rounded-2xl border border-gray-150 dark:border-gray-800">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <Building size={18} className="text-blue-500" />
                         Master Organisasi (DFO)
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
-                        Data Organisasi Klinik terpetakan 1-to-1 dengan registrasi DFO (Direktorat Fasilitas Pelayanan Kesehatan) Kementerian Kesehatan. Masukkan ID Organisasi Anda di database atau profil sebelum menekan tombol sinkronisasi.
+                        Data Organisasi Klinik terpetakan 1-to-1 dengan registrasi DFO (Direktorat Fasilitas Pelayanan Kesehatan) Kementerian Kesehatan. Salin Organization ID dari SATUSEHAT Platform → Kode Akses API, tempel di bawah, lalu simpan — ID langsung diverifikasi ke SATUSEHAT.
                       </p>
+
+                      <div className="mb-4">
+                        <label htmlFor="ss-org-id" className="block text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">
+                          Organization ID SATUSEHAT
+                        </label>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            id="ss-org-id"
+                            type="text"
+                            value={ssOrgIdInput}
+                            onChange={(e) => setSsOrgIdInput(e.target.value)}
+                            disabled={!isAdmin || savingSSOrgId}
+                            placeholder="contoh: 1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d"
+                            spellCheck={false}
+                            autoComplete="off"
+                            className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm font-mono text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleSaveSSOrgId}
+                            disabled={!isAdmin || savingSSOrgId || !ssOrgIdInput.trim() || ssOrgIdInput.trim().toLowerCase() === ssOrg?.satusehat_organization_id}
+                            className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                          >
+                            {savingSSOrgId ? <Loader className="animate-spin" size={16} /> : <Save size={16} />}
+                            {savingSSOrgId ? 'Menyimpan...' : 'Simpan & Verifikasi'}
+                          </button>
+                        </div>
+                      </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center bg-gray-50 dark:bg-gray-800/20 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
                         <div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 font-semibold mb-1">Status Integrasi</div>
                           <div className="flex items-center gap-2">
                             <span className={`w-2.5 h-2.5 rounded-full ${ssOrg?.satusehat_organization_id ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
-                            <span className="text-sm font-bold text-gray-800 dark:text-gray-200">
-                              {ssOrg?.satusehat_organization_id ? 'Terhubung ke Sandbox' : 'Belum Terhubung / ID Kosong'}
+                            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                              {ssOrg?.satusehat_organization_id
+                                ? `ID tersimpan (${ssOrg.environment === 'production' ? 'Production' : 'Sandbox'})`
+                                : 'Belum Terhubung / ID Kosong'}
                             </span>
                           </div>
-                          {ssOrg?.satusehat_organization_id && (
-                            <div className="mt-1 text-[11px] text-gray-500 font-mono select-all">
-                              ID: {ssOrg.satusehat_organization_id}
-                            </div>
-                          )}
-                          {ssOrg?.last_synced_at && (
-                            <div className="mt-1 text-[10px] text-gray-400">
-                              Terakhir Sinkron: {new Date(ssOrg.last_synced_at).toLocaleString('id-ID')}
+                          {ssOrg?.updated_at && (
+                            <div className="mt-1 text-xs text-gray-400">
+                              Terakhir diperbarui: {new Date(ssOrg.updated_at).toLocaleString('id-ID')}
                             </div>
                           )}
                         </div>
@@ -998,8 +1102,8 @@ const SettingsPage = () => {
                           <button
                             type="button"
                             onClick={handleSyncSSOrg}
-                            disabled={syncingSS.org}
-                            className="flex items-center gap-2 py-2 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                            disabled={syncingSS.org || !ssOrg?.satusehat_organization_id}
+                            className="flex items-center gap-2 py-2 px-4 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
                           >
                             {syncingSS.org ? <Loader className="animate-spin" size={16} /> : <Shield size={16} />}
                             {syncingSS.org ? 'Menyinkronkan...' : 'Sinkronkan Organisasi'}
@@ -1010,13 +1114,39 @@ const SettingsPage = () => {
 
                     {/* Locations Section */}
                     <div className="glass-panel p-6 rounded-2xl border border-gray-150 dark:border-gray-800">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <MapPin size={18} className="text-blue-500" />
                         Master Lokasi (Ruangan & Unit Pelayanan)
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
-                        Data ruangan, poli gusi, poli bedah mulut, dan unit pelayanan fisik di dalam klinik yang wajib dipetakan ke FHIR Location SatuSehat.
+                        Data ruangan, poli gusi, poli bedah mulut, dan unit pelayanan fisik di dalam klinik yang wajib dipetakan ke FHIR Location SatuSehat. Ruangan pertama menjadi lokasi default kunjungan.
                       </p>
+
+                      {isAdmin && (
+                        <div className="mb-4 flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            value={newLocName}
+                            onChange={(e) => setNewLocName(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleAddSSLoc(); }}
+                            disabled={addingLoc}
+                            maxLength={100}
+                            placeholder="Nama ruangan, mis. Poli Gigi 1"
+                            aria-label="Nama ruangan baru"
+                            className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddSSLoc}
+                            disabled={addingLoc || !newLocName.trim() || !ssOrg?.satusehat_organization_id}
+                            title={!ssOrg?.satusehat_organization_id ? 'Isi Organization ID terlebih dahulu' : ''}
+                            className="flex items-center justify-center gap-2 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl text-sm transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                          >
+                            {addingLoc ? <Loader className="animate-spin" size={16} /> : <MapPin size={16} />}
+                            {addingLoc ? 'Menambahkan...' : 'Tambah & Sinkronkan'}
+                          </button>
+                        </div>
+                      )}
 
                       {ssLocations.length === 0 ? (
                         <div className="text-center py-8 border border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
@@ -1039,7 +1169,7 @@ const SettingsPage = () => {
                                   <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white">
                                     {loc.nama_unit}
                                     {loc.is_default && (
-                                      <span className="ml-2 inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 uppercase tracking-wide">
+                                      <span className="ml-2 inline-flex px-1.5 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">
                                         Default
                                       </span>
                                     )}
@@ -1048,7 +1178,7 @@ const SettingsPage = () => {
                                     {loc.satusehat_location_id || '-'}
                                   </td>
                                   <td className="py-3 px-4 text-center">
-                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
                                       loc.satusehat_location_id
                                         ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                                         : 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
@@ -1061,7 +1191,7 @@ const SettingsPage = () => {
                                       type="button"
                                       onClick={() => handleSyncSSLoc(loc.id)}
                                       disabled={syncingSS[loc.id] || !ssOrg?.satusehat_organization_id}
-                                      className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-bold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                       title={!ssOrg?.satusehat_organization_id ? 'Sinkronkan Organisasi terlebih dahulu' : ''}
                                     >
                                       {syncingSS[loc.id] ? <Loader className="animate-spin" size={12} /> : <Shield size={12} />}
@@ -1080,7 +1210,7 @@ const SettingsPage = () => {
                     <div className="glass-panel p-6 rounded-2xl border border-gray-150 dark:border-gray-800 space-y-6">
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 dark:border-gray-800 pb-4">
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                             <Database size={18} className="text-blue-500" />
                             Antrian Pengiriman (Outbox Queue) & Rasio Medis
                           </h3>
@@ -1092,59 +1222,59 @@ const SettingsPage = () => {
                           type="button"
                           onClick={handleProcessOutboxQueue}
                           disabled={processingOutbox}
-                          className="flex items-center gap-2 py-2 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-bold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                          className="flex items-center gap-2 py-2 px-4 bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-semibold rounded-xl text-xs transition-all shadow-sm active:scale-95 disabled:opacity-50"
                         >
                           {processingOutbox ? <Loader className="animate-spin" size={14} /> : <Send size={14} />}
-                          {processingOutbox ? 'Memproses...' : 'Jalankan Antrian Sekarang'}
+                          {processingOutbox ? 'Memproses...' : 'Jalankan Antrean Sekarang'}
                         </button>
                       </div>
 
                       {/* Clinical Audit Ratios */}
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div className="p-4 bg-blue-50/50 dark:bg-blue-500/5 rounded-xl border border-blue-100 dark:border-blue-500/10">
-                          <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider">Condition : Encounter</div>
-                          <div className="text-2xl font-extrabold text-blue-700 dark:text-blue-300 mt-1">
+                          <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold">Condition : Encounter</div>
+                          <div className="text-2xl font-semibold text-blue-700 dark:text-blue-300 mt-1">
                             {(() => {
                               const enc = ssOutbox.filter(i => i.resource_type === 'Encounter' && i.status === 'success').length;
                               const cond = ssOutbox.filter(i => i.resource_type === 'Condition' && i.status === 'success').length;
                               return enc > 0 ? (cond / enc).toFixed(2) : '0.00';
                             })()}
                           </div>
-                          <div className="text-[10px] text-gray-500 mt-0.5">Target ideal ≈ 1.00</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Target ideal ≈ 1.00</div>
                         </div>
 
                         <div className="p-4 bg-purple-50/50 dark:bg-purple-500/5 rounded-xl border border-purple-100 dark:border-purple-500/10">
-                          <div className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold uppercase tracking-wider">Composition : Encounter</div>
-                          <div className="text-2xl font-extrabold text-purple-700 dark:text-purple-300 mt-1">
+                          <div className="text-xs text-purple-600 dark:text-purple-400 font-semibold">Composition : Encounter</div>
+                          <div className="text-2xl font-semibold text-purple-700 dark:text-purple-300 mt-1">
                             {(() => {
                               const enc = ssOutbox.filter(i => i.resource_type === 'Encounter' && i.status === 'success').length;
                               const comp = ssOutbox.filter(i => i.resource_type === 'Composition' && i.status === 'success').length;
                               return enc > 0 ? (comp / enc).toFixed(2) : '0.00';
                             })()}
                           </div>
-                          <div className="text-[10px] text-gray-500 mt-0.5">Target ideal ≈ 1.00</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Target ideal ≈ 1.00</div>
                         </div>
 
                         <div className="p-4 bg-amber-50/50 dark:bg-amber-500/5 rounded-xl border border-amber-100 dark:border-amber-500/10">
-                          <div className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider">Pending / Retryable</div>
-                          <div className="text-2xl font-extrabold text-amber-700 dark:text-amber-300 mt-1">
+                          <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold">Menunggu / Dicoba ulang</div>
+                          <div className="text-2xl font-semibold text-amber-700 dark:text-amber-300 mt-1">
                             {ssOutbox.filter(i => i.status === 'pending' || i.status === 'failed_retryable').length}
                           </div>
-                          <div className="text-[10px] text-gray-500 mt-0.5">Menunggu jadwal retry</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Menunggu jadwal retry</div>
                         </div>
 
                         <div className="p-4 bg-rose-50/50 dark:bg-rose-500/5 rounded-xl border border-rose-100 dark:border-rose-500/10">
-                          <div className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">Gagal Permanen</div>
-                          <div className="text-2xl font-extrabold text-rose-700 dark:text-rose-300 mt-1">
+                          <div className="text-xs text-rose-600 dark:text-rose-400 font-semibold">Gagal Permanen</div>
+                          <div className="text-2xl font-semibold text-rose-700 dark:text-rose-300 mt-1">
                             {ssOutbox.filter(i => i.status === 'failed_permanent').length}
                           </div>
-                          <div className="text-[10px] text-gray-500 mt-0.5">Butuh intervensi manual</div>
+                          <div className="text-xs text-gray-500 mt-0.5">Butuh intervensi manual</div>
                         </div>
                       </div>
 
                       {/* Outbox Log Table */}
                       <div>
-                        <h4 className="text-sm font-bold text-gray-800 dark:text-gray-200 mb-3">
+                        <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3">
                           Daftar Log Outbox Terakhir ({ssOutbox.length} item)
                         </h4>
 
@@ -1175,7 +1305,7 @@ const SettingsPage = () => {
                                       {item.resource_type}
                                     </td>
                                     <td className="py-2.5 px-3">
-                                      <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                      <span className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold ${
                                         item.status === 'success'
                                           ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
                                           : item.status === 'processing'
@@ -1205,7 +1335,7 @@ const SettingsPage = () => {
                                           type="button"
                                           onClick={() => handleRetryOutboxItem(item.id)}
                                           disabled={retryingOutboxId === item.id}
-                                          className="inline-flex items-center gap-1 py-1 px-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold rounded-lg text-[11px] transition-all"
+                                          className="inline-flex items-center gap-1 py-1 px-2.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-semibold rounded-lg text-xs transition-all"
                                         >
                                           {retryingOutboxId === item.id ? <Loader className="animate-spin" size={10} /> : <Shield size={10} />}
                                           Retry Manual
@@ -1228,13 +1358,13 @@ const SettingsPage = () => {
             {/* Database Tab */}
             {activeTab === 'database' && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex justify-between items-center">
-                  <span>Database & Backup</span>
-                  <span className="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-amber-500/20 text-amber-500 rounded-xl border border-amber-500/30">Hubungi Administrator</span>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6 flex justify-between items-center">
+                  <span>Data & Cadangan</span>
+                  <span className="px-3 py-1 text-xs font-semibold bg-amber-500/20 text-amber-500 rounded-xl border border-amber-500/30">Hubungi Administrator</span>
                 </h2>
                 <div className="space-y-6">
                   <div className="relative p-5 bg-gray-50/50 dark:bg-gray-800/10 border border-gray-200 dark:border-gray-800/50 rounded-xl">
-                    <span className="absolute top-0 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Belum Terverifikasi</span>
+                    <span className="absolute top-0 right-4 px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Belum Terverifikasi</span>
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Automatic Backup</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       Backup dikelola oleh provider database (Supabase). Status backup terverifikasi belum tersedia di dashboard ini — hubungi administrator sistem untuk info backup terakhir.
@@ -1242,7 +1372,7 @@ const SettingsPage = () => {
                   </div>
 
                   <div className="relative">
-                    <span className="absolute top-0 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Dalam Pengembangan</span>
+                    <span className="absolute top-0 right-4 px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Dalam Pengembangan</span>
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Manual Backup</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 opacity-70">
                       Buat backup manual dari database saat ini
@@ -1254,8 +1384,8 @@ const SettingsPage = () => {
                   </div>
 
                   <div className="relative">
-                    <span className="absolute top-0 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Dalam Pengembangan</span>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Restore Database</h3>
+                    <span className="absolute top-0 right-4 px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 rounded">Dalam Pengembangan</span>
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Pulihkan Data</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 opacity-70">
                       Pulihkan database dari backup sebelumnya
                     </p>
@@ -1265,7 +1395,7 @@ const SettingsPage = () => {
                   </div>
 
                   <div className="p-5 bg-rose-50/50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl mt-8 relative">
-                    <span className="absolute top-4 right-4 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 rounded">Khusus Superadmin</span>
+                    <span className="absolute top-4 right-4 px-2 py-0.5 text-xs font-semibold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 rounded">Khusus Superadmin</span>
                     <h3 className="font-semibold text-rose-900 dark:text-rose-400 mb-2 flex items-center gap-2">⚠️ Danger Zone</h3>
                     <p className="text-sm text-rose-700 dark:text-rose-300 mb-4 opacity-70">
                       Tindakan di bawah ini bersifat permanen dan tidak dapat dibatalkan
@@ -1297,7 +1427,7 @@ const SettingsPage = () => {
                 )}
                 <button
                   onClick={handleSave}
-                  className="px-6 py-2.5 bg-[var(--color-accent)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-secondary)] transition-colors flex items-center gap-2 shadow-lg shadow-[var(--color-accent)]/20"
+                  className="px-6 py-2.5 bg-[var(--color-accent)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-secondary)] transition-colors flex items-center gap-2 shadow-lg"
                 >
                   <Save size={18} />
                   Simpan Perubahan

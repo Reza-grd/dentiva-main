@@ -57,7 +57,7 @@ const CompleteRegistration = () => {
             <div className="w-12 h-12 bg-accent-primary/10 rounded-2xl flex items-center justify-center mb-4">
               <Building2 className="text-accent-primary" size={24} aria-hidden="true" />
             </div>
-            <h1 className="text-2xl font-bold text-text-primary">Email terverifikasi — satu langkah lagi</h1>
+            <h1 className="text-2xl font-medium text-text-primary">Email terverifikasi — satu langkah lagi</h1>
             <p className="text-sm text-text-muted mt-1">
               Periksa kembali data klinik Anda ({user?.email}), lalu kirim pendaftaran untuk diverifikasi tim Dentiva.
             </p>

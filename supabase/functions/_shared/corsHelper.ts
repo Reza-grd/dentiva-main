@@ -8,6 +8,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://dentiva.app',
+  'https://app.dentiva.id',
   'https://dentiva-main.vercel.app',
   'https://neurodent.vercel.app'
 ];
@@ -19,7 +20,9 @@ export function getCorsHeaders(req: Request): Record<string, string> {
   const allowedOrigins = [...DEFAULT_ALLOWED_ORIGINS, ...envOrigins];
 
   let matchedOrigin = allowedOrigins[0];
-  if (origin && allowedOrigins.includes(origin)) {
+  // Preview Vercel milik proyek Dentiva (pola sama dengan gerbang API di infra/vps/batasi-cors.sh).
+  const isDentivaPreview = !!origin && /^https:\/\/dentiva-main[a-z0-9-]*-reza-grds-projects\.vercel\.app$/.test(origin);
+  if (origin && (allowedOrigins.includes(origin) || isDentivaPreview)) {
     matchedOrigin = origin;
   } else if (Deno.env.get('SATUSEHAT_ENVIRONMENT') === 'sandbox' && origin && origin.startsWith('http://localhost:')) {
     matchedOrigin = origin;

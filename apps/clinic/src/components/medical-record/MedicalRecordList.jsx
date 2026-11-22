@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Search, Calendar, User, Filter, Eye } from 'lucide-react';
+import { FileText, Search, Calendar, User, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { patientService } from '../../services/patientService';
@@ -87,12 +87,18 @@ const MedicalRecordList = () => {
   return (
     <div className="max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
-          <FileText className="text-primary-600" size={32} />
-          Rekam Medis
-        </h1>
-        <p className="text-gray-600">Lihat dan kelola semua rekam medis pasien</p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-[22px] md:text-[26px] font-medium leading-tight text-text-primary">Rekam Medis</h1>
+          <p className="text-gray-600">Lihat dan kelola semua rekam medis pasien</p>
+        </div>
+        <button
+          type="button" data-tur="rm-latihan" onClick={() => navigate('/rekam-medis/simulasi')}
+          className="px-4 py-2 rounded-lg border border-accent-primary/25 bg-accent-primary/10 text-accent-primary hover:bg-accent-primary/15 text-sm font-semibold"
+          title="Buka formulir rekam medis dengan pasien anonim. Tidak ada data yang disimpan."
+        >
+          Latihan isi rekam medis
+        </button>
       </div>
 
       {/* Filters */}
@@ -136,13 +142,13 @@ const MedicalRecordList = () => {
         <div className="card">
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-1">Total Pasien</p>
-            <p className="text-xl md:text-3xl font-bold text-primary-600">{totalCount}</p>
+            <p className="text-xl md:text-3xl font-semibold text-primary-600">{totalCount}</p>
           </div>
         </div>
         <div className="card">
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-1">Total Pasien Aktif</p>
-            <p className="text-xl md:text-3xl font-bold text-green-600">
+            <p className="text-xl md:text-3xl font-semibold text-green-600">
               {totalCount}
             </p>
           </div>
@@ -150,7 +156,7 @@ const MedicalRecordList = () => {
         <div className="card">
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-1">Terdaftar Hari Ini</p>
-            <p className="text-xl md:text-3xl font-bold text-[var(--color-accent)]">
+            <p className="text-xl md:text-3xl font-semibold text-[var(--color-accent)]">
               {filteredRecords.filter(r => {
                 const recordDate = new Date(r.created_at);
                 return recordDate.toDateString() === new Date().toDateString();
@@ -161,7 +167,7 @@ const MedicalRecordList = () => {
         <div className="card">
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-1">Terdaftar Bulan Ini</p>
-            <p className="text-xl md:text-3xl font-bold text-purple-600">
+            <p className="text-xl md:text-3xl font-semibold text-purple-600">
               {filteredRecords.filter(r => {
                 const d = new Date(r.created_at);
                 const now = new Date();
@@ -174,7 +180,7 @@ const MedicalRecordList = () => {
 
       {/* Records List */}
       <div className="card">
-        <h2 className="text-xl font-bold mb-4">Daftar Rekam Medis</h2>
+        <h2 className="text-xl font-semibold mb-4">Daftar Rekam Medis</h2>
         
         {loading ? (
           <LoadingSpinner />
@@ -188,22 +194,22 @@ const MedicalRecordList = () => {
             <table className="table">
               <thead className="table-header">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
                     No. RM
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
                     Pasien
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
                     Kontak
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
                     Jumlah Record
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
                     Terakhir Update
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">
                     Aksi
                   </th>
                 </tr>
@@ -275,7 +281,7 @@ const MedicalRecordList = () => {
         {!loading && totalCount > 0 && (
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-100 dark:border-gray-800 pt-6">
             <div className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              Menampilkan <span className="text-gray-900 dark:text-white font-bold">{(page - 1) * pageSize + 1}</span> - <span className="text-gray-900 dark:text-white font-bold">{Math.min(page * pageSize, totalCount)}</span> dari <span className="text-gray-900 dark:text-white font-bold">{totalCount}</span> pasien
+              Menampilkan <span className="text-gray-900 dark:text-white font-semibold">{(page - 1) * pageSize + 1}</span> - <span className="text-gray-900 dark:text-white font-semibold">{Math.min(page * pageSize, totalCount)}</span> dari <span className="text-gray-900 dark:text-white font-semibold">{totalCount}</span> pasien
             </div>
             
             <div className="flex items-center gap-1.5">

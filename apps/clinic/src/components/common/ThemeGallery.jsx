@@ -17,7 +17,7 @@ const ThemeGallery = ({ onSelect, compact = false }) => {
     <div className={`w-full ${compact ? 'space-y-2' : 'space-y-4'}`}>
       {!compact && (
         <div className="mb-4">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Galeri Tema & Gradient</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Galeri Tema & Gradient</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Pilih skema warna aksen gradient untuk diterapkan ke seluruh aplikasi.
           </p>
@@ -47,7 +47,7 @@ const ThemeGallery = ({ onSelect, compact = false }) => {
               >
                 {/* Visual accents in preview card */}
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white text-xs font-semibold">
                   Aa
                 </div>
 
@@ -62,7 +62,7 @@ const ThemeGallery = ({ onSelect, compact = false }) => {
               {/* Title & Metadata */}
               <div className="mt-2.5 flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white flex items-center gap-1.5">
+                  <h4 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1.5">
                     {palette.name}
                   </h4>
                   <div className="flex items-center gap-1 mt-1">
@@ -79,7 +79,7 @@ const ThemeGallery = ({ onSelect, compact = false }) => {
                   </div>
                 </div>
                 {isActive && (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)]">
                     Aktif
                   </span>
                 )}

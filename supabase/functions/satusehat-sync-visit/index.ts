@@ -7,6 +7,7 @@ import { buildAndSyncConditions } from "../_shared/resources/condition.ts";
 import { buildAndSyncProcedures } from "../_shared/resources/procedure.ts";
 import { buildAndSyncMedicationRequests } from "../_shared/resources/medicationRequest.ts";
 import { buildAndSyncComposition } from "../_shared/resources/composition.ts";
+import { buildAndSyncDentalObservations } from "../_shared/resources/dentalObservation.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -152,11 +153,6 @@ serve(async (req) => {
       callingUserId
     );
 
-    // FIX D: Update Encounter resource on SATUSEHAT to attach Condition diagnosis references
-    if (conditionIds.length > 0) {
-      await updateEncounterDiagnoses(supabaseAdmin, encounterId, conditionIds);
-    }
-
     // 4. Sync Procedures (Step 3)
     const procedureIds = await buildAndSyncProcedures(
       supabaseAdmin,
@@ -179,11 +175,38 @@ serve(async (req) => {
       callingUserId
     );
 
+    // 5b. Modul Gigi: OHIS & odontogram (Observation). Gagal di sini tidak menggagalkan resume medis;
+    // item gagal tercatat di satusehat_outbox dan dicoba ulang oleh prosesor.
+    let observationIds: string[] = [];
+    try {
+      observationIds = await buildAndSyncDentalObservations(
+        supabaseAdmin, visitId, patientSId, practitionerSId, encounterId, isoTimestamp, undefined, callingUserId
+      );
+    } catch (e: any) {
+      console.error('Dental Observation sync failed:', e?.message);
+    }
+
+    // FIX D: Tutup Encounter (arrived → finished) beserta diagnosis setelah semua
+    // resource kunjungan terkirim. Gagal di sini tidak membatalkan resume medis.
+    let encounterFinishError: string | null = null;
+    if (conditionIds.length > 0) {
+      try {
+        await updateEncounterDiagnoses(supabaseAdmin, encounterId, conditionIds);
+      } catch (e: any) {
+        encounterFinishError = e?.message || String(e);
+        console.error('Encounter finish failed:', encounterFinishError);
+      }
+    } else {
+      encounterFinishError = 'Encounter belum bisa ditutup (finished): tidak ada diagnosis ICD-10 yang terkirim.';
+      console.warn(encounterFinishError);
+    }
+
     // Save mapping list of successfully synced resources
     const resourceIds = {
       conditions: conditionIds,
       procedures: procedureIds,
-      medicationRequests: medicationRequestIds
+      medicationRequests: medicationRequestIds,
+      observations: observationIds
     };
     
     await supabaseAdmin
@@ -219,7 +242,9 @@ serve(async (req) => {
           conditionIds,
           procedureIds,
           medicationRequestIds,
-          compositionId
+          observationIds,
+          compositionId,
+          encounterFinishError
         }
       }),
       {

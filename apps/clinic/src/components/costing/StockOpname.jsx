@@ -135,13 +135,13 @@ const StockOpname = () => {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bahan</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stok Sistem</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stok Fisik</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Selisih</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Petugas</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catatan</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Tanggal</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Bahan</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Stok Sistem</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Stok Fisik</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Selisih</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Petugas</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Catatan</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -156,7 +156,7 @@ const StockOpname = () => {
                         <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">{op.master_bahan?.nama_bahan}</td>
                         <td className="px-6 py-4 text-sm text-right text-gray-500 dark:text-gray-400">{op.stok_sistem} {op.master_bahan?.satuan_dasar}</td>
                         <td className="px-6 py-4 text-sm text-right font-medium text-gray-900 dark:text-white">{op.stok_fisik} {op.master_bahan?.satuan_dasar}</td>
-                        <td className={`px-6 py-4 text-sm text-right font-bold ${diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-500'}`}>
+                        <td className={`px-6 py-4 text-sm text-right font-semibold ${diff > 0 ? 'text-green-600' : diff < 0 ? 'text-red-600' : 'text-gray-500'}`}>
                           {diff > 0 ? '+' : ''}{diff}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{op.users?.full_name || 'System'}</td>
@@ -180,7 +180,7 @@ const StockOpname = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Settings className="text-primary-600" />
                 Stok Opname
               </h3>
@@ -214,7 +214,7 @@ const StockOpname = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
                     <label className="block text-xs text-gray-500 mb-1">Stok Sistem (Saat Ini)</label>
-                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                    <div className="text-lg font-semibold text-gray-900 dark:text-white">
                       {formData.stok_sistem} <span className="text-sm font-normal text-gray-500">{selectedMaterial.satuan_dasar}</span>
                     </div>
                   </div>
@@ -224,7 +224,7 @@ const StockOpname = () => {
                       type="number" step="any" required
                       value={formData.stok_fisik} 
                       onChange={e => setFormData({...formData, stok_fisik: e.target.value})} 
-                      className="w-full border rounded-lg px-3 py-2 text-lg font-bold text-primary-700 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-primary-400"
+                      className="w-full border rounded-lg px-3 py-2 text-lg font-semibold text-primary-700 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-primary-400"
                     />
                   </div>
                 </div>

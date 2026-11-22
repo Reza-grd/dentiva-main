@@ -58,5 +58,18 @@ export function createAuthAdmin(admin: SupabaseClient): AuthAdmin {
       const { error } = await admin.auth.resetPasswordForEmail(email, { redirectTo });
       if (error) throw new Error(`Gagal mengirim email reset: ${error.message}`);
     },
+
+    async buatTautan(jenis, email, redirectTo) {
+      // Undangan untuk akun yang sudah ada bisa ditolak GoTrue → pakai tautan pemulihan (sama-sama membuka halaman buat password).
+      const urutan: ("invite" | "recovery")[] = jenis === "invite" ? ["invite", "recovery"] : ["recovery"];
+      let pesan = "";
+      for (const type of urutan) {
+        const { data, error } = await admin.auth.admin.generateLink({ type, email, options: { redirectTo } } as Parameters<typeof admin.auth.admin.generateLink>[0]);
+        const link = data?.properties?.action_link;
+        if (!error && link) return link;
+        pesan = error?.message ?? "tautan kosong";
+      }
+      throw new Error(`Gagal membuat tautan: ${pesan}`);
+    },
   };
 }

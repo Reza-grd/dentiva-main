@@ -1,18 +1,25 @@
 /**
  * Edge Function: whatsapp-webhook (Meta WhatsApp Cloud API) — verify_jwt = false.
+ * Callback URL: https://api.dentiva.id/functions/v1/whatsapp-webhook
  *
- * Versi lama (hanya ada di produksi) menulis WHATSAPP_VERIFY_TOKEN ke log saat token
- * tidak cocok, tidak memverifikasi tanda tangan Meta, dan mencatat isi pesan pasien.
- *
- *   GET  : verifikasi webhook (hub.mode/hub.verify_token/hub.challenge).
+ *   GET  : verifikasi webhook (hub.mode/hub.verify_token/hub.challenge) — WHATSAPP_VERIFY_TOKEN.
  *   POST : wajib bertanda tangan X-Hub-Signature-256 = HMAC-SHA256(body, WHATSAPP_APP_SECRET).
- *          Hanya mencatat jumlah & jenis event (tanpa isi pesan / nomor lengkap).
- *
- * Catatan: pengiriman WA aplikasi memakai Whapi.cloud; webhook Meta ini hanya diperlukan
- * bila nomor Meta Cloud API dipakai. Pesan masuk belum diproses (fitur mendatang).
+ *          - status pesan (sent/delivered/read/failed) → notification_logs.delivery_status (lewat wa_catat_status)
+ *          - pesan masuk → whatsapp_inbound (tanpa isi & nomor), "BERHENTI" mencabut wa_consent,
+ *            balasan otomatis berisi kontak klinik bila WA_BALAS_OTOMATIS=true (maks. 1× per pengirim per 24 jam).
+ *          Kiriman ulang Meta aman: status tidak pernah mundur, pesan masuk unik per wamid.
+ *          Log hanya jumlah event (tanpa isi pesan / nomor — UU PDP).
+ *          EIRA LEWAT WA: "DENTIVA 123456" menautkan nomor ke akun (kode dari aplikasi). Pesan dari nomor yang
+ *          tertaut diteruskan ke Eira (ai-assistant, mode internal "wa") atas nama akun itu; pesan dari nomor lain
+ *          tetap diperlakukan sebagai pesan pasien seperti sebelumnya.
  */
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
+import { recipientHash, sendWhatsApp } from "../_shared/whatsapp.ts"
+import { autoReplyText, type ClinicContact, isOptOut, isReplyable, optOutReplyText, parseEvents, type WaInboundEvent, type WaStatusEvent } from "../_shared/waWebhook.ts"
+import { type AkunWa, bacaPerintah, keFormatWa, riwayatAktif, samarkanNomor, TEKS_KHUSUS_MANAJER, teksBantuan, teksHasilTautan, teksPilihKlinik, teksUsulan } from "../_shared/waEira.ts"
 
 const encoder = new TextEncoder()
+const RETENSI_HARI = 90
 
 function timingSafeEqual(a: string, b: string) {
   if (a.length !== b.length) return false
@@ -26,6 +33,10 @@ async function hmacSha256Hex(secret: string, body: string) {
   const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(body))
   return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('')
 }
+
+// Proses berat (DB, balasan ke Graph API) berjalan setelah respons 200 agar Meta tidak menganggap webhook lambat.
+const runtime = (globalThis as { EdgeRuntime?: { waitUntil(p: Promise<unknown>): void } }).EdgeRuntime
+const later = (p: Promise<unknown>) => (runtime?.waitUntil ? runtime.waitUntil(p) : p)
 
 Deno.serve(async (req) => {
   const url = new URL(req.url)
@@ -67,19 +78,221 @@ Deno.serve(async (req) => {
       return new Response('Unsupported object', { status: 400 })
     }
 
-    let messages = 0
-    let statuses = 0
-    for (const entry of payload.entry ?? []) {
-      for (const change of entry.changes ?? []) {
-        if (change.field !== 'messages') continue
-        messages += change.value?.messages?.length ?? 0
-        statuses += change.value?.statuses?.length ?? 0
-      }
+    const { statuses, messages } = parseEvents(payload, Deno.env.get('META_WA_PHONE_NUMBER_ID')?.trim() || undefined)
+    console.log(`[whatsapp-webhook] diterima: ${messages.length} pesan, ${statuses.length} status`)
+    if (statuses.length || messages.length) {
+      await later(processEvents(statuses, messages).catch((e) => console.error('[whatsapp-webhook] proses gagal:', (e as Error).message)))
     }
-    // Tanpa isi pesan / nomor pasien di log (UU PDP).
-    console.log(`[whatsapp-webhook] diterima: ${messages} pesan, ${statuses} status`)
     return new Response('EVENT_RECEIVED', { status: 200 })
   }
 
   return new Response('Method Not Allowed', { status: 405 })
 })
+
+async function processEvents(statuses: WaStatusEvent[], messages: WaInboundEvent[]) {
+  const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+
+  let updated = 0
+  for (const s of statuses) {
+    const { data, error } = await db.rpc('wa_catat_status', { p_wamid: s.wamid, p_status: s.status, p_at: s.at, p_error: s.error })
+    if (error) console.error('[whatsapp-webhook] status gagal dicatat:', error.message)
+    else if (data === true) updated++
+  }
+
+  const outcome = { baru: 0, duplikat: 0, berhenti: 0, dibalas: 0 }
+  for (const m of messages) await handleInbound(db, m, outcome)
+
+  // Retensi: pesan masuk lebih dari 90 hari dihapus (ringan; berjalan sesekali).
+  if (messages.length && Math.random() < 0.05) {
+    const batas = new Date(Date.now() - RETENSI_HARI * 86_400_000).toISOString()
+    const { error } = await db.from('whatsapp_inbound').delete().lt('received_at', batas)
+    if (error) console.error('[whatsapp-webhook] retensi gagal:', error.message)
+  }
+
+  console.log(`[whatsapp-webhook] diproses: ${updated} status diperbarui, ${outcome.baru} pesan baru, ${outcome.duplikat} duplikat, ${outcome.berhenti} berhenti, ${outcome.dibalas} dibalas`)
+}
+
+async function handleInbound(db: any, m: WaInboundEvent, outcome: Record<string, number>) {
+  const senderHash = await recipientHash(m.from)
+  if (!senderHash) return
+
+  // Pesan terakhir yang dikirim ke nomor ini → klinik & pasien yang dibalas (60 hari terakhir).
+  const since = new Date(Date.now() - 60 * 86_400_000).toISOString()
+  const { data: last } = await db.from('notification_logs')
+    .select('clinic_id, patient_id')
+    .eq('recipient_hash', senderHash)
+    .gte('timestamp', since)
+    .order('timestamp', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const { data: row, error: insErr } = await db.from('whatsapp_inbound').insert([{
+    wamid: m.wamid, clinic_id: last?.clinic_id ?? null, patient_id: last?.patient_id ?? null,
+    sender_hash: senderHash, message_type: m.type,
+  }]).select('id').single()
+  if (insErr) {
+    if (insErr.code === '23505') outcome.duplikat++ // kiriman ulang Meta: sudah diproses
+    else console.error('[whatsapp-webhook] pesan masuk gagal dicatat:', insErr.code, insErr.message)
+    return
+  }
+  outcome.baru++
+
+  // Staf klinik yang menautkan nomornya → Eira. Selain itu: alur pesan pasien seperti biasa.
+  const eira = await tanganiStaf(db, m, senderHash).catch((e) => {
+    console.error('[whatsapp-webhook] eira gagal:', (e as Error).message)
+    return null
+  })
+  if (eira) {
+    await db.from('whatsapp_inbound').update({ action: eira }).eq('id', row.id)
+    return
+  }
+
+  const optOut = isOptOut(m.text)
+  if (optOut) {
+    const { error } = await db.rpc('wa_cabut_persetujuan', { p_sender_hash: senderHash })
+    if (error) console.error('[whatsapp-webhook] cabut persetujuan gagal:', error.message)
+    else outcome.berhenti++
+  }
+
+  let action: 'none' | 'auto_reply' | 'opt_out' = optOut ? 'opt_out' : 'none'
+  if (Deno.env.get('WA_BALAS_OTOMATIS') === 'true' && (optOut || isReplyable(m.type))) {
+    // Balasan otomatis paling banyak sekali per pengirim per 24 jam (konfirmasi BERHENTI selalu dikirim).
+    const { count } = await db.from('whatsapp_inbound').select('id', { count: 'exact', head: true })
+      .eq('sender_hash', senderHash).eq('action', 'auto_reply')
+      .gte('received_at', new Date(Date.now() - 86_400_000).toISOString())
+    if (optOut || (count ?? 0) === 0) {
+      const contact = last?.clinic_id ? await clinicContact(db, last.clinic_id) : null
+      const r = await sendWhatsApp({ to: m.from, text: optOut ? optOutReplyText(contact) : autoReplyText(contact) }, { provider: 'meta' })
+      if (r.ok) {
+        outcome.dibalas++
+        if (!optOut) action = 'auto_reply'
+      } else console.error('[whatsapp-webhook] balasan otomatis gagal:', r.error)
+    }
+  }
+  if (action !== 'none') {
+    const { error } = await db.from('whatsapp_inbound').update({ action }).eq('id', row.id)
+    if (error) console.error('[whatsapp-webhook] tindakan gagal dicatat:', error.message)
+  }
+}
+
+async function clinicContact(db: any, clinicId: string): Promise<ClinicContact | null> {
+  const [{ data: settings }, { data: clinic }] = await Promise.all([
+    db.from('clinic_settings').select('key, value').eq('clinic_id', clinicId).in('key', ['clinic_name', 'clinic_phone']),
+    db.from('clinics').select('name').eq('id', clinicId).maybeSingle(),
+  ])
+  const s = Object.fromEntries((settings ?? []).map((r: any) => [r.key, r.value]))
+  const name = s.clinic_name || clinic?.name
+  return name ? { name, phone: s.clinic_phone || '-' } : null
+}
+
+// ─── Eira lewat WhatsApp ──────────────────────────────────────────────────────
+
+const balas = (to: string, text: string) => sendWhatsApp({ to, text }, { provider: 'meta' })
+const USULAN_BERLAKU_MS = 30 * 60_000
+
+/** Kembalikan tindakan yang dicatat ('tautan' | 'eira') bila pesan ini milik alur staf, atau null untuk alur pasien. */
+async function tanganiStaf(db: any, m: WaInboundEvent, senderHash: string): Promise<'tautan' | 'eira' | null> {
+  const perintah = bacaPerintah(m.text)
+
+  if (perintah.jenis === 'kode') {
+    const { data, error } = await db.rpc('wa_tautkan', { p_kode: perintah.kode, p_sender_hash: senderHash, p_nomor_tersamar: samarkanNomor(m.from) })
+    if (error) throw new Error(`wa_tautkan: ${error.message}`)
+    await balas(m.from, teksHasilTautan(data ?? { ok: false }))
+    return 'tautan'
+  }
+
+  const { data: akun, error: akunErr } = await db.rpc('wa_akun_pengirim', { p_sender_hash: senderHash })
+  if (akunErr) throw new Error(`wa_akun_pengirim: ${akunErr.message}`)
+  const daftar: AkunWa[] = akun ?? []
+  if (daftar.length === 0) return null
+
+  if (m.type !== 'text') {
+    await balas(m.from, 'Saat ini Eira lewat WhatsApp baru bisa membaca pesan teks. Untuk memindai nota, gunakan Asisten AI di aplikasi.')
+    return 'eira'
+  }
+
+  const { data: sesi } = await db.from('wa_sesi_eira').select('user_id, riwayat, usulan_menunggu, diperbarui').eq('sender_hash', senderHash).maybeSingle()
+  const simpanSesi = (isi: Record<string, unknown>) =>
+    db.from('wa_sesi_eira').upsert({ sender_hash: senderHash, ...isi, diperbarui: new Date().toISOString() })
+
+  // Akun aktif: pilihan tersimpan, atau satu-satunya akun.
+  let aktif = daftar.find((a) => a.user_id === sesi?.user_id) ?? (daftar.length === 1 ? daftar[0] : null)
+
+  if (perintah.jenis === 'putuskan') {
+    await db.from('wa_tautan_akun').delete().eq('sender_hash', senderHash)
+    await db.from('wa_sesi_eira').delete().eq('sender_hash', senderHash)
+    await balas(m.from, 'Nomor ini sudah dilepas dari akun Dentiva. Anda bisa menautkannya lagi kapan saja dari aplikasi.')
+    return 'eira'
+  }
+  if (perintah.jenis === 'ganti_klinik' || (!aktif && perintah.jenis !== 'pilih')) {
+    if (daftar.length === 1) {
+      await balas(m.from, `Nomor ini hanya tertaut ke *${daftar[0].klinik}*.`)
+      return 'eira'
+    }
+    await simpanSesi({ user_id: null, riwayat: [], usulan_menunggu: [] })
+    await balas(m.from, teksPilihKlinik(daftar))
+    return 'eira'
+  }
+  if (perintah.jenis === 'pilih' && (!aktif || daftar.length > 1) && perintah.nomor <= daftar.length && !sesi?.user_id) {
+    aktif = daftar[perintah.nomor - 1]
+    await simpanSesi({ user_id: aktif.user_id, riwayat: [], usulan_menunggu: [] })
+    await balas(m.from, `Akun aktif: *${aktif.klinik}* (${aktif.peran === 'admin' ? 'Manajer' : aktif.peran}). Silakan bertanya.`)
+    return 'eira'
+  }
+  if (!aktif) {
+    await balas(m.from, teksPilihKlinik(daftar))
+    return 'eira'
+  }
+  if (perintah.jenis === 'bantuan') {
+    await balas(m.from, teksBantuan(aktif))
+    return 'eira'
+  }
+
+  db.from('wa_tautan_akun').update({ terakhir_dipakai: new Date().toISOString() }).eq('sender_hash', senderHash).eq('user_id', aktif.user_id).then(() => {})
+
+  if (aktif.peran !== 'admin') {
+    await balas(m.from, TEKS_KHUSUS_MANAJER)
+    return 'eira'
+  }
+
+  // Persetujuan usulan Eira Agen (YA / TIDAK) yang masih berlaku.
+  const menunggu: string[] = Array.isArray(sesi?.usulan_menunggu) ? sesi.usulan_menunggu : []
+  const masihBerlaku = sesi?.diperbarui && Date.now() - new Date(sesi.diperbarui).getTime() < USULAN_BERLAKU_MS
+  if ((perintah.jenis === 'ya' || perintah.jenis === 'tidak') && menunggu.length && masihBerlaku) {
+    const r = await keEira({ user_id: aktif.user_id, aksi: perintah.jenis === 'ya' ? 'setujui' : 'tolak', ids: menunggu })
+    await simpanSesi({ user_id: aktif.user_id, usulan_menunggu: [] })
+    await balas(m.from, r.ok
+      ? (perintah.jenis === 'ya' ? 'Selesai. Usulan sudah dijalankan dan tercatat di aplikasi (bisa dibatalkan dari Asisten AI).' : 'Baik, usulan dibatalkan. Tidak ada data yang berubah.')
+      : `Usulan tidak dapat diproses: ${r.error}`)
+    return 'eira'
+  }
+
+  const pertanyaan = perintah.jenis === 'tanya' ? perintah.teks : m.text.trim()
+  const riwayat = riwayatAktif(sesi?.riwayat, sesi?.diperbarui ?? null)
+  const r = await keEira({ user_id: aktif.user_id, question: pertanyaan, history: riwayat })
+  if (!r.ok) {
+    await balas(m.from, r.error)
+    return 'eira'
+  }
+  const jawaban = String(r.data?.answer ?? '').trim() || 'Maaf, saya belum menemukan jawabannya. Coba ulangi dengan kalimat lain.'
+  const usulan = Array.isArray(r.data?.actions) ? r.data.actions : []
+  await balas(m.from, keFormatWa(jawaban) + (usulan.length ? teksUsulan(usulan) : ''))
+  await simpanSesi({
+    user_id: aktif.user_id,
+    riwayat: [...riwayat, { role: 'user', content: pertanyaan.slice(0, 1000) }, { role: 'assistant', content: jawaban.slice(0, 4000) }].slice(-20),
+    usulan_menunggu: usulan.map((u: any) => u.id).filter(Boolean),
+  })
+  return 'eira'
+}
+
+/** Panggil ai-assistant (mode internal "wa") dengan kunci service role. */
+async function keEira(body: Record<string, unknown>): Promise<{ ok: true; data: any } | { ok: false; error: string }> {
+  const res = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/ai-assistant`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mode: 'wa', ...body }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) return { ok: false, error: String(data?.error ?? 'Eira sedang tidak dapat dihubungi. Coba lagi sebentar lagi.') }
+  return { ok: true, data }
+}

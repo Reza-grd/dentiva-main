@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, RefreshCw, ArrowRight, Lightbulb, ChevronRight } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { aiService } from '../../services/aiService';
-import { getGreeting, getRelativeTime } from '../../utils/dateUtils';
+import { getRelativeTime } from '../../utils/dateUtils';
 import DentiMascot, { useDentiDirector } from '../mascot/DentiMascot';
 import { moodForBrief, POKE_REACTIONS } from '../../utils/dentiMood';
 import './ai-brief.css';
@@ -23,11 +22,6 @@ const STAFF_ROUTES = {
   pasien: { to: '/pasien', label: 'Buka data pasien' },
 };
 
-const firstName = (profile) => {
-  const n = (profile?.full_name || '').trim().split(/\s+/)[0] || '';
-  return n ? n.charAt(0).toUpperCase() + n.slice(1) : '';
-};
-
 /**
  * Kartu Asisten AI di Dashboard: sapaan + catatan singkat dari AI (disimpan server dan dipakai
  * ulang beberapa jam).
@@ -37,8 +31,8 @@ const firstName = (profile) => {
  */
 export default function AiBriefCard({ variant = 'admin' }) {
   const isStaff = variant === 'staff';
-  const { userProfile } = useAuth();
   const navigate = useNavigate();
+  const [rincian, setRincian] = useState(false); // ponsel: rincian dibuka saat diketuk
   const [state, setState] = useState({ phase: 'loading' }); // loading | ready | inactive | error | hidden
   const [refreshing, setRefreshing] = useState(false);
   const [question, setQuestion] = useState('');
@@ -90,23 +84,22 @@ export default function AiBriefCard({ variant = 'admin' }) {
 
   if (state.phase === 'hidden') return null;
 
-  const name = firstName(userProfile);
-  const greeting = `${getGreeting()}${name ? `, ${name}` : ''}.`;
+  const judul = isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini';
 
   return (
-    <section className="ai-brief relative overflow-hidden rounded-2xl border p-6 sm:p-7" aria-labelledby="ai-brief-title">
+    <section className="ai-brief relative overflow-hidden rounded-2xl border p-4 sm:p-7" aria-labelledby="ai-brief-title">
       <div className="ai-brief__glow" aria-hidden="true" />
-      <div className="relative z-10 space-y-5">
+      <div className="relative z-10 space-y-4 sm:space-y-5">
         <header className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <button type="button" onClick={poke} className="ai-brief__denti" aria-label="Colek Eira" title="Colek Eira">
             <DentiMascot state={denti.state} size={68} title="Eira, asisten AI Dentiva" />
           </button>
           <div className="space-y-1.5 min-w-0">
             <p className="ai-brief__eyebrow flex items-center gap-2">
-              <Sparkles size={13} /> Eira · Asisten AI · {isStaff ? 'Tugas meja depan hari ini' : 'Catatan hari ini'}
+              <Sparkles size={13} /> Eira · Asisten AI
             </p>
-            <h2 id="ai-brief-title" className="ai-brief__greeting">{greeting}</h2>
+            <h2 id="ai-brief-title" className="ai-brief__greeting">{judul}</h2>
           </div>
           </div>
           {state.phase === 'ready' && (
@@ -166,6 +159,15 @@ export default function AiBriefCard({ variant = 'admin' }) {
           <>
             {state.brief.ringkasan && <p className="ai-brief__lead">{state.brief.ringkasan}</p>}
 
+            {(state.brief.poin?.length > 0 || state.brief.saran) && (
+              <button type="button" onClick={() => setRincian((v) => !v)} aria-expanded={rincian}
+                className="ai-brief__link ai-brief__toggle text-sm">
+                {rincian ? 'Sembunyikan rincian' : `Lihat rincian${state.brief.poin?.length ? ` (${state.brief.poin.length} poin)` : ''}`}
+                <ChevronRight size={14} className={`transition-transform ${rincian ? 'rotate-90' : ''}`} />
+              </button>
+            )}
+
+            <div className={`space-y-4 sm:space-y-5 ${rincian ? '' : 'hidden sm:block'}`}>
             {state.brief.poin?.length > 0 && (
               <ul className="grid gap-3 sm:grid-cols-2">
                 {state.brief.poin.map((p, i) => {
@@ -173,7 +175,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
                   const route = isStaff ? STAFF_ROUTES[p.aksi] : null;
                   return (
                     <li key={i} className="ai-brief__point flex flex-col">
-                      <p className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] opacity-60">
+                      <p className="flex items-center gap-2 text-xs font-semibold opacity-60">
                         <span className={`h-1.5 w-1.5 rounded-full ${tone.dot}`} /> {tone.label}
                       </p>
                       <p className="mt-1.5 font-semibold leading-snug">{p.judul}</p>
@@ -195,11 +197,12 @@ export default function AiBriefCard({ variant = 'admin' }) {
                 <span><span className="font-semibold">{isStaff ? 'Selanjutnya — ' : 'Langkah hari ini — '}</span>{state.brief.saran}</span>
               </p>
             )}
+            </div>
           </>
         )}
 
         {!isStaff && (state.phase === 'ready' || state.phase === 'error' || state.phase === 'empty') && (
-          <form onSubmit={ask} className="ai-brief__ask">
+          <form onSubmit={ask} className="ai-brief__ask" data-ringkas={state.phase === 'ready' && !rincian ? 'true' : undefined}>
             <Sparkles size={16} className="shrink-0 opacity-50" />
             <input
               aria-label="Tanyakan pada Asisten AI"
@@ -216,7 +219,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
         )}
 
         {state.phase === 'ready' && (
-          <p className="text-[11px] tracking-wide opacity-50">
+          <p className="hidden sm:block text-xs opacity-50">
             {state.stale ? 'Layanan AI sedang ramai — menampilkan catatan terakhir' : 'Disusun AI dari data klinik'}
             {' · '}diperbarui {getRelativeTime(state.generatedAt)} · otomatis pukul 00.00 & 12.00 WIB
           </p>

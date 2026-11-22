@@ -5,7 +5,7 @@ const ScheduleVisitForm = ({ scheduleForm, setScheduleForm, allDoctors }) => {
     <div className="space-y-4">
       {/* Dokter */}
       <div>
-        <label htmlFor="dokter_id" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Dokter Gigi <span className="text-red-500">*</span></label>
+        <label htmlFor="dokter_id" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Dokter Gigi <span className="text-red-500">*</span></label>
         <select 
           id="dokter_id"
           required
@@ -23,7 +23,7 @@ const ScheduleVisitForm = ({ scheduleForm, setScheduleForm, allDoctors }) => {
       <div className="grid grid-cols-2 gap-4">
         {/* Tanggal */}
         <div>
-          <label htmlFor="tanggal_kunjungan" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Tanggal Kunjungan <span className="text-red-500">*</span></label>
+          <label htmlFor="tanggal_kunjungan" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Tanggal Kunjungan <span className="text-red-500">*</span></label>
           <input 
             type="date"
             id="tanggal_kunjungan"
@@ -36,7 +36,7 @@ const ScheduleVisitForm = ({ scheduleForm, setScheduleForm, allDoctors }) => {
 
         {/* Jam */}
         <div>
-          <label htmlFor="jam_kunjungan" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Jam Kunjungan <span className="text-red-500">*</span></label>
+          <label htmlFor="jam_kunjungan" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Jam Kunjungan <span className="text-red-500">*</span></label>
           <input 
             type="time" 
             id="jam_kunjungan"
@@ -50,7 +50,7 @@ const ScheduleVisitForm = ({ scheduleForm, setScheduleForm, allDoctors }) => {
 
       {/* Keluhan */}
       <div>
-        <label htmlFor="keluhan" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Keluhan / Catatan</label>
+        <label htmlFor="keluhan" className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Keluhan / Catatan</label>
         <textarea 
           id="keluhan"
           value={scheduleForm.keluhan || ''}

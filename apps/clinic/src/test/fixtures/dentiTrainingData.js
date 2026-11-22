@@ -139,7 +139,7 @@ export const CYCLES = [
       ['maksudnya?', 'ulang'],
     ],
     ai: ['jam berapa pasien terakhir datang?', 'tanggal berapa gajian staf?', 'apa yang bisa saya lakukan untuk menaikkan pendapatan?',
-      'bagaimana cara menambah dokter baru?', 'maksudnya laba kotor itu apa?'],
+      'kenapa kunjungan minggu ini turun?', 'maksudnya laba kotor itu apa?'],
   },
   {
     name: 'Siklus 6 · ekspresi jawaban bernuansa',

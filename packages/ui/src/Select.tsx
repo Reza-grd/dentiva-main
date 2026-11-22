@@ -10,7 +10,7 @@ import { cn } from "./cn";
  */
 
 const selectVariants = cva(
-  "w-full appearance-none rounded-xl border bg-card text-text-primary pr-10 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50",
+  "w-full appearance-none rounded-lg border bg-card text-text-primary pr-10 transition-colors focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -66,7 +66,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-xs font-semibold uppercase tracking-wider text-text-muted"
+            className="block text-xs font-medium text-text-muted"
           >
             {label}
             {required && <span className="text-red-500 ml-0.5">*</span>}

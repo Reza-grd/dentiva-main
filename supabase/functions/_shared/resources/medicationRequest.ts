@@ -13,9 +13,10 @@ export async function buildAndSyncMedicationRequests(
   // 1. Fetch visit details for clinic_id and patient_id
   const { data: visit } = await supabaseAdmin
     .from('visits')
-    .select('clinic_id, patient_id')
+    .select('clinic_id, patient_id, doctor:users!visits_dokter_id_fkey(full_name, satusehat_practitioner_id)')
     .eq('id', visitId)
     .single();
+  const practitionerSId: string | null = (visit as any)?.doctor?.satusehat_practitioner_id || null;
 
   // FIX E: Fetch clinic's SATUSEHAT Organization ID for sys-ids.kemkes.go.id namespace
   const { data: org, error: orgErr } = await supabaseAdmin
@@ -101,7 +102,32 @@ export async function buildAndSyncMedicationRequests(
         {
           resourceType: 'Medication',
           id: 'med-1',
+          meta: {
+            profile: ['https://fhir.kemkes.go.id/r4/StructureDefinition/Medication']
+          },
+          identifier: [
+            {
+              system: `http://sys-ids.kemkes.go.id/medication/${orgIhs}`,
+              use: 'official',
+              value: identifierValue
+            }
+          ],
           status: 'active',
+          // Wajib di SATUSEHAT (RuleNumber 10031): jenis obat. Resep klinik = obat jadi (non-racikan).
+          extension: [
+            {
+              url: 'https://fhir.kemkes.go.id/r4/StructureDefinition/MedicationType',
+              valueCodeableConcept: {
+                coding: [
+                  {
+                    system: 'http://terminology.kemkes.go.id/CodeSystem/medication-type',
+                    code: 'NC',
+                    display: 'Non-compound'
+                  }
+                ]
+              }
+            }
+          ],
           code: {
             coding: [
               {
@@ -133,6 +159,9 @@ export async function buildAndSyncMedicationRequests(
         reference: `Encounter/${encounterId}`
       },
       authoredOn: isoTimestamp,
+      ...(practitionerSId
+        ? { requester: { reference: `Practitioner/${practitionerSId}`, display: (visit as any)?.doctor?.full_name || undefined } }
+        : {}),
       dosageInstruction: [
         {
           text: dosageText || 'Sesuai petunjuk dokter'

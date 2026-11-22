@@ -1,15 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const ALLOWED_ORIGINS = [
+  "http://localhost:3000", "http://localhost:3001", "http://localhost:5173",
+  "https://dentiva-main.vercel.app", "https://dentiva.id", "https://app.dentiva.id",
+  "http://tauri.localhost", "https://tauri.localhost", "tauri://localhost",
+]
+const asalDiizinkan = (req: Request) => {
+  const o = req.headers.get("Origin") ?? ""
+  return ALLOWED_ORIGINS.includes(o) ? o : ALLOWED_ORIGINS[3]
+}
+const corsHeaders = (req: Request) => ({
+  'Access-Control-Allow-Origin': asalDiizinkan(req),
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-}
+  'Vary': 'Origin',
+})
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders(req) })
   }
 
   try {
@@ -17,7 +27,7 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized: Missing Authorization header' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -28,7 +38,7 @@ serve(async (req) => {
     if (!supabaseUrl || !supabaseServiceKey) {
       return new Response(JSON.stringify({ error: 'Server misconfiguration' }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -41,7 +51,7 @@ serve(async (req) => {
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized: Invalid token' }), {
         status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -54,7 +64,7 @@ serve(async (req) => {
     if (!profile || profile.role !== 'admin' || !['active', 'invited'].includes(profile.status ?? 'active')) {
       return new Response(JSON.stringify({ error: 'Forbidden: Admin access required' }), {
         status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -86,7 +96,7 @@ serve(async (req) => {
           }),
           {
             status: 403,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
           }
         )
       }
@@ -99,7 +109,7 @@ serve(async (req) => {
     } catch (e) {
       return new Response(JSON.stringify({ error: 'Invalid JSON request body' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -108,28 +118,23 @@ serve(async (req) => {
     if (!profile.clinic_id) {
       return new Response(JSON.stringify({ error: 'Akun admin tidak terhubung ke klinik' }), {
         status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
-    if (role === 'dokter') {
-      return new Response(JSON.stringify({ error: 'Akun dokter (akses rekam medis) dibuat dan diverifikasi oleh tim Dentiva — hubungi dukungan Dentiva' }), {
-        status: 403,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    if (!['admin', 'resepsionis'].includes(role)) {
+    // Manajer klinik boleh membuat akun dokter sendiri (sejak 15 Nov 2026). Keabsahan STR/SIP
+    // menjadi tanggung jawab klinik; dokter melengkapinya di Profil Dokter.
+    if (!['admin', 'resepsionis', 'dokter'].includes(role)) {
       return new Response(JSON.stringify({ error: 'Role tidak valid' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
     if (!email || !password || !full_name || !role) {
       return new Response(JSON.stringify({ error: 'Missing required fields (email, password, full_name, role)' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -147,7 +152,7 @@ serve(async (req) => {
     if (createError) {
       return new Response(JSON.stringify({ error: createError.message }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
@@ -169,18 +174,18 @@ serve(async (req) => {
       await adminClient.auth.admin.deleteUser(authData.user.id)
       return new Response(JSON.stringify({ error: 'Failed to create user profile: ' + profileError.message }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
     }
 
     return new Response(JSON.stringify({ success: true, user: authData.user }), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
   } catch (error) {
     return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
   }
 })

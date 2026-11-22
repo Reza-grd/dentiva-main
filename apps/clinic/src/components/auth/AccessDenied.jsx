@@ -15,7 +15,7 @@ const AccessDenied = () => {
         <div className="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mx-auto mb-5">
           <ShieldOff size={32} className="text-red-500" />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Akses Ditolak</h1>
+        <h1 className="text-2xl font-medium text-gray-900 mb-2">Akses Ditolak</h1>
         <p className="text-gray-500 mb-6 text-sm leading-relaxed">
           Anda tidak memiliki izin untuk mengakses halaman ini.
           Silakan hubungi administrator jika Anda merasa ini adalah kesalahan.

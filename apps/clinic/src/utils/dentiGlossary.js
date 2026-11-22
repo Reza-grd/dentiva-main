@@ -9,6 +9,16 @@ import { PAGES } from './dentiGuide.js';
 /** { id, label, aliases[], def, page? } — `page` = id halaman di PAGES untuk tawaran "buka". */
 export const GLOSSARY = [
   // ── Istilah di Dentiva ──
+  { id: 'dashboard', label: 'Dashboard', aliases: ['dashboard', 'dasbor', 'beranda', 'isi dashboard', 'halaman utama'], page: 'dashboard',
+    def: 'Halaman pertama setelah masuk, isinya menyesuaikan peran. **Manajer** melihat ringkasan kunjungan, pendapatan, dan hal yang perlu ditindaklanjuti; **dokter** melihat pasien dan antrean hari ini; **resepsionis** melihat antrean, kunjungan, dan pembayaran hari ini.' },
+  { id: 'str', label: 'STR (Surat Tanda Registrasi)', aliases: ['str', 'surat tanda registrasi', 'nomor str'], page: 'profil-dokter',
+    def: 'Bukti dokter gigi terdaftar dan berwenang berpraktik. Nomor dan masa berlakunya dicatat di **Profil Dokter**, dan dipakai sebagai data tenaga kesehatan untuk SATUSEHAT.' },
+  { id: 'sip', label: 'SIP (Surat Izin Praktik)', aliases: ['sip', 'surat izin praktik', 'surat izin praktek', 'nomor sip'], page: 'profil-dokter',
+    def: 'Izin dari dinas kesehatan untuk berpraktik di fasilitas tertentu. Nomornya dicatat di **Profil Dokter** sebagai identitas resmi dokter di klinik.' },
+  { id: 'bookingonline', label: 'Booking online', aliases: ['booking online', 'janji online', 'reservasi online', 'halaman booking'], page: 'booking',
+    def: 'Halaman publik klinik tempat pasien memilih dokter, tanggal, dan jam sendiri. Permintaannya masuk ke menu **Booking Online** untuk dikonfirmasi resepsionis. Jam yang tersedia mengikuti **Jadwal Dokter**.' },
+  { id: 'asistenai', label: 'Asisten AI', aliases: ['asisten ai', 'eira ai', 'ai klinik', 'kartu usulan'], page: 'asisten',
+    def: 'Tempat manajer bertanya kondisi klinik dengan bahasa sehari-hari, misalnya pendapatan atau stok. Bila Eira mengusulkan perubahan data, usulan tampil sebagai **kartu** dan data **baru berubah setelah Anda setujui**.' },
   { id: 'soap', label: 'SOAP', aliases: ['soap', 'catatan soap', 'format soap'], page: 'tab-soap',
     def: 'Format catatan rekam medis: **S**ubjective (keluhan pasien), **O**bjective (hasil pemeriksaan), **A**ssessment (diagnosis), dan **P**lan (rencana perawatan). Template SOAP bisa diatur admin di Pengaturan.' },
   { id: 'odontogram', label: 'Odontogram', aliases: ['odontogram', 'peta gigi', 'bagan gigi'], page: 'rekam',

@@ -60,6 +60,11 @@ export interface AuthAdmin {
   /** Kirim email undangan (juga untuk user yang sudah dibuat tapi belum konfirmasi). */
   sendInvite(email: string, redirectTo: string): Promise<void>;
   sendPasswordReset(email: string, redirectTo: string): Promise<void>;
+  /**
+   * Buat tautan sekali pakai TANPA mengirim email (cadangan bila SMTP gagal).
+   * 'invite' untuk akun yang belum pernah login, 'recovery' untuk atur ulang password.
+   */
+  buatTautan(jenis: "invite" | "recovery", email: string, redirectTo: string): Promise<string>;
 }
 
 export interface AppConfig {

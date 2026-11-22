@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FileSpreadsheet, Search, Plus, Trash2, CheckCircle, AlertCircle, RefreshCw, Save } from 'lucide-react';
+import { FileSpreadsheet, Search, Plus, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { costingService } from '../../services/costingService';
 import { inventoryService } from '../../services/inventoryService';
@@ -166,7 +166,7 @@ const TreatmentBOM = () => {
             <>
               <div className="p-5 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30">
                 <div>
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">{selectedTreatment.nama_treatment}</h2>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{selectedTreatment.nama_treatment}</h2>
                   <p className="text-sm text-gray-500">Harga Jual Dasar: {formatCurrency(selectedTreatment.harga_dasar)}</p>
                 </div>
                 <button
@@ -191,11 +191,11 @@ const TreatmentBOM = () => {
                   <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead className="bg-gray-50 dark:bg-gray-900/50 sticky top-0">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Bahan</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Qty Rata2</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Est. Biaya</th>
-                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Nama Bahan</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Qty Rata2</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Est. Biaya</th>
+                        <th className="px-6 py-3 text-center text-xs font-medium text-gray-500">Status</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500">Aksi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -215,7 +215,7 @@ const TreatmentBOM = () => {
                               {formatCurrency(estBiaya)}
                             </td>
                             <td className="px-6 py-4 text-center">
-                              <span className={`inline-flex px-2 py-1 text-[10px] font-medium rounded-full ${item.wajib ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+                              <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${item.wajib ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
                                 {item.wajib ? 'Wajib' : 'Opsional'}
                               </span>
                             </td>
@@ -228,8 +228,8 @@ const TreatmentBOM = () => {
                     </tbody>
                     <tfoot className="bg-gray-50 dark:bg-gray-900/50 sticky bottom-0 border-t border-gray-200 dark:border-gray-700">
                       <tr>
-                        <td colSpan="2" className="px-6 py-3 text-right text-sm font-bold text-gray-900 dark:text-white">Total Estimasi Biaya Bahan:</td>
-                        <td className="px-6 py-3 text-right text-sm font-bold text-primary-600 dark:text-primary-400">
+                        <td colSpan="2" className="px-6 py-3 text-right text-sm font-semibold text-gray-900 dark:text-white">Total Estimasi Biaya Bahan:</td>
+                        <td className="px-6 py-3 text-right text-sm font-semibold text-primary-600 dark:text-primary-400">
                           {formatCurrency(bomItems.reduce((sum, item) => sum + (item.qty_rata2 * (1 + (item.wastage_percent/100)) * item.master_bahan.harga_rata2), 0))}
                         </td>
                         <td colSpan="2"></td>
@@ -248,7 +248,7 @@ const TreatmentBOM = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">Tambah Bahan ke BOM</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tambah Bahan ke BOM</h3>
               <p className="text-sm text-gray-500 mt-1">{selectedTreatment?.nama_treatment}</p>
             </div>
             

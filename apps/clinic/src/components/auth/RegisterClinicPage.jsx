@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Building2, MailCheck, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { simpanNiatBeli } from '../../utils/midtransSnap';
+import { Building2, MailCheck, AlertCircle, Eye, EyeOff, Check } from 'lucide-react';
 import { Button, Card, CardContent, Input } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
+import Turnstile from './Turnstile';
 
 // Sama dengan kebijakan password Supabase Auth proyek ini (min. 8, huruf + angka).
 const passwordProblems = (pw) => {
@@ -35,7 +37,7 @@ export const validateClinicForm = (f) => {
 
 export const Field = ({ label, error, required, children }) => (
   <div>
-    <label className="block text-[11px] font-bold text-text-muted uppercase tracking-wider mb-2">
+    <label className="block text-xs font-semibold text-text-muted mb-2">
       {label}
       {required && <span className="text-red-500"> *</span>}
     </label>
@@ -49,6 +51,12 @@ export const Field = ({ label, error, required, children }) => (
  * email terverifikasi dan menunggu persetujuan tim Dentiva (status 'pending').
  */
 const RegisterClinicPage = () => {
+  // Datang dari tombol "Pilih paket" di dentiva.id (?paket=pro&siklus=yearly): ingat untuk checkout.
+  const [searchParams] = useSearchParams();
+  useEffect(() => { simpanNiatBeli(searchParams); }, [searchParams]);
+  const paketDipilih = (searchParams.get('paket') || '').trim().toLowerCase();
+  const namaPaket = { starter: 'Starter', pro: 'Pro', enterprise: 'Enterprise' }[paketDipilih] || '';
+  const siklusDipilih = searchParams.get('siklus') === 'yearly' ? 'Tahunan' : 'Bulanan';
   const { signUpClinic } = useAuth();
   const [form, setForm] = useState({
     clinicName: '', clinicPhone: '', city: '', province: '', ownerName: '', ownerPhone: '',
@@ -59,6 +67,7 @@ const RegisterClinicPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [sentTo, setSentTo] = useState('');
   const [showPw, setShowPw] = useState(false);
+  const captcha = useRef(null);
 
   const set = (name) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
@@ -79,7 +88,16 @@ const RegisterClinicPage = () => {
 
     setSubmitting(true);
     setServerError('');
+    let captchaToken;
+    try {
+      captchaToken = await captcha.current?.ambilToken();
+    } catch (err) {
+      setSubmitting(false);
+      setServerError(err.message);
+      return;
+    }
     const res = await signUpClinic({
+      captchaToken,
       email: form.email.trim().toLowerCase(),
       password: form.password,
       ownerName: form.ownerName.trim(),
@@ -90,6 +108,7 @@ const RegisterClinicPage = () => {
       province: form.province.trim(),
     });
     setSubmitting(false);
+    captcha.current?.reset();
     if (!res.success) {
       setServerError(res.error);
       return;
@@ -105,7 +124,7 @@ const RegisterClinicPage = () => {
           <div className="w-16 h-16 bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl flex items-center justify-center mb-6">
             <MailCheck className="text-emerald-600" size={30} aria-hidden="true" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Cek email Anda</h1>
+          <h1 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Cek email Anda</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
             Kami mengirim tautan verifikasi ke <strong>{sentTo}</strong>. Buka tautan tersebut untuk menyelesaikan
             pendaftaran klinik. Email bisa tiba beberapa menit kemudian — periksa juga folder Spam.
@@ -124,11 +143,23 @@ const RegisterClinicPage = () => {
         <div className="w-12 h-12 bg-accent-primary/10 rounded-2xl flex items-center justify-center mb-4">
           <Building2 className="text-accent-primary" size={24} aria-hidden="true" />
         </div>
-        <h1 className="text-2xl font-bold text-text-primary">Daftarkan klinik Anda</h1>
+        <h1 className="text-2xl font-medium text-text-primary">Daftarkan klinik Anda</h1>
         <p className="text-sm text-text-muted mt-1">
-          Setelah diverifikasi tim Dentiva (biasanya 1×24 jam kerja), klinik Anda mendapat masa uji coba gratis 14
-          hari.
+          {namaPaket
+            ? 'Isi data klinik dan akun pemilik. Setelah email terverifikasi, Anda langsung menyelesaikan pembayaran paket dan klinik siap dipakai.'
+            : 'Setelah diverifikasi tim Dentiva (biasanya 1×24 jam kerja), klinik Anda mendapat masa uji coba gratis 14 hari.'}
         </p>
+        {namaPaket && (
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-accent-primary/25 bg-accent-primary/5 px-4 py-3">
+            <div className="flex items-center gap-2.5">
+              <Check size={16} className="text-accent-primary" aria-hidden="true" />
+              <p className="text-sm text-text-primary">
+                Paket dipilih: <span className="font-semibold">{namaPaket}</span> <span className="text-text-muted">· {siklusDipilih}</span>
+              </p>
+            </div>
+            <a href="https://dentiva.id/#paket" className="text-xs font-medium text-accent-primary hover:underline">Ganti paket</a>
+          </div>
+        )}
       </div>
 
       {serverError && (
@@ -174,6 +205,8 @@ const RegisterClinicPage = () => {
             {errors.agree && <span className="block text-xs text-red-500">{errors.agree}</span>}
           </span>
         </label>
+
+        <Turnstile ref={captcha} />
 
         <Button type="submit" className="w-full h-11" isLoading={submitting}>
           Daftarkan klinik

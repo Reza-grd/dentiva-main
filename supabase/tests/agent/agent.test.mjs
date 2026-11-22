@@ -256,7 +256,8 @@ test("nama ambigu → kandidat; salah ketik ringan tetap dikenali", async () => 
 });
 
 test("persetujuan massal atomik: satu gagal → tidak ada yang berubah", async () => {
-  const p1 = await ok("pengeluaran_catat", { kategori: "Marketing", deskripsi: "Brosur", jumlah: 300000, tanggal: "2026-10-05" });
+  // Kategori sengaja bukan "Marketing": tanggal tetap ini lama-lama masuk rata-rata 3 bulan dan merusak uji anomali Marketing.
+  const p1 = await ok("pengeluaran_catat", { kategori: "Lainnya", deskripsi: "Brosur", jumlah: 300000, tanggal: "2026-10-05" });
   const p2 = await ok("tindakan_harga", { tindakan: "Scaling", harga_baru: 320000 });
   await db.exec(`update public.treatments set harga_dasar = 301000 where clinic_id = '${A}' and nama_treatment = 'Scaling'`); // p2 jadi basi
   await rejects(apply(ADMIN_A, [p1.action_id, p2.action_id]), /sudah berubah/);

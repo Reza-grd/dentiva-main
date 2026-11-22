@@ -12,6 +12,9 @@ export const useClinicSettings = () => {
   return context;
 };
 
+/** Seperti useClinicSettings, tetapi mengembalikan null bila dipakai di luar provider (halaman publik, tes). */
+export const useClinicSettingsOptional = () => useContext(ClinicSettingsContext);
+
 export const ClinicSettingsProvider = ({ children }) => {
   const [settings, setSettings] = useState(() => {
     const defaults = {

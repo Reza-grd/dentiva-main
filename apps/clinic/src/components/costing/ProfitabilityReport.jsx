@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Download, Filter, FileText } from 'lucide-react';
+import { Activity, Download } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { costingService } from '../../services/costingService';
 import {
@@ -130,28 +130,28 @@ const ProfitabilityReport = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Pendapatan</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{formatCurrency(totalRevenue)}</p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white mt-1">{formatCurrency(totalRevenue)}</p>
               <p className="text-xs text-gray-400 mt-2">Dari {data.length} transaksi selesai</p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Modal / HPP</p>
-              <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">{formatCurrency(totalCost)}</p>
+              <p className="text-2xl font-semibold text-red-600 dark:text-red-400 mt-1">{formatCurrency(totalCost)}</p>
               <p className="text-xs text-gray-400 mt-2">Bahan + Overhead</p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Keuntungan Bersih (Margin)</p>
-              <p className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{formatCurrency(totalMargin)}</p>
+              <p className="text-2xl font-semibold text-green-600 dark:text-green-400 mt-1">{formatCurrency(totalMargin)}</p>
             </div>
             <div className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
               <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Rata-rata Margin %</p>
-              <p className="text-2xl font-bold text-primary-600 dark:text-primary-400 mt-1">{avgMarginPercent.toFixed(1)}%</p>
+              <p className="text-2xl font-semibold text-primary-600 dark:text-primary-400 mt-1">{avgMarginPercent.toFixed(1)}%</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Chart Top 5 */}
             <div className="lg:col-span-1 bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-              <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">Top 5 Kontributor Margin</h4>
+              <h4 className="font-semibold text-gray-800 dark:text-gray-100 mb-4">5 Penyumbang Margin Terbesar</h4>
               <div className="h-64">
                 {chartData.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -209,7 +209,7 @@ const ProfitabilityReport = () => {
                         </td>
                         <td className="px-4 py-3 text-sm text-right font-semibold text-green-600">
                           {formatCurrency(item.margin)}
-                          <div className="text-[10px] font-normal">{Number(item.margin_percent).toFixed(1)}%</div>
+                          <div className="text-xs font-normal">{Number(item.margin_percent).toFixed(1)}%</div>
                         </td>
                       </tr>
                     ))}

@@ -6,6 +6,7 @@
 import { ALL_TOOLS, READ_TOOLS, runTool, SYSTEM } from "../../../functions/ai-assistant/core.ts";
 import { geminiInteract, readInteraction, toGeminiSchema, userText } from "../../../functions/ai-assistant/gemini.ts";
 import { groqChat, readCompletion, toGroqTools } from "../../../functions/ai-assistant/groq.ts";
+import { supportsServerFallback } from "../../../functions/ai-assistant/pricing.ts";
 
 const MAX_ROUNDS = 10;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -15,6 +16,7 @@ export function toolSet(writeTools) { return writeTools ? ALL_TOOLS : READ_TOOLS
 /** Eksekusi satu panggilan alat lewat pelaksana produksi; catat jejaknya. */
 async function exec(client, ctx, trace, name, args) {
   const res = await runTool(client, name, args ?? {}, ctx);
+  ctx.evidence?.push(res.content);
   trace.push({ name, args, isError: res.isError, result: res.content.slice(0, 1500) });
   return res;
 }
@@ -53,16 +55,40 @@ async function geminiLoop({ key, model, turns, tools, client, ctx, trace, thinki
   return { answer: "", rounds: MAX_ROUNDS + 1, exhausted: true };
 }
 
-async function anthropicLoop({ key, model, turns, tools, client, ctx, trace, effort }) {
+const addUsage = (usage, u) => {
+  if (!usage || !u) return;
+  usage.input += u.input_tokens ?? 0;
+  usage.output += u.output_tokens ?? 0;
+  usage.cacheRead += u.cache_read_input_tokens ?? 0;
+  usage.cacheWrite += u.cache_creation_input_tokens ?? 0;
+};
+
+/** Sama dengan chatAnthropic di index.ts: alat & cache sama, fallback server untuk model selain Haiku. */
+async function anthropicLoop({ key, model, turns, tools, client, ctx, trace, effort, usage }) {
   const messages = turns.map((t) => ({ role: t.role, content: t.content }));
-  const atools = tools.map((t) => ({ name: t.name, description: t.description, input_schema: t.input_schema }));
+  const fallback = supportsServerFallback(model);
   for (let round = 0; round <= MAX_ROUNDS; round++) {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model, max_tokens: 8000, system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }], tools: atools, messages, ...(effort ? { output_config: { effort } } : {}) }),
-    });
-    const data = await res.json();
+    let res, data;
+    for (let attempt = 0; ; attempt++) {
+      res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01",
+          ...(fallback ? { "anthropic-beta": "server-side-fallback-2026-07-01" } : {}),
+        },
+        body: JSON.stringify({
+          model, max_tokens: 16000, output_config: { effort }, cache_control: { type: "ephemeral" },
+          system: [{ type: "text", text: SYSTEM, cache_control: { type: "ephemeral" } }], tools, messages,
+          ...(fallback ? { fallbacks: "default" } : {}),
+        }),
+      });
+      data = await res.json();
+      if (res.ok || attempt >= 3 || ![429, 500, 502, 503, 504, 529].includes(res.status)) break;
+      await sleep(Number(res.headers.get("retry-after") ?? 0) * 1000 || 2500 * (attempt + 1));
+    }
     if (!res.ok) throw Object.assign(new Error(data?.error?.message ?? `HTTP ${res.status}`), { status: res.status });
+    addUsage(usage, data.usage);
+    if (data.stop_reason === "refusal") return { answer: "", rounds: round + 1, refused: true };
     const uses = data.content.filter((b) => b.type === "tool_use");
     if (data.stop_reason !== "tool_use" || uses.length === 0) return { answer: data.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim(), rounds: round + 1 };
     messages.push({ role: "assistant", content: data.content });

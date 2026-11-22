@@ -44,7 +44,7 @@ export default function PatientImportModal({ onClose, onImported }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
       <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-          <h2 className="font-bold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+          <h2 className="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2">
             <FileSpreadsheet size={20} className="text-[var(--color-accent)]" /> Impor Pasien dari Excel
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Tutup"><X size={18} /></button>

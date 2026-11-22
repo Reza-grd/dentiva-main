@@ -65,7 +65,7 @@ const KfaPicker = ({ value, selected, onSelect, onClear, defaultKeyword = '' }) 
             <p className="font-mono text-xs text-gray-500">KFA {current.code}</p>
             <p className="font-medium text-gray-900 dark:text-gray-100">{current.name || 'Nama KFA belum tersedia'}</p>
             {current.form && <p className="text-xs text-gray-500">{current.form}</p>}
-            <p className="text-[11px] mt-1 text-gray-600 dark:text-gray-400">
+            <p className="text-xs mt-1 text-gray-600 dark:text-gray-400">
               {current.verified
                 ? 'Terverifikasi dari KFA SATUSEHAT — resep obat ini dikirim ke SATUSEHAT.'
                 : current.pending
@@ -123,7 +123,7 @@ const KfaPicker = ({ value, selected, onSelect, onClear, defaultKeyword = '' }) 
                 className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 disabled:opacity-50"
               >
                 <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{r.name}</p>
-                <p className="text-[11px] text-gray-500 font-mono">
+                <p className="text-xs text-gray-500 font-mono">
                   KFA {r.kfa_code}
                   {r.dosage_form_name ? ` · ${r.dosage_form_name}` : ''}
                   {r.manufacturer ? ` · ${r.manufacturer}` : ''}

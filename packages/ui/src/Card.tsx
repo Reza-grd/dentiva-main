@@ -7,7 +7,7 @@ const Card = forwardRef<HTMLDivElement, DivProps>(({ className, ...props }, ref)
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl border border-border bg-card text-text-primary shadow-sm backdrop-blur-md transition-shadow hover:shadow-card-hover",
+      "rounded-2xl border border-border bg-card text-text-primary",
       className
     )}
     {...props}

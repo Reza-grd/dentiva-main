@@ -122,7 +122,7 @@ const TreatmentEducationTemplates = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Template Edukasi Perawatan</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Template Edukasi Perawatan</h2>
           <p className="text-sm text-gray-500 mt-1">Kelola template pesan WA edukasi dan panduan obat pasca tindakan.</p>
         </div>
         {!isAdding && !editingId && (
@@ -134,7 +134,7 @@ const TreatmentEducationTemplates = () => {
 
       {(isAdding || editingId) && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm mb-6">
-          <h3 className="font-bold text-lg mb-4">{isAdding ? 'Tambah Template Baru' : 'Edit Template'}</h3>
+          <h3 className="font-semibold text-lg mb-4">{isAdding ? 'Tambah Template Baru' : 'Edit Template'}</h3>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Nama Tindakan (Harus sesuai dengan nama di master treatment)</label>
@@ -204,7 +204,7 @@ const TreatmentEducationTemplates = () => {
                 <Trash2 size={14} />
               </button>
             </div>
-            <h3 className="font-bold text-gray-900 dark:text-white mb-2">{tmpl.treatment_type}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{tmpl.treatment_type}</h3>
             {tmpl.keywords && tmpl.keywords.length > 0 && (
               <div className="flex flex-wrap gap-1 mb-2">
                 {tmpl.keywords.map((kw, i) => (
@@ -216,11 +216,11 @@ const TreatmentEducationTemplates = () => {
             )}
             <div className="space-y-3 mt-4">
               <div>
-                <span className="text-xs font-semibold text-gray-500 uppercase">Edukasi:</span>
+                <span className="text-xs font-semibold text-gray-500">Edukasi:</span>
                 <p className="text-sm mt-1 whitespace-pre-wrap line-clamp-3">{tmpl.education_text || '-'}</p>
               </div>
               <div>
-                <span className="text-xs font-semibold text-gray-500 uppercase">Instruksi Obat:</span>
+                <span className="text-xs font-semibold text-gray-500">Instruksi Obat:</span>
                 <p className="text-sm mt-1 whitespace-pre-wrap line-clamp-2">{tmpl.medication_instructions || '-'}</p>
               </div>
             </div>

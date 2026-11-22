@@ -20,7 +20,10 @@ const RISK = {
 const LINK = (jenis) => {
   if (jenis.startsWith('pengeluaran')) return { to: '/admin/pengeluaran', label: 'Pengeluaran' };
   if (jenis.startsWith('tindakan')) return { to: '/admin/treatments', label: 'Master Treatment' };
-  return { to: '/admin/costing', label: 'Biaya & Modal' };
+  if (jenis.startsWith('resep')) return { to: '/admin/costing?tab=resep&sub=bom', label: 'Resep Bahan' };
+  if (jenis.startsWith('overhead')) return { to: '/admin/costing?tab=operasional', label: 'Biaya Operasional' };
+  if (jenis.startsWith('stok')) return { to: '/admin/costing?tab=gudang&sub=kartu', label: 'Kartu Stok' };
+  return { to: '/admin/costing?tab=gudang&sub=bahan', label: 'Gudang' };
 };
 
 const isExpired = (a) => a.state === 'pending' && a.at && Date.now() - a.at > EXPIRES_MS;

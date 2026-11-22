@@ -35,11 +35,12 @@ const brief = {
 beforeEach(() => vi.clearAllMocks());
 
 describe('Kartu Asisten AI di Dashboard', () => {
-  it('menyapa dengan nama, menampilkan ringkasan, poin, dan langkah hari ini', async () => {
+  it('berjudul "Catatan hari ini" (sapaan cukup di judul halaman), menampilkan ringkasan, poin, dan langkah hari ini', async () => {
     ai.getBrief.mockResolvedValue({ success: true, data: { brief, generated_at: new Date().toISOString(), cached: true } });
     wrap();
     expect(await screen.findByText(brief.ringkasan)).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /, Reza\.$/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Catatan hari ini' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: /Reza/ })).toBeNull();
     expect(screen.getByText('2 kunjungan belum dibayar')).toBeInTheDocument();
     expect(screen.getByText('Penting')).toBeInTheDocument();
     expect(screen.getByText('Kabar baik')).toBeInTheDocument();

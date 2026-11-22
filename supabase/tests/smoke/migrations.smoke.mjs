@@ -391,6 +391,23 @@ ok(rc.slug === "klinik-senyum-ceria" && rc.role === "admin", "slug dibuat dari n
 await loginAs(uR);
 ok((await one("select public.get_user_clinic_id() as c")).c === null, "klinik pending belum punya akses data (RLS)");
 ok((await one("select has_access from public.get_my_account_status()")).has_access === false, "status akun: menunggu (has_access=false)");
+const cPlans = await q("select * from public.get_checkout_plans()");
+ok(cPlans.length >= 1, "klinik pending bisa melihat paket untuk checkout", cPlans.length);
+await logout();
+// Checkout: bayar = klinik pending langsung aktif
+const cPlan = cPlans[0];
+await one(`select * from public.billing_register_midtrans_order('ORD-CK', '${regId}', '${cPlan.id}', 'monthly')`);
+await loginAs(uR);
+ok((await one("select status from public.get_checkout_status('ORD-CK')")).status === "pending", "pemilik melihat status order miliknya");
+await logout();
+await loginAs(uA);
+ok((await q("select * from public.get_checkout_status('ORD-CK')")).length === 0, "klinik lain tidak melihat order ini");
+await logout();
+ok((await one(`select public.billing_settle_midtrans_order('ORD-CK', 'success', ${Math.round(Number(cPlan.price_monthly))}, '{}') as r`)).r === "confirmed", "checkout klinik pending terkonfirmasi");
+const ck = await one(`select status, activated_at from public.clinics where id = '${regId}'`);
+ok(ck.status === "active" && ck.activated_at !== null, "pembayaran mengaktifkan klinik pending", ck);
+await loginAs(uR);
+ok((await one("select has_access from public.get_my_account_status()")).has_access === true, "setelah bayar pemilik langsung punya akses");
 await logout();
 await db.exec(`update auth.users set email_confirmed_at = now() where id = '${uB}'`);
 await loginAs(uB);
@@ -413,6 +430,164 @@ ok((await one(`select kfa_nama from public.master_bahan where id = '${mb.id}'`))
 await db.exec(`update public.master_bahan set kode_kfa = '93009999' where id = '${mb.id}'`);
 ok((await one(`select kfa_verified_at is null as v from public.master_bahan where id = '${mb.id}'`)).v, "kode KFA diubah dari browser → status verifikasi dihapus");
 await logout();
+
+// WhatsApp Cloud API: status Meta & pesan masuk hanya ditulis server; pesan masuk hanya terlihat admin kliniknya.
+console.log("\n11. WhatsApp Cloud API");
+await db.exec(`alter table public.patients add column if not exists wa_consent boolean`); // ada di produksi, tidak di baseline sintetis
+const pB1 = (await one(`select id from public.patients where no_rm = 'B-1'`)).id;
+await db.exec(`update public.patients set wa_consent = true where id = '${pB1}'`);
+await db.exec(`insert into public.notification_logs (clinic_id, patient_id, message_type, status, provider, provider_message_id, recipient_hash, delivery_status)
+  values ('${B}', '${pB1}', 'reminder_day', 'sent', 'meta', 'wamid.T1', 'sidik-b1', 'accepted')`);
+await loginAs(uB);
+// Aman bila insert ditolak RLS, atau diterima dengan kolom Meta dikosongkan trigger.
+const palsu = await one(`insert into public.notification_logs (clinic_id, message_type, status, provider_message_id, delivery_status)
+  values ('${B}', 'manual', 'sent', 'wamid.PALSU', 'read') returning provider_message_id, delivery_status`).catch(() => null);
+await logout();
+ok((palsu === null || (palsu.provider_message_id === null && palsu.delivery_status === null))
+  && (await one(`select count(*)::int as n from public.notification_logs where provider_message_id = 'wamid.PALSU'`)).n === 0,
+  "browser tidak bisa mengisi ID pesan / status pengiriman Meta");
+// Produksi mengizinkan staf mencatat log sendiri (kebijakan lama) — trigger tetap harus mengosongkan kolom Meta.
+await db.exec(`alter table public.notification_logs disable row level security; grant insert, select, update on public.notification_logs to authenticated`);
+await loginAs(uB);
+const lolos = await one(`insert into public.notification_logs (clinic_id, message_type, status, provider, provider_message_id, recipient_hash, delivery_status)
+  values ('${B}', 'manual', 'sent', 'meta', 'wamid.PALSU2', 'x', 'read') returning id, provider, provider_message_id, recipient_hash, delivery_status`);
+ok([lolos.provider, lolos.provider_message_id, lolos.recipient_hash, lolos.delivery_status].every((v) => v === null), "trigger mengosongkan kolom Meta pada insert dari browser");
+await db.exec(`update public.notification_logs set delivery_status = 'failed', provider_message_id = 'wamid.T1' where provider_message_id = 'wamid.T1' or id = '${lolos.id}'`);
+await logout();
+ok((await one(`select delivery_status from public.notification_logs where provider_message_id = 'wamid.T1'`)).delivery_status === "accepted", "trigger menolak perubahan status Meta dari browser");
+await db.exec(`delete from public.notification_logs where id = '${lolos.id}'; alter table public.notification_logs enable row level security`);
+await loginAs(uB);
+await expectError(`select public.wa_catat_status('wamid.T1', 'read', now())`, /permission denied|42501/, "browser tidak bisa memanggil wa_catat_status");
+await expectError(`select public.wa_cabut_persetujuan('sidik-b1')`, /permission denied|42501/, "browser tidak bisa memanggil wa_cabut_persetujuan");
+await logout();
+ok((await one(`select public.wa_catat_status('wamid.T1', 'read', now()) as r`)).r === true, "server mencatat status 'read'");
+ok((await one(`select public.wa_catat_status('wamid.T1', 'delivered', now()) as r`)).r === false, "status tidak mundur (delivered setelah read diabaikan)");
+ok((await one(`select delivery_status from public.notification_logs where provider_message_id = 'wamid.T1'`)).delivery_status === "read", "status tetap 'read'");
+ok((await one(`select public.wa_catat_status('wamid.TIDAK-ADA', 'read', now()) as r`)).r === false, "status untuk pesan tak dikenal diabaikan");
+await db.exec(`insert into public.whatsapp_inbound (wamid, clinic_id, patient_id, sender_hash, message_type) values
+  ('wamid.IN-B', '${B}', '${pB1}', 'sidik-b1', 'text'), ('wamid.IN-A', '${A}', null, 'sidik-a', 'text')`);
+await expectError(`insert into public.whatsapp_inbound (wamid, sender_hash, message_type) values ('wamid.IN-B', 'x', 'text')`, /duplicate|23505/, "pesan masuk yang sama tidak tercatat dua kali");
+await loginAs(uB);
+ok((await q(`select wamid from public.whatsapp_inbound`)).map((r) => r.wamid).join() === "wamid.IN-B", "admin klinik B hanya melihat pesan masuk kliniknya");
+await expectError(`insert into public.whatsapp_inbound (wamid, clinic_id, sender_hash, message_type) values ('wamid.X', '${B}', 'x', 'text')`, /permission denied|row-level security|42501/, "browser tidak bisa menulis pesan masuk");
+await logout();
+ok((await one(`select public.wa_cabut_persetujuan('sidik-b1') as n`)).n === 1, "BERHENTI mencabut persetujuan pasien yang dikirimi pesan");
+ok((await one(`select wa_consent from public.patients where id = '${pB1}'`)).wa_consent === false, "wa_consent pasien menjadi false");
+
+// Invoice langganan klinik (20261114120000)
+console.log("Invoice langganan klinik");
+const hargaPro = Number((await one(`select price_monthly from public.subscription_plans where id = '${plan}'`)).price_monthly);
+await loginAs(uB);
+const inv1 = (await one(`select public.billing_minta_invoice('${plan}', 'monthly') as j`)).j;
+ok(inv1.invoice.status === "open" && /^INV-\d{4}-\d{6}$/.test(inv1.invoice.number), "manajer klinik mendapat invoice terbuka bernomor resmi");
+ok(Number(inv1.invoice.total_idr) === Math.round(hargaPro), "nominal invoice diambil dari katalog paket di server");
+ok(inv1.bill_to && typeof inv1.bill_to.name === "string", "invoice menyertakan data penagihan klinik");
+const inv2 = (await one(`select public.billing_minta_invoice('${plan}', 'monthly') as j`)).j;
+ok(inv2.invoice.number === inv1.invoice.number, "permintaan ulang paket & siklus sama memakai invoice yang sama");
+const inv3 = (await one(`select public.billing_minta_invoice('${plan}', 'yearly') as j`)).j;
+ok(inv3.invoice.number !== inv1.invoice.number, "siklus berbeda membuat invoice baru");
+const daftar = (await one(`select public.billing_invoice_klinik() as j`)).j;
+ok(daftar.invoices.some((i) => i.number === inv3.invoice.number) && !daftar.invoices.some((i) => i.number === inv1.invoice.number), "daftar invoice klinik tidak memuat permintaan yang diganti");
+await expectError(`select count(*) from platform.invoices`, /permission denied|42501/, "browser tidak bisa membaca tabel invoice langsung");
+await expectError(`select public.billing_minta_invoice('${plan}', 'mingguan')`, /tidak valid/, "siklus tagihan tak dikenal ditolak");
+await logout();
+ok((await one(`select status from platform.invoices where number = '${inv1.invoice.number}'`)).status === "void", "permintaan lama yang belum dibayar dibatalkan (void)");
+ok((await one(`select clinic_id from platform.invoices where number = '${inv3.invoice.number}'`)).clinic_id === B, "invoice tercatat untuk klinik peminta");
+await loginAs(uD);
+await expectError(`select public.billing_minta_invoice('${plan}', 'monthly')`, /manajer klinik|42501/, "dokter tidak bisa membuat invoice langganan");
+await expectError(`select public.billing_invoice_klinik()`, /manajer klinik|42501/, "dokter tidak bisa melihat invoice langganan");
+await logout();
+await db.exec("set role anon");
+await expectError(`select public.billing_invoice_klinik()`, /permission denied|42501/, "pengunjung tanpa login tidak bisa memanggil");
+await db.exec("reset role");
+
+// Eira lewat WhatsApp: penautan nomor (20261115090000)
+console.log("Eira lewat WhatsApp: penautan nomor");
+await db.exec(`update public.users set status = 'active' where id = '${uB}'`);
+await loginAs(uB);
+const kodeB = (await one(`select public.wa_buat_kode_tautan() as j`)).j;
+ok(/^\d{6}$/.test(kodeB.kode), "pengguna aktif mendapat kode 6 digit");
+await expectError(`select public.wa_buat_kode_tautan()`, /Tunggu sebentar/, "kode baru tidak bisa dibuat beruntun");
+await expectError(`select public.wa_tautkan('${kodeB.kode}', 'sidik-x', '62***')`, /permission denied|42501/, "browser tidak bisa menautkan nomor sendiri");
+await expectError(`select * from public.wa_akun_pengirim('sidik-x')`, /permission denied|42501/, "browser tidak bisa mencari akun dari nomor");
+ok((await one(`select count(*)::int as n from public.wa_kode_tautan`).catch(() => ({ n: -1 }))).n === -1, "browser tidak bisa membaca tabel kode");
+await logout();
+ok((await one(`select public.wa_tautkan('000000', 'sidik-wa-b', '+62 812-••••-0001') as j`)).j.ok === false, "kode salah ditolak");
+const taut = (await one(`select public.wa_tautkan('${kodeB.kode}', 'sidik-wa-b', '+62 812-••••-0001') as j`)).j;
+ok(taut.ok === true && taut.peran === "admin", "kode benar menautkan nomor ke akun admin klinik B");
+ok((await one(`select public.wa_tautkan('${kodeB.kode}', 'sidik-wa-b', '+62') as j`)).j.ok === false, "kode hanya bisa dipakai sekali");
+const akun = await q(`select * from public.wa_akun_pengirim('sidik-wa-b')`);
+ok(akun.length === 1 && akun[0].clinic_id === B, "nomor tertaut dikenali sebagai klinik B");
+ok((await q(`select * from public.wa_akun_pengirim('sidik-tak-dikenal')`)).length === 0, "nomor lain tidak dikenali");
+for (let i = 0; i < 5; i++) await one(`select public.wa_tautkan('11111${i}', 'sidik-penebak', '+62') as j`);
+ok((await one(`select public.wa_tautkan('999999', 'sidik-penebak', '+62') as j`)).j.alasan === "terlalu_banyak", "lebih dari 5 kode salah per jam diblokir");
+await loginAs(uB);
+ok((await q(`select nomor_tersamar from public.wa_tautan_akun`)).length === 1, "pengguna melihat tautan nomornya sendiri");
+await logout();
+await loginAs(uD);
+ok((await q(`select * from public.wa_tautan_akun`)).length === 0, "pengguna lain tidak melihat tautan milik orang lain");
+await logout();
+await db.exec(`update public.users set status = 'suspended' where id = '${uB}'`);
+ok((await q(`select * from public.wa_akun_pengirim('sidik-wa-b')`)).length === 0, "akun yang ditangguhkan tidak lagi dikenali lewat WA");
+await db.exec(`update public.users set status = 'active' where id = '${uB}'`);
+await loginAs(uB);
+await db.exec(`delete from public.wa_tautan_akun`);
+await logout();
+ok((await q(`select * from public.wa_akun_pengirim('sidik-wa-b')`)).length === 0, "pengguna bisa memutus tautan nomornya");
+ok((await one(`select public.akun_email_terpakai('B@X.TEST') as j`)).j === true, "pemeriksa email terpakai tidak peka huruf besar");
+await loginAs(uB);
+await expectError(`select public.akun_email_terpakai('b@x.test')`, /permission denied|42501/, "browser tidak bisa mengecek email terpakai");
+await logout();
+
+// Cabut sesi staf setelah password diatur ulang (20261115120000)
+await loginAs(uB);
+await expectError(`select public.staf_cabut_sesi('${uD}')`, /permission denied|42501/, "browser tidak bisa mencabut sesi staf langsung");
+await logout();
+ok(Number((await one(`select public.staf_cabut_sesi('${uD}') as n`)).n) >= 0, "server (service role) bisa mencabut sesi staf");
+
+// Email profil disamakan dengan email Auth saat login (20261115150000)
+await db.exec(`update auth.users set email = 'b-baru@x.test' where id = '${uB}'`);
+await loginAs(uB);
+await one(`select public.record_login() as r`);
+ok((await one(`select email from public.users where id = '${uB}'`)).email === "b-baru@x.test", "record_login menyamakan email profil dengan email Auth yang sudah dikonfirmasi");
+await logout();
+await db.exec(`update auth.users set email = 'b@x.test' where id = '${uB}'; update public.users set email = 'b@x.test' where id = '${uB}'`);
+
+// Keamanan: MFA ditegakkan di database, sesi milik sendiri (20261115170000)
+console.log("Keamanan: MFA & sesi");
+const klaimB = async (aal, sesi) => {
+  await db.exec("reset role");
+  const u = await one("select raw_app_meta_data from auth.users where id = $1", [uB]);
+  await q("select set_config('request.jwt.claims', $1, false), set_config('request.jwt.claim.sub', $2, false)",
+    [JSON.stringify({ sub: uB, role: "authenticated", aal, session_id: sesi, app_metadata: u?.raw_app_meta_data ?? {} }), uB]);
+  await db.exec("set role authenticated");
+};
+await klaimB("aal1", null);
+ok((await one(`select public.get_user_clinic_id() as c`)).c === B, "tanpa MFA terpasang: sesi aal1 tetap dikenali (perilaku lama)");
+await logout();
+await db.exec(`insert into auth.mfa_factors (user_id, status) values ('${uB}', 'verified')`);
+await klaimB("aal1", null);
+ok((await one(`select public.get_user_clinic_id() as c`)).c === null, "MFA terpasang + sesi aal1 (hanya password): tidak dikenali sebagai anggota klinik");
+ok((await q(`select id from public.patients`)).length === 0, "MFA terpasang + sesi aal1: data pasien tidak terbaca");
+await expectError(`select public.wa_buat_kode_tautan()`, /tidak aktif|42501/, "MFA terpasang + sesi aal1: tidak bisa membuat kode tautan WA");
+await expectError(`select * from public.sesi_saya()`, /Tidak diizinkan|42501/, "MFA terpasang + sesi aal1: daftar perangkat ditolak");
+await klaimB("aal2", null);
+ok((await one(`select public.get_user_clinic_id() as c`)).c === B, "MFA terpasang + sesi aal2: dikenali kembali");
+await logout();
+await db.exec(`delete from auth.mfa_factors where user_id = '${uB}'`);
+const [s1, s2] = ["5e550001-0000-4000-8000-000000000001", "5e550001-0000-4000-8000-000000000002"];
+await db.exec(`insert into auth.sessions (id, user_id, user_agent, ip) values ('${s1}', '${uB}', 'Chrome', '182.10.225.246'), ('${s2}', '${uB}', 'Safari', '10.1.2.3'), (gen_random_uuid(), '${uD}', 'Lain', '1.2.3.4')`);
+await klaimB("aal1", s1);
+const sesi = await q(`select * from public.sesi_saya()`);
+ok(sesi.length === 2 && sesi.some((x) => x.sesi_ini) && sesi.every((x) => !x.ip_tersamar || x.ip_tersamar.endsWith(".x.x")), "daftar perangkat: hanya milik sendiri, IP disamarkan, sesi ini ditandai");
+ok(Number((await one(`select public.keluar_perangkat_lain() as n`)).n) === 1, "keluar dari perangkat lain menghapus sesi lain saja");
+await logout();
+ok((await one(`select count(*)::int as n from auth.sessions where user_id = '${uD}'`)).n === 1, "sesi pengguna lain tidak tersentuh");
+await loginAs(uB);
+ok((await q(`select clinic_id from public.users`)).every((r) => r.clinic_id === B), "daftar pengguna hanya dari klinik sendiri");
+await logout();
+const av = await one(`select file_size_limit, allowed_mime_types from storage.buckets where id = 'avatars'`).catch(() => null);
+ok(!av || (Number(av.file_size_limit) === 2097152 && av.allowed_mime_types.includes("image/png")), "bucket avatars dibatasi gambar 2 MB");
 
 console.log(`\nHasil: ${pass} lulus, ${fail} gagal`);
 process.exit(fail ? 1 : 0);

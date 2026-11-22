@@ -207,7 +207,7 @@ const PAGES = [
   [['dashboard', 'beranda', 'home', 'halaman utama', 'halaman depan'], '/admin', 'Dashboard'],
   [['pasien', 'data pasien', 'daftar pasien', 'patients'], '/pasien', 'Data Pasien'],
   [['pendaftaran pasien', 'registrasi pasien', 'tambah pasien', 'pasien baru'], '/pasien/daftar', 'Pendaftaran Pasien'],
-  [['keuangan', 'dashboard keuangan', 'finance'], '/keuangan', 'Keuangan'],
+  [['keuangan', 'dashboard keuangan', 'finance'], '/admin/laporan?tab=keuangan', 'Laporan › Keuangan'],
   [['pembayaran', 'kasir', 'transaksi', 'payments'], '/admin/pembayaran', 'Pembayaran'],
   [['tindakan', 'master tindakan', 'daftar tindakan', 'treatment', 'treatments'], '/admin/treatments', 'Master Tindakan'],
   [['biaya dan modal', 'biaya & modal', 'biaya modal', 'costing', 'modal', 'hpp'], '/admin/costing', 'Biaya & Modal'],

@@ -5,19 +5,23 @@
  *
  * @type {import('tailwindcss').Config}
  */
+const tema = (v) => `color-mix(in srgb, var(${v}) calc(<alpha-value> * 100%), transparent)`;
+
 module.exports = {
   darkMode: 'class',
   theme: {
     extend: {
+      // Variabel tema berisi kode hex, sehingga pengubah opasitas Tailwind (mis. bg-accent-primary/10)
+      // dulu tidak menghasilkan CSS sama sekali. <alpha-value> + color-mix membuatnya bekerja.
       colors: {
-        background: 'var(--color-bg)',
-        card: 'var(--color-card)',
-        border: 'var(--color-border)',
-        'text-primary': 'var(--color-text)',
-        'text-muted': 'var(--color-muted)',
-        'accent-primary': 'var(--color-accent)',
-        'accent-secondary': 'var(--color-accent-secondary)',
-        'dark-base': 'var(--color-dark-base)',
+        background: tema('--color-bg'),
+        card: tema('--color-card'),
+        border: tema('--color-border'),
+        'text-primary': tema('--color-text'),
+        'text-muted': tema('--color-muted'),
+        'accent-primary': tema('--color-accent'),
+        'accent-secondary': tema('--color-accent-secondary'),
+        'dark-base': tema('--color-dark-base'),
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

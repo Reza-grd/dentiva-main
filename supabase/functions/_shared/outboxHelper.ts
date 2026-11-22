@@ -25,7 +25,7 @@ export function calculateNextRetry(attemptCount: number): string | null {
 
 export interface OutboxParams {
   clinicId: string;
-  resourceType: 'Organization' | 'Location' | 'Practitioner' | 'Patient' | 'Encounter' | 'Condition' | 'Procedure' | 'MedicationRequest' | 'Composition';
+  resourceType: 'Organization' | 'Location' | 'Practitioner' | 'Patient' | 'Encounter' | 'Condition' | 'Procedure' | 'MedicationRequest' | 'Composition' | 'Observation';
   relatedVisitId?: string;
   relatedPatientId?: string;
   payload: any;

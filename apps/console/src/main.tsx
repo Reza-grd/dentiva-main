@@ -11,6 +11,19 @@ import { APP_ENV } from "./lib/supabase";
 import "@dentiva/ui/tokens.css";
 import "./styles.css";
 
+// Setelah deploy baru, tab lama bisa meminta berkas halaman (chunk) yang sudah tidak ada → layar kosong.
+// Muat ulang sekali agar memakai versi terbaru; dijaga agar tidak berulang tanpa henti.
+window.addEventListener("vite:preloadError", (e) => {
+  const kunci = "dentiva-muat-ulang-chunk";
+  try {
+    const terakhir = Number(sessionStorage.getItem(kunci) || 0);
+    if (Date.now() - terakhir < 30_000) return;
+    sessionStorage.setItem(kunci, String(Date.now()));
+  } catch { /* penyimpanan dimatikan */ }
+  e.preventDefault();
+  window.location.reload();
+});
+
 const dsn = import.meta.env.VITE_SENTRY_DSN as string | undefined;
 if (import.meta.env.PROD && dsn) {
   Sentry.init({

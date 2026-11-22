@@ -30,14 +30,14 @@ const MedicalRecordForm = lazy(() => import('./components/medical-record/Medical
 const MedicalRecordList = lazy(() => import('./components/medical-record/MedicalRecordList'));
 const PaymentForm = lazy(() => import('./components/payment/PaymentForm'));
 const PaymentList = lazy(() => import('./components/payment/PaymentList'));
-const FinancialDashboard = lazy(() => import('./components/financial/FinancialDashboard'));
 const AiAssistantPage = lazy(() => import('./components/ai/AiAssistantPage'));
 const ExpensesPage = lazy(() => import('./components/financial/ExpensesPage'));
 const RecallPage = lazy(() => import('./components/recall/RecallPage'));
 const CostingDashboard = lazy(() => import('./components/costing/CostingDashboard'));
 const TreatmentMaster = lazy(() => import('./components/treatments/TreatmentMaster'));
-const ReportsPage = lazy(() => import('./components/reports/ReportsPage'));
+const LaporanPage = lazy(() => import('./components/reports/LaporanPage'));
 const SettingsPage = lazy(() => import('./components/settings/SettingsPage'));
+const CheckoutStatusPage = lazy(() => import('./pages/CheckoutStatusPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
 const ProfilePage = lazy(() => import('./components/profile/ProfilePage'));
 const DoctorProfilePage = lazy(() => import('./components/profile/DoctorProfilePage'));
@@ -50,20 +50,31 @@ const AuditLogPage = lazy(() => import('./components/admin/AuditLogPage'));
 const UserManagementPage = lazy(() => import('./components/admin/UserManagementPage'));
 const BookingPage = lazy(() => import('./pages/BookingPage'));
 const BookingRequests = lazy(() => import('./components/schedule/BookingRequests'));
+const VerifikasiMfaPage = lazy(() => import('./components/auth/VerifikasiMfaPage'));
 // Pembaruan otomatis hanya untuk aplikasi desktop (Tauri)
 const DesktopUpdater = isDesktop ? lazy(() => import('./components/common/DesktopUpdater')) : null;
 
 function App() {
-  const { loading, user, userProfile, accountStatus, signOut } = useAuth();
+  const { loading, user, userProfile, accountStatus, signOut, mfaDiperlukan } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
   }
 
+  // Sudah lolos password, menunggu kode verifikasi dua langkah.
+  if (user && mfaDiperlukan && location.pathname !== '/atur-password') {
+    return <Suspense fallback={<LoadingSpinner fullScreen />}><VerifikasiMfaPage /></Suspense>;
+  }
+
   // Tautan undangan / reset password: boleh dibuka sebelum profil termuat.
   if (location.pathname === '/atur-password') {
     return <SetPasswordPage />;
+  }
+
+  // Status pembayaran langganan: harus bisa dibuka klinik yang masih menunggu aktivasi.
+  if (user && location.pathname === '/langganan/status') {
+    return <Suspense fallback={<LoadingSpinner fullScreen />}><CheckoutStatusPage /></Suspense>;
   }
 
   // Klinik ditangguhkan / ditutup / belum aktif (dikelola dari Dentiva Console).
@@ -224,11 +235,8 @@ function App() {
             </ProtectedRoute>
           } />
 
-          <Route path="/keuangan" element={
-            <ProtectedRoute allowedRoles={['admin']}>
-              <FinancialDashboard />
-            </ProtectedRoute>
-          } />
+          {/* Lap. Keuangan digabung ke Laporan (tab Keuangan); alamat lama dialihkan agar bookmark tetap jalan. */}
+          <Route path="/keuangan" element={<Navigate to="/admin/laporan?tab=keuangan" replace />} />
 
 
           {/* Transaksi dulu duplikat Pembayaran; alamat lama dialihkan agar bookmark tetap jalan. */}
@@ -266,7 +274,7 @@ function App() {
 
           <Route path="/admin/laporan" element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <ReportsPage />
+              <LaporanPage />
             </ProtectedRoute>
           } />
 

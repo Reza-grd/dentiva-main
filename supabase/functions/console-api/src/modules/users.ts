@@ -67,9 +67,17 @@ export const resendInvite: H<"users.resendInvite"> = async (ctx, p) => {
   if (user.status !== "invited") {
     throw precondition("Undangan hanya bisa dikirim ulang untuk user berstatus 'Diundang'");
   }
-  await ctx.auth.sendInvite(user.email, `${ctx.config.clinicAppUrl}/atur-password`);
-  ctx.audit({ targetType: "clinic_user", targetId: p.userId, clinicId: user.clinic_id, after: { email: user.email } });
-  return { sent: true as const };
+  const tujuan = `${ctx.config.clinicAppUrl}/atur-password`;
+  // Email bisa gagal (mis. SMTP belum terpasang). Jangan gagalkan aksi: beri operator tautan sekali pakai
+  // untuk dikirim manual (WhatsApp). Tautan tidak dicatat di audit log.
+  let link: string | undefined;
+  try {
+    await ctx.auth.sendInvite(user.email, tujuan);
+  } catch {
+    link = await ctx.auth.buatTautan("invite", user.email, tujuan);
+  }
+  ctx.audit({ targetType: "clinic_user", targetId: p.userId, clinicId: user.clinic_id, after: { email: user.email, delivery: link ? "tautan_manual" : "email" } });
+  return link ? { sent: false, link } : { sent: true };
 };
 
 export const sendPasswordReset: H<"users.sendPasswordReset"> = async (ctx, p) => {
@@ -77,7 +85,13 @@ export const sendPasswordReset: H<"users.sendPasswordReset"> = async (ctx, p) =>
   if (!["active", "invited"].includes(user.status)) {
     throw precondition("Aktifkan user terlebih dahulu sebelum mengirim reset password");
   }
-  await ctx.auth.sendPasswordReset(user.email, `${ctx.config.clinicAppUrl}/atur-password`);
-  ctx.audit({ targetType: "clinic_user", targetId: p.userId, clinicId: user.clinic_id, reason: p.reason, after: { email: user.email } });
-  return { sent: true as const };
+  const tujuan = `${ctx.config.clinicAppUrl}/atur-password`;
+  let link: string | undefined;
+  try {
+    await ctx.auth.sendPasswordReset(user.email, tujuan);
+  } catch {
+    link = await ctx.auth.buatTautan("recovery", user.email, tujuan);
+  }
+  ctx.audit({ targetType: "clinic_user", targetId: p.userId, clinicId: user.clinic_id, reason: p.reason, after: { email: user.email, delivery: link ? "tautan_manual" : "email" } });
+  return link ? { sent: false, link } : { sent: true };
 };

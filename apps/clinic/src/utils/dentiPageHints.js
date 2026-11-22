@@ -20,8 +20,7 @@ export const PAGE_HINTS = [
   { prefix: '/admin/treatments', hints: ['Ajarkan cara menambah tindakan', 'Apa itu margin?'] },
   { prefix: '/admin/pengeluaran', hints: ['Ajarkan cara catat pengeluaran'] },
   { prefix: '/admin/jadwal-dokter', hints: ['Ajarkan cara mengatur jadwal praktik dokter'] },
-  { prefix: '/keuangan', hints: ['Ajarkan cara lihat laporan keuangan', 'Apa itu margin?'] },
-  { prefix: '/admin/laporan', hints: ['Ajarkan cara lihat laporan keuangan'] },
+  { prefix: '/admin/laporan', hints: ['Ajarkan cara lihat laporan keuangan', 'Apa itu margin?'] },
   { prefix: '/admin/audit-log', hints: ['Ajarkan cara membaca log audit', 'Apa itu audit log?'] },
 ];
 

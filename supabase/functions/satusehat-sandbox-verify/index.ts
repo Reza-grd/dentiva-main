@@ -21,6 +21,7 @@ import { buildAndSyncConditions } from "../_shared/resources/condition.ts";
 import { buildAndSyncProcedures } from "../_shared/resources/procedure.ts";
 import { buildAndSyncMedicationRequests } from "../_shared/resources/medicationRequest.ts";
 import { buildAndSyncComposition } from "../_shared/resources/composition.ts";
+import { buildAndSyncDentalObservations } from "../_shared/resources/dentalObservation.ts";
 import { fhirRequest } from "../_shared/fhirClient.ts";
 import { getSatuSehatEnv, DIAGNOSIS_USE_CANDIDATES, diagnosisUseCodingFor } from "../_shared/satusehatConfig.ts";
 
@@ -82,6 +83,7 @@ Deno.serve(async (req) => {
   let conditionIds: string[] = [];
   let procedureIds: string[] = [];
   let medicationRequestIds: string[] = [];
+  let observationIds: string[] = [];
   const diagnosisUseProbe: Array<{ variant: string; httpStatus: number; ok: boolean; outcome: unknown }> = [];
 
   if (encounterId) {
@@ -114,6 +116,8 @@ Deno.serve(async (req) => {
     procedureIds = (await run("Procedure", () => buildAndSyncProcedures(admin, visitId, patientSId, encounterId, iso, undefined, null), (r) => r)) ?? [];
     medicationRequestIds =
       (await run("MedicationRequest", () => buildAndSyncMedicationRequests(admin, visitId, patientSId, encounterId, iso, undefined, null), (r) => r)) ?? [];
+    observationIds =
+      (await run("Observation (Modul Gigi: OHIS & odontogram)", () => buildAndSyncDentalObservations(admin, visitId, patientSId, practitionerSId, encounterId, iso, undefined, null), (r) => r)) ?? [];
     if (conditionIds.length > 0) {
       await run(
         "Composition",
@@ -132,10 +136,13 @@ Deno.serve(async (req) => {
     .order("updated_at", { ascending: false })
     .limit(50);
 
-  const expected = { conditions: conditionIds.length > 0, procedures: procedureIds.length > 0, medicationRequests: medicationRequestIds.length > 0 };
+  const expected = {
+    conditions: conditionIds.length > 0, procedures: procedureIds.length > 0, medicationRequests: medicationRequestIds.length > 0,
+    observations: observationIds.length > 0,
+  };
   const passed =
     steps.every((s) => s.ok) &&
-    expected.conditions && expected.procedures && expected.medicationRequests &&
+    expected.conditions && expected.procedures && expected.medicationRequests && expected.observations &&
     !(outbox ?? []).some((o: any) => String(o.status).startsWith("failed"));
 
   const report = {
@@ -144,11 +151,11 @@ Deno.serve(async (req) => {
     passed,
     steps,
     diagnosisUseProbe,
-    resources: { encounterId, conditionIds, procedureIds, medicationRequestIds },
+    resources: { encounterId, conditionIds, procedureIds, medicationRequestIds, observationIds },
     outbox,
     note: passed
       ? "Cocokkan payload di satusehat_outbox dengan koleksi Postman resmi, pilih SATUSEHAT_DIAGNOSIS_USE dari varian yang lulus, lalu set SATUSEHAT_PRODUCTION_APPROVED=true."
-      : "Belum lulus — perbaiki langkah yang gagal lalu jalankan ulang. Kunjungan uji harus punya ≥1 diagnosis ICD-10, ≥1 tindakan ICD-9-CM, dan ≥1 obat berkode KFA terverifikasi.",
+      : "Belum lulus — perbaiki langkah yang gagal lalu jalankan ulang. Kunjungan uji harus punya ≥1 diagnosis ICD-10, ≥1 tindakan ICD-9-CM, ≥1 obat berkode KFA terverifikasi, serta odontogram dan/atau skor OHIS pasien terisi.",
   };
 
   const { error: saveErr } = await admin.from("satusehat_verification_runs").insert({

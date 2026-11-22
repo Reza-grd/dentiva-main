@@ -91,6 +91,7 @@ function harness(opts: {
       deleteUser: vi.fn(async () => {}),
       sendInvite: vi.fn(async () => {}),
       sendPasswordReset: vi.fn(async () => {}),
+      buatTautan: vi.fn(async () => "https://contoh.test/tautan"),
     },
     handlers,
     config: {

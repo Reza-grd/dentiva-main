@@ -89,7 +89,7 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-        <h3 className="font-bold text-lg text-gray-900">Diagnosis & Perawatan</h3>
+        <h3 className="font-semibold text-lg text-gray-900">Diagnosis & Perawatan</h3>
       </div>
       
       <div className="p-6">
@@ -126,7 +126,7 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
                         className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0 flex justify-between items-center group"
                       >
                         <div>
-                          <span className="font-mono text-xs font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
+                          <span className="font-mono text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
                           <span className="text-gray-700 dark:text-gray-300">{d.name}</span>
                         </div>
                         <Plus size={16} className="text-gray-300 group-hover:text-[var(--color-accent)] transition-colors" />
@@ -152,7 +152,7 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
                     {diagnoses.map((d) => (
                       <li key={d.code} className="flex justify-between items-center bg-white dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
                         <div>
-                          <span className="font-mono text-xs font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
+                          <span className="font-mono text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent)]/10 dark:bg-[var(--color-accent)]/20 px-1.5 py-0.5 rounded mr-2">{d.code}</span>
                           <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{d.name}</span>
                         </div>
                         <button onClick={() => removeDiagnosis(d.code)} className="print:hidden text-gray-400 hover:text-red-500 transition-colors p-1" title="Hapus">
@@ -248,7 +248,7 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
                       <li key={idx} className="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
                         <div className="flex flex-col">
                           <span className="text-sm font-medium text-gray-800">{t.name}</span>
-                          <span className="text-xs font-bold text-gray-500">{formatCurrency(t.cost)}</span>
+                          <span className="text-xs font-semibold text-gray-500">{formatCurrency(t.cost)}</span>
                         </div>
                         {!isLocked && (
                           <button onClick={() => removeTreatment(idx)} className="print:hidden text-gray-400 hover:text-red-500 transition-colors p-1" title="Hapus">
@@ -265,7 +265,7 @@ const DiagnosisTreatment = ({ clinicalData, setClinicalData, isLocked }) => {
               {treatments.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center bg-green-50/50 p-3 rounded-lg border-green-100 border">
                   <span className="font-semibold text-gray-700 text-sm">Total Estimasi Biaya</span>
-                  <span className="font-bold text-lg text-green-700">{formatCurrency(totalCost)}</span>
+                  <span className="font-semibold text-lg text-green-700">{formatCurrency(totalCost)}</span>
                 </div>
               )}
             </div>

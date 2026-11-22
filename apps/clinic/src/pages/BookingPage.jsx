@@ -100,7 +100,7 @@ export default function BookingPage() {
     return shell(
       <div className="text-center">
         <AlertCircle className="mx-auto text-amber-500 mb-3" size={32} />
-        <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-1">Booking online tidak tersedia</h1>
+        <h1 className="text-lg font-medium text-gray-900 dark:text-white mb-1">Booking online tidak tersedia</h1>
         <p className="text-sm text-gray-500">
           {page.reason === 'disabled' ? 'Klinik ini belum membuka booking online. Silakan hubungi klinik langsung.' : 'Klinik tidak ditemukan. Periksa kembali tautan Anda.'}
         </p>
@@ -112,7 +112,7 @@ export default function BookingPage() {
     return shell(
       <div className="text-center">
         <CheckCircle2 className="mx-auto text-emerald-500 mb-3" size={40} />
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Permintaan terkirim</h1>
+        <h1 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Permintaan terkirim</h1>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
           {page.clinic.name} akan mengonfirmasi jadwal Anda melalui WhatsApp. Jadwal belum pasti sebelum dikonfirmasi klinik.
         </p>
@@ -133,7 +133,7 @@ export default function BookingPage() {
         <div className="w-11 h-11 rounded-2xl bg-accent-primary/10 flex items-center justify-center mb-3">
           <CalendarCheck className="text-accent-primary" size={22} />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{page.clinic.name}</h1>
+        <h1 className="text-2xl font-medium text-gray-900 dark:text-white">{page.clinic.name}</h1>
         <p className="text-sm text-gray-500 mt-1">Booking jadwal periksa gigi</p>
         <div className="mt-3 space-y-1 text-xs text-gray-500">
           {page.clinic.address && <p className="flex items-start gap-1.5"><MapPin size={13} className="mt-0.5 flex-shrink-0" />{page.clinic.address}{page.clinic.city ? `, ${page.clinic.city}` : ''}</p>}
@@ -188,7 +188,7 @@ export default function BookingPage() {
 
 const Label = ({ text, children }) => (
   <div>
-    <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">{text}</label>
+    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">{text}</label>
     {children}
   </div>
 );

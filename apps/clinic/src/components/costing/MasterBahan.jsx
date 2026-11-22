@@ -193,12 +193,12 @@ const MasterBahan = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kode</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama Bahan</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Stok (Satuan)</th>
-                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">Hrg Rata2 (Dasar)</th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Kode</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Nama Bahan</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Kategori</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">Stok (Satuan)</th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500">Hrg Rata2 (Dasar)</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -211,12 +211,12 @@ const MasterBahan = () => {
                     <td className="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">
                       <div>{m.nama_bahan}</div>
                       {m.kode_kfa && (
-                        <div className={`text-[10px] font-mono mt-0.5 ${m.kfa_verified_at ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        <div className={`text-xs font-mono mt-0.5 ${m.kfa_verified_at ? 'text-emerald-600' : 'text-amber-600'}`}>
                           KFA {m.kode_kfa} · {m.kfa_verified_at ? 'terverifikasi' : 'belum terverifikasi'}
                         </div>
                       )}
                       {m.stok_saat_ini <= m.stok_minimum && (
-                        <span className="mt-1 inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-700">
+                        <span className="mt-1 inline-flex px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
                           Low Stock
                         </span>
                       )}
@@ -254,7 +254,7 @@ const MasterBahan = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {editTarget ? 'Edit Master Bahan' : 'Tambah Master Bahan Baru'}
               </h3>
             </div>
@@ -323,7 +323,7 @@ const MasterBahan = () => {
                       setFormData((f) => ({ ...f, kode_kfa: '' }));
                     }}
                   />
-                  <p className="text-[11px] text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     Wajib untuk obat yang diresepkan: hanya kode yang terverifikasi dari KFA SATUSEHAT yang dikirim sebagai e-resep.
                   </p>
                 </div>
@@ -349,7 +349,7 @@ const MasterBahan = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Layers className="text-primary-600" /> 
                 Info Batch & Kadaluarsa
               </h3>

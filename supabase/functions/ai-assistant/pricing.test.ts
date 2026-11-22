@@ -1,11 +1,19 @@
 // deno test --config supabase/functions/ai-assistant/deno.json supabase/functions/ai-assistant/pricing.test.ts
 import { assert, assertAlmostEquals, assertEquals } from "jsr:@std/assert@1";
-import { anthropicModels, costUsd, DEFAULT_CHAT_MODEL, DEFAULT_LIGHT_MODEL, priceFor, supportsServerFallback } from "./pricing.ts";
+import { anthropicModels, costUsd, DEFAULT_CHAT_MODEL, DEFAULT_LIGHT_MODEL, isCreditExhausted, priceFor, supportsServerFallback } from "./pricing.ts";
 
 Deno.test("model bawaan: Sonnet 5.5 untuk percakapan, Haiku 5.5 untuk tugas ringan; dapat diganti lewat secret", () => {
   assertEquals(anthropicModels(undefined, undefined), { chat: "claude-sonnet-5-5", light: "claude-haiku-5-5" });
   assertEquals(anthropicModels("", "  "), { chat: DEFAULT_CHAT_MODEL, light: DEFAULT_LIGHT_MODEL });
   assertEquals(anthropicModels(' "claude-opus-5-5" ', "claude-sonnet-5-5"), { chat: "claude-opus-5-5", light: "claude-sonnet-5-5" });
+});
+
+Deno.test("kredit habis dikenali dari 402 atau 400 saldo kredit, bukan dari 400 lain", () => {
+  assert(isCreditExhausted(402, "billing_error"));
+  assert(isCreditExhausted(400, "Your credit balance is too low to access the Anthropic API."));
+  assert(!isCreditExhausted(400, "tools.0: invalid schema"));
+  assert(!isCreditExhausted(429, "credit balance"));
+  assert(!isCreditExhausted(undefined, "credit balance"));
 });
 
 Deno.test("harga per 1 juta token sesuai daftar resmi", () => {

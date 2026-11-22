@@ -118,6 +118,18 @@ Panduan membuat skenario tambahan dengan bantuan GPT: `docs/briefing-gpt-agen.md
 permintaan (satu per putaran alat), jadi paket gratis hanya cukup untuk beberapa percakapan per hari. Untuk produksi: aktifkan penagihan Gemini
 (`GEMINI_PAID=true`) atau pasang kunci Anthropic/Groq. Evaluasi ini memakai model cadangan agar kuota model utama tidak habis.
 
+### Evaluasi dengan Claude (mulai 7 Nov 2026)
+
+Produksi kini memakai Haiku 5.5 untuk obrolan biasa dan Sonnet 5.5 untuk permintaan tindakan; harness meniru pembagian ini.
+Total 234 skenario: `scenarios.mjs` (alat dan usulan) ditambah `scenarios-nalar.mjs` (nalar, jujur, batas, panduan, lanjutan, sehari).
+
+```bash
+ANTHROPIC_API_KEY=… npm run eval:agen -- --provider anthropic --model claude-haiku-5-5 --budget 1.5 --json eval-putaran1.json
+ANTHROPIC_API_KEY=… npm run eval:agen -- --provider anthropic --sample 40 --budget 1 --json eval-putaran2.json
+```
+
+`--budget` menghentikan putaran saat biaya tercapai. Ukur dulu, baru ubah prompt: satu perubahan per putaran, lalu bandingkan lulus, biaya, dan waktu.
+
 ## Menambah kemampuan baru (satu jenis tindakan)
 
 1. Database: tambah `ai_agent_p_<jenis>` (validasi + pratinjau), `ai_agent_x_<jenis>` (eksekusi, kembalikan `{hasil, sebelum, bisa_batal}`),

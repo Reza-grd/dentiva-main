@@ -87,7 +87,7 @@ serve(async (req) => {
     // RBAC: Check calling user role and clinic_id
     const { data: profile } = await supabaseAdmin
       .from("users")
-      .select("role, clinic_id, status")
+      .select("role, clinic_id, status, full_name, phone, no_telepon")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -156,6 +156,12 @@ serve(async (req) => {
 
     const authString = btoa(`${serverKey}:`);
 
+    // Nama item maks 50 karakter (batas Midtrans); order_id unik ≤ 50 karakter.
+    const itemName = `Dentiva ${plan.name} ${billing_cycle === "yearly" ? "Tahunan" : "Bulanan"}`.slice(0, 50);
+    const appUrl = (Deno.env.get("CLINIC_APP_URL") || "https://app.dentiva.id").replace(/\/+$/, "");
+    const wib = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 19).replace("T", " ");
+    const phone = (profile as any).phone || (profile as any).no_telepon || undefined;
+
     const snapPayload = {
       transaction_details: {
         order_id: orderId,
@@ -163,16 +169,24 @@ serve(async (req) => {
       },
       item_details: [
         {
-          id: plan.id,
+          id: String(plan.id).slice(0, 50),
           price: amount,
           quantity: 1,
-          name: `Dentiva ${plan.name} (${billing_cycle})`,
+          name: itemName,
+          merchant_name: "Dentiva",
         },
       ],
       customer_details: {
+        first_name: ((profile as any).full_name || user.user_metadata?.full_name || "Admin klinik").slice(0, 50),
         email: user.email,
-        first_name: user.user_metadata?.full_name || "Admin",
+        ...(phone ? { phone } : {}),
       },
+      // Batas waktu bayar 24 jam (VA/QRIS) — setelahnya order kedaluwarsa & invoice dibatalkan otomatis lewat webhook.
+      expiry: { start_time: `${wib} +0700`, unit: "hours", duration: 24 },
+      page_expiry: { duration: 24, unit: "hours" },
+      // Setelah bayar (alur redirect/e-wallet), kembali ke halaman status langganan di aplikasi.
+      callbacks: { finish: `${appUrl}/langganan/status?order_id=${encodeURIComponent(orderId)}` },
+      credit_card: { secure: true },
       // Informasi saja (tidak dipakai webhook untuk keputusan apa pun).
       custom_field1: profile.clinic_id,
       custom_field2: plan.id,
@@ -212,6 +226,9 @@ serve(async (req) => {
         token: snapData.token,
         redirect_url: snapData.redirect_url,
         order_id: orderId,
+        amount,
+        plan_name: plan.name,
+        environment,
       }),
       {
         status: 200,

@@ -13,6 +13,7 @@ import { prescriptionService } from '../../services/prescriptionService';
  */
 const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = '', disabled = false }) => {
   const [masterObat, setMasterObat] = useState([]);
+  const [loadError, setLoadError] = useState(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -34,6 +35,9 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
       const res = await prescriptionService.getActiveObat();
       if (res.success && res.data) {
         setMasterObat(res.data);
+        setLoadError(null);
+      } else {
+        setLoadError(res.error || 'Daftar obat gagal dimuat');
       }
     };
     fetchMasterObat();
@@ -135,7 +139,7 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
         <div className="space-y-3">
           <div className="flex flex-col md:flex-row gap-3 items-start">
             <div className="relative flex-1" ref={containerRef}>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Pilih Obat</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Pilih Obat</label>
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                 <input
@@ -181,10 +185,18 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
                   </ul>
                 </div>
               )}
+
+              {isOpen && results.length === 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl px-3 py-2.5 text-xs text-gray-600 dark:text-gray-300">
+                  {loadError
+                    ? `Daftar obat gagal dimuat: ${loadError}. Muat ulang halaman.`
+                    : `Obat "${query.trim()}" tidak ditemukan. Hanya bahan berkategori "Obat" dan berstatus aktif di Inventori → Master Bahan yang muncul di sini (${masterObat.length} obat tersedia).`}
+                </div>
+              )}
             </div>
 
             <div className="w-full md:w-32">
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Dosis</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Dosis</label>
               <input
                 type="text"
                 value={dosis}
@@ -195,7 +207,7 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
             </div>
             
             <div className="w-full md:w-32">
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Frekuensi</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Frekuensi</label>
               <input
                 type="text"
                 value={frekuensi}
@@ -206,7 +218,7 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
             </div>
 
             <div className="w-full md:w-24">
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Jumlah</label>
+              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Jumlah</label>
               <input
                 type="number"
                 value={qty}
@@ -222,7 +234,7 @@ const PrescriptionEntry = ({ prescriptions = [], onChange, patientAllergies = ''
                 type="button"
                 onClick={handleAdd}
                 disabled={!selectedDrug || !qty}
-                className="w-full md:w-auto h-[38px] px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-[22px]"
+                className="w-full md:w-auto h-[38px] px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-[22px]"
               >
                 <Plus size={16} /> Tambah
               </button>

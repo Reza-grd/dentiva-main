@@ -82,16 +82,17 @@ printf '\n\033[1;36mRahasia & konfigurasi edge function Dentiva\033[0m\n'
 printf 'Lihat daftar nama yang dipakai di: Supabase Dashboard → Edge Functions → Secrets.\n'
 
 printf '\n\033[1;36m— Konfigurasi (tidak rahasia) —\033[0m\n'
-biasa CLINIC_APP_URL "alamat web klinik" "https://dentiva-main.vercel.app"
-biasa CONSOLE_URL "alamat console admin" "https://dentiva-main-console.vercel.app"
-biasa CONSOLE_ALLOWED_ORIGINS "origin console yang diizinkan (pisah koma)" "https://dentiva-main-console.vercel.app,https://console.dentiva.co.id"
+biasa CLINIC_APP_URL "alamat web klinik" "https://app.dentiva.id"
+biasa CONSOLE_URL "alamat console admin" "https://console.dentiva.id"
+biasa CONSOLE_ALLOWED_ORIGINS "origin console yang diizinkan (pisah koma)" "https://console.dentiva.id,https://dentiva-main-console.vercel.app"
 biasa ALLOWED_ORIGINS "origin tambahan web/desktop (pisah koma)" "https://app.dentiva.co.id,https://app.dentiva.id,http://tauri.localhost,tauri://localhost"
 biasa MIDTRANS_ENVIRONMENT "sandbox atau production" "sandbox"
 biasa SATUSEHAT_ENVIRONMENT "sandbox atau production" "sandbox"
 
 printf '\n\033[1;36m— Rahasia (tidak tampil saat diketik) —\033[0m\n'
 rahasia GEMINI_API_KEY "Google AI Studio → API keys (untuk asisten Denti)"
-rahasia MIDTRANS_SERVER_KEY "Midtrans Dashboard → Settings → Access Keys → Server Key"
+rahasia MIDTRANS_SERVER_KEY "Midtrans Dashboard → Settings → Access Keys → General Credentials → Server Key (izin Snap Checkout: Write, Core API: Read)"
+rahasia MIDTRANS_SIGNATURE_KEY "Midtrans Dashboard → Settings → Access Keys → General Credentials → Signature Secret Key (untuk memeriksa notifikasi)"
 rahasia WHAPI_TOKEN "Whapi.cloud → Channel → Token"
 rahasia WHATSAPP_VERIFY_TOKEN "token verifikasi webhook WhatsApp (sama dengan yang diisi di pengaturan webhook)"
 rahasia WHATSAPP_APP_SECRET "App Secret Meta (jika dipakai; Enter untuk lewati)"

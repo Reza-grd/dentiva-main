@@ -61,3 +61,8 @@
 .denti-widget__form button:not(:disabled):hover { transform: translateY(-1px); }
 
 @media (prefers-reduced-motion: reduce) { .denti-widget__panel, .denti-widget__launch { animation: none; transition: none; } }
+
+/* Admin: Eira dengan Asisten AI — panel sedikit lebih lebar agar kartu usulan (Setujui/Tolak) lega */
+.denti-widget__panel--ai { width: min(430px, calc(100vw - 2rem)); height: min(640px, calc(100vh - 8rem)); }
+.denti-widget__actions { width: 100%; }
+.denti-widget__row:has(.denti-widget__actions) { max-width: 100%; }

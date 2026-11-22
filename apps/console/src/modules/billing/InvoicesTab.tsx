@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Banknote, Ban, Plus } from "lucide-react";
+import { Banknote, Ban, Download, Loader2, Plus } from "lucide-react";
 import { Button, Input } from "@dentiva/ui";
 import {
   ACTIONS,
@@ -22,6 +22,8 @@ import { ReasonDialog } from "@/components/ReasonDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useUrlState } from "@/lib/hooks";
 import { useConsoleMutation, useConsoleQuery } from "@/lib/query";
+import { errorMessage } from "@/lib/api";
+import { unduhInvoice } from "@/lib/invoice";
 
 const KEYS = ["q", "status", "clinicId", "page"] as const;
 const INVALIDATE = ["billing.", "dashboard.", "clinics.", "audit."];
@@ -46,6 +48,19 @@ export function InvoicesTab() {
   const [creating, setCreating] = useState(false);
   const [voiding, setVoiding] = useState<Invoice | null>(null);
   const [paying, setPaying] = useState<Invoice | null>(null);
+  const [mengunduh, setMengunduh] = useState<string | null>(null);
+  const [galatUnduh, setGalatUnduh] = useState<string | null>(null);
+  const unduh = async (inv: Invoice) => {
+    setMengunduh(inv.id);
+    setGalatUnduh(null);
+    try {
+      await unduhInvoice(inv);
+    } catch (e) {
+      setGalatUnduh(`Gagal mengunduh ${inv.number}: ${errorMessage(e)}`);
+    } finally {
+      setMengunduh(null);
+    }
+  };
 
   const voidInv = useConsoleMutation("billing.invoices.void", {
     invalidate: INVALIDATE,
@@ -81,9 +96,16 @@ export function InvoicesTab() {
       key: "actions",
       header: <span className="sr-only">Aksi</span>,
       align: "right",
-      cell: (i) =>
-        i.status === "open" || i.status === "overdue" ? (
+      cell: (i) => (
           <div className="flex justify-end gap-1">
+            <Button
+              size="sm" variant="ghost" className="gap-1" onClick={() => void unduh(i)}
+              disabled={mengunduh === i.id} aria-label={`Unduh PDF ${i.number}`} title="Unduh invoice (PDF)"
+            >
+              {mengunduh === i.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} PDF
+            </Button>
+            {(i.status === "open" || i.status === "overdue") && (
+            <>
             <Can action="billing.payments.confirmManual">
               <Button size="sm" variant="ghost" className="gap-1" onClick={() => setPaying(i)}>
                 <Banknote className="h-3.5 w-3.5" /> Konfirmasi bayar
@@ -94,13 +116,18 @@ export function InvoicesTab() {
                 <Ban className="h-3.5 w-3.5" />
               </Button>
             </Can>
+            </>
+            )}
           </div>
-        ) : null,
+        ),
     },
   ];
 
   return (
     <>
+      {galatUnduh && (
+        <p role="alert" className="mb-3 rounded-lg border border-[var(--color-danger)]/30 px-3 py-2 text-sm text-[var(--color-danger)]">{galatUnduh}</p>
+      )}
       <Toolbar>
         <SearchInput value={values.q} onChange={(q) => set({ q })} placeholder="Cari nomor invoice atau klinik…" />
         <FilterSelect

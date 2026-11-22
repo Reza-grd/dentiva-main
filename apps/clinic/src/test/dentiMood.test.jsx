@@ -1,7 +1,7 @@
 /** Eira pintar di Asisten AI: obrolan ringan tanpa kuota, topik analisis, ekspresi dari isi jawaban. */
 import React from 'react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { smallTalk, topicOf, moodForAnswer, moodForBrief } from '../utils/dentiMood';
 
@@ -87,11 +87,29 @@ describe('Eira di halaman Asisten AI', () => {
     await send('Berapa pendapatan bulan ini?');
     expect(await screen.findByText('Menganalisis data pendapatan…')).toBeInTheDocument();
     await waitFor(() => expect(document.querySelector('svg.denti')).toHaveAttribute('data-state', 'scan'));
-    expect(ai.ask).toHaveBeenCalledWith('Berapa pendapatan bulan ini?', []);
+    expect(ai.ask).toHaveBeenCalledWith('Berapa pendapatan bulan ini?', [], expect.any(Object));
     resolve({ success: true, data: { answer: 'Pendapatan naik 15% dibanding bulan lalu.', tools: [], usage_id: 'u1' } });
     // Eira "berbicara" selama jawaban muncul, lalu merayakan sambil menyebut angka pentingnya
     expect(await screen.findByText('Kabar baik — naik 15%! 🎉')).toBeInTheDocument();
     await waitFor(() => expect(document.querySelector('svg.denti')).toHaveAttribute('data-state', 'celebrate'), { timeout: 2500 });
+  });
+
+  it('jawaban tampil bertahap dan hilang dari draft saat model lanjut memanggil alat', async () => {
+    let opts;
+    let resolve;
+    ai.ask.mockImplementation((_q, _h, o) => { opts = o; return new Promise((r) => { resolve = r; }); });
+    wrap();
+    await send('Berapa pendapatan bulan ini?');
+    await waitFor(() => expect(opts).toBeTruthy());
+    act(() => opts.onDelta('Saya cek '));
+    act(() => opts.onDelta('dulu.'));
+    expect(await screen.findByText('Saya cek dulu.')).toBeInTheDocument();
+    act(() => opts.onReset());
+    await waitFor(() => expect(screen.queryByText('Saya cek dulu.')).not.toBeInTheDocument());
+    act(() => opts.onDelta('Pendapatan Rp 12.000.000.'));
+    expect(await screen.findByText('Pendapatan Rp 12.000.000.')).toBeInTheDocument();
+    resolve({ success: true, data: { answer: 'Pendapatan Rp 12.000.000.', tools: [], usage_id: 'u2' } });
+    await waitFor(() => expect(screen.getAllByText('Pendapatan Rp 12.000.000.')).toHaveLength(1));
   });
 
   it('Eira bisa dicolek', async () => {
@@ -163,7 +181,7 @@ describe('Eira pintar — keterampilan di halaman', () => {
     await send('Berapa pendapatan bulan ini?');
     const chip = await screen.findByRole('button', { name: 'Bandingkan dengan bulan lalu' });
     fireEvent.click(chip);
-    await waitFor(() => expect(ai.ask).toHaveBeenLastCalledWith('Bandingkan dengan bulan lalu', expect.any(Array)));
+    await waitFor(() => expect(ai.ask).toHaveBeenLastCalledWith('Bandingkan dengan bulan lalu', expect.any(Array), expect.any(Object)));
   });
 
   it('"mulai baru" membersihkan percakapan', async () => {

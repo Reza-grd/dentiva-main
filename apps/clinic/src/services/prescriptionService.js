@@ -84,8 +84,8 @@ export const prescriptionService = {
         dosis: p.dosis || '',
         frekuensi: p.frekuensi || '',
         qty: parseInt(p.qty, 10) || 1,
-        harga_satuan: parseFloat(p.harga_satuan) || 0,
-        subtotal: (parseInt(p.qty, 10) || 1) * (parseFloat(p.harga_satuan) || 0)
+        harga_satuan: parseFloat(p.harga_satuan) || 0
+        // subtotal = kolom generated di database (qty * harga_satuan); tidak boleh dikirim.
       }));
 
       // Insert data baru

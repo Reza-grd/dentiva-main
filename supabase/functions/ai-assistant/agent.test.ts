@@ -287,6 +287,11 @@ Deno.test("needsWriteTools: alat tulis hanya bila relevan (perintah, briefing, a
   assert(!needsWriteTools(normalizeQuestion("apa itu hpp")));
   assert(!needsWriteTools(normalizeQuestion("kalau harga scaling naik 10% dampaknya berapa")));
   assert(!needsWriteTools(normalizeQuestion("halo denti")));
+  assert(needsWriteTools(normalizeQuestion("cek lalu catat internet450rb dan air180rb hari ini")));
+  assert(needsWriteTools(normalizeQuestion("cek lalu tambah satu daftar: Matrix Band pcs50 @3000")));
+  assert(!needsWriteTools(normalizeQuestion("cek stok lidocaine lalu bandingkan dengan bulan lalu")));
+  assert(!needsWriteTools(normalizeQuestion("strategi apa untuk meningkatkan kunjungan klinik")));
+  assert(!needsWriteTools(normalizeQuestion("saran supaya pasien lama kembali")));
   // temuan evaluasi model nyata: kalimat data-entry tanpa kata kerja baku HARUS tetap mendapat alat usulan
   for (const q of ["eh lidocain masuk 3 box ya 55rb per box", "sarung tngan nitril m masuk 2 box @80rb", "sewa ruko bulan ini 8 jt", "lidocaine 120 ampul harga 5000"]) {
     assert(needsWriteTools(normalizeQuestion(q)), q);

@@ -76,3 +76,6 @@ deno.lock
 
 # bundel konteks tim (dibuat otomatis)
 docs/tim/bundel/
+
+# Hasil evaluasi Eira (jejak percakapan uji)
+eval-*.json

@@ -16,9 +16,12 @@ const problemsOf = (pw) => {
 /**
  * Tujuan tautan undangan (dari Dentiva Console / admin klinik) dan tautan reset password.
  * Supabase membuat sesi dari tautan tersebut; user lalu membuat password sendiri.
+ * Akun yang memakai verifikasi dua langkah wajib memasukkan kode authenticator dulu
+ * (layanan Auth menolak ganti password dari sesi tanpa MFA).
  */
 const SetPasswordPage = () => {
-  const { user, userProfile, loading } = useAuth();
+  const { user, userProfile, loading, mfaDiperlukan, verifikasiMfa } = useAuth();
+  const [kode, setKode] = useState('');
   const navigate = useNavigate();
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -31,12 +34,23 @@ const SetPasswordPage = () => {
     e.preventDefault();
     if (problems.length) return setError(`Password belum memenuhi: ${problems.join(', ')}.`);
     if (pw !== pw2) return setError('Konfirmasi password tidak sama.');
+    if (mfaDiperlukan && !/^\d{6}$/.test(kode)) return setError('Masukkan 6 digit kode dari aplikasi authenticator.');
     setSaving(true);
     setError('');
+    if (mfaDiperlukan) {
+      const v = await verifikasiMfa(kode);
+      if (!v.success) {
+        setSaving(false);
+        setKode('');
+        return setError(v.error);
+      }
+    }
     const { error: err } = await supabase.auth.updateUser({ password: pw });
     if (err) {
       setSaving(false);
-      return setError(err.message);
+      return setError(/aal2/i.test(err.message)
+        ? 'Akun ini memakai verifikasi dua langkah. Masuk ulang lewat halaman login, lalu ganti password dari Profil.'
+        : err.message);
     }
     await supabase.rpc('record_login');
     setSaving(false);
@@ -48,9 +62,9 @@ const SetPasswordPage = () => {
       <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-[#0B0F17]">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
-            <h1 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Tautan tidak valid atau kedaluwarsa</h1>
+            <h1 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Tautan tidak valid atau kedaluwarsa</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-              Minta admin klinik atau tim Dentiva mengirim ulang undangan, atau gunakan "Lupa password" di halaman login.
+              Minta admin klinik atau tim Dentiva mengirim ulang undangan, atau gunakan “Lupa password” di halaman login.
             </p>
             <Button onClick={() => navigate('/login', { replace: true })} className="w-full">Ke halaman login</Button>
           </CardContent>
@@ -66,7 +80,7 @@ const SetPasswordPage = () => {
           <div className="w-12 h-12 rounded-2xl bg-[var(--color-accent)]/10 flex items-center justify-center mb-4">
             <KeyRound className="text-[var(--color-accent)]" size={24} aria-hidden="true" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Buat password</h1>
+          <h1 className="text-xl font-medium text-gray-900 dark:text-white">Buat password</h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-6">
             {user?.email ? <>Untuk akun <strong>{user.email}</strong>.</> : null} Gunakan minimal 8 karakter dengan huruf dan angka.
           </p>
@@ -84,6 +98,14 @@ const SetPasswordPage = () => {
               <label htmlFor="new-password-2" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Ulangi password</label>
               <Input id="new-password-2" type="password" autoComplete="new-password" value={pw2} onChange={(e) => setPw2(e.target.value)} required />
             </div>
+            {mfaDiperlukan && (
+              <div>
+                <label htmlFor="kode-mfa-setpw" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Kode verifikasi dua langkah</label>
+                <Input id="kode-mfa-setpw" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={kode}
+                  onChange={(e) => setKode(e.target.value.replace(/\D/g, '').slice(0, 6))} required />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">6 digit dari Google Authenticator atau aplikasi sejenis.</p>
+              </div>
+            )}
             <Button type="submit" className="w-full" isLoading={saving} disabled={loading}>Simpan & masuk</Button>
           </form>
         </CardContent>
