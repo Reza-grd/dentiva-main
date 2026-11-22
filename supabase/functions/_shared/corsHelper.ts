@@ -8,6 +8,7 @@ const DEFAULT_ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://dentiva.app',
+  'https://app.dentiva.id',
   'https://dentiva-main.vercel.app',
   'https://neurodent.vercel.app'
 ];

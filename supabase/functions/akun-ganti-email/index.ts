@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
   // Minta Auth mengirim tautan konfirmasi (ke email lama & baru) memakai token pengguna sendiri.
   const asal = req.headers.get("Origin") ?? ""
   // Hanya alamat web yang terdaftar di daftar redirect Auth; aplikasi desktop memakai alamat web.
-  const appUrl = ["https://dentiva-main.vercel.app", "https://app.dentiva.id", "https://dentiva.id"].includes(asal) ? asal : "https://dentiva-main.vercel.app"
+  const appUrl = ["https://dentiva-main.vercel.app", "https://app.dentiva.id", "https://dentiva.id"].includes(asal) ? asal : "https://app.dentiva.id"
   const minta = await fetch(`${url}/auth/v1/user?redirect_to=${encodeURIComponent(`${appUrl}/profil?email=dikonfirmasi`)}`, {
     method: "PUT",
     headers: { apikey: anonKey, Authorization: authHeader, "Content-Type": "application/json" },

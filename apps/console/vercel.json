@@ -26,5 +26,8 @@
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ],
+  "redirects": [
+    { "source": "/(.*)", "has": [{ "type": "host", "value": "dentiva-main-console.vercel.app" }], "destination": "https://console.dentiva.id/$1", "permanent": false }
+  ],
   "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
 }
