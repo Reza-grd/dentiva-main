@@ -14,7 +14,7 @@ create schema cron;
 create table auth.users (
   id uuid primary key, instance_id uuid, aud text, role text, email text,
   raw_app_meta_data jsonb default '{}', created_at timestamptz, updated_at timestamptz,
-  email_confirmed_at timestamptz
+  email_confirmed_at timestamptz, last_sign_in_at timestamptz, encrypted_password text
 );
 create table auth.sessions (id uuid primary key default gen_random_uuid(), user_id uuid,
   created_at timestamptz default now(), updated_at timestamptz default now(), refreshed_at timestamp,

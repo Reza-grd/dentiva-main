@@ -37,12 +37,14 @@
     "eval:agen": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs",
     "eval:agen:selftest": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs --selftest",
     "eval:agen:negative": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs --negative",
-    "check:functions": "bash scripts/check-edge-functions.sh"
+    "check:functions": "bash scripts/check-edge-functions.sh",
+    "sbom": "npx -y @cyclonedx/cyclonedx-npm@4 --omit dev --output-format JSON --output-file docs/keamanan/sbom/dentiva-sbom.cdx.json"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.3.0",
     "@emnapi/runtime": "1.11.3",
     "typescript": "^5.6.3",
+    "vite": "^7.3.8",
     "vitest": "^4.1.10"
   }
 }

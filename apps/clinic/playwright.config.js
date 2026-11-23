@@ -54,6 +54,8 @@ export default defineConfig({
       VITE_E2E_ISOLATED_ENV: '1',
       VITE_SUPABASE_URL: SUPABASE_SYNTHETIC_URL,
       VITE_SUPABASE_ANON_KEY: SUPABASE_SYNTHETIC_ANON_KEY,
+      // CAPTCHA Turnstile memuat skrip challenges.cloudflare.com, yang diblokir uji terisolasi → matikan widget.
+      VITE_TURNSTILE_SITE_KEY: 'off',
     },
   },
 });

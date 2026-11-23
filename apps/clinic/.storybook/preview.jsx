@@ -3,7 +3,7 @@ import "../src/styles/index.css";
 import "../src/styles/theme.css";
 import { ThemeProvider } from "../src/contexts/ThemeContext";
 
-/** @type { import('@storybook/react').Preview } */
+/** @type { import('@storybook/react-vite').Preview } */
 const preview = {
   parameters: {
     actions: { argTypesRegex: "^on[A-Z].*" },

@@ -49,7 +49,7 @@ jobs:
       release_id: ${{ steps.release.outputs.result }}
       version: ${{ steps.check.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Periksa versi, kunci publik & secrets
         id: check
         shell: bash
@@ -71,7 +71,7 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Buat draft rilis di repo publik
         id: release
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ secrets.RELEASES_TOKEN }}
           script: |
@@ -109,7 +109,7 @@ jobs:
       VITE_MIDTRANS_CLIENT_KEY: ${{ vars.VITE_MIDTRANS_CLIENT_KEY }}
       VITE_MIDTRANS_ENV: ${{ vars.VITE_MIDTRANS_ENV }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Periksa konfigurasi Supabase
         shell: bash
@@ -118,23 +118,24 @@ jobs:
             echo "::warning::Variabel VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY belum diisi — installer uji tidak akan bisa login."
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: npm
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
         with:
+          toolchain: stable
           targets: ${{ matrix.rust_targets }}
 
-      - uses: swatinem/rust-cache@v2
+      - uses: swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           workspaces: apps/desktop/src-tauri -> target
 
       - run: npm ci
 
       # Build uji: hanya artefak, tanpa tanda tangan pembaruan
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0
         if: env.IS_RELEASE != 'true'
         with:
           projectPath: apps/desktop
@@ -142,7 +143,7 @@ jobs:
           args: ${{ matrix.args }}
 
       # Rilis: installer + .sig + latest.json ke repo publik dentiva-desktop-releases
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0
         if: env.IS_RELEASE == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }}
@@ -159,7 +160,7 @@ jobs:
           updaterJsonPreferNsis: true
 
       - name: Simpan installer sebagai artefak
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dentiva-${{ runner.os }}
           if-no-files-found: error
@@ -174,7 +175,7 @@ jobs:
     needs: [prepare, build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           github-token: ${{ secrets.RELEASES_TOKEN }}
           script: |

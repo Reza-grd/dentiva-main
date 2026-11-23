@@ -74,10 +74,11 @@ Ringkasan kondisi saat ini per kategori, lalu yang belum.
 - [ ] Samakan header keamanan di console dan situs dentiva.id dengan web klinik.
 
 ### B3. Rantai pasok perangkat lunak (A03) — P1
-- [ ] Perbarui paket rentan: `npm audit` (produksi) 22 Nov = 1 tinggi (`vite`), 5 sedang (`esbuild`, `glob`, `minimatch`, `vite-plugin-pwa`, `workbox-build`) — semua ada perbaikannya.
-- [ ] Aktifkan Dependabot (pembaruan keamanan otomatis) untuk npm + GitHub Actions.
-- [ ] Tambahkan pemindaian di CI: `npm audit --omit=dev --audit-level=high` dan pemindai rahasia (gitleaks).
-- [ ] Kunci versi GitHub Actions ke commit SHA.
+- [x] 24 Nov: paket rentan diperbarui — vite 5 → 7.3.8, @vitejs/plugin-react 5.2, Storybook 8 → 9.1. `npm audit --omit=dev`: **tinggi 0**; sisa 4 sedang (glob/minimatch di workbox-build, hanya saat build) + 2 rendah (quill, belum ada perbaikan) — alasan diterima di [sbom/README.md](sbom/README.md).
+- [x] 24 Nov: Dependabot (`.github/dependabot.yml`) — npm mingguan (Senin 06.00 WIB, dikelompokkan), Actions bulanan. [ ] Pemilik: aktifkan *Dependabot alerts & security updates* di Settings → Code security repo GitHub.
+- [x] 24 Nov: job CI **Keamanan** — `npm audit --omit=dev --audit-level=high` + gitleaks.
+- [x] 24 Nov: semua Actions (ci, e2e, desktop) dikunci ke commit SHA.
+- [x] 24 Nov: SBOM CycloneDX 1.6 (`npm run sbom`) + daftar dependensi fungsi edge di [sbom/](sbom/README.md).
 
 ### B4. Kriptografi (A04)
 - [ ] Pastikan rahasia TOTP di `auth.mfa_factors` terenkripsi (opsi enkripsi kolom GoTrue) — cek & aktifkan.
