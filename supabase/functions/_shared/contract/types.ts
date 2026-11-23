@@ -212,3 +212,44 @@ export interface ProvisionResult {
   ownerUserId: string;
   inviteSent: boolean;
 }
+
+// ─── Migrasi data pasien ────────────────────────────────────────────────────
+export type MigrasiStatus = "berjalan" | "selesai" | "dibatalkan";
+
+export interface MigrasiPasien {
+  id: string;
+  clinic_id: string;
+  operator_id: string | null;
+  operator_name: string | null;
+  nama_berkas: string;
+  dasar_persetujuan: string;
+  status: MigrasiStatus;
+  total_baris: number;
+  jumlah_masuk: number;
+  jumlah_lewati: number;
+  jumlah_dibatalkan: number;
+  jumlah_dipertahankan: number;
+  dibuat_pada: string;
+  selesai_pada: string | null;
+  dibatalkan_pada: string | null;
+  alasan_batal: string | null;
+}
+
+export interface MigrasiDuplikat {
+  baris: number;
+  alasan: string;
+  /** No. RM Dentiva pasien yang cocok. */
+  no_rm: string | null;
+  /** true → dilewati saat impor; false → hanya peringatan. */
+  pasti: boolean;
+}
+
+export interface MigrasiPratinjau {
+  duplikat: MigrasiDuplikat[];
+  kuota: { maks: number; terpakai: number };
+}
+
+export interface MigrasiKirimHasil {
+  masuk: number;
+  lewati: { baris: number; alasan: string; no_rm: string | null }[];
+}

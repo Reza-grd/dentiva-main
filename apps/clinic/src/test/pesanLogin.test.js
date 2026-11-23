@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('../contexts/AuthContext', () => ({ useAuth: () => ({}) }));
 
-const { normalizeLoginError, CAPTCHA_ERROR } = await import('../components/auth/LoginPage');
+import { normalizeLoginError, CAPTCHA_ERROR } from '../components/auth/LoginPage'; // vi.mock di atas di-hoist oleh vitest
 
 describe('normalizeLoginError', () => {
   it('kunci login bertingkat: sisa waktu tetap terlihat', () => {

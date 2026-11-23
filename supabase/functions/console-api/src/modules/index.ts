@@ -10,6 +10,7 @@ import * as billing from "./billing.ts";
 import * as clinics from "./clinics.ts";
 import * as dashboard from "./dashboard.ts";
 import * as insights from "./insights.ts";
+import * as migrasi from "./migrasi.ts";
 import * as operators from "./operators.ts";
 import * as usage from "./usage.ts";
 import * as users from "./users.ts";
@@ -60,4 +61,11 @@ export const handlers: HandlerRegistry<AnySql> = {
   "announcements.list": announcements.list,
   "announcements.upsert": announcements.upsert,
   "announcements.end": announcements.end,
+
+  "migrasi.list": migrasi.list,
+  "migrasi.pratinjau": migrasi.pratinjau,
+  "migrasi.mulai": migrasi.mulai,
+  "migrasi.kirim": migrasi.kirim,
+  "migrasi.selesai": migrasi.selesai,
+  "migrasi.batalkan": migrasi.batalkan,
 };

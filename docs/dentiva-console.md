@@ -132,7 +132,35 @@ Diterapkan di `contract/actions.ts` dan dicek tes `peta izin sesuai tabel hak ak
 | Kelola operator | ✓ | – | – |
 | Catatan internal klinik | ✓ | ✓ | ✓ |
 | Pengumuman | ✓ | ✓ | – |
+| Migrasi data pasien lama (impor tulis-saja, batalkan) | ✓ | ✓ | – |
 | Baca rekam medis pasien | – | – | – |
+
+### Migrasi data pasien lama (dibantu tim Dentiva)
+
+Klinik → Detail → **Migrasi data pasien**. Alur: pilih berkas Excel/CSV klinik → cocokkan kolom (ditebak otomatis, termasuk *No. RM lama*) → periksa (validasi per baris + cek duplikat terhadap pasien yang sudah ada + sisa kuota paket) → isi **dasar persetujuan klinik** dan centang persetujuan → data dikirim per 200 baris.
+
+- **Tulis-saja.** Operator tidak pernah membaca data pasien kembali: pratinjau hanya mengembalikan nomor baris, alasan, dan No. RM Dentiva yang cocok. Nama/NIK pasien yang sudah ada dibuka hanya di dalam database (`platform.migrasi_cek_duplikat`).
+- **Enkripsi sama dengan klinik.** `platform.migrasi_kirim` memanggil `private.encrypt_envelope(.., clinic_id)` untuk nama, WA, alamat, NIK. No. RM Dentiva tetap dibuat trigger; nomor lama disimpan di `patients.no_rm_lama` (tampil & bisa dicari di aplikasi klinik).
+- **Duplikat:** No. RM lama / NIK / nama+tanggal lahir sama → dilewati. Nama sama tetapi tanggal lahir kosong → tetap dimasukkan, ditandai untuk diperiksa klinik.
+- **Satu migrasi berjalan per klinik**, kuota paket dicek sebelum mulai dan setiap potongan.
+- **Selesai** → notifikasi in-app ke klinik (`notifikasi`, kunci `migrasi:<id>`). **Batalkan** → pasien hasil migrasi yang belum dipakai (tanpa kunjungan/pembayaran/rencana/persetujuan/riwayat medis dan belum diubah) di-soft-delete; yang sudah dipakai dipertahankan; klinik diberi tahu.
+- Audit Console mencatat nama berkas, dasar persetujuan, dan jumlah per potongan — tidak pernah isi data pasien.
+- Tes: `npm run db:migrasi-pasien` (PGlite, skema produksi), `npm run test:api`, tes `migrasi-baca-berkas` di Console.
+
+#### Mesin pengenal kolom (ML) & umpan balik operator
+
+- Kolom berkas dikenali **model pembelajaran mesin di browser** (`apps/console/src/modules/clinics/migrasi/ml.ts`, bobot di `modelKolom.ts`): regresi logistik multikelas atas ±43 ciri judul + isi kolom. Tidak ada data yang dikirim ke AI luar.
+- Model dilatih dengan **data sintetis** (`scripts/migrasi-ml/pabrik.ts`): `npm run ml:latih-migrasi` (latih + tulis model), `-- --uji` (uji saja). Ketepatan pada berkas klinik nyata baru diketahui dari umpan balik di bawah.
+- **Umpan balik:** saat `migrasi.mulai`, Console mengirim pemetaan akhir per kolom ke `platform.migrasi_koreksi_kolom`: angka ciri kolom, tebakan mesin, pilihan operator (`dikoreksi` = berbeda), versi model. **Tanpa isi sel/data pasien**; teks judul kolom hanya ikut bila baris judul benar-benar dikenali sebagai judul (dan tanpa deret angka/@). Skema kontrak `pemetaanKolomMigrasi` ketat — field lain ditolak. Ikut terhapus bila baris migrasi dihapus.
+- **Latih ulang dengan koreksi nyata** (di VPS, lalu salin berkasnya ke laptop):
+
+  ```bash
+  docker exec -i supabase-db psql -X -At -U postgres -d postgres -c     "select coalesce(json_agg(json_build_object('fitur', fitur, 'final', final, 'tebakan', tebakan)), '[]') from platform.migrasi_koreksi_kolom" > koreksi.json
+  npm run ml:latih-migrasi -- --koreksi koreksi.json
+  ```
+
+  Baris dari versi ciri lain otomatis dibuang; 20% disisihkan sebagai uji "NYATA" dan hasilnya dibandingkan dengan model lama. Pasang model baru hanya bila skor NYATA tidak turun dan uji penjaga mutu (`migrasi-ml.test.ts`) tetap lolos.
+- Rasio koreksi per versi model: `select versi_model, count(*), avg(dikoreksi::int) from platform.migrasi_koreksi_kolom group by 1;`
 
 ---
 

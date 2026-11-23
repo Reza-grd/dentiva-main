@@ -395,6 +395,7 @@ const PatientDetail = () => {
             <div className="text-center sm:text-left flex-1">
               <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">{patient?.nama_lengkap}</h2>
               <p className="text-[var(--color-accent)] font-semibold text-xl font-mono mt-1">{patient?.no_rm}</p>
+              {patient?.no_rm_lama && (<p className="text-sm text-gray-500 dark:text-gray-400 font-mono">RM lama: {patient.no_rm_lama}</p>)}
               <div className="flex gap-2 mt-3 flex-wrap justify-center sm:justify-start">
                 <span className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-lg">
                   {patient?.jenis_kelamin}

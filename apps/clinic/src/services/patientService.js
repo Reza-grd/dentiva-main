@@ -45,7 +45,7 @@ export const patientService = {
       if (searchTerm && searchTerm.trim()) {
         const term = sanitizeSearchTerm(searchTerm);
         if (term) {
-          query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_wa.ilike.%${term}%,alamat.ilike.%${term}%,alamat_detail.ilike.%${term}%`);
+          query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_rm_lama.ilike.%${term}%,no_wa.ilike.%${term}%,alamat.ilike.%${term}%,alamat_detail.ilike.%${term}%`);
         }
       }
 
@@ -447,7 +447,7 @@ export const patientService = {
       if (searchTerm && searchTerm.trim()) {
         const term = sanitizeSearchTerm(searchTerm);
         if (term) {
-          query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_wa.ilike.%${term}%`);
+          query = query.or(`nama_lengkap.ilike.%${term}%,no_rm.ilike.%${term}%,no_rm_lama.ilike.%${term}%,no_wa.ilike.%${term}%`);
         }
       }
       let { data, error } = await query.order('created_at', { ascending: false });

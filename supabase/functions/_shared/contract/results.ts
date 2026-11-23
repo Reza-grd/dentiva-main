@@ -9,6 +9,9 @@ import type {
   ClinicDetail,
   ClinicListItem,
   ClinicNote,
+  MigrasiKirimHasil,
+  MigrasiPasien,
+  MigrasiPratinjau,
   ClinicUser,
   DashboardSummary,
   Invoice,
@@ -99,6 +102,12 @@ export type ActionResults = {
   "announcements.list": Announcement[];
   "announcements.upsert": Announcement;
   "announcements.end": Announcement;
+  "migrasi.list": MigrasiPasien[];
+  "migrasi.pratinjau": MigrasiPratinjau;
+  "migrasi.mulai": MigrasiPasien;
+  "migrasi.kirim": MigrasiKirimHasil;
+  "migrasi.selesai": MigrasiPasien;
+  "migrasi.batalkan": MigrasiPasien;
 };
 
 // Compile-time guard: every action has a result type and vice versa.

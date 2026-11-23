@@ -267,6 +267,46 @@ describe("peta izin", () => {
     expect(canPerform(null, "dashboard.summary")).toBe(false);
   });
 
+  it("migrasi pasien: hanya owner & support; finance ditolak", async () => {
+    for (const a of ["migrasi.list", "migrasi.pratinjau", "migrasi.mulai", "migrasi.kirim", "migrasi.selesai", "migrasi.batalkan"] as const) {
+      expect([...ACTIONS[a].roles].sort()).toEqual(["owner", "support"]);
+    }
+    const h = harness({ operator: makeOperator("finance") });
+    const { body } = await read(
+      await call(h, { v: 1, action: "migrasi.kirim", params: { migrasiId: CLINIC_ID, rows: [{ baris: 2, nama_lengkap: "Budi" }] } }),
+    );
+    expect(body.error.code).toBe("forbidden");
+    expect(h.handlerCalls).toHaveLength(0);
+  });
+
+  it("migrasi pasien: baris tidak valid ditolak sebelum menyentuh database", async () => {
+    const h = harness({ operator: makeOperator("support") });
+    const kirim = (rows: unknown[]) => call(h, { v: 1, action: "migrasi.kirim", params: { migrasiId: CLINIC_ID, rows } });
+    for (const rows of [
+      [],
+      [{ baris: 2, nama_lengkap: "Budi", nik: "123" }],
+      [{ baris: 2, nama_lengkap: "Budi", tanggal_lahir: "2999-01-01" }],
+      [{ baris: 2, nama_lengkap: "Budi", jenis_kelamin: "L" }],
+      [{ baris: 2, nama_lengkap: "Budi", kolom_liar: "x" }],
+      Array.from({ length: 1001 }, (_, i) => ({ baris: i + 2, nama_lengkap: "Budi" })),
+    ]) {
+      const { status, body } = await read(await kirim(rows));
+      expect(status).toBe(400);
+      expect(body.error.code).toBe("invalid_params");
+    }
+    expect(h.handlerCalls).toHaveLength(0);
+    // baris valid lolos validasi dan sampai ke handler (handler palsu tanpa audit → router membatalkan: audit_failed)
+    const { body } = await read(await kirim([{ baris: 2, nama_lengkap: "Budi", nik: "3201234567890001", jenis_kelamin: "Laki-laki", tanggal_lahir: "1990-05-17", no_wa: "081234567890" }]));
+    expect(h.handlerCalls).toEqual(["migrasi.kirim"]);
+    const mulai = (pemetaan: unknown) =>
+      call(h, { v: 1, action: "migrasi.mulai", params: { clinicId: CLINIC_ID, namaBerkas: "a.xlsx", dasarPersetujuan: "Permintaan klinik", totalBaris: 1, pemetaan } });
+    // pemetaan hanya boleh berisi angka ciri & jenis kolom — sel/isi data ditolak skema ketat
+    expect((await read(await mulai([{ kolom: 0, judul: "Nama", fitur: [0.1], tebakan: "nama_lengkap", final: "nama_lengkap", isi: ["Budi"] }]))).status).toBe(400);
+    expect((await read(await mulai([{ kolom: 0, judul: "Nama", fitur: ["Budi"], tebakan: "nama_lengkap", final: "nama_lengkap" }]))).status).toBe(400);
+    expect(h.handlerCalls).toEqual(["migrasi.kirim"]);
+    expect(body.error.code).toBe("audit_failed");
+  });
+
   it("tidak ada aksi yang membuka rekam medis pasien", () => {
     for (const name of ACTION_NAMES) {
       expect(name).not.toMatch(/patient|visit|emr|medical|rekam/i);

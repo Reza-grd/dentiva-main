@@ -48,6 +48,8 @@ jobs:
         run: npm run db:audit
       - name: Uji kunci login bertingkat (PGlite)
         run: npm run db:kunci-login
+      - name: Uji migrasi data pasien lewat Console (PGlite)
+        run: npm run db:migrasi-pasien
 
       - name: Denti Agen — evaluasi percakapan (skrip, tanpa jaringan) + uji penilai
         run: |

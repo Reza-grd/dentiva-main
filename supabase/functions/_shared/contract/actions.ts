@@ -66,6 +66,49 @@ const clinicProfile = z.object({
   province: z.string().trim().max(80).optional(),
 });
 
+// ─── Migrasi data pasien (dibantu tim Dentiva) ──────────────────────────────
+/** Batas baris per permintaan migrasi (pratinjau & kirim). */
+export const MIGRASI_MAKS_BARIS = 1000;
+const teksOpsional = (max: number) => z.string().trim().max(max).nullable().optional();
+/** Satu baris pasien dari berkas Excel klinik, sudah dinormalisasi di Console. */
+export const barisPasienMigrasi = z
+  .object({
+    baris: z.number().int().min(1).max(1_000_000),
+    nama_lengkap: z.string().trim().min(2, "Nama minimal 2 karakter").max(200),
+    tanggal_lahir: isoDate
+      .refine((d) => d <= new Date().toISOString().slice(0, 10), "Tanggal lahir di masa depan")
+      .nullable()
+      .optional(),
+    jenis_kelamin: z.enum(["Laki-laki", "Perempuan"]).nullable().optional(),
+    no_wa: z.string().trim().regex(/^\+?[0-9]{6,20}$/, "Nomor WA tidak valid").nullable().optional(),
+    alamat: teksOpsional(500),
+    nik: z.string().regex(/^\d{16}$/, "NIK harus 16 digit").nullable().optional(),
+    tempat_lahir: teksOpsional(100),
+    pekerjaan: teksOpsional(100),
+    golongan_darah: z.enum(["A", "B", "AB", "O"]).nullable().optional(),
+    no_rm_lama: teksOpsional(50),
+  })
+  .strict();
+export type BarisPasienMigrasi = z.infer<typeof barisPasienMigrasi>;
+const daftarBaris = z.array(barisPasienMigrasi).min(1).max(MIGRASI_MAKS_BARIS);
+
+/**
+ * Pemetaan kolom akhir dari operator, untuk melatih ulang mesin pengenal kolom.
+ * TANPA isi data pasien: hanya judul kolom (bila baris judul terdeteksi) + angka
+ * ciri statistik kolom (rasio, rata-rata) + tebakan mesin vs pilihan operator.
+ */
+const jenisKolom = z.string().regex(/^[a-z_]{3,30}$/);
+export const pemetaanKolomMigrasi = z
+  .object({
+    kolom: z.number().int().min(0).max(199),
+    judul: z.string().trim().max(60).nullable(),
+    fitur: z.array(z.number().finite()).min(1).max(120),
+    tebakan: jenisKolom,
+    final: jenisKolom,
+  })
+  .strict();
+export type PemetaanKolomMigrasi = z.infer<typeof pemetaanKolomMigrasi>;
+
 export interface ActionSpec {
   roles: readonly OperatorRole[];
   mutates: boolean;
@@ -416,6 +459,51 @@ export const ACTIONS = {
     mutates: true,
     params: z.object({ id }),
     description: "Akhiri pengumuman sekarang.",
+  },
+
+  // ─── Migrasi data pasien (dibantu tim Dentiva) ─────────────────────────────
+  "migrasi.list": {
+    roles: OWNER_SUPPORT,
+    mutates: false,
+    params: z.object({ clinicId: id }),
+    description: "Riwayat migrasi data pasien klinik.",
+  },
+  "migrasi.pratinjau": {
+    roles: OWNER_SUPPORT,
+    mutates: false,
+    params: z.object({ clinicId: id, rows: daftarBaris }),
+    description: "Cek duplikat terhadap pasien klinik yang sudah ada + sisa kuota paket.",
+  },
+  "migrasi.mulai": {
+    roles: OWNER_SUPPORT,
+    mutates: true,
+    params: z.object({
+      clinicId: id,
+      namaBerkas: z.string().trim().min(1).max(200),
+      dasarPersetujuan: z.string().trim().min(5, "Tuliskan dasar persetujuan klinik (minimal 5 karakter)").max(500),
+      totalBaris: z.number().int().min(1).max(100_000),
+      versiModel: z.string().trim().max(80).optional(),
+      pemetaan: z.array(pemetaanKolomMigrasi).max(200).optional(),
+    }),
+    description: "Mulai satu kelompok migrasi pasien.",
+  },
+  "migrasi.kirim": {
+    roles: OWNER_SUPPORT,
+    mutates: true,
+    params: z.object({ migrasiId: id, rows: daftarBaris }),
+    description: "Masukkan satu potongan baris pasien (terenkripsi atas nama klinik).",
+  },
+  "migrasi.selesai": {
+    roles: OWNER_SUPPORT,
+    mutates: true,
+    params: z.object({ migrasiId: id }),
+    description: "Tutup migrasi dan beri tahu klinik.",
+  },
+  "migrasi.batalkan": {
+    roles: OWNER_SUPPORT,
+    mutates: true,
+    params: z.object({ migrasiId: id, reason }),
+    description: "Batalkan migrasi: hapus pasien hasil migrasi yang belum dipakai.",
   },
 } as const satisfies Record<string, ActionSpec>;
 

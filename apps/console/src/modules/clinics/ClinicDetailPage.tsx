@@ -22,6 +22,7 @@ import { ErrorState, LoadingBlock } from "@/components/States";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useConsoleMutation, useConsoleQuery } from "@/lib/query";
 import { useAuth } from "@/lib/auth";
+import { MigrasiSection } from "./migrasi/MigrasiSection";
 
 type Dialog = null | "approve" | "activate" | "suspend" | "close" | "extend" | "plan" | "edit";
 
@@ -68,6 +69,7 @@ export function ClinicDetailPage() {
         <div className="space-y-6 xl:col-span-2">
           <UsageSection clinicId={clinic.id} detail={data} />
           <UsersSection detail={data} />
+          <MigrasiSection clinicId={clinic.id} clinicName={clinic.name} />
           <InvoicesSection detail={data} />
         </div>
         <div className="space-y-6">

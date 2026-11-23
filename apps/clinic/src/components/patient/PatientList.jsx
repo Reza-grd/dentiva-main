@@ -253,6 +253,7 @@ const PatientList = () => {
                       <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
                         {patient.no_rm}
                       </span>
+                      {patient.no_rm_lama && <span className="block mt-1 text-[11px] text-gray-500 dark:text-gray-400 font-mono" title="Nomor RM dari sistem lama">lama: {patient.no_rm_lama}</span>}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
