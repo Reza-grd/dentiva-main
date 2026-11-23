@@ -51,6 +51,19 @@ describe('ClinicSettingsProvider & sesi', () => {
     expect(getSettings).toHaveBeenCalledTimes(1);
   });
 
+  it('akun ber-MFA: menunggu kode (aal1), lalu memuat setelah verifikasi (aal2) dengan pengguna yang sama', async () => {
+    const token = (aal) => `x.${btoa(JSON.stringify({ aal })).replace(/=+$/, '')}.y`;
+    const faktor = [{ status: 'verified' }];
+    sesiAwal = { user: { id: 'u3', factors: faktor }, access_token: token('aal1') };
+    pasang();
+    await waitFor(() => expect(terakhir.loading).toBe(false));
+    expect(getSettings).not.toHaveBeenCalled();
+    await act(async () => { pendengar('MFA_CHALLENGE_VERIFIED', { user: { id: 'u3', factors: faktor }, access_token: token('aal2') }); });
+    await waitFor(() => expect(getSettings).toHaveBeenCalledTimes(1));
+    act(() => pendengar('TOKEN_REFRESHED', { user: { id: 'u3', factors: faktor }, access_token: token('aal2') }));
+    expect(getSettings).toHaveBeenCalledTimes(1);
+  });
+
   it('masuk setelah halaman login: pengaturan dimuat saat SIGNED_IN', async () => {
     pasang();
     await waitFor(() => expect(terakhir.loading).toBe(false));

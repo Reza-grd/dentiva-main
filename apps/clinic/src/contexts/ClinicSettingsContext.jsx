@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { clinicSettingsService } from '../services/clinicSettingsService';
 import { supabase } from '../services/supabase';
+import { aalSesi, sesiPerluMfa } from './AuthContext';
 import { useToast } from '../components/common/ToastNotification';
 
 const ClinicSettingsContext = createContext(null);
@@ -67,12 +68,15 @@ export const ClinicSettingsProvider = ({ children }) => {
   // Muat pengaturan hanya bila ada sesi (tamu tidak punya hak baca → galat 401/42501 di halaman login),
   // dan muat ulang saat pengguna lain masuk tanpa memuat ulang halaman.
   useEffect(() => {
-    let idTerakhir = null;
+    let kunciTerakhir = null;
     const sesuaikan = (session) => {
       const id = session?.user?.id ?? null;
-      if (!id) { idTerakhir = null; setLoading(false); return; }
-      if (id === idTerakhir) return;
-      idTerakhir = id;
+      // Tanpa sesi, atau sesi masih menunggu kode MFA (database menolak sampai aal2): jangan meminta dulu.
+      if (!id || sesiPerluMfa(session)) { kunciTerakhir = null; setLoading(false); return; }
+      // Kunci = pengguna + level sesi: muat ulang setelah verifikasi MFA, abaikan penyegaran token biasa.
+      const kunci = `${id}:${aalSesi(session)}`;
+      if (kunci === kunciTerakhir) return;
+      kunciTerakhir = kunci;
       loadSettings();
     };
     supabase.auth.getSession().then(({ data }) => sesuaikan(data?.session)).catch(() => setLoading(false));
