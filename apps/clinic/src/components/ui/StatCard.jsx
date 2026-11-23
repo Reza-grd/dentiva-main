@@ -24,7 +24,7 @@ export default function StatCard({ label, value, hint, tone = 'netral', trend, t
       className={`flex h-full flex-col rounded-2xl border border-border bg-card p-4 text-left ${onClick ? 'transition-colors hover:border-accent-primary/40' : ''} ${className}`}
     >
       {loading ? (
-        <div className="w-full animate-pulse space-y-2.5" aria-label="Memuat">
+        <div className="w-full animate-pulse space-y-2.5" role="status" aria-label="Memuat">
           <div className="h-3 w-1/2 rounded bg-border" />
           <div className="h-6 w-2/3 rounded bg-border" />
         </div>

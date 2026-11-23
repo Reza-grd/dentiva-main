@@ -219,7 +219,7 @@ export default function AiBriefCard({ variant = 'admin' }) {
         )}
 
         {state.phase === 'ready' && (
-          <p className="hidden sm:block text-xs opacity-50">
+          <p className="hidden sm:block text-xs text-gray-600 dark:text-gray-300">
             {state.stale ? 'Layanan AI sedang ramai — menampilkan catatan terakhir' : 'Disusun AI dari data klinik'}
             {' · '}diperbarui {getRelativeTime(state.generatedAt)} · otomatis pukul 00.00 & 12.00 WIB
           </p>

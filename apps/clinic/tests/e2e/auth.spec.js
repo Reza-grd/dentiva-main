@@ -13,7 +13,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/admin$/);
-    await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Selamat (Pagi|Siang|Sore|Malam), Admin/i })).toBeVisible();
   });
 
   test('Login sebagai Dokter mengarahkan ke /dokter dan memuat daftar pasien hari ini', async ({ page }) => {
@@ -37,7 +37,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/resepsionis$/);
-    await expect(page.getByRole('heading', { name: /Rina Puspita/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Selamat (Pagi|Siang|Sore|Malam), Rina/i })).toBeVisible();
   });
 
   test('Login gagal menampilkan pesan galat generik yang sama untuk email tidak terdaftar maupun sandi salah', async ({ page }) => {
@@ -106,7 +106,7 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await page.getByRole('button', { name: /^Masuk$/i }).click();
 
     await expect(page).toHaveURL(/\/admin$/);
-    await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Selamat (Pagi|Siang|Sore|Malam), Admin/i })).toBeVisible();
 
     // Pastikan selama alur login dan pemuatan dashboard tidak ada satu pun permintaan keluar ke host non-localhost
     expect(
@@ -134,7 +134,9 @@ test.describe('Autentikasi, Tantangan MFA, dan Proteksi Peran (RBAC)', () => {
     await setupSyntheticClinic(page, { role: 'admin', mfaEnabled: true });
 
     await page.goto('/admin');
-    await expect(page.getByRole('heading', { name: /Manajer Klinik/i })).toBeVisible();
+    // Sesi aal1 milik akun ber-MFA wajib melewati layar kode dulu — dasbor belum boleh tampil.
+    await expect(page.getByRole('heading', { name: /Verifikasi dua langkah/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Selamat (Pagi|Siang|Sore|Malam), Admin/i })).toHaveCount(0);
 
     // Verifikasi alur challenge & verify TOTP terhadap endpoint Auth Supabase sintetis
     const mfaResult = await page.evaluate(async () => {

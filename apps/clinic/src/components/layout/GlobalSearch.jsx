@@ -100,7 +100,7 @@ const GlobalSearch = () => {
         />
         {!searchTerm && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-            <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-400 bg-gray-200/50 dark:bg-gray-700/50 rounded-lg">
+            <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-200/50 dark:bg-gray-700/50 rounded-lg">
               <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>K
             </kbd>
           </div>
