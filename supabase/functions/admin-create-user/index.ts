@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
+import { galatAman } from "../_shared/galatAman.ts"
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000", "http://localhost:3001", "http://localhost:5173",
@@ -172,7 +173,7 @@ serve(async (req) => {
     if (profileError) {
       // Rollback auth user creation if profile insert fails
       await adminClient.auth.admin.deleteUser(authData.user.id)
-      return new Response(JSON.stringify({ error: 'Failed to create user profile: ' + profileError.message }), {
+      return new Response(JSON.stringify(galatAman('admin-create-user/profil', profileError, 'Profil staf gagal dibuat. Silakan coba lagi.')), {
         status: 500,
         headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
       })
@@ -183,7 +184,7 @@ serve(async (req) => {
       headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : String(error) }), {
+    return new Response(JSON.stringify(galatAman('admin-create-user', error)), {
       status: 500,
       headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })

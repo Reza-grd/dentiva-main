@@ -27,6 +27,8 @@ services:
       GOTRUE_PASSWORD_MIN_LENGTH: "8"
       GOTRUE_PASSWORD_REQUIRED_CHARACTERS: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789"
       GOTRUE_PASSWORD_HIBP_ENABLED: "true"
+      # Sesi berakhir di server bila tidak dipakai 12 jam (aplikasi klinik sudah keluar otomatis setelah 15 menit diam).
+      GOTRUE_SESSIONS_INACTIVITY_TIMEOUT: "12h"
       # CAPTCHA Turnstile (login, daftar, lupa password). Nilai di .env, diatur lewat /opt/dentiva/bin/atur-captcha.sh;
       # bawaan mati. Permintaan service role (fungsi edge) tidak diperiksa CAPTCHA.
       GOTRUE_SECURITY_CAPTCHA_ENABLED: ${CAPTCHA_ENABLED:-false}

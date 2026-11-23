@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
 import { configProblem, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
+import { galatAman } from "../_shared/galatAman.ts"
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000", "http://localhost:3001", "http://localhost:5173",
@@ -313,8 +314,7 @@ Pesan ini dikirim dari menu Pengaturan.`
     })
 
   } catch (error: any) {
-    console.error('Fatal Edge Function Error:', error)
-    return new Response(JSON.stringify({ error: error.message || 'Unknown internal error' }), {
+    return new Response(JSON.stringify(galatAman('send-whatsapp', error)), {
       status: 500,
       headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
     })

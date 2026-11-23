@@ -70,7 +70,7 @@ Ringkasan kondisi saat ini per kategori, lalu yang belum.
 - [ ] Uji otomatis "klinik A tidak bisa membaca klinik B" juga untuk **fungsi edge** (bukan hanya tabel), terutama fungsi yang memakai service role.
 
 ### B2. Konfigurasi (A02)
-- [ ] Header `X-Frame-Options`/`frame-ancestors` dan `Referrer-Policy` juga di `api.dentiva.id` (saat ini hanya HSTS & nosniff).
+- [~] 24 Nov: `infra/vps/Caddyfile` — `X-Frame-Options: DENY`, CSP `default-src 'none'; frame-ancestors 'none'` (kecuali berkas storage), `Permissions-Policy`. **Belum diterapkan di VPS** (perlu `caddy reload`).
 - [ ] Samakan header keamanan di console dan situs dentiva.id dengan web klinik.
 
 ### B3. Rantai pasok perangkat lunak (A03) — P1
@@ -91,8 +91,8 @@ Ringkasan kondisi saat ini per kategori, lalu yang belum.
 - [ ] Dokumen model ancaman singkat (aset, pelaku, jalur serangan) untuk fitur baru.
 
 ### B6. Autentikasi tambahan (A07)
-- [ ] Tolak password yang pernah bocor (pemeriksaan HaveIBeenPwned bawaan GoTrue) — rekomendasi audit 15 Nov.
-- [ ] Batas waktu sesi: keluar otomatis bila tidak aktif (mis. 8–12 jam) dan masa sesi maksimum.
+- [x] Tolak password yang pernah bocor: `GOTRUE_PASSWORD_HIBP_ENABLED=true` sudah ada di compose VPS. [ ] Pastikan aktif di server (uji daftar dengan password umum, mis. `Password123`).
+- [~] 24 Nov: `GOTRUE_SESSIONS_INACTIVITY_TIMEOUT=12h` di compose (**belum diterapkan di VPS**). Masa sesi maksimum (timebox) menunggu keputusan pemilik (dampak ke pengguna desktop).
 - [ ] Email pemberitahuan saat login dari perangkat baru, ganti password, atau MFA dimatikan.
 
 ### B7. Integritas (A08)
@@ -105,10 +105,11 @@ Ringkasan kondisi saat ini per kategori, lalu yang belum.
 - [ ] Peran staf berubah / aksi operator console sensitif → peringatan.
 - [x] 22 Nov: `pantau.sh` (tiap 5 menit) memperingatkan lewat WA bila: ≥30 login gagal/10 menit, akun terkunci ≥30 menit,
       MFA dimatikan/dihapus, ≥20 permintaan kena batas per IP/10 menit (dedup 6 jam per jenis).
+- [x] 24 Nov: **log transaksi API SATUSEHAT** (`public.satusehat_log_api`, migrasi 20261124090000): waktu, metode, endpoint tanpa query (NIK tidak tercatat), client ID, Organization ID, status, durasi, kode galat; retensi 365 hari; hanya service role. Juga baris JSON `jenis=satusehat_api` di log fungsi. **Belum diterapkan di VPS.**
 - [x] `keamanan.kejadian` disimpan 90 hari (pg_cron harian) dan ikut backup database. [ ] Backup offsite (B4).
 
 ### B9. Penanganan galat (A10)
-- [ ] Fungsi edge jangan mengirim pesan galat mentah ke pengguna (ditemukan ±4 tempat `error.message` di respons); kirim pesan umum + kode, detail hanya di log.
+- [x] 24 Nov: `_shared/galatAman.ts` — admin-create-user, midtrans-create-transaction, midtrans-webhook, send-whatsapp kini membalas pesan umum + kode rujukan (G-XXXXXXXX); detail hanya di log. **Fungsi edge belum dipasang ulang di VPS.**
 - [ ] Tinjau titik "fail-open": bila layanan pihak ketiga (CAPTCHA, Midtrans, WA) gagal, sistem menolak dengan aman, tidak melewati pemeriksaan.
 
 ---

@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 import { getCorsHeaders } from "../_shared/corsHelper.ts";
+import { galatAman } from "../_shared/galatAman.ts";
 
 /**
  * Edge Function: midtrans-create-transaction
@@ -236,9 +237,8 @@ serve(async (req) => {
       }
     );
   } catch (err: any) {
-    console.error("Error in midtrans-create-transaction:", err);
     return new Response(
-      JSON.stringify({ success: false, error: err.message }),
+      JSON.stringify({ success: false, ...galatAman("midtrans-create-transaction", err, "Pembayaran belum bisa dibuat. Silakan coba lagi.") }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

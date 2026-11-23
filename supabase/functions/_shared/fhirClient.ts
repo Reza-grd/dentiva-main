@@ -1,5 +1,6 @@
-import { getSatuSehatBaseUrl, assertEnvironmentAllowed } from './satusehatConfig.ts';
+import { getSatuSehatBaseUrl, getSatuSehatEnv, assertEnvironmentAllowed } from './satusehatConfig.ts';
 import { getAccessToken } from './satusehatAuth.ts';
+import { catatApiSatusehat, kodeGalatFhir } from './satusehatLog.ts';
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -18,6 +19,11 @@ export async function fhirRequest(
   let attempts = 0;
   const maxAttempts = 3;
   let delay = 1000; // start with 1 second delay
+  const mulai = performance.now();
+  const catat = (status: number, data: unknown) => catatApiSatusehat(supabaseAdmin, {
+    lingkungan: getSatuSehatEnv(), metode: method, url, status, percobaan: attempts,
+    durasiMs: performance.now() - mulai, kodeGalat: status >= 200 && status < 300 ? null : (kodeGalatFhir(data) ?? (status === 0 ? 'jaringan' : null)),
+  });
   
   while (true) {
     attempts++;
@@ -42,6 +48,7 @@ export async function fhirRequest(
       }
       
       const data = await res.json().catch(() => null);
+      await catat(res.status, data);
       return { ok: res.ok, status: res.status, data };
     } catch (err: any) {
       if (attempts < maxAttempts) {
@@ -50,6 +57,7 @@ export async function fhirRequest(
         delay *= 2;
         continue;
       }
+      await catat(0, null);
       return { ok: false, status: 0, data: { error: err.message } };
     }
   }

@@ -16,5 +16,13 @@
         Strict-Transport-Security "max-age=31536000; includeSubDomains"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "strict-origin-when-cross-origin"
+        # API hanya mengembalikan JSON/berkas: tidak boleh dibingkai halaman lain dan tidak menjalankan konten aktif.
+        X-Frame-Options "DENY"
+        Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+        X-Permitted-Cross-Domain-Policies "none"
     }
+
+    # CSP ketat untuk respons JSON. Berkas storage (PDF/gambar) dikecualikan agar penampil PDF bawaan browser tetap jalan.
+    @bukan_storage not path /storage/v1/*
+    header @bukan_storage Content-Security-Policy "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
 }

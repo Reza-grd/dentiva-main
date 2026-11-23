@@ -1,4 +1,5 @@
 import { getSatuSehatBaseUrl, getSatuSehatEnv } from './satusehatConfig.ts';
+import { catatApiSatusehat } from './satusehatLog.ts';
 
 export async function getAccessToken(supabaseAdmin: any): Promise<string> {
   const now = new Date();
@@ -34,11 +35,19 @@ export async function getAccessToken(supabaseAdmin: any): Promise<string> {
   bodyParams.set('client_id', clientId);
   bodyParams.set('client_secret', clientSecret);
 
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: bodyParams.toString(),
-  });
+  const mulai = performance.now();
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: bodyParams.toString(),
+    });
+  } catch (e) {
+    await catatApiSatusehat(supabaseAdmin, { lingkungan: environment, metode: 'POST', url, status: 0, durasiMs: performance.now() - mulai, kodeGalat: 'jaringan' });
+    throw e;
+  }
+  await catatApiSatusehat(supabaseAdmin, { lingkungan: environment, metode: 'POST', url, status: res.status, durasiMs: performance.now() - mulai, kodeGalat: res.ok ? null : `http_${res.status}` });
 
   if (!res.ok) {
     const errorText = await res.text();
