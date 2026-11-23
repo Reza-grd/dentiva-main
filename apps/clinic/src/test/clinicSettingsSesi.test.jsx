@@ -64,6 +64,35 @@ describe('ClinicSettingsProvider & sesi', () => {
     expect(getSettings).toHaveBeenCalledTimes(1);
   });
 
+  it('cache disimpan bersama pemiliknya', async () => {
+    sesiAwal = { user: { id: 'u1' } };
+    pasang();
+    await waitFor(() => expect(JSON.parse(localStorage.getItem('clinic_settings'))).toMatchObject({ pemilik: 'u1', data: { clinic_name: 'Klinik Uji' } }));
+  });
+
+  it('sesi hilang (keluar / kedaluwarsa): cache dihapus & tampilan kembali ke bawaan', async () => {
+    localStorage.setItem('clinic_settings', JSON.stringify({ pemilik: 'u1', data: { clinic_name: 'Klinik Lama' } }));
+    sesiAwal = { user: { id: 'u1' } };
+    getSettings.mockResolvedValue({ success: true, data: { clinic_name: 'Klinik Lama' } });
+    pasang();
+    await waitFor(() => expect(terakhir.settings.clinic_name).toBe('Klinik Lama'));
+    await act(async () => { pendengar('SIGNED_OUT', null); });
+    expect(terakhir.settings.clinic_name).toBe('Dentiva Dental Clinic');
+    expect(localStorage.getItem('clinic_settings')).toBeNull();
+  });
+
+  it('pengguna lain di perangkat yang sama: pengaturan klinik sebelumnya tidak terbawa', async () => {
+    localStorage.setItem('clinic_settings', JSON.stringify({ pemilik: 'orang-lain', data: { clinic_name: 'Klinik Tetangga' } }));
+    sesiAwal = { user: { id: 'u9' } };
+    let selesai;
+    getSettings.mockReturnValue(new Promise((r) => { selesai = r; }));
+    pasang();
+    await waitFor(() => expect(getSettings).toHaveBeenCalled());
+    expect(terakhir.settings.clinic_name).toBe('Dentiva Dental Clinic');
+    await act(async () => { selesai({ success: true, data: { clinic_name: 'Klinik Saya' } }); });
+    expect(terakhir.settings.clinic_name).toBe('Klinik Saya');
+  });
+
   it('masuk setelah halaman login: pengaturan dimuat saat SIGNED_IN', async () => {
     pasang();
     await waitFor(() => expect(terakhir.loading).toBe(false));
