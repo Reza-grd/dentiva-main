@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { clinicSettingsService } from '../services/clinicSettingsService';
+import { supabase } from '../services/supabase';
 import { useToast } from '../components/common/ToastNotification';
 
 const ClinicSettingsContext = createContext(null);
@@ -63,8 +64,20 @@ export const ClinicSettingsProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // Muat pengaturan hanya bila ada sesi (tamu tidak punya hak baca → galat 401/42501 di halaman login),
+  // dan muat ulang saat pengguna lain masuk tanpa memuat ulang halaman.
   useEffect(() => {
-    loadSettings();
+    let idTerakhir = null;
+    const sesuaikan = (session) => {
+      const id = session?.user?.id ?? null;
+      if (!id) { idTerakhir = null; setLoading(false); return; }
+      if (id === idTerakhir) return;
+      idTerakhir = id;
+      loadSettings();
+    };
+    supabase.auth.getSession().then(({ data }) => sesuaikan(data?.session)).catch(() => setLoading(false));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => sesuaikan(session));
+    return () => data?.subscription?.unsubscribe();
   }, [loadSettings]);
 
   // Inject CSS Variables for Dynamic Branding
