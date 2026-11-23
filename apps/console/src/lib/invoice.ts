@@ -7,7 +7,17 @@ import { callConsole } from "./api";
  * Identitas penjual & rekening dari Environment Variables proyek Console di Vercel
  * (nama variabel sama dengan aplikasi klinik); yang kosong tidak dicetak.
  */
-const env = import.meta.env;
+// Hanya kunci yang dipakai (bukan seluruh import.meta.env) agar variabel build lain tidak ikut ke bundle.
+const env = {
+  VITE_INVOICE_NAMA: import.meta.env.VITE_INVOICE_NAMA as string | undefined,
+  VITE_INVOICE_ALAMAT: import.meta.env.VITE_INVOICE_ALAMAT as string | undefined,
+  VITE_INVOICE_NPWP: import.meta.env.VITE_INVOICE_NPWP as string | undefined,
+  VITE_BILLING_EMAIL: import.meta.env.VITE_BILLING_EMAIL as string | undefined,
+  VITE_BILLING_BANK: import.meta.env.VITE_BILLING_BANK as string | undefined,
+  VITE_BILLING_REKENING: import.meta.env.VITE_BILLING_REKENING as string | undefined,
+  VITE_BILLING_ATAS_NAMA: import.meta.env.VITE_BILLING_ATAS_NAMA as string | undefined,
+  VITE_BILLING_WA: import.meta.env.VITE_BILLING_WA as string | undefined,
+};
 const teks = (v: unknown) => String(v ?? "").trim();
 
 const PENJUAL = {

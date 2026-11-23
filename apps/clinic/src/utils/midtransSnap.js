@@ -6,7 +6,11 @@
  * Server Key TIDAK pernah ada di aplikasi; transaksi dibuat fungsi midtrans-create-transaction.
  * Hasil popup hanya petunjuk tampilan — status resmi datang dari webhook (lihat get_checkout_status).
  */
-const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
+// Hanya kunci yang dipakai (bukan seluruh import.meta.env) agar variabel build lain tidak ikut ke bundle.
+const env = {
+  VITE_MIDTRANS_CLIENT_KEY: import.meta.env.VITE_MIDTRANS_CLIENT_KEY,
+  VITE_MIDTRANS_ENV: import.meta.env.VITE_MIDTRANS_ENV,
+};
 
 export const MIDTRANS = {
   clientKey: String(env.VITE_MIDTRANS_CLIENT_KEY || '').trim(),

@@ -4,7 +4,17 @@
  * Data rekening & nomor WhatsApp di bawah hanya untuk identitas pada invoice PDF, diisi pemilik di
  * Environment Variables — tidak ditulis di kode.
  */
-const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
+// Hanya kunci yang dipakai (bukan seluruh import.meta.env) agar variabel build lain tidak ikut ke bundle.
+const env = {
+  VITE_BILLING_BANK: import.meta.env.VITE_BILLING_BANK,
+  VITE_BILLING_REKENING: import.meta.env.VITE_BILLING_REKENING,
+  VITE_BILLING_ATAS_NAMA: import.meta.env.VITE_BILLING_ATAS_NAMA,
+  VITE_BILLING_WA: import.meta.env.VITE_BILLING_WA,
+  VITE_BILLING_EMAIL: import.meta.env.VITE_BILLING_EMAIL,
+  VITE_INVOICE_NAMA: import.meta.env.VITE_INVOICE_NAMA,
+  VITE_INVOICE_ALAMAT: import.meta.env.VITE_INVOICE_ALAMAT,
+  VITE_INVOICE_NPWP: import.meta.env.VITE_INVOICE_NPWP,
+};
 const teks = (v) => String(v ?? '').trim();
 
 /** "0812-3456 7890" / "+62 812…" / "62812…" → "62812…" (format wa.me); kosong bila tidak valid. */

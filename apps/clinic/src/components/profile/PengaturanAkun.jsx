@@ -6,7 +6,10 @@ import { akunService } from '../../services/akunService';
 import { nomorWa } from '../../utils/billingConfig';
 import KeamananAkun from './KeamananAkun';
 
-const env = (typeof import.meta !== 'undefined' && import.meta.env) || {};
+// Hanya kunci yang dipakai (bukan seluruh import.meta.env) agar variabel build lain tidak ikut ke bundle.
+const env = {
+  VITE_EIRA_WA: import.meta.env.VITE_EIRA_WA,
+};
 /** Nomor WhatsApp resmi Eira (diisi pemilik di Vercel: VITE_EIRA_WA). */
 const NOMOR_EIRA = nomorWa(env.VITE_EIRA_WA);
 const tampilNomor = (d) => (d ? `+${d.slice(0, 2)} ${d.slice(2, 5)}-${d.slice(5, 9)}-${d.slice(9)}` : '');
