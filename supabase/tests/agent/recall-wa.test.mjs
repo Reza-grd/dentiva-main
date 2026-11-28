@@ -120,6 +120,17 @@ test("cari recall dari balasan: pesan dikutip lebih dulu, lalu sidik nomor (pesa
   assert.equal((await q("select * from public.recall_wa_cari('tidak-ada', 'hash-asing')")).length, 0);
 });
 
+test("cari lewat sidik nomor: tidak dipakai bila pesan terakhir ke nomor itu bukan percakapan recall", async () => {
+  await db.query(`insert into public.notification_logs (visit_id, patient_id, clinic_id, message_type, status, provider, recipient_hash, "timestamp")
+                  values (null, $1, $2, 'recall_balasan', 'sent', 'sidecar', 'hash-p1', now() + interval '1 second')`, [P1, A]);
+  assert.equal((await one("select * from public.recall_wa_cari(null, 'hash-p1')")).id, r1.id, "balasan recall tetap percakapan recall");
+  const pengingat = await one(`insert into public.notification_logs (patient_id, clinic_id, message_type, status, provider, recipient_hash, "timestamp")
+                  values ($1, $2, 'reminder', 'sent', 'sidecar', 'hash-p1', now() + interval '2 seconds') returning id`, [P1, A]);
+  assert.equal((await q("select * from public.recall_wa_cari(null, 'hash-p1')")).length, 0, "'ya' untuk pengingat janji bukan jawaban recall");
+  assert.equal((await one("select * from public.recall_wa_cari('PESAN-1', 'hash-p1')")).id, r1.id, "pesan dikutip tetap dikenali");
+  await db.query("delete from public.notification_logs where id = $1", [pengingat.id]);
+});
+
 test("jawaban: Bisa → dikonfirmasi + lonceng resepsionis; diulang → 'sudah'; Ganti → minta_ganti", async () => {
   assert.equal((await one("select public.recall_wa_jawab($1, 'bisa') h", [r1.id])).h, "dikonfirmasi");
   const s = await rj(r1.id);

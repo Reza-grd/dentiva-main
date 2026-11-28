@@ -1,12 +1,19 @@
 import { assert, assertEquals, assertStringIncludes } from "https://deno.land/std@0.168.0/testing/asserts.ts";
-import { dalamJendelaKirim, PESAN_PETUNJUK, pesanBalasan, pesanRecall, tafsirJawaban } from "./recallWa.ts";
+import { dalamJendelaKirim, jawabanTegas, PESAN_PETUNJUK, pesanBalasan, pesanRecall, tafsirJawaban } from "./recallWa.ts";
 
 Deno.test("tafsir jawaban: angka, frasa umum, BERHENTI; kalimat ambigu ditolak", () => {
   for (const t of ["1", " 1. ", "1 bisa datang", "Bisa datang", "iya", "OK!"]) assertEquals(tafsirJawaban(t), "bisa", t);
   for (const t of ["2", "2 - ganti jadwal", "Ganti jadwal", "ubah jadwal"]) assertEquals(tafsirJawaban(t), "ganti", t);
-  for (const t of ["3", "Tidak perlu", "tdk", "gak usah"]) assertEquals(tafsirJawaban(t), "tidak", t);
+  for (const t of ["3", "Tidak perlu", "tdk perlu", "gak usah"]) assertEquals(tafsirJawaban(t), "tidak", t);
+  // "Tidak"/"gak" saja = tidak bisa datang pada tanggal itu → ganti jadwal (recall tidak ditutup).
+  for (const t of ["tidak", "Gak", "tdk", "tidak bisa", "belum bisa"]) assertEquals(tafsirJawaban(t), "ganti", t);
   for (const t of ["BERHENTI", "stop"]) assertEquals(tafsirJawaban(t), "berhenti", t);
   for (const t of ["tidak bisa hari itu", "12", "4", "", null, "halo dok, gigi saya masih ngilu"]) assertEquals(tafsirJawaban(t), null, String(t));
+});
+
+Deno.test("jawaban tegas: sapaan 'ok'/'ya' tidak boleh menimpa jawaban sebelumnya", () => {
+  for (const t of ["1", "2.", "3 tidak perlu", "Ganti jadwal", "bisa datang", "tidak"]) assert(jawabanTegas(t), t);
+  for (const t of ["ok", "Ya", "siap!", "terima kasih", "oke dok"]) assert(!jawabanTegas(t), t);
 });
 
 Deno.test("pesan recall awal & ulang: formal, pilihan angka, tanpa emoji", () => {

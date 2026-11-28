@@ -14,15 +14,17 @@ import { decryptBatch } from "../_shared/decryptionHelper.ts"
 import { recipientHash, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 import { barisIdentitas, beriIdentitas } from "../_shared/tandaPesan.ts"
 import {
-  dalamJendelaKirim, type HasilJawab, PESAN_BERHENTI, PESAN_PETUNJUK, pesanBalasan, pesanRecall, tafsirJawaban,
+  dalamJendelaKirim, type HasilJawab, jawabanTegas, PESAN_BERHENTI, PESAN_PETUNJUK, pesanBalasan, pesanRecall, tafsirJawaban,
 } from "../_shared/recallWa.ts"
 
 const PER_PUTARAN = 6
+/** Pesan masuk yang terus gagal diproses lebih lama dari ini dilewati agar tidak menyumbat kotak masuk. */
+const BATAS_COBA_MS = 30 * 60_000
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
-interface Masuk { seq: number; id: string; from: string | null; text: string; quotedId: string | null }
+interface Masuk { seq: number; id: string; from: string | null; text: string; quotedId: string | null; at?: string }
 
 Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -60,6 +62,13 @@ Deno.serve(async (req) => {
         await prosesMasuk(m)
         upTo = m.seq
       } catch (err: any) {
+        const umur = m.at ? Date.now() - Date.parse(m.at) : 0
+        if (umur > BATAS_COBA_MS) {
+          // Gagal terus (mis. data berubah) → lewati agar pesan sesudahnya tetap diproses.
+          console.error('recall-wa: pesan masuk dilewati setelah gagal berulang:', err?.message)
+          upTo = m.seq
+          continue
+        }
         // Berhenti di sini: pesan ini & sesudahnya dicoba lagi pada putaran berikutnya.
         console.error('recall-wa: pesan masuk gagal diproses:', err?.message)
         break
@@ -88,7 +97,11 @@ Deno.serve(async (req) => {
       if (!hash || !m.from) return
       if (!(await catatMasuk(null, null, 'opt_out'))) return
       const { data: n, error } = await db.rpc('wa_cabut_persetujuan', { p_sender_hash: hash })
-      if (error) throw error
+      if (error) {
+        // Lepas catatan agar BERHENTI diproses ulang (bukan dianggap sudah ditangani).
+        await db.from('whatsapp_inbound').delete().eq('wamid', `sc:${m.id}`)
+        throw error
+      }
       if ((n ?? 0) > 0) await kirim(m.from, PESAN_BERHENTI, null)
       hasil.diproses += 1
       return
@@ -113,6 +126,10 @@ Deno.serve(async (req) => {
       return
     }
 
+    // Sudah dijawab: hanya jawaban tegas (1/2/3 atau frasa pilihan) yang boleh mengubahnya; "ok"/"ya"/"terima kasih"
+    // untuk pesan balasan kita diabaikan tanpa membalas (mencegah balas-membalas tanpa akhir).
+    if (r.wa_jawaban && !jawabanTegas(m.text)) return
+    if (r.wa_jawaban === jawaban) return
     if (!(await catatMasuk(r.clinic_id, r.patient_id, 'recall'))) return
     const { data: h, error } = await db.rpc('recall_wa_jawab', { p_id: r.id, p_jawaban: jawaban })
     if (error) {
@@ -120,6 +137,7 @@ Deno.serve(async (req) => {
       await db.from('whatsapp_inbound').delete().eq('wamid', `sc:${m.id}`)
       throw error
     }
+    if (h === 'sudah') { hasil.diproses += 1; return }
     const [nama] = await decryptBatch(db, [r.nama_lengkap || ''])
     const teks = pesanBalasan(h as HasilJawab, { nama, klinik: r.nama_klinik, tanggal: r.tanggal_target, telepon: r.telepon_klinik })
     await kirim(m.from, beriIdentitas(teks, barisIdentitas({ kode: r.kode_wa, noRm: r.no_rm, nama })),

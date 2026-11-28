@@ -15,8 +15,12 @@ const KATA: Record<string, JawabanRecall> = {
   'iya bisa': 'bisa', 'ok': 'bisa', 'oke': 'bisa', 'okey': 'bisa', 'siap': 'bisa', 'insyaallah bisa': 'bisa',
   '2': 'ganti', 'dua': 'ganti', 'ganti': 'ganti', 'ganti jadwal': 'ganti', 'ubah jadwal': 'ganti', 'jadwal lain': 'ganti',
   'atur ulang': 'ganti', 'reschedule': 'ganti',
-  '3': 'tidak', 'tiga': 'tidak', 'tidak': 'tidak', 'tidak perlu': 'tidak', 'tdk': 'tidak', 'tdk perlu': 'tidak',
-  'gak': 'tidak', 'ga': 'tidak', 'nggak': 'tidak', 'enggak': 'tidak', 'tidak usah': 'tidak', 'gak usah': 'tidak',
+  // "Tidak"/"gak" saja menjawab "Apakah Anda bisa datang?" = tidak bisa pada tanggal itu → ganti jadwal
+  // (resepsionis menghubungi), BUKAN "tidak perlu kontrol" yang menutup recall.
+  'tidak': 'ganti', 'tdk': 'ganti', 'gak': 'ganti', 'ga': 'ganti', 'nggak': 'ganti', 'enggak': 'ganti',
+  'tidak bisa': 'ganti', 'gak bisa': 'ganti', 'tdk bisa': 'ganti', 'belum bisa': 'ganti',
+  '3': 'tidak', 'tiga': 'tidak', 'tidak perlu': 'tidak', 'tdk perlu': 'tidak', 'tidak usah': 'tidak', 'gak usah': 'tidak',
+  'gak perlu': 'tidak', 'ga perlu': 'tidak',
   'berhenti': 'berhenti', 'stop': 'berhenti', 'unsubscribe': 'berhenti',
 }
 
@@ -24,13 +28,27 @@ const KATA: Record<string, JawabanRecall> = {
  * Tafsir balasan pasien. Hanya jawaban yang jelas yang diterima: angka 1/2/3 di awal pesan
  * ("1", "1.", "2 ganti jadwal") atau frasa pendek yang dikenal. Kalimat lain (mis. "tidak bisa hari itu") → null.
  */
+const rapikan = (teks: string | null | undefined) =>
+  String(teks ?? '').toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim()
+
 export function tafsirJawaban(teks: string | null | undefined): JawabanRecall | null {
-  const t = String(teks ?? '').toLowerCase().normalize('NFKC').replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim()
+  const t = rapikan(teks)
   if (!t) return null
   if (KATA[t]) return KATA[t]
   const angka = /^([123])(\s|$)/.exec(t)
   if (angka) return KATA[angka[1]]
   return null
+}
+
+/** Sapaan singkat ("ya", "ok", "siap") yang hanya berarti "Bisa" sebagai jawaban PERTAMA. */
+const SAPAAN = new Set(['ya', 'iya', 'ok', 'oke', 'okey', 'siap'])
+
+/**
+ * Jawaban tegas: angka 1/2/3 atau frasa yang menyebut pilihannya. Setelah pasien menjawab, hanya jawaban tegas
+ * yang boleh mengubah jawaban — "ok"/"ya" untuk pesan balasan kita tidak boleh menimpa "Ganti jadwal".
+ */
+export function jawabanTegas(teks: string | null | undefined): boolean {
+  return tafsirJawaban(teks) !== null && !SAPAAN.has(rapikan(teks))
 }
 
 /** "2026-12-05" → "Sabtu, 5 Desember 2026" (WIB). */
