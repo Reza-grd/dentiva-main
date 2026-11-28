@@ -265,6 +265,16 @@ function App() {
               <RecallPage />
             </ProtectedRoute>
           } />
+          <Route path="/dokter/recall" element={
+            <ProtectedRoute allowedRoles={['dokter']}>
+              <RecallPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/recall" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <RecallPage />
+            </ProtectedRoute>
+          } />
 
           <Route path="/admin/asisten-ai" element={
             <ProtectedRoute allowedRoles={['admin']}>

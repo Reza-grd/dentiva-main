@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { CreditCard, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Shield, Loader, MapPin, Building, Activity, Palette } from 'lucide-react';
+import { CreditCard, User, Lock, Bell, Database, Save, Check, MessageSquare, Send, Shield, Loader, MapPin, Building, Activity, Palette, BellRing } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../common/ToastNotification';
 import { supabase } from '../../services/supabase';
@@ -12,6 +12,7 @@ import ThemeGallery from '../common/ThemeGallery';
 import { TEMPLATE_VARS, DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, MAX_TEMPLATE_LENGTH, renderPreview, unknownPlaceholders } from '../../utils/waTemplates';
 import PaymentSettings from './PaymentSettings';
 import BookingSettings from './BookingSettings';
+import SopRecallSettings from './SopRecallSettings';
 import Turnstile from '../auth/Turnstile';
 
 const SettingsPage = () => {
@@ -455,6 +456,7 @@ const SettingsPage = () => {
       { id: 'whatsapp', label: 'Pengaturan WhatsApp', icon: MessageSquare },
       { id: 'treatment-education', label: 'Edukasi Perawatan', icon: MessageSquare },
       { id: 'soap-templates', label: 'Template SOAP', icon: Save },
+      { id: 'sop-recall', label: 'SOP Recall', icon: BellRing },
       { id: 'satusehat', label: 'SATUSEHAT', icon: Shield },
       { id: 'payments', label: 'Pembayaran & QRIS', icon: CreditCard },
       { id: 'booking', label: 'Booking Online', icon: Activity },
@@ -1416,8 +1418,10 @@ const SettingsPage = () => {
 
             {activeTab === 'booking' && <BookingSettings />}
 
+            {activeTab === 'sop-recall' && isAdmin && <SopRecallSettings />}
+
             {/* Save Button */}
-            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && activeTab !== 'payments' && activeTab !== 'booking' && (
+            {activeTab !== 'security' && activeTab !== 'audit-logs' && activeTab !== 'satusehat' && activeTab !== 'billing' && activeTab !== 'payments' && activeTab !== 'booking' && activeTab !== 'sop-recall' && (
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3 items-center">
                 {saved && (
                   <div className="flex items-center gap-2 text-green-600 dark:text-green-400 mr-2 bg-green-50 dark:bg-green-500/10 px-3 py-1.5 rounded-lg">

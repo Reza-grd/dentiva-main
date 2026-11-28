@@ -27,7 +27,7 @@ vi.mock('../contexts/ClinicSettingsContext', () => ({
 
 import { ToastProvider } from '../components/common/ToastNotification';
 import ExpensesPage from '../components/financial/ExpensesPage';
-import RecallPage from '../components/recall/RecallPage';
+import RecallPage from '../components/recall/RecallPasienLama';
 
 const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })();
 const wrap = (ui) => render(<MemoryRouter><ToastProvider>{ui}</ToastProvider></MemoryRouter>);

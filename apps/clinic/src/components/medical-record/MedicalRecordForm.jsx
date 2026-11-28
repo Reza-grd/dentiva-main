@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import logger from '../../utils/logger';
 import LoadingSpinner from '../common/LoadingSpinner';
@@ -28,6 +28,10 @@ import { generatePrescriptionPdf } from '../../utils/prescriptionPdfGenerator';
 import { RichTextEditor } from '../ui/RichTextEditor';
 import { encryptionService } from '../../services/encryptionService';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
+import RecallSectionRM from '../recall/RecallSectionRM';
+import RecallKonfirmasiModal from '../recall/RecallKonfirmasiModal';
+import { recallService } from '../../services/recallService';
+import { usulanRecall, validasiKeputusan } from '../../utils/recallSop';
 
 /** Pasien anonim untuk latihan (tur pengenalan dokter). Tidak ada identitas & tidak ada baris di database. */
 export const ID_SIMULASI = 'simulasi';
@@ -94,6 +98,50 @@ const MedicalRecordForm = () => {
     kelainan_gigi_geligi: 'tidak_ada', kelainan_gigi_geligi_keterangan: '', lain_lain: ''
   });
   const [visits, setVisits] = useState([]);
+
+  // ── Recall berbasis SOP (dokter/manajer) ──
+  const bolehRecall = !simulasi && ['dokter', 'admin'].includes(userProfile?.role);
+  const [sopRecall, setSopRecall] = useState([]);
+  const [recallDraft, setRecallDraft] = useState(null);   // null = tidak diubah di layar ini
+  const [recallTersimpan, setRecallTersimpan] = useState(null);
+  const [recallModal, setRecallModal] = useState(null);   // { visitId, tanggal }
+  // Kunjungan sasaran recall = kunjungan baru terakhir, atau kunjungan terbaru yang sudah tersimpan.
+  const kunjunganRecall = useMemo(() => {
+    const baru = visits.filter((v) => v._isNew);
+    if (baru.length) return { id: null, tanggal: baru[baru.length - 1].tanggal_kunjungan };
+    const lama = visits.find((v) => typeof v.id === 'string');
+    return lama ? { id: lama.id, tanggal: lama.tanggal_kunjungan } : null;
+  }, [visits]);
+  const recallUsulan = useMemo(
+    () => usulanRecall((clinicalData.treatment_list || []).map((t) => t.id), sopRecall),
+    [clinicalData.treatment_list, sopRecall]
+  );
+  useEffect(() => {
+    if (!bolehRecall) return;
+    recallService.sopList().then((r) => r.success && setSopRecall(r.data));
+  }, [bolehRecall]);
+  useEffect(() => {
+    let batal = false;
+    setRecallTersimpan(null);
+    if (!bolehRecall || !kunjunganRecall?.id) return undefined;
+    recallService.keputusanKunjungan(kunjunganRecall.id).then((r) => { if (!batal && r.success) setRecallTersimpan(r.data); });
+    return () => { batal = true; };
+  }, [bolehRecall, kunjunganRecall?.id]);
+
+  /** Setelah RM tersimpan: simpan isian recall, atau tanya lewat pop-up bila kunjungan ini belum punya keputusan. */
+  const prosesRecallSetelahSimpan = async (visitId, tanggal) => {
+    if (!bolehRecall || !visitId) return;
+    if (recallDraft) {
+      const r = await recallService.simpanKeputusan(visitId, recallDraft);
+      if (!r.success) { toast.error('Rekam medis tersimpan, tetapi recall gagal disimpan: ' + r.error); return; }
+      setRecallDraft(null);
+      setRecallTersimpan(r.data);
+      return;
+    }
+    const ada = await recallService.keputusanKunjungan(visitId);
+    if (ada.success && ada.data) return;
+    setRecallModal({ visitId, tanggal });
+  };
   const [consents, setConsents] = useState([]);
   const [showConsentModal, setShowConsentModal] = useState(false);
   const [selectedConsentVisit, setSelectedConsentVisit] = useState(null);
@@ -521,6 +569,11 @@ const MedicalRecordForm = () => {
       return;
     }
 
+    if (bolehRecall && recallDraft) {
+      const galatRecall = validasiKeputusan(recallDraft);
+      if (galatRecall) { toast.error('Rencana Recall: ' + galatRecall); return; }
+    }
+
     if (simulasi) {
       toast.success('Simulasi berhasil — semua bidang wajib sudah terisi. Data latihan tidak disimpan.');
       return;
@@ -546,6 +599,7 @@ const MedicalRecordForm = () => {
       }
 
       let latestVisitId = null;
+      let latestVisitTanggal = null;
       // Kunjungan baru ditandai selesai PALING AKHIR (setelah resep & tindakan
       // tersimpan): status completed memicu kirim ke SATUSEHAT dan mengunci
       // tindakan, jadi semua data harus sudah lengkap sebelumnya.
@@ -567,6 +621,7 @@ const MedicalRecordForm = () => {
         }
         if (res.data) {
           latestVisitId = res.data.id;
+          latestVisitTanggal = res.data.tanggal_kunjungan || v.tanggal_kunjungan;
           visitIdsToComplete.push(res.data.id);
           if (v.prescriptions && v.prescriptions.length > 0) {
             const obatRes = await prescriptionService.replaceVisitObat(latestVisitId, v.prescriptions);
@@ -591,7 +646,7 @@ const MedicalRecordForm = () => {
           setSaving(false);
           return;
         }
-        if (!latestVisitId) latestVisitId = v.id;
+        if (!latestVisitId) { latestVisitId = v.id; latestVisitTanggal = v.tanggal_kunjungan; }
         visitIdsToComplete.push(v.id);
         if (v.prescriptions) {
           const obatRes = await prescriptionService.replaceVisitObat(v.id, v.prescriptions);
@@ -691,6 +746,7 @@ const MedicalRecordForm = () => {
 
       toast.success('Berhasil disimpan!');
       sessionStorage.removeItem(`Dentiva_draft_rm_${patientId}`); // Clear draft on successful database save
+      await prosesRecallSetelahSimpan(latestVisitId, latestVisitTanggal);
       await loadPatientData(); // Reload pristine data and clear _isNew flags to prevent duplicates
     } catch (error) { 
       toast.error('Gagal: ' + error.message); 
@@ -1356,6 +1412,17 @@ const MedicalRecordForm = () => {
               isLocked={isTreatmentLocked}
             />
 
+            {bolehRecall && kunjunganRecall && (
+              <RecallSectionRM
+                tersimpan={recallTersimpan}
+                draft={recallDraft}
+                setDraft={setRecallDraft}
+                usulan={recallUsulan}
+                tanggalKunjungan={kunjunganRecall.tanggal}
+                disabled={saving}
+              />
+            )}
+
           {/* ═════════════════════════════════════════════════════════════════
               TAB 3: BERKAS & RUJUKAN (Always printed in serial print outs)
               ═════════════════════════════════════════════════════════════════ */}
@@ -1600,6 +1667,14 @@ const MedicalRecordForm = () => {
       </>
       )}
 
+      <RecallKonfirmasiModal
+        buka={!!recallModal}
+        visitId={recallModal?.visitId}
+        tanggalKunjungan={recallModal?.tanggal}
+        usulan={recallUsulan}
+        namaPasien={patient?.nama_lengkap}
+        onSelesai={(row) => { setRecallModal(null); setRecallTersimpan(row); }}
+      />
       {/* Global CSS for Print (Medical Record) */}
       <style>{`
         @media print {
