@@ -19,6 +19,8 @@
 //    POST /pairing-code {phone}   → { code }   (alternatif QR: "Tautkan dengan nomor telepon")
 //    POST /send {to, text}        → { ok, id }
 //    POST /logout                 → { ok }
+//    GET  /inbox?after=SEQ        → { items: [{seq,id,from,text,quotedId,at}] } balasan pasien (pesan teks pribadi)
+//    POST /inbox/ack {upTo}       → { removed }
 // ─────────────────────────────────────────────────────────────────────────────
 import http from 'node:http'
 import { rm, mkdir } from 'node:fs/promises'
@@ -26,7 +28,7 @@ import path from 'node:path'
 import { randomBytes } from 'node:crypto'
 import wweb from 'whatsapp-web.js'
 import QRCode from 'qrcode'
-import { normalizeTo, mask, safeEqual, createSender, createOnce, cleanKey, cleanText } from './lib.mjs'
+import { normalizeTo, mask, safeEqual, createSender, createOnce, cleanKey, cleanText, createInbox, cleanInbound } from './lib.mjs'
 
 const { Client, LocalAuth } = wweb
 const PORT = Number(process.env.PORT || 3000)
@@ -47,6 +49,7 @@ const send = createSender({
   maxWaitMs: Number(process.env.WA_MAX_WAIT_MS || 45_000),
 })
 const once = createOnce()
+const inbox = createInbox({ max: Number(process.env.WA_INBOX_MAX || 500) })
 
 const state = { status: 'starting', qr: null, code: null, me: null, since: new Date().toISOString(), lastError: null }
 let client = null
@@ -195,6 +198,25 @@ async function start({ fresh = false, pairDigits = null } = {}) {
     restartLater(loggedOut ? 3_000 : undefined, { fresh: loggedOut })
   }))
   c.on('change_state', mine((s) => log('status WhatsApp Web:', s)))
+  // Balasan pasien (mis. jawaban recall 1/2/3, BERHENTI) → kotak masuk, diambil edge function recall-wa.
+  // Hanya chat pribadi berisi teks; grup, status & media diabaikan. Isi tidak dicatat di log.
+  c.on('message', mine(async (msg) => {
+    try {
+      if (msg.fromMe || msg.isStatus || msg.type !== 'chat') return
+      const jid = String(msg.from || '')
+      if (!jid.endsWith('@c.us') && !jid.endsWith('@lid')) return
+      const text = cleanInbound(msg.body)
+      if (!text) return
+      let from = jid.endsWith('@c.us') ? normalizeTo(jid.split('@')[0]) : null
+      if (!from) from = normalizeTo((await msg.getContact().catch(() => null))?.number)
+      const quotedId = msg.hasQuotedMsg ? ((await msg.getQuotedMessage().catch(() => null))?.id?.id ?? null) : null
+      if (!from && !quotedId) return
+      const id = msg.id?.id
+      if (inbox.push({ id, from, text, quotedId })) log('pesan masuk dari', mask(from || jid))
+    } catch (err) {
+      log('pesan masuk gagal dibaca:', String(err?.message || err).slice(0, 120))
+    }
+  }))
 
   try {
     await c.initialize()
@@ -333,6 +355,17 @@ const routes = {
     })
     log(out.duplicate ? 'permintaan ganda diabaikan (kunci sama) untuk' : 'terkirim ke', mask(to))
     return [200, out]
+  },
+
+  'GET /inbox': async (req) => {
+    const u = new URL(req.url, 'http://localhost')
+    const after = Number(u.searchParams.get('after') || 0)
+    return [200, { items: inbox.list(Number.isFinite(after) ? after : 0, 100) }]
+  },
+
+  'POST /inbox/ack': async (req) => {
+    const body = await readJson(req)
+    return [200, { removed: inbox.ack(body.upTo) }]
   },
 
   'POST /logout': async () => {

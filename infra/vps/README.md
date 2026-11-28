@@ -91,6 +91,7 @@ Satu pintu pengirim di `supabase/functions/_shared/whatsapp.ts`, dipilih lewat `
 - **Akses:** tidak ada port publik. Fungsi edge memanggilnya lewat jaringan Docker. Halaman QR hanya di 127.0.0.1:3002 (lewat terowongan SSH).
 - **Data sesi:** profil WhatsApp Web di `volumes/wa-sidecar/wwebjs` (izin 700). Profil ini memuat riwayat chat nomor tersebut, jadi perlakukan sebagai data rahasia.
 - **Pesan dan log:** nomor disamarkan di log. Pesan kiriman tidak menandai chat sebagai "dibaca". Pengiriman diberi jeda acak dan batas 200/jam.
+- **Pesan masuk (recall Fase 3):** balasan teks pribadi disimpan sementara di memori (maks. 500, 24 jam, isi tidak dicatat di log). Edge function `recall-wa` (cron tiap 5 menit) mengambilnya lewat `GET /inbox`, lalu `POST /inbox/ack`. Kotak masuk kosong lagi bila container dimulai ulang. Pasien yang belum menjawab tetap mendapat pesan ulang.
 - **Gangguan sementara:** kalau WhatsApp belum tersambung, pengingat **ditunda**, tidak dicatat gagal, dan dicoba lagi di putaran cron berikutnya.
 - **Menautkan nomor** (pakai nomor klinik, bukan nomor pribadi):
   1. Di laptop, buka terowongan: `ssh -N -L 3002:127.0.0.1:3002 dentiva@202.74.74.163`.

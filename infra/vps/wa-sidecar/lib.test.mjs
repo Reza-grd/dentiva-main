@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { normalizeTo, mask, safeEqual, createSender, createOnce, cleanKey, cleanText } from './lib.mjs'
+import { normalizeTo, mask, safeEqual, createSender, createOnce, cleanKey, cleanText, createInbox, cleanInbound } from './lib.mjs'
 
 test('normalizeTo: 08xx → 628xx, format bebas, tolak yang tidak valid', () => {
   assert.equal(normalizeTo('0812-3456-7890'), '6281234567890')
@@ -91,4 +91,28 @@ test('cleanKey: hanya karakter aman', () => {
   assert.equal(cleanKey('a b'), null)
   assert.equal(cleanKey('x'.repeat(121)), null)
   assert.equal(cleanKey(undefined), null)
+})
+
+test('createInbox: urut, tanpa duplikat, ack menghapus, dibatasi jumlah & umur', () => {
+  let t = 0
+  const box = createInbox({ max: 3, ttlMs: 1000, now: () => t })
+  assert.equal(box.push({ id: 'a', from: '628', text: '1' }), 1)
+  assert.equal(box.push({ id: 'a', from: '628', text: '1' }), null)
+  box.push({ id: 'b', from: '628', text: '2', quotedId: 'Q' })
+  assert.deepEqual(box.list().map((m) => [m.seq, m.id, m.quotedId]), [[1, 'a', null], [2, 'b', 'Q']])
+  assert.deepEqual(box.list(1).map((m) => m.id), ['b'])
+  assert.equal(box.ack(1), 1)
+  assert.deepEqual(box.list().map((m) => m.id), ['b'])
+  box.push({ id: 'c', from: '6', text: 'x' }); box.push({ id: 'd', from: '6', text: 'x' }); box.push({ id: 'e', from: '6', text: 'x' })
+  assert.deepEqual(box.list().map((m) => m.id), ['c', 'd', 'e'])
+  t = 5000
+  assert.equal(box.list().length, 0)
+  // id lama yang kedaluwarsa boleh masuk lagi
+  assert.ok(box.push({ id: 'a', from: '628', text: '1' }))
+})
+
+test('cleanInbound: dipangkas & dibatasi 300 karakter', () => {
+  assert.equal(cleanInbound('  1 '), '1')
+  assert.equal(cleanInbound(''), null)
+  assert.equal(cleanInbound('x'.repeat(400)).length, 300)
 })

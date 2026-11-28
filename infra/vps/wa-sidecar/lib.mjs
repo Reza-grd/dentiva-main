@@ -97,3 +97,47 @@ export function cleanText(text) {
   const t = String(text ?? '').trim()
   return t && t.length <= 4096 ? t : null
 }
+
+/**
+ * Kotak masuk sementara (dalam memori) untuk balasan pasien. Edge function `recall-wa` mengambilnya lewat
+ * GET /inbox lalu mengonfirmasi dengan POST /inbox/ack. Dibatasi jumlah & umur; isi tidak pernah dicatat di log.
+ * Hilang bila container dimulai ulang (pasien tetap mendapat pesan ulang bila belum menjawab).
+ */
+export function createInbox({ max = 500, ttlMs = 86_400_000, now = () => Date.now() } = {}) {
+  let seq = 0
+  const items = []
+  const ids = new Set()
+  const prune = () => {
+    const t = now()
+    while (items.length && (items.length > max || t - items[0].at > ttlMs)) ids.delete(items.shift().id)
+  }
+  return {
+    push({ id, from, text, quotedId = null }) {
+      if (!id || ids.has(id)) return null
+      seq += 1
+      items.push({ seq, id, from, text, quotedId, at: now() })
+      ids.add(id)
+      prune()
+      return seq
+    },
+    list(after = 0, limit = 100) {
+      prune()
+      return items.filter((m) => m.seq > after).slice(0, limit)
+        .map(({ seq: s, id, from, text, quotedId, at }) => ({ seq: s, id, from, text, quotedId, at: new Date(at).toISOString() }))
+    },
+    ack(upTo) {
+      const n = Number(upTo)
+      if (!Number.isFinite(n)) return 0
+      let removed = 0
+      while (items.length && items[0].seq <= n) { ids.delete(items.shift().id); removed += 1 }
+      return removed
+    },
+    get size() { return items.length },
+  }
+}
+
+/** Teks pesan masuk: hanya pesan teks pendek yang disimpan (cukup untuk jawaban 1/2/3 atau BERHENTI). */
+export function cleanInbound(text) {
+  const t = String(text ?? '').trim()
+  return t ? t.slice(0, 300) : null
+}

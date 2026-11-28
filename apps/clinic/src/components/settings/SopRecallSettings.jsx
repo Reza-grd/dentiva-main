@@ -5,6 +5,7 @@ import { supabase } from '../../services/supabase';
 import { recallService } from '../../services/recallService';
 import { useToast } from '../common/ToastNotification';
 import { BATAS_HARI, teksJarak } from '../../utils/recallSop';
+import RecallWaOtomatis from './RecallWaOtomatis';
 
 const inputCls = 'rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2.5 py-1.5 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] disabled:opacity-50';
 
@@ -89,6 +90,8 @@ export default function SopRecallSettings() {
           dan tetap bisa mengubahnya per pasien. Angka bawaan hanyalah titik awal — tinjau bersama dokter penanggung jawab.
         </p>
       </div>
+
+      <RecallWaOtomatis />
 
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
         <div className="relative sm:w-72">

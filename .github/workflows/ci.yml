@@ -54,6 +54,8 @@ jobs:
         run: npm run db:recall
       - name: Uji kode klinik untuk identitas pesan WA (PGlite)
         run: npm run db:kode-klinik
+      - name: Uji recall WhatsApp otomatis (PGlite)
+        run: npm run db:recall-wa
 
       - name: Denti Agen — evaluasi percakapan (skrip, tanpa jaringan) + uji penilai
         run: |
