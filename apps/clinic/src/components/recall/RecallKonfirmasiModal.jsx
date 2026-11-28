@@ -25,7 +25,12 @@ export default function RecallKonfirmasiModal({ buka, visitId, tanggalKunjungan,
     setMenyimpan(true);
     const res = await recallService.simpanKeputusan(visitId, isi);
     setMenyimpan(false);
-    if (!res.success) return toast.error('Recall gagal disimpan: ' + res.error);
+    if (!res.success) {
+      toast.error('Recall gagal disimpan: ' + res.error);
+      // "Nanti saja" yang gagal tidak boleh mengunci layar; kunjungan ini akan ditanyakan lagi saat disimpan.
+      if (isi.keputusan === 'belum') onSelesai?.(null);
+      return;
+    }
     if (isi.keputusan === 'perlu') toast.success(res.data?.wajib ? 'Recall WAJIB dijadwalkan.' : 'Recall dijadwalkan.');
     onSelesai?.(res.data);
   };

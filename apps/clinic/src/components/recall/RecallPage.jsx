@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, MessageCircle, Search, CalendarCheck, CheckCircle2, XCircle, Pencil, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Card, CardContent, Button, Badge, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@dentiva/ui';
 import { useAuth } from '../../contexts/AuthContext';
 import { useClinicSettings } from '../../contexts/ClinicSettingsContext';
@@ -34,10 +34,15 @@ export default function RecallPage() {
   const bisaPutuskan = role === 'dokter' || role === 'admin';
   const bisaPasienLama = role === 'admin' || role === 'resepsionis';
 
-  const [tab, setTab] = useState(() => {
-    const dariUrl = new URLSearchParams(window.location.search).get('tab');
-    return TAB.some((t) => t.id === dariUrl) ? dariUrl : 'jatuh_tempo';
-  });
+  const { search } = useLocation();
+  const tabDariUrl = useCallback((q) => {
+    const t = new URLSearchParams(q).get('tab');
+    const ada = TAB.find((x) => x.id === t);
+    return ada && (!ada.staf || bisaPasienLama) ? t : null;
+  }, [bisaPasienLama]);
+  const [tab, setTab] = useState(() => tabDariUrl(search) || 'jatuh_tempo');
+  // Tautan lonceng (?tab=terlewat) juga berlaku saat halaman ini sudah terbuka.
+  useEffect(() => { const t = tabDariUrl(search); if (t) setTab(t); }, [search, tabDariUrl]);
   const [rows, setRows] = useState([]);
   const [ringkas, setRingkas] = useState({});
   const [memuat, setMemuat] = useState(true);
@@ -82,8 +87,9 @@ export default function RecallPage() {
   };
 
   const kirimWa = (row) => {
-    // Membuka WA di perangkat staf; status "diingatkan" dicatat bila sebelumnya belum.
-    if (['menunggu', 'terlewat'].includes(row.status)) ubahStatus(row, 'diingatkan', null, true);
+    // Membuka WA di perangkat staf; "diingatkan" dicatat sekali. Recall terlewat tetap di tab Terlewat
+    // (bila diubah ke diingatkan, tugas harian akan mengembalikannya ke terlewat setiap hari).
+    if (row.status === 'menunggu') ubahStatus(row, 'diingatkan', null, true);
   };
 
   const simpanTidakJadi = async () => {

@@ -746,8 +746,9 @@ const MedicalRecordForm = () => {
 
       toast.success('Berhasil disimpan!');
       sessionStorage.removeItem(`Dentiva_draft_rm_${patientId}`); // Clear draft on successful database save
-      await prosesRecallSetelahSimpan(latestVisitId, latestVisitTanggal);
       await loadPatientData(); // Reload pristine data and clear _isNew flags to prevent duplicates
+      // Setelah dimuat ulang: pop-up recall tidak ikut hilang saat layar memuat.
+      await prosesRecallSetelahSimpan(latestVisitId, latestVisitTanggal); // Reload pristine data and clear _isNew flags to prevent duplicates
     } catch (error) { 
       toast.error('Gagal: ' + error.message); 
     } finally { 

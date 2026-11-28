@@ -181,7 +181,7 @@ test("harian: lewat 7 hari → terlewat + lonceng resepsionis & dokter untuk WAJ
   assert.equal((await jadwal(v)).status, "terlewat");
   assert.equal((await one("select public.recall_harian() n")).n, 0, "tidak dobel");
   const n = await q("select penerima_role, penerima_id, tautan from public.notifikasi where kunci like 'recall:%' order by tautan");
-  assert.deepEqual(n.map((x) => [x.penerima_role, x.penerima_id, x.tautan]), [[null, DOK, "/dokter/recall"], ["resepsionis", null, "/resepsionis/recall"]]);
+  assert.deepEqual(n.map((x) => [x.penerima_role, x.penerima_id, x.tautan]), [[null, DOK, "/dokter/recall?tab=terlewat"], ["resepsionis", null, "/resepsionis/recall?tab=terlewat"]]);
   assert.deepEqual((await daftar(RESEP, "terlewat")).map((r) => r.no_rm), ["RM-000003"]);
 });
 
@@ -195,4 +195,36 @@ test("daftar lama > N bulan tidak memuat pasien dengan recall aktif", async () =
   const c = await asUser(RESEP, () => q("select no_rm from public.recall_candidates(6)"));
   assert.ok(c.some((x) => x.no_rm === "RM-000005"));
   assert.ok(!c.some((x) => x.no_rm === "RM-000004"));
+});
+
+test("kunjungan asal dihapus → recall ditutup (tidak ada lonceng untuk kunjungan terhapus)", async () => {
+  const p = "c1000000-0000-4000-8000-000000000107";
+  await db.query("insert into public.patients (id, no_rm, nama_lengkap, clinic_id) values ($1, 'RM-000007', 'Pasien Tujuh', $2)", [p, A]);
+  const v = await kunjungan(p, await hari(-20));
+  await putuskan(DOK, v, "perlu", 7, true);
+  await db.query("update public.visits set deleted_at = now() where id = $1", [v]);
+  const j = await jadwal(v);
+  assert.deepEqual([j.status, j.catatan], ["tidak_jadi", "Kunjungan asal dihapus"]);
+  await db.query("select public.recall_harian()");
+  assert.equal((await one("select count(*)::int n from public.notifikasi where kunci like $1", ["%" + j.id])).n, 0);
+});
+
+test("dibooking basi (jadwal lewat, pasien tidak datang) → kembali menunggu lalu terlewat", async () => {
+  const p = "c1000000-0000-4000-8000-000000000108";
+  await db.query("insert into public.patients (id, no_rm, nama_lengkap, clinic_id) values ($1, 'RM-000008', 'Pasien Delapan', $2)", [p, A]);
+  const v = await kunjungan(p, await hari(-30));
+  await putuskan(DOK, v, "perlu", 14);
+  await kunjungan(p, await hari(-15), "scheduled");
+  assert.equal((await jadwal(v)).status, "dibooking");
+  await db.query("select public.recall_harian()");
+  assert.equal((await jadwal(v)).status, "terlewat");
+
+  // jadwal mendatang yang masih ada tidak disentuh
+  const p2 = "c1000000-0000-4000-8000-000000000109";
+  await db.query("insert into public.patients (id, no_rm, nama_lengkap, clinic_id) values ($1, 'RM-000009', 'Pasien Sembilan', $2)", [p2, A]);
+  const v2 = await kunjungan(p2, await hari(-10));
+  await putuskan(DOK, v2, "perlu", 14);
+  await kunjungan(p2, await hari(2), "scheduled");
+  await db.query("select public.recall_harian()");
+  assert.equal((await jadwal(v2)).status, "dibooking");
 });
