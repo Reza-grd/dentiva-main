@@ -4,6 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
 import { configProblem, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 import { galatAman } from "../_shared/galatAman.ts"
+import { beriIdentitas, identitasPasien } from "../_shared/tandaPesan.ts"
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000", "http://localhost:3001", "http://localhost:5173",
@@ -168,8 +169,8 @@ serve(async (req) => {
       }
       const { data: nameRow } = await supabase.from('clinic_settings').select('value')
         .eq('clinic_id', callingClinicId).eq('key', 'clinic_name').maybeSingle()
-      message = `🦷 *Uji WhatsApp Dentiva*
-${nameRow?.value || 'Klinik'}: koneksi WhatsApp aktif ✅
+      message = `*Uji WhatsApp Dentiva*
+${nameRow?.value || 'Klinik'}: koneksi WhatsApp aktif.
 Pesan ini dikirim dari menu Pengaturan.`
     }
 
@@ -285,6 +286,9 @@ Pesan ini dikirim dari menu Pengaturan.`
     let msgType = messageType;
     if (isTest) msgType = 'test';
     if (!msgType) msgType = 'manual';
+
+    // Identitas pesan (kode klinik · No. RM · nama singkat): satu nomor Dentiva dipakai semua klinik.
+    if (!isTest && finalPatientId) message = beriIdentitas(message, await identitasPasien(supabase, finalPatientId))
 
     const result = await sendWhatsApp({ to: finalPhone, text: message, kind: 'manual' })
     console.log(`[WA] ${result.provider ?? '-'} type=${msgType} ok=${result.ok}`)

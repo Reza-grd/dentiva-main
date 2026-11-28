@@ -52,6 +52,8 @@ jobs:
         run: npm run db:migrasi-pasien
       - name: Uji recall berbasis SOP perawatan (PGlite)
         run: npm run db:recall
+      - name: Uji kode klinik untuk identitas pesan WA (PGlite)
+        run: npm run db:kode-klinik
 
       - name: Denti Agen — evaluasi percakapan (skrip, tanpa jaringan) + uji penilai
         run: |

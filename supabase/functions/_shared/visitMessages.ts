@@ -42,15 +42,15 @@ export function buildReceipt(r: ReceiptInput): string {
     ? new Date(r.paidAt).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB'
     : '-'
   const L: string[] = []
-  L.push(`🦷 *${r.clinicName.toUpperCase()}*`)
+  L.push(`*${r.clinicName.toUpperCase()}*`)
   L.push('*INVOICE PEMBAYARAN*')
-  L.push('━━━━━━━━━━━━━━━━━━')
+  L.push('────────────────────')
   L.push(`No. Invoice : ${r.invoiceNumber || '-'}`)
   L.push(`Tanggal     : ${tgl}`)
   L.push(`Pasien      : ${r.patientName || '-'}`)
   if (r.noRm) L.push(`No. RM      : ${r.noRm}`)
   L.push(`Dokter      : ${r.doctorName}`)
-  L.push('━━━━━━━━━━━━━━━━━━')
+  L.push('────────────────────')
   if (r.treatments.length) {
     L.push('*Tindakan:*')
     for (const t of r.treatments) {
@@ -65,7 +65,7 @@ export function buildReceipt(r: ReceiptInput): string {
   }
   if (Number(r.extraFee) > 0) L.push(`• ${r.extraFeeNote?.trim() || 'Biaya tambahan'} — ${rupiah(r.extraFee)}`)
   if (Number(r.discount) > 0) L.push(`• Diskon — -${rupiah(r.discount)}`)
-  L.push('━━━━━━━━━━━━━━━━━━')
+  L.push('────────────────────')
   L.push(`*Total       : ${rupiah(r.total)}*`)
   const method = r.method ? (METHOD_LABEL[r.method.toLowerCase()] ?? r.method) : '-'
   L.push(`Pembayaran  : ${method}`)
@@ -73,8 +73,8 @@ export function buildReceipt(r: ReceiptInput): string {
     L.push(`Dibayar     : ${rupiah(r.amountPaid)}`)
     L.push(`Kembalian   : ${rupiah(Number(r.amountPaid) - r.total)}`)
   }
-  L.push('Status      : ✅ *LUNAS*')
-  L.push('━━━━━━━━━━━━━━━━━━')
+  L.push('Status      : *LUNAS*')
+  L.push('────────────────────')
   L.push(`Terima kasih atas kepercayaan Anda.${r.clinicPhone ? ` Info: ${r.clinicPhone}` : ''}`)
   return L.join('\n')
 }
@@ -151,25 +151,25 @@ export function buildEducation(e: EduInput): { message: string | null; matches: 
   if (!withText.length && !meds.length) return { message: null, matches }
 
   const L: string[] = []
-  L.push('📋 *EDUKASI PERAWATAN*')
+  L.push('*PANDUAN SETELAH PERAWATAN*')
   L.push(e.clinicName)
-  L.push('━━━━━━━━━━━━━━━━━━')
+  L.push('────────────────────')
   L.push(`Halo ${e.patientName || 'Bapak/Ibu'}, berikut panduan setelah perawatan hari ini:`)
   for (const m of withText) {
     L.push('')
     L.push(`*${m.name}*`)
     if (m.text) L.push(m.text)
-    if (m.medication) L.push(`💊 ${m.medication}`)
+    if (m.medication) L.push(`Obat: ${m.medication}`)
   }
   if (meds.length) {
     L.push('')
-    L.push('*💊 Obat yang diresepkan:*')
+    L.push('*Obat yang diresepkan:*')
     for (const m of meds) {
       const aturan = [m.dosis?.trim(), m.frekuensi?.trim()].filter(Boolean).join(', ')
       L.push(`• ${m.name.trim()}${aturan ? ` — ${aturan}` : ''}`)
     }
   }
-  L.push('━━━━━━━━━━━━━━━━━━')
+  L.push('────────────────────')
   L.push(`Jika ada keluhan atau pertanyaan, hubungi kami${e.clinicPhone ? `: ${e.clinicPhone}` : '.'}`)
   return { message: L.join('\n'), matches }
 }
@@ -177,25 +177,29 @@ export function buildEducation(e: EduInput): { message: string | null; matches: 
 // ── Template pengingat yang bisa diatur admin (clinic_settings.wa_template_reminder_day / _hour) ──
 export const TEMPLATE_PLACEHOLDERS = ['nama', 'klinik', 'tanggal', 'jam', 'dokter', 'telepon'] as const
 export const DEFAULT_REMINDER_DAY =
-  `🦷 *PENGINGAT JADWAL*
+  `*PENGINGAT JADWAL KUNJUNGAN*
 {klinik}
-━━━━━━━━━━━━━━━━━━
-Halo {nama},
-Anda memiliki jadwal kunjungan:
-📅 {tanggal} jam {jam} WIB
-👨‍⚕️ Dokter: {dokter}
-📍 {klinik}
-━━━━━━━━━━━━━━━━━━
-Mohon hadir tepat waktu. Hubungi kami jika perlu reschedule: {telepon}`
+
+Yth. {nama},
+kami mengingatkan jadwal kunjungan Anda:
+
+Tanggal : {tanggal}
+Jam     : {jam} WIB
+Dokter  : {dokter}
+
+Mohon hadir 10 menit lebih awal. Untuk perubahan jadwal, silakan hubungi {telepon}.`
 export const DEFAULT_REMINDER_HOUR =
-  `⏰ *SEBENTAR LAGI JADWAL ANDA*
+  `*JADWAL ANDA SEBENTAR LAGI*
 {klinik}
-━━━━━━━━━━━━━━━━━━
-Halo {nama}, kunjungan Anda dimulai sekitar 1 jam lagi:
-📅 {tanggal} jam {jam} WIB
-👨‍⚕️ Dokter: {dokter}
-━━━━━━━━━━━━━━━━━━
-Mohon hadir tepat waktu. Perlu reschedule? Hubungi {telepon}`
+
+Yth. {nama},
+kunjungan Anda dimulai sekitar 1 jam lagi.
+
+Tanggal : {tanggal}
+Jam     : {jam} WIB
+Dokter  : {dokter}
+
+Bila berhalangan hadir, mohon kabari kami di {telepon}.`
 
 /** Ganti {placeholder} dikenal; yang tidak dikenal dibiarkan apa adanya. Kosong/terlalu panjang → bawaan. */
 export function renderTemplate(template: string | null | undefined, vars: Record<string, string>, fallback: string): string {

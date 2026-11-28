@@ -13,6 +13,7 @@ import { TEMPLATE_VARS, DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, MAX_TEMPLAT
 import PaymentSettings from './PaymentSettings';
 import BookingSettings from './BookingSettings';
 import SopRecallSettings from './SopRecallSettings';
+import KodeKlinikWa from './KodeKlinikWa';
 import Turnstile from '../auth/Turnstile';
 
 const SettingsPage = () => {
@@ -696,6 +697,8 @@ const SettingsPage = () => {
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">Pengaturan WhatsApp</h2>
                 
                 <div className="space-y-6">
+                  {isAdmin && <KodeKlinikWa />}
+
                   {/* WhatsApp Notification Toggles */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-semibold text-gray-400 dark:text-gray-500">Toggles Notifikasi Otomatis</h3>

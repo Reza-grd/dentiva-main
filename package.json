@@ -34,6 +34,7 @@
     "db:kunci-login": "node --test supabase/tests/agent/kunci-login.test.mjs",
     "db:migrasi-pasien": "node --test supabase/tests/agent/migrasi-pasien.test.mjs",
     "db:recall": "node --test supabase/tests/agent/recall-sop.test.mjs",
+    "db:kode-klinik": "node --test supabase/tests/agent/kode-klinik.test.mjs",
     "ml:latih-migrasi": "node apps/console/scripts/migrasi-ml/latih.ts",
     "eval:agen": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs",
     "eval:agen:selftest": "node --experimental-transform-types --no-warnings supabase/tests/agent/eval/run.mjs --selftest",

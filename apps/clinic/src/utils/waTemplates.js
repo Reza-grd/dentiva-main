@@ -8,25 +8,29 @@ export const TEMPLATE_VARS = [
   { key: 'telepon', label: 'Telepon klinik', contoh: '021-1234567' },
 ];
 
-export const DEFAULT_REMINDER_DAY = `🦷 *PENGINGAT JADWAL*
+export const DEFAULT_REMINDER_DAY = `*PENGINGAT JADWAL KUNJUNGAN*
 {klinik}
-━━━━━━━━━━━━━━━━━━
-Halo {nama},
-Anda memiliki jadwal kunjungan:
-📅 {tanggal} jam {jam} WIB
-👨‍⚕️ Dokter: {dokter}
-📍 {klinik}
-━━━━━━━━━━━━━━━━━━
-Mohon hadir tepat waktu. Hubungi kami jika perlu reschedule: {telepon}`;
 
-export const DEFAULT_REMINDER_HOUR = `⏰ *SEBENTAR LAGI JADWAL ANDA*
+Yth. {nama},
+kami mengingatkan jadwal kunjungan Anda:
+
+Tanggal : {tanggal}
+Jam     : {jam} WIB
+Dokter  : {dokter}
+
+Mohon hadir 10 menit lebih awal. Untuk perubahan jadwal, silakan hubungi {telepon}.`;
+
+export const DEFAULT_REMINDER_HOUR = `*JADWAL ANDA SEBENTAR LAGI*
 {klinik}
-━━━━━━━━━━━━━━━━━━
-Halo {nama}, kunjungan Anda dimulai sekitar 1 jam lagi:
-📅 {tanggal} jam {jam} WIB
-👨‍⚕️ Dokter: {dokter}
-━━━━━━━━━━━━━━━━━━
-Mohon hadir tepat waktu. Perlu reschedule? Hubungi {telepon}`;
+
+Yth. {nama},
+kunjungan Anda dimulai sekitar 1 jam lagi.
+
+Tanggal : {tanggal}
+Jam     : {jam} WIB
+Dokter  : {dokter}
+
+Bila berhalangan hadir, mohon kabari kami di {telepon}.`;
 
 export const MAX_TEMPLATE_LENGTH = 1500;
 

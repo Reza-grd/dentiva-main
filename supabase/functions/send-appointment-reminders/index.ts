@@ -15,6 +15,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
 import { decryptBatch } from "../_shared/decryptionHelper.ts"
 import { configProblem, reminderTemplate, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 import { DEFAULT_REMINDER_DAY, DEFAULT_REMINDER_HOUR, renderTemplate } from "../_shared/visitMessages.ts"
+import { barisIdentitas, beriIdentitas } from "../_shared/tandaPesan.ts"
 
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -48,15 +49,17 @@ Deno.serve(async (req) => {
     // 1. Klinik yang berhak (status & paket)
     const { data: subs, error: subErr } = await supabase
       .from('clinic_subscriptions')
-      .select('clinic_id, status, plan:subscription_plans(features), clinic:clinics(status, name)')
+      .select('clinic_id, status, plan:subscription_plans(features), clinic:clinics(status, name, kode_wa)')
       .in('status', ['trialing', 'active'])
     if (subErr) throw subErr
 
     const eligible = new Map<string, string>() // clinic_id → nama (fallback)
+    const kodeKlinik = new Map<string, string>() // clinic_id → kode pesan WA
     for (const s of subs ?? []) {
       const c: any = (s as any).clinic
       if (c && ['trial', 'active'].includes(c.status) && (s as any).plan?.features?.whatsapp_reminders === true) {
         eligible.set((s as any).clinic_id, c.name)
+        if (c.kode_wa) kodeKlinik.set((s as any).clinic_id, c.kode_wa)
       }
     }
     if (eligible.size === 0) return json(200, { success: true, processed: [], note: 'Tidak ada klinik dengan fitur pengingat WA' })
@@ -102,7 +105,7 @@ Deno.serve(async (req) => {
       const { data, error } = await supabase
         .from('visits')
         .select(`id, clinic_id, patient_id, tanggal_kunjungan, jam_kunjungan,
-                 patient:patients (nama_lengkap, no_wa, wa_consent),
+                 patient:patients (nama_lengkap, no_rm, no_wa, wa_consent),
                  dokter:users!visits_dokter_id_fkey (full_name, gelar_depan, gelar_belakang)`)
         .eq('tanggal_kunjungan', date)
         .eq('status', 'scheduled')
@@ -164,7 +167,9 @@ Deno.serve(async (req) => {
       }
 
       try {
-        const { text, params } = build({ ...visit.patient, nama_lengkap: nama }, cfg(visit.clinic_id))
+        const { text: isi, params } = build({ ...visit.patient, nama_lengkap: nama }, cfg(visit.clinic_id))
+        // Identitas pesan (kode klinik · No. RM · nama singkat) untuk pesan teks; template Meta isinya tetap.
+        const text = beriIdentitas(isi, barisIdentitas({ kode: kodeKlinik.get(visit.clinic_id), noRm: visit.patient.no_rm, nama }))
         const { resp, fields } = await sendReminder(wa, text, params, `${type}:${visit.id}`)
         // Pesan sudah terkirim; bila log gagal diperbarui, klaim tetap 'sending' (tidak dikirim ulang; sweep menandai 'uncertain').
         const ok = await setStatus('sent', JSON.stringify(resp), fields)

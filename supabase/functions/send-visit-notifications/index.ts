@@ -19,6 +19,7 @@ import { decryptBatch } from "../_shared/decryptionHelper.ts"
 import { configProblem, sendWhatsApp, sentLogFields } from "../_shared/whatsapp.ts"
 import { KINDS, parseTypes, type Kind } from "../_shared/notificationInput.ts"
 import { buildEducation, buildReceipt, doctorDisplayName } from "../_shared/visitMessages.ts"
+import { barisIdentitas, beriIdentitas } from "../_shared/tandaPesan.ts"
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -133,6 +134,9 @@ async function processVisit(
   const planOk = await hasWhatsAppFeature(db, visit.clinic_id)
   const consent = visit.patient?.wa_consent === true
   const [nama, noWa] = await decryptBatch(db, [visit.patient?.nama_lengkap || "", visit.patient?.no_wa || ""])
+  // Identitas pesan (kode klinik · No. RM · nama singkat): satu nomor Dentiva dipakai semua klinik.
+  const { data: klinik } = await db.from("clinics").select("kode_wa").eq("id", visit.clinic_id).maybeSingle()
+  const identitas = barisIdentitas({ kode: klinik?.kode_wa, noRm: visit.patient?.no_rm, nama })
 
   for (const type of types) {
     // Sudah final (terkirim / sedang dikirim / sengaja dilewati)? → tidak dikirim lagi, kecuali kirim ulang struk.
@@ -183,7 +187,7 @@ async function processVisit(
     }
 
     // Kunci per klaim: percobaan ulang untuk klaim yang sama tidak mengirim dobel; kirim ulang manual = klaim baru.
-    const r = await sendWhatsApp({ to: noWa, text: message, idempotencyKey: `${logType}:${visitId}:${claim.id}`, kind: type })
+    const r = await sendWhatsApp({ to: noWa, text: beriIdentitas(message, identitas), idempotencyKey: `${logType}:${visitId}:${claim.id}`, kind: type })
     if (r.ok) {
       // Pesan SUDAH terkirim: kegagalan mencatat tidak boleh memicu kirim ulang. Klaim dibiarkan 'sending' (lalu
       // ditandai 'uncertain' oleh sweep, yang tidak dicoba lagi) dan kegagalan dicatat di log server.

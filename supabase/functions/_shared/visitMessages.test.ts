@@ -88,8 +88,10 @@ Deno.test("template pengingat: placeholder diganti, yang tak dikenal tetap, koso
   const v = { nama: "Budi", klinik: "Klinik X", tanggal: "Senin, 12 Oktober 2026", jam: "09:00", dokter: "drg. Ani", telepon: "021-1" };
   assertEquals(renderTemplate("Halo {nama}, jam {jam} di {klinik}. {tidak_ada}", v, "x"), "Halo Budi, jam 09:00 di Klinik X. {tidak_ada}");
   const bawaan = renderTemplate("", v, DEFAULT_REMINDER_DAY);
-  assertStringIncludes(bawaan, "Halo Budi");
-  assertStringIncludes(bawaan, "Senin, 12 Oktober 2026 jam 09:00 WIB");
+  assertStringIncludes(bawaan, "Yth. Budi,");
+  assertStringIncludes(bawaan, "Tanggal : Senin, 12 Oktober 2026");
+  assertStringIncludes(bawaan, "Jam     : 09:00 WIB");
+  assert(!/\p{Extended_Pictographic}/u.test(bawaan), "tanpa emoji");
   assert(!bawaan.includes("{"));
   assertEquals(renderTemplate("a".repeat(1501), v, "cadangan"), "cadangan");
 });
